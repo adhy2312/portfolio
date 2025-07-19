@@ -1,0 +1,30 @@
+.navbar {
+  background-color: rgba(0,0,0,0.6);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar ul {
+  list-style: none;
+  display: flex;
+  justify-content: space-around;
+  padding: 0;
+  margin: 0;
+}
+
+.navbar a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.toggle {
+  background: none;
+  border: 2px solid #0ff;
+  color: #0ff;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+}

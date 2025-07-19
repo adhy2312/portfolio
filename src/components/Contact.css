@@ -1,0 +1,32 @@
+.contact-section {
+  padding: 60px 20px;
+  background-color: var(--bg-alt);
+  color: var(--text-color);
+  text-align: center;
+}
+
+.contact-container {
+  max-width: 700px;
+  margin: 0 auto;
+  background-color: var(--bg-box);
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+.contact-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.contact-container li {
+  font-size: 1.1rem;
+  margin: 10px 0;
+}
+
+.contact-section h2 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: teal;
+}

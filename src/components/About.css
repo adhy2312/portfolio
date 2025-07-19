@@ -1,0 +1,78 @@
+/* src/components/About.css */
+
+.about-wrapper {
+  padding: 4rem 1rem;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border-top: 4px solid #222;
+  border-bottom: 4px solid #222;
+  text-align: center;
+}
+
+.about-wrapper h2 {
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.about-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+  background-color: var(--card-bg);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  gap: 1.5rem;
+}
+
+.about-dp {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #00ffff;
+  box-shadow: 0 0 15px #00ffff;
+  transition: transform 0.3s ease;
+}
+
+.about-dp:hover {
+  transform: scale(1.05);
+}
+
+.about-text {
+  text-align: left;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.glow-button {
+  display: inline-block;
+  margin-top: 1rem;
+  padding: 10px 20px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: 0 0 10px #00ffff;
+  transition: all 0.3s ease;
+}
+
+.glow-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px #00ffff;
+}
+
+/* Responsive */
+@media screen and (min-width: 768px) {
+  .about-container {
+    flex-direction: row;
+  }
+
+  .about-text {
+    padding-left: 2rem;
+  }
+}

@@ -1,0 +1,40 @@
+.photography-section {
+  padding: 60px 20px;
+  background: linear-gradient(to right, #f2f2f2, #eaeaea);
+  border-top: 5px solid #333;
+  border-bottom: 5px solid #333;
+  text-align: center;
+}
+
+.photography-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  color: #111;
+}
+
+.photography-section .intro {
+  font-size: 1.2rem;
+  margin-bottom: 40px;
+  color: #444;
+}
+
+.photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.photo-gallery img {
+  width: 300px;
+  height: 200px;
+  object-fit: cover;
+  border: 3px solid #222;
+  border-radius: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.photo-gallery img:hover {
+  transform: scale(1.05);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+}
