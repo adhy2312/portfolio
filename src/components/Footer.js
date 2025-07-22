@@ -42,10 +42,10 @@ const Footer = () => {
         <div className="footer-socials">
           <h3>My Socials</h3>
           <ul>
-            <li><i className="fab fa-linkedin-in"></i> @adhyprofile</li>
-            <li><i className="fab fa-instagram"></i> @adhyshots</li>
-            <li><i className="fab fa-discord"></i> @adhydev</li>
-            <li><i className="fas fa-envelope"></i> adhy@devmail.com</li>
+            <li><i className="fab fa-linkedin-in"></i> www.linkedin.com/in/adhithya-mohan-s</li>
+            <li><i className="fab fa-instagram"></i> @zoomout_images</li>
+            <li><i className="fab fa-discord"></i> @adhithya_mohan</li>
+            <li><i className="fas fa-envelope"></i> adhithyamohan2312@gmail.com</li>
           </ul>
         </div>
 
