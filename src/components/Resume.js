@@ -1,15 +1,10 @@
-// src/components/Resume.js
-import React from 'react';
-import './Resume.css';
+import React from "react";
 
-const Resume = () => {
+export default function Resume() {
   return (
-    <section className="resume-section">
-      <h2 className="section-title">Resume</h2>
-      <p className="resume-text">Click the button below to download my resume as PDF.</p>
-      <a href="/resume.pdf" download className="download-btn">Download CV</a>
+    <section id="resume">
+      <h2>📄 Resume</h2>
+      <a href="/resume.pdf" className="glow-button">Download CV</a>
     </section>
   );
-};
-
-export default Resume;
+}

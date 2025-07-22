@@ -1,12 +1,11 @@
 import React from 'react';
+import './ThemeToggle.css';
 
 const ThemeToggle = ({ toggleTheme, theme }) => {
   return (
-    <div style={{ textAlign: 'right', padding: '10px 20px' }}>
-      <button onClick={toggleTheme}>
-        Switch to {theme === 'dark' ? 'Light' : 'Dark'} Mode
-      </button>
-    </div>
+    <button onClick={toggleTheme} className="theme-toggle">
+      {theme === 'light' ? '🌙' : '☀️'}
+    </button>
   );
 };
 

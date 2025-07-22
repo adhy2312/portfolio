@@ -1,36 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import './index.css';
-import dp from './assets/dp.jpg';
+import React from 'react';
+import Navbar from './components/Navbar';
+import Hero from './components/Hero';
 import About from './components/About';
-import Contact from './components/Contact';
-import Resume from './components/Resume';
 import Photography from './components/Photography';
+import MyWorks from './components/MyWorks';
+import Testimonials from './components/Testimonials';
+import Contact from './components/Contact';
+import Footer from './components/Footer';
+import './index.css';
+import { AnimatePresence } from 'framer-motion';
+import CallToAction from './components/CallToAction';
+import ParticlesBackground from './components/ParticlesBackground';
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
-
-  useEffect(() => {
-    document.body.className = darkMode ? 'dark-mode' : '';
-  }, [darkMode]);
-
   return (
-    <div className="App">
-      <div className="parallax">
-        <img src={dp} alt="Adhithya Mohan" className="dp" />
-        <h1 className="typewriter">Adhithya Mohan</h1>
-        <button
-          className="glow-button"
-          onClick={() => setDarkMode(!darkMode)}
-        >
-          Toggle {darkMode ? 'Light' : 'Dark'} Mode
-        </button>
+    <AnimatePresence mode="wait">
+      <div className="App">
+        <ParticlesBackground />
+        <Navbar />
+        <Hero />
+        <About />
+        <Photography />
+        <MyWorks />
+        <Testimonials />
+        <CallToAction />
+        <Contact />
+        <Footer />
       </div>
-
-      <About />
-      <Photography />
-      <Resume />
-      <Contact />
-    </div>
+    </AnimatePresence>
   );
 }
 

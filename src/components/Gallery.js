@@ -1,41 +1,25 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import photo1 from '../assets/photo1.jpg';
+import photo2 from '../assets/photo2.jpg';
+import photo3 from '../assets/photo3.jpg';
 
-const photos = [
-  'https://source.unsplash.com/random/800x600?nature',
-  'https://source.unsplash.com/random/800x600?city',
-  'https://source.unsplash.com/random/800x600?portrait',
-];
+const images = [photo1, photo2, photo3];
 
-function Gallery() {
-  return (
-    <section className="section">
-      <h2>✨ Featured Shots</h2>
-      <div style={{
-        display: 'flex',
-        gap: '20px',
-        justifyContent: 'center',
-        flexWrap: 'wrap',
+export default () => (
+  <section id="gallery" className="section">
+    <motion.h2 initial={{opacity:0, y:20}} whileInView={{opacity:1,y:0}} viewport={{once:true}} transition={{duration:0.6}}>
+      📷 My Photography
+    </motion.h2>
+    <motion.div style={{display:'flex',flexWrap:'wrap',justifyContent:'center',gap:'20px',marginTop:'2rem'}}
+      initial="hidden" whileInView="visible" viewport={{ once:true }} variants={{
+        visible:{transition:{staggerChildren:0.2}}
       }}>
-        {photos.map((src, index) => (
-          <img
-            key={index}
-            src={src}
-            alt={`photo-${index}`}
-            style={{
-              width: '300px',
-              height: '200px',
-              objectFit: 'cover',
-              borderRadius: '12px',
-              boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
-              transition: 'transform 0.3s ease',
-            }}
-            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          />
-        ))}
-      </div>
-    </section>
-  );
-}
-
-export default Gallery;
+      {images.map((src,i)=>(
+        <motion.img key={i} src={src} alt={`photo${i+1}`} style={{width:'280px',borderRadius:'8px',boxShadow:'0 4px 15px rgba(0,0,0,0.3)'}}
+          variants={{hidden:{opacity:0, scale:0.8}, visible:{opacity:1, scale:1}}}
+          whileHover={{ scale:1.05 }} transition={{ duration:0.6, delay:i*0.2 }}/>
+      ))}
+    </motion.div>
+  </section>
+);

@@ -1,0 +1,187 @@
+.footer {
+  position: relative;
+  background-color: #0a0a0a;
+  color: white;
+  padding: 80px 20px 40px;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  z-index: 0;
+}
+
+/* Stars */
+.footer-stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(white 1px, transparent 1px);
+  background-size: 40px 40px;
+  animation: moveStars 100s linear infinite;
+  opacity: 0.07;
+  z-index: 1;
+}
+
+@keyframes moveStars {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(-1000px, 1000px); }
+}
+
+/* Wave (base64) */
+.footer-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 150px;
+  background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTYwMCIgaGVpZ2h0PSIxNTAiIHZpZXdCb3g9IjAgMCAxNjAwIDE1MCIgd2lkdGg9IjE2MDAiIGhlaWdodD0iMTUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCwxMDBDMjAwLDE1MCA0MDAsMCA2MDAsNEM4MDAsOCAxMDAwLDEyMCAxMjAwLDEyMEMxNDAwLDEyMCAxNjAwLDEwMCAxNjAwLDEwMFYxNTBIMFYxMDBaIiBmaWxsPSIjMDBmMGZmIiBmaWxsLW9wYWNpdHk9IjAuMTUiIC8+Cjwvc3ZnPg==") no-repeat bottom center;
+  background-size: cover;
+  z-index: 1;
+  opacity: 0.4;
+}
+
+/* Footer Content */
+.footer-content {
+  position: relative;
+  z-index: 2;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Signature */
+.footer-signature {
+  margin: 60px 0 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.footer-signature-svg {
+  width: 200px;
+  height: 60px;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: draw 4s linear infinite;
+}
+
+@keyframes draw {
+  0% {
+    stroke-dashoffset: 200;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Connect */
+.footer-connect {
+  margin: 40px 0;
+  font-size: 1.2rem;
+}
+
+.footer-button {
+  display: inline-block;
+  background-color: #00f0ff;
+  color: #000;
+  padding: 10px 16px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  margin-top: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s;
+}
+
+.footer-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 0 10px #00f0ff, 0 0 20px #00f0ff;
+}
+
+/* Socials */
+.footer-socials h3 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.footer-socials ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-socials li {
+  font-size: 1rem;
+  margin: 10px 0;
+  color: #999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footer-socials li i {
+  margin-right: 10px;
+  color: #00f0ff;
+}
+
+/* Bottom */
+.footer-bottom {
+  font-size: 0.9rem;
+  color: #888;
+  margin-top: 30px;
+  line-height: 1.5;
+}
+
+.footer-bottom strong {
+  color: #00f0ff;
+}
+.stars {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200%;
+  height: 200%;
+  background: transparent url('https://assets.codepen.io/13471/stars.svg') repeat;
+  background-size: contain;
+  animation: moveStars 40s linear infinite;
+  opacity: 0.2;
+  z-index: 0;
+}
+@keyframes moveStars {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(-500px, -500px);
+  }
+}
+.waves {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100px;
+  z-index: 1;
+  opacity: 0;
+  animation: fadeIn 2s ease-in-out forwards;
+  animation-delay: 1s;
+}
+
+.wave-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  animation: waveMove 6s linear infinite;
+}
+
+@keyframes waveMove {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}

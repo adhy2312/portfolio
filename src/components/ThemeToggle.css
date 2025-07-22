@@ -1,0 +1,20 @@
+.theme-toggle {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 200;
+  background-color: var(--card);
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  color: var(--text);
+  box-shadow: 0 0 10px teal;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.theme-toggle:hover {
+  background-color: teal;
+  color: white;
+}

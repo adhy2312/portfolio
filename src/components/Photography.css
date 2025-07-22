@@ -1,40 +1,50 @@
-.photography-section {
-  padding: 60px 20px;
-  background: linear-gradient(to right, #f2f2f2, #eaeaea);
-  border-top: 5px solid #333;
-  border-bottom: 5px solid #333;
+.photography {
+  background: #0a0a0a;
+  padding: 100px 20px;
   text-align: center;
 }
 
-.photography-section h2 {
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-  color: #111;
+.photography-title {
+  font-size: 2.8rem;
+  margin-bottom: 50px;
+  color: #00fff7;
+  font-family: 'Orbitron', sans-serif;
+  text-shadow: 0 0 15px #00fff7, 0 0 30px #00fff7;
 }
 
-.photography-section .intro {
-  font-size: 1.2rem;
-  margin-bottom: 40px;
-  color: #444;
-}
-
-.photo-gallery {
+.photo-grid {
   display: flex;
   flex-wrap: wrap;
+  gap: 30px;
   justify-content: center;
-  gap: 20px;
+  align-items: center;
 }
 
-.photo-gallery img {
+.photo-card {
   width: 300px;
   height: 200px;
-  object-fit: cover;
-  border: 3px solid #222;
-  border-radius: 10px;
+  overflow: hidden;
+  border-radius: 15px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 3px solid #00fff7;
+  box-shadow: 0 0 20px #00fff7;
 }
 
-.photo-gallery img:hover {
+.photo-card:hover {
   transform: scale(1.05);
-  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 30px #00fff7, 0 0 60px #00fff7;
+}
+
+.photo-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .photo-card {
+    width: 90%;
+    height: auto;
+  }
 }
