@@ -1,50 +1,156 @@
+/* ═══════════════════════════════
+   PHOTOGRAPHY SECTION
+═══════════════════════════════ */
 .photography {
-  background: #0a0a0a;
-  padding: 100px 20px;
-  text-align: center;
+  padding: var(--section-padding);
+  background: linear-gradient(180deg, #0a0e20 0%, #080d1f 100%);
+  position: relative;
+  z-index: 1;
 }
 
-.photography-title {
-  font-size: 2.8rem;
-  margin-bottom: 50px;
-  color: #00fff7;
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 15px #00fff7, 0 0 30px #00fff7;
+.photo-header {
+  margin-bottom: 3rem;
 }
 
-.photo-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 30px;
-  justify-content: center;
-  align-items: center;
+/* ── Masonry Grid ── */
+.photo-masonry {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
 }
 
-.photo-card {
-  width: 300px;
-  height: 200px;
+/* ── Photo Item ── */
+.photo-item {
+  cursor: pointer;
+  border-radius: 16px;
   overflow: hidden;
-  border-radius: 15px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: 3px solid #00fff7;
-  box-shadow: 0 0 20px #00fff7;
 }
 
-.photo-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 30px #00fff7, 0 0 60px #00fff7;
+.photo-inner {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
 }
 
-.photo-card img {
+.photo-inner img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: block;
 }
 
+.photo-item:hover .photo-inner img {
+  transform: scale(1.08);
+}
+
+/* Overlay */
+.photo-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    0deg,
+    rgba(6, 9, 24, 0.85) 0%,
+    rgba(6, 9, 24, 0.2) 60%,
+    transparent 100%
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.photo-item:hover .photo-overlay {
+  opacity: 1;
+}
+
+.photo-category {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #4FC3F7;
+  margin-bottom: 4px;
+}
+
+.photo-caption {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.photo-zoom-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: rgba(255,255,255,0.8);
+  background: rgba(0,0,0,0.4);
+  border-radius: 8px;
+  padding: 4px;
+  width: 32px;
+  height: 32px;
+}
+
+.photo-ig-cta {
+  text-align: center;
+}
+
+/* ── Lightbox ── */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.92);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+}
+
+.lightbox-img {
+  max-width: 88vw;
+  max-height: 88vh;
+  border-radius: 16px;
+  object-fit: contain;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
+  cursor: default;
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff;
+  font-size: 1.2rem;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s;
+}
+
+.lightbox-close:hover {
+  background: rgba(108, 99, 255, 0.4);
+  border-color: #6C63FF;
+}
+
+/* ── Responsive ── */
 @media (max-width: 768px) {
-  .photo-card {
-    width: 90%;
-    height: auto;
+  .photo-masonry {
+    grid-template-columns: 1fr;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
   }
 }

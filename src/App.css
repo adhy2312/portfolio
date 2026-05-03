@@ -1,11 +1,6 @@
-section {
-  padding: 60px 20px;
-  max-width: 1200px;
-  margin: auto;
-}
-
-@media (max-width: 768px) {
-  section {
-    padding: 40px 10px;
-  }
+/* App.css — minimal, index.css handles design system */
+.App {
+  position: relative;
+  overflow-x: hidden;
+  min-height: 100vh;
 }

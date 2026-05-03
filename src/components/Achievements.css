@@ -1,0 +1,110 @@
+/* ═══════════════════════════════
+   ACHIEVEMENTS SECTION
+   (replaces Testimonials)
+═══════════════════════════════ */
+.achievements {
+  padding: var(--section-padding);
+  background: linear-gradient(180deg, #06091a 0%, #080d1f 100%);
+  position: relative;
+  z-index: 1;
+}
+
+.ach-header {
+  margin-bottom: 3rem;
+}
+
+/* ── Grid ── */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.3rem;
+}
+
+/* ── Card ── */
+.ach-card {
+  padding: 2rem 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.ach-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--ach-accent, #6C63FF);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ach-card:hover::before {
+  opacity: 1;
+}
+
+/* Icon */
+.ach-icon-wrap {
+  position: relative;
+  display: inline-flex;
+  width: 52px;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ach-accent, #6C63FF) 12%, transparent);
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--ach-accent, #6C63FF) 30%, transparent);
+  margin-bottom: 0.5rem;
+}
+
+.ach-emoji {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.ach-icon-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  background: radial-gradient(circle, var(--ach-accent, #6C63FF), transparent 70%);
+  opacity: 0;
+  filter: blur(8px);
+  transition: opacity 0.4s;
+}
+
+.ach-card:hover .ach-icon-glow {
+  opacity: 0.3;
+}
+
+/* Text */
+.ach-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.ach-desc {
+  font-size: 0.87rem;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin: 0;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .ach-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .ach-grid {
+    grid-template-columns: 1fr;
+  }
+}

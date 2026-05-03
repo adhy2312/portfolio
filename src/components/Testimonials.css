@@ -1,71 +1,70 @@
 .testimonials {
-  background-color: #0d0d0d;
-  padding: 100px 20px;
-  color: #fff;
-  text-align: center;
+  padding: 8rem 0;
+  position: relative;
 }
 
-.testimonials-title {
-  font-size: 2.8rem;
-  margin-bottom: 60px;
-  color: #00fff7;
-  font-family: 'Orbitron', sans-serif;
-  text-shadow: 0 0 15px #00fff7, 0 0 30px #00fff7;
+.testimonials-header {
+  text-align: center;
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .testimonials-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
 }
 
 .testimonial-card {
-  background: #111;
-  border: 2px solid #00fff7;
-  box-shadow: 0 0 20px #00fff7;
-  padding: 40px 30px;
-  border-radius: 20px;
-  max-width: 360px;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  position: relative;
 }
 
-.testimonial-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 0 30px #00fff7, 0 0 60px #00fff7;
+.quote-icon {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  font-size: 2rem;
+  color: var(--accent-primary);
+  opacity: 0.2;
 }
 
-.feedback {
-  font-size: 1.1rem;
-  color: #ccc;
-  margin-bottom: 30px;
+.testimonial-quote {
   font-style: italic;
-  line-height: 1.7;
-  font-family: 'Orbitron', sans-serif;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--text-primary);
 }
 
-.name {
-  font-size: 1.2rem;
-  color: #00fff7;
-  margin-bottom: 5px;
-  font-family: 'Orbitron', sans-serif;
+.testimonial-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: auto;
 }
 
-.role {
-  font-size: 0.9rem;
-  color: #aaa;
-  font-family: 'Orbitron', sans-serif;
+.user-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--accent-primary);
 }
 
-@media (max-width: 768px) {
-  .testimonials-grid {
-    flex-direction: column;
-    align-items: center;
-  }
+.user-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
 
-  .testimonial-card {
-    width: 90%;
-  }
+.user-role {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
