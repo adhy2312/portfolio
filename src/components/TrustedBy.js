@@ -25,7 +25,23 @@ const TrustedBy = () => {
   return (
     <div className="trusted-by">
       <div className="container">
-        <p className="trusted-title">Trusted By</p>
+        <motion.div
+          className="trusted-header"
+          initial={{ opacity: 1, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+          viewport={{ once: true }}
+        >
+          <span className="section-label">// trusted partners</span>
+          <h2 className="section-title">
+            Trusted <span>By</span>
+          </h2>
+          <div className="section-divider" />
+          <p className="section-desc">
+            Collaborating with amazing companies and teams worldwide
+          </p>
+        </motion.div>
+        <p className="trusted-title">Featured Clients & Partners</p>
         <div className="logo-marquee-container">
           <div className="logo-marquee">
             {[...displayBrands, ...displayBrands].map((brand, i) => (
@@ -33,7 +49,7 @@ const TrustedBy = () => {
                 {brand.isPlaceholder ? (
                    <span className="placeholder-logo">{brand.name}</span>
                 ) : (
-                  <img src={urlFor(brand.logo).url()} alt={brand.name} />
+                  brand.logo ? <img src={urlFor(brand.logo).url()} alt={brand.name} /> : <span className="placeholder-logo">{brand.name}</span>
                 )}
               </div>
             ))}

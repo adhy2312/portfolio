@@ -49,6 +49,10 @@
   --transition-fast: 0.2s ease;
   --transition-smooth: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --transition-slow: 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+
+  /* Skeuomorphic Shadows */
+  --skeuo-shadow-dark: rgba(0, 0, 0, 0.5);
+  --skeuo-shadow-light: rgba(255, 255, 255, 0.05);
 }
 
 /* ═══════════════════════════════════════════
@@ -60,13 +64,28 @@
   padding: 0;
 }
 
+/* Global Noise Texture — Commented out due to 404 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("https://grainy-gradients.vercel.app/noise.svg");
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 9999;
+}
+*/
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;

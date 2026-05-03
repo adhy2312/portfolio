@@ -26,7 +26,7 @@ const Testimonials = () => {
       <div className="container">
         <motion.div
           className="testimonials-header"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 1, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
@@ -43,7 +43,7 @@ const Testimonials = () => {
             <motion.div
               key={i}
               className="testimonial-card glass-card"
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 1, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               viewport={{ once: true }}

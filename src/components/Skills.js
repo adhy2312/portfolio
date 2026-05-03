@@ -85,7 +85,7 @@ const Skills = () => {
       <div className="container">
         <motion.div
           className="skills-header"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 1, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
@@ -107,20 +107,20 @@ const Skills = () => {
             <motion.div
               key={catIdx}
               className="skill-card glass-card"
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 1, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: catIdx * 0.1 }}
               viewport={{ once: true }}
             >
               <div className="skill-card-header">
                 <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
-                <h3 className="skill-card-title" style={{ color: cat.color }}>
-                  {cat.category || cat.title}
+                <h3 className="skill-card-title" style={{ color: cat.color || '#6C63FF' }}>
+                  {cat.title || cat.category}
                 </h3>
               </div>
 
               <div className="skill-bars">
-                {cat.skills.map((skill, skillIdx) => (
+                {(cat.skills || []).map((skill, skillIdx) => (
                   <div key={skillIdx} className="skill-bar-item">
                     <div className="skill-bar-label">
                       <span>{skill.name}</span>
@@ -129,7 +129,7 @@ const Skills = () => {
                     <div className="skill-bar-track">
                       <motion.div
                         className="skill-bar-fill"
-                        style={{ '--bar-color': cat.color }}
+                        style={{ '--bar-color': cat.color || '#6C63FF' }}
                         initial={{ width: 0 }}
                         whileInView={{ width: `${skill.level}%` }}
                         transition={{ duration: 1, delay: 0.3 + skillIdx * 0.1, ease: 'easeOut' }}

@@ -107,7 +107,7 @@ const MyWorks = () => {
       <div className="container">
         <motion.div
           className="works-header"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 1, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
@@ -155,7 +155,7 @@ const MyWorks = () => {
               <motion.div
                 className="work-card glass-card"
                 key={project.title}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 1, y: 50 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: index * 0.08 }}
                 style={{ '--card-accent': project.accent }}

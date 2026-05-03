@@ -16,27 +16,25 @@ import { AnimatePresence } from 'framer-motion';
 
 function App() {
   return (
-    <AnimatePresence mode="wait">
-      <div className="App">
-        {/* Ambient background blobs */}
-        <div className="ambient-blob ambient-blob-1" />
-        <div className="ambient-blob ambient-blob-2" />
-        <div className="ambient-blob ambient-blob-3" />
+    <div className="App">
+      {/* Ambient background blobs */}
+      <div className="ambient-blob ambient-blob-1" />
+      <div className="ambient-blob ambient-blob-2" />
+      <div className="ambient-blob ambient-blob-3" />
 
-        <Navbar />
-        <Hero />
-        <About />
-        <Skills />
-        <TrustedBy />
-        <MyWorks />
-        <Photography />
-        <Achievements />
-        <Testimonials />
-        <CallToAction />
-        <Contact />
-        <Footer />
-      </div>
-    </AnimatePresence>
+      <Navbar />
+      <Hero />
+      <About />
+      <Skills />
+      <TrustedBy />
+      <MyWorks />
+      <Photography />
+      <Achievements />
+      <Testimonials />
+      <CallToAction />
+      <Contact />
+      <Footer />
+    </div>
   );
 }
 

@@ -22,10 +22,10 @@ const Photography = () => {
     client.fetch(query).then((data) => {
       if (data && data.length > 0) {
         const formattedData = data.map(item => ({
-          src: urlFor(item.image).url(),
-          alt: item.title,
-          caption: item.title,
-          category: item.category
+          src: item.image ? urlFor(item.image).url() : "https://via.placeholder.com/600",
+          alt: item.title || "Photography",
+          caption: item.title || "Story",
+          category: item.category || "Urban"
         }));
         setFetchedPhotos(formattedData);
       }
@@ -39,7 +39,7 @@ const Photography = () => {
       <div className="container">
         <motion.div
           className="photo-header"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 1, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
@@ -59,7 +59,7 @@ const Photography = () => {
             <motion.div
               className="photo-item"
               key={index}
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 1, y: 50 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.15 }}
               viewport={{ once: true }}

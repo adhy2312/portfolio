@@ -38,12 +38,17 @@ const About = () => {
     experienceYears: aboutData?.experienceYears || "2+"
   };
 
+  if (!displayData.profileImage && !dp) {
+    // Fallback if both Sanity and local import fail (shouldn't happen)
+    displayData.profileImage = "https://via.placeholder.com/400";
+  }
+
   return (
     <section className="about" id="about">
       <div className="container">
         <motion.div
           className="about-grid"
-          initial={{ opacity: 0, y: 60 }}
+          initial={{ opacity: 1, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}

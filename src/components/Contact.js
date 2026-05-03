@@ -1,11 +1,12 @@
 // src/components/Contact.js
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import './Contact.css';
 import emailjs from 'emailjs-com';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail, FiMapPin, FiLinkedin, FiGithub, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { client } from '../sanity';
 
-const contactInfo = [
+const defaultContactInfo = [
   {
     icon: <FiMail />,
     label: 'Email',
@@ -29,6 +30,14 @@ const contactInfo = [
 const Contact = () => {
   const form = useRef();
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
+  const [contactData, setContactData] = useState(null);
+
+  useEffect(() => {
+    const query = '*[_type == "contact"][0]';
+    client.fetch(query).then((data) => {
+      if (data) setContactData(data);
+    }).catch(console.error);
+  }, []);
 
   const sendEmail = (e) => {
     e.preventDefault();
@@ -59,7 +68,7 @@ const Contact = () => {
       <div className="container">
         <motion.div
           className="contact-header"
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 1, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
@@ -79,7 +88,7 @@ const Contact = () => {
           {/* Info panel */}
           <motion.div
             className="contact-info"
-            initial={{ opacity: 0, x: -40 }}
+            initial={{ opacity: 1, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.1 }}
             viewport={{ once: true }}
@@ -92,7 +101,7 @@ const Contact = () => {
               </p>
 
               <div className="contact-info-list">
-                {contactInfo.map((item, i) => (
+                {(contactData?.contactMethods || defaultContactInfo).map((item, i) => (
                   <div key={i} className="contact-info-item">
                     <span className="contact-info-icon">{item.icon}</span>
                     <div>
@@ -119,7 +128,7 @@ const Contact = () => {
           {/* Form */}
           <motion.div
             className="contact-form-wrap"
-            initial={{ opacity: 0, x: 40 }}
+            initial={{ opacity: 1, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.2 }}
             viewport={{ once: true }}
@@ -131,7 +140,7 @@ const Contact = () => {
                   <input
                     type="text"
                     name="user_name"
-                    placeholder="John Doe"
+                    placeholder="What's your name?"
                     className="form-input"
                     required
                   />
