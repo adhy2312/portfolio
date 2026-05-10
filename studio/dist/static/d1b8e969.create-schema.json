@@ -1,0 +1,572 @@
+[
+  {
+    "fields": [
+      {
+        "name": "greeting",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "description": "e.g. Adhithya is Right Here!",
+        "name": "heading",
+        "type": "string",
+        "title": "Hero Heading"
+      },
+      {
+        "name": "role",
+        "type": "string",
+        "title": "Role Title"
+      },
+      {
+        "name": "bio",
+        "type": "text",
+        "title": "Bio Description"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "value",
+                "type": "string"
+              },
+              {
+                "name": "label",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "stats",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "name": "description",
+                "type": "text"
+              },
+              {
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "highlights",
+        "type": "array",
+        "title": "Highlights (Right Column)"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "techStack",
+        "type": "array"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "resumeUrl",
+        "type": "url",
+        "title": "Resume PDF URL"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "heroImage",
+        "type": "image",
+        "title": "Hero Image (Cutout)"
+      }
+    ],
+    "name": "hero",
+    "type": "document",
+    "title": "Hero Section"
+  },
+  {
+    "fields": [
+      {
+        "name": "location",
+        "type": "string",
+        "title": "Location Text"
+      },
+      {
+        "of": [
+          {
+            "type": "text"
+          }
+        ],
+        "name": "bioParagraphs",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "value",
+                "type": "string"
+              },
+              {
+                "name": "label",
+                "type": "string"
+              },
+              {
+                "description": "Name of feather icon, e.g., FiAward",
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "stats",
+        "type": "array"
+      },
+      {
+        "name": "profileImage",
+        "type": "image"
+      },
+      {
+        "name": "experienceYears",
+        "type": "string",
+        "title": "Years of Experience"
+      }
+    ],
+    "name": "about",
+    "type": "document",
+    "title": "About Section"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string",
+        "title": "Category Title"
+      },
+      {
+        "description": "Hex code, e.g., #6C63FF",
+        "name": "color",
+        "type": "string",
+        "title": "Category Color"
+      },
+      {
+        "description": "Name of feather icon, e.g., FiMonitor",
+        "name": "iconName",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "level": "error",
+                    "rules": [
+                      {
+                        "flag": "min",
+                        "constraint": 0
+                      },
+                      {
+                        "flag": "max",
+                        "constraint": 100
+                      }
+                    ]
+                  }
+                ],
+                "name": "level",
+                "type": "number"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "skills",
+        "type": "array"
+      }
+    ],
+    "name": "skillCategory",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "desc",
+        "type": "text",
+        "title": "Description"
+      },
+      {
+        "description": "Hex code, e.g., #6C63FF",
+        "name": "accent",
+        "type": "string",
+        "title": "Accent Color"
+      },
+      {
+        "description": "Name of feather icon, e.g., FiAward",
+        "name": "iconName",
+        "type": "string"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "achievement",
+    "type": "document",
+    "title": "Achievements / Highlights"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "imageUrl",
+        "type": "image",
+        "title": "Image"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "githubLink",
+        "type": "url",
+        "title": "GitHub Link"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "liveLink",
+        "type": "url"
+      }
+    ],
+    "name": "project",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "image",
+        "type": "image"
+      },
+      {
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "photo",
+    "type": "document",
+    "title": "Photography"
+  },
+  {
+    "fields": [
+      {
+        "name": "tagline",
+        "type": "text"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "title": "Email Address"
+      },
+      {
+        "name": "whatsapp",
+        "type": "string",
+        "title": "WhatsApp Number"
+      },
+      {
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "platform",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "level": "error",
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "name": "url",
+                "type": "url"
+              },
+              {
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "socialLinks",
+        "type": "array"
+      }
+    ],
+    "name": "footer",
+    "type": "document",
+    "title": "Footer Settings"
+  },
+  {
+    "fields": [
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "name": "role",
+        "type": "string"
+      },
+      {
+        "name": "quote",
+        "type": "text"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "image",
+        "type": "image",
+        "title": "User Image"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "testimonial",
+    "type": "document",
+    "title": "Testimonials (Quotes)"
+  },
+  {
+    "fields": [
+      {
+        "name": "name",
+        "type": "string",
+        "title": "Brand Name"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "logo",
+        "type": "image",
+        "title": "Brand Logo"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "trustedBy",
+    "type": "document",
+    "title": "Trusted By (Brands)"
+  },
+  {
+    "fields": [
+      {
+        "name": "heading",
+        "type": "string"
+      },
+      {
+        "name": "subheading",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "type",
+                "type": "string",
+                "title": "Type (e.g., Email, Phone)"
+              },
+              {
+                "name": "value",
+                "type": "string",
+                "title": "Value (Link/Text)"
+              },
+              {
+                "name": "label",
+                "type": "string",
+                "title": "Display Label"
+              },
+              {
+                "description": "e.g., FiMail, FiPhone",
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "contactMethods",
+        "type": "array"
+      },
+      {
+        "name": "buttonText",
+        "type": "string",
+        "title": "CTA Button Text"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "buttonLink",
+        "type": "url"
+      }
+    ],
+    "name": "contact",
+    "type": "document",
+    "title": "Contact Section"
+  }
+]
