@@ -1,0 +1,255 @@
+/* ═══════════════════════════════════════════
+   PING PONG EASTER EGG GAME
+═══════════════════════════════════════════ */
+.ppg-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: ppg-overlay-in 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes ppg-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.ppg-container {
+  background: rgba(6, 9, 24, 0.92);
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05),
+    0 40px 100px rgba(0,0,0,0.8),
+    0 0 80px rgba(108, 99, 255, 0.2);
+  animation: ppg-container-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  max-width: 95vw;
+}
+
+@keyframes ppg-container-in {
+  from { transform: scale(0.85) translateY(30px); opacity: 0; }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Header */
+.ppg-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: rgba(255,255,255,0.03);
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.ppg-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #F0F4FF;
+  letter-spacing: 2px;
+}
+
+.ppg-icon {
+  font-size: 1.3rem;
+  animation: ppg-bounce 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes ppg-bounce {
+  from { transform: translateX(-4px); }
+  to   { transform: translateX(4px); }
+}
+
+.ppg-easter-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  color: #00E5A0;
+  background: rgba(0,229,160,0.1);
+  border: 1px solid rgba(0,229,160,0.3);
+  border-radius: 20px;
+  padding: 2px 8px;
+  letter-spacing: 1px;
+  text-transform: lowercase;
+}
+
+.ppg-controls-hint {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.3);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.ppg-close {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: rgba(255,255,255,0.5);
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+}
+
+.ppg-close:hover {
+  background: rgba(255, 95, 87, 0.2);
+  border-color: rgba(255, 95, 87, 0.5);
+  color: #FF5F57;
+}
+
+/* Score */
+.ppg-score {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 12px 20px;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.ppg-score-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ppg-score-num {
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 20px currentColor;
+  transition: all 0.3s ease;
+}
+
+.ppg-score-label {
+  font-size: 0.7rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.ppg-score-divider {
+  font-size: 2rem;
+  color: rgba(255,255,255,0.2);
+  font-weight: 300;
+}
+
+/* Canvas wrapper */
+.ppg-canvas-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin: 0 20px 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.07);
+}
+
+.ppg-canvas {
+  display: block;
+  width: 100%;
+  max-width: 800px;
+  height: auto;
+  cursor: none;
+  touch-action: none;
+}
+
+/* Overlay messages */
+.ppg-overlay-msg {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(6, 9, 24, 0.75);
+  backdrop-filter: blur(4px);
+}
+
+.ppg-overlay-msg > span {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #F0F4FF;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+}
+
+.ppg-overlay-msg > small {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  color: rgba(255,255,255,0.5);
+}
+
+.ppg-gameover.ppg-win > span  { color: #00E5A0; text-shadow: 0 0 30px #00E5A0; }
+.ppg-gameover.ppg-lose > span { color: #F5A623; text-shadow: 0 0 30px #F5A623; }
+
+.ppg-gameover-btns {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.ppg-btn {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 10px 24px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.ppg-btn-primary {
+  background: linear-gradient(135deg, #6C63FF, #4FC3F7);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(108,99,255,0.4);
+}
+
+.ppg-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(108,99,255,0.5);
+}
+
+.ppg-btn-outline {
+  background: transparent;
+  color: rgba(255,255,255,0.6);
+  border: 1.5px solid rgba(255,255,255,0.15) !important;
+}
+
+.ppg-btn-outline:hover {
+  background: rgba(255,255,255,0.07);
+  color: #fff;
+}
+
+/* Footer hint */
+.ppg-footer-hint {
+  text-align: center;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.25);
+  padding: 10px 20px 14px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ppg-controls-hint { display: none; }
+  .ppg-score-num { font-size: 2rem; }
+  .ppg-canvas-wrapper { margin: 0 10px 12px; }
+  .ppg-overlay-msg > span { font-size: 1.4rem; }
+}

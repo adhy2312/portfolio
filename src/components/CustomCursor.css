@@ -1,0 +1,45 @@
+/* ═══════════════════════════════════════
+   PREMIUM CUSTOM CURSOR
+═══════════════════════════════════════ */
+* { cursor: none !important; }
+
+.cursor-dot {
+  position: fixed;
+  top: 0; left: 0;
+  width: 8px; height: 8px;
+  background: #fff;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99999;
+  transition: width 0.2s ease, height 0.2s ease, background 0.2s ease, opacity 0.2s ease;
+  mix-blend-mode: difference;
+}
+
+.cursor-ring {
+  position: fixed;
+  top: 0; left: 0;
+  width: 40px; height: 40px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 99998;
+  transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease, opacity 0.2s ease;
+  mix-blend-mode: difference;
+}
+
+/* Hover state — ring expands */
+.cursor-dot-hover  { width: 8px; height: 8px; background: #6C63FF; }
+.cursor-ring-hover { width: 60px; height: 60px; border-color: #6C63FF; opacity: 0.6; }
+
+/* Click state — both shrink */
+.cursor-dot-click  { width: 12px; height: 12px; background: #4FC3F7; }
+.cursor-ring-click { width: 30px; height: 30px; border-color: #4FC3F7; }
+
+/* Text state — I-beam feel */
+.cursor-dot-text  { width: 2px; height: 20px; border-radius: 2px; background: #fff; }
+.cursor-ring-text { opacity: 0; }
+
+@media (hover: none) {
+  .cursor-dot, .cursor-ring { display: none; }
+  * { cursor: auto !important; }
+}

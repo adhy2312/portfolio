@@ -74,8 +74,8 @@ const Contact = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// say hello</span>
-          <h2 className="section-title">
-            Let's <span>Connect</span>
+          <h2 className="section-title" data-hover="Get in Touch">
+            <span className="section-title-inner">Let's <span>Connect</span></span>
           </h2>
           <div className="section-divider" />
           <p className="section-desc">

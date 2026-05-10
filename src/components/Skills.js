@@ -62,6 +62,34 @@ const skillCategories = [
   },
 ];
 
+// Tool chip metadata: group color + micro snippet for tooltip
+const toolMeta = {
+  'React':       { group: 'frontend', snippet: 'UI Library', emoji: '⚛️' },
+  'Node.js':     { group: 'backend',  snippet: 'Runtime Engine', emoji: '🟢' },
+  'Figma':       { group: 'design',   snippet: 'Design Tool', emoji: '🎨' },
+  'Arduino':     { group: 'iot',      snippet: 'Microcontroller', emoji: '🔌' },
+  'ESP32':       { group: 'iot',      snippet: 'IoT Board', emoji: '📡' },
+  'MongoDB':     { group: 'backend',  snippet: 'NoSQL Database', emoji: '🍃' },
+  'Git':         { group: 'tools',    snippet: 'Version Control', emoji: '🔀' },
+  'Firebase':    { group: 'backend',  snippet: 'Cloud Platform', emoji: '🔥' },
+  'Photoshop':   { group: 'design',   snippet: 'Image Editor', emoji: '🖼️' },
+  'Lightroom':   { group: 'design',   snippet: 'Photo Editor', emoji: '📸' },
+  'JavaScript':  { group: 'frontend', snippet: 'Core Language', emoji: '⚡' },
+  'CSS3':        { group: 'frontend', snippet: 'Styling', emoji: '🎭' },
+  'HTML5':       { group: 'frontend', snippet: 'Markup', emoji: '🏗️' },
+  'Express.js':  { group: 'backend',  snippet: 'Web Framework', emoji: '🚂' },
+  'REST APIs':   { group: 'backend',  snippet: 'API Design', emoji: '🔗' },
+  'Linux':       { group: 'tools',    snippet: 'Operating System', emoji: '🐧' },
+};
+
+const groupColors = {
+  frontend: { border: '#6C63FF', glow: 'rgba(108, 99, 255, 0.35)' },
+  backend:  { border: '#4FC3F7', glow: 'rgba(79, 195, 247, 0.35)' },
+  design:   { border: '#F5A623', glow: 'rgba(245, 166, 35, 0.35)' },
+  iot:      { border: '#00E5A0', glow: 'rgba(0, 229, 160, 0.35)' },
+  tools:    { border: '#CBA6F7', glow: 'rgba(203, 166, 247, 0.35)' },
+};
+
 const tools = [
   'React', 'Node.js', 'Figma', 'Arduino', 'ESP32', 'MongoDB',
   'Git', 'Firebase', 'Photoshop', 'Lightroom', 'JavaScript', 'CSS3',
@@ -70,6 +98,7 @@ const tools = [
 
 const Skills = () => {
   const [fetchedCategories, setFetchedCategories] = useState([]);
+  const [hoveredTool, setHoveredTool] = useState(null);
 
   useEffect(() => {
     const query = '*[_type == "skillCategory"]';
@@ -91,8 +120,8 @@ const Skills = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// what I know</span>
-          <h2 className="section-title">
-            Skills & <span>Expertise</span>
+          <h2 className="section-title" data-hover="My Arsenal">
+            <span className="section-title-inner">Skills & <span>Expertise</span></span>
           </h2>
           <div className="section-divider" />
           <p className="section-desc">
@@ -153,19 +182,35 @@ const Skills = () => {
         >
           <h3 className="tools-title">Tools & Technologies</h3>
           <div className="tools-cloud">
-            {tools.map((tool, i) => (
-              <motion.span
-                key={i}
-                className="tech-tag tools-chip"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.04, duration: 0.3 }}
-                viewport={{ once: true }}
-                whileHover={{ scale: 1.1 }}
-              >
-                {tool}
-              </motion.span>
-            ))}
+            {tools.map((tool, i) => {
+              const meta = toolMeta[tool] || { group: 'tools', snippet: tool, emoji: '🔧' };
+              const colors = groupColors[meta.group] || groupColors.tools;
+              return (
+                <motion.span
+                  key={i}
+                  className={`tech-tag tools-chip tools-chip-interactive ${hoveredTool === tool ? 'tools-chip-active' : ''}`}
+                  style={{
+                    '--chip-border': colors.border,
+                    '--chip-glow': colors.glow,
+                  }}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: i * 0.04, duration: 0.3 }}
+                  viewport={{ once: true }}
+                  whileHover={{ scale: 1.12, y: -4 }}
+                  onMouseEnter={() => setHoveredTool(tool)}
+                  onMouseLeave={() => setHoveredTool(null)}
+                >
+                  <span className="chip-emoji">{meta.emoji}</span>
+                  {tool}
+                  {/* Tooltip */}
+                  <span className="chip-tooltip">
+                    <span className="chip-tooltip-title">{meta.emoji} {tool}</span>
+                    <span className="chip-tooltip-desc">{meta.snippet}</span>
+                  </span>
+                </motion.span>
+              );
+            })}
           </div>
         </motion.div>
       </div>

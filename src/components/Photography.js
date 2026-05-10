@@ -45,8 +45,8 @@ const Photography = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// through the lens</span>
-          <h2 className="section-title">
-            Visual <span>Stories</span>
+          <h2 className="section-title" data-hover="Lens Work">
+            <span className="section-title-inner">Visual <span>Stories</span></span>
           </h2>
           <div className="section-divider" />
           <p className="section-desc">

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 
@@ -82,6 +82,63 @@ const filters = [
   { label: 'Photography', value: 'photography' },
 ];
 
+const TiltCard = ({ children, project, index }) => {
+  const ref = useRef(null);
+
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["12.5deg", "-12.5deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12.5deg", "12.5deg"]);
+
+  const handleMouseMove = (e) => {
+    if (!ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      ref={ref}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      initial={{ opacity: 1, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.08 }}
+      style={{
+        rotateX,
+        rotateY,
+        transformStyle: "preserve-3d",
+        perspective: "1000px",
+        '--card-accent': project.accent
+      }}
+      className="work-card-wrapper"
+    >
+      <div 
+        className="work-card glass-card"
+        style={{ transform: "translateZ(50px)" }}
+      >
+        {children}
+      </div>
+    </motion.div>
+  );
+};
+
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [fetchedProjects, setFetchedProjects] = useState([]);
@@ -113,8 +170,8 @@ const MyWorks = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// what I've built</span>
-          <h2 className="section-title">
-            Featured <span>Projects</span>
+          <h2 className="section-title" data-hover="Masterpieces">
+            <span className="section-title-inner">Featured <span>Projects</span></span>
           </h2>
           <div className="section-divider" />
           <p className="section-desc">
@@ -152,15 +209,8 @@ const MyWorks = () => {
             transition={{ duration: 0.3 }}
           >
             {filtered.map((project, index) => (
-              <motion.div
-                className="work-card glass-card"
-                key={project.title}
-                initial={{ opacity: 1, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                style={{ '--card-accent': project.accent }}
-              >
-                <div className="work-card-top">
+              <TiltCard key={project.title} project={project} index={index}>
+                <div className="work-card-top" style={{ transform: "translateZ(30px)" }}>
                   <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
                   <div className="work-card-links">
                     {project.github && (
@@ -174,10 +224,10 @@ const MyWorks = () => {
                   </div>
                 </div>
 
-                <h3 className="work-title">{project.title}</h3>
-                <p className="work-desc">{project.description}</p>
+                <h3 className="work-title" style={{ transform: "translateZ(40px)" }}>{project.title}</h3>
+                <p className="work-desc" style={{ transform: "translateZ(20px)" }}>{project.description}</p>
 
-                <div className="work-tags">
+                <div className="work-tags" style={{ transform: "translateZ(25px)" }}>
                   {project.tags.map((tag) => (
                     <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>
                       {tag}
@@ -185,12 +235,12 @@ const MyWorks = () => {
                   ))}
                 </div>
 
-                <div className="work-card-footer">
+                <div className="work-card-footer" style={{ transform: "translateZ(35px)" }}>
                   <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
                     View Project <FiArrowRight size={14} />
                   </a>
                 </div>
-              </motion.div>
+              </TiltCard>
             ))}
           </motion.div>
         </AnimatePresence>

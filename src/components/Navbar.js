@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Navbar.css';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const clickCountRef = useRef(0);
+  const clickTimerRef = useRef(null);
+  const [logoGlow, setLogoGlow] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -18,6 +21,28 @@ const Navbar = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    // Scroll to top on single click
+    handleNavClick(e, 'hero');
+
+    // Easter egg: 5 rapid clicks → launch ping pong
+    clickCountRef.current += 1;
+    setLogoGlow(true);
+    setTimeout(() => setLogoGlow(false), 300);
+
+    clearTimeout(clickTimerRef.current);
+    clickTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+
+    if (clickCountRef.current >= 5) {
+      clickCountRef.current = 0;
+      clearTimeout(clickTimerRef.current);
+      window.dispatchEvent(new CustomEvent('launch-pong'));
+    }
+  };
+
   const links = [
     { label: 'About', target: 'about' },
     { label: 'Skills', target: 'skills' },
@@ -29,7 +54,12 @@ const Navbar = () => {
   return (
     <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
       <div className="navbar-inner">
-        <a className="nav-logo" href="#hero" onClick={(e) => handleNavClick(e, 'hero')}>
+        <a
+          className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
+          href="#hero"
+          onClick={handleLogoClick}
+          title="Try clicking me 5 times... 🏓"
+        >
           <span className="logo-text">ADHY</span>
           <span className="logo-dot">.</span>
         </a>

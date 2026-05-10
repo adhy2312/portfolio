@@ -32,8 +32,8 @@ const Testimonials = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// recommendations</span>
-          <h2 className="section-title">
-            Kind <span>Words</span>
+          <h2 className="section-title" data-hover="Endorsements">
+            <span className="section-title-inner">Kind <span>Words</span></span>
           </h2>
           <div className="section-divider" />
         </motion.div>

@@ -1,0 +1,160 @@
+/* ═══════════════════════════════════════
+   GITHUB STATS SECTION
+═══════════════════════════════════════ */
+.github-stats-section {
+  padding: var(--section-padding);
+  background: var(--bg-primary);
+}
+
+.github-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 3rem;
+  color: var(--text-secondary);
+}
+
+.gh-profile-link {
+  margin-left: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  color: var(--accent-primary);
+  text-decoration: none;
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  padding: 6px 14px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+.gh-profile-link:hover { background: rgba(108, 99, 255, 0.12); }
+
+/* Loading skeleton */
+.gh-loading { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.gh-skeleton {
+  height: 100px;
+  flex: 1;
+  min-width: 200px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 100%);
+  background-size: 200% 100%;
+  border-radius: 16px;
+  animation: skeletonShimmer 1.5s infinite;
+}
+@keyframes skeletonShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Stats row */
+.gh-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.gh-stat-card {
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.gh-stat-icon { font-size: 1.4rem; color: var(--accent-primary); }
+.gh-stat-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.gh-stat-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-muted);
+}
+
+/* Heatmap */
+.gh-heatmap-wrapper {
+  margin-bottom: 2.5rem;
+}
+.gh-heatmap-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+.gh-heatmap-canvas {
+  display: block;
+  border-radius: 6px;
+}
+
+/* Repos */
+.gh-repos {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2rem;
+}
+
+.gh-repo-card {
+  padding: 1.4rem;
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gh-repo-top { display: flex; align-items: center; justify-content: space-between; }
+.gh-repo-name {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.88rem;
+  color: var(--accent-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-repo-stars {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+.gh-repo-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+.gh-repo-lang {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  color: var(--accent-green);
+  background: rgba(0,229,160,0.08);
+  border: 1px solid rgba(0,229,160,0.2);
+  padding: 2px 8px;
+  border-radius: 10px;
+  align-self: flex-start;
+}
+
+/* Error */
+.gh-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  padding: 3rem;
+}
+.gh-error a { color: var(--accent-primary); }
+
+@media (max-width: 900px) {
+  .gh-stats-row, .gh-repos { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 560px) {
+  .gh-stats-row, .gh-repos { grid-template-columns: 1fr; }
+}

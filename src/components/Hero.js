@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Particles from "react-tsparticles";
 import { loadBasic } from "tsparticles-basic";
 import { client, urlFor } from '../sanity';
+import LanguageTerminal from './LanguageTerminal';
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
@@ -140,6 +141,8 @@ const Hero = () => {
           ))}
         </motion.h1>
         
+        <LanguageTerminal />
+
         <motion.div 
           className="hero-tagline-premium"
           initial={{ opacity: 0, letterSpacing: "20px" }}

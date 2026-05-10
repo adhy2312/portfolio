@@ -22,7 +22,7 @@ const links = [
 const socials = [
   { icon: <FiLinkedin size={18} />, href: 'https://www.linkedin.com/in/adhithya-mohan-s', label: 'LinkedIn' },
   { icon: <FiGithub size={18} />, href: 'https://github.com/adhy2312', label: 'GitHub' },
-  { icon: <FiInstagram size={18} />, href: 'https://instagram.com/zoomout_images', label: 'Instagram' },
+  { icon: <FiInstagram size={18} />, href: 'https://instagram.com/zoomout_frames', label: 'Instagram' },
   { icon: <FiMail size={18} />, href: 'mailto:adhithyamohan2312@gmail.com', label: 'Email' },
 ];
 
@@ -50,7 +50,7 @@ const Footer = () => {
     socialLinks: footerData?.socialLinks || [
       { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/adhithya-mohan-s', iconName: 'FiLinkedin' },
       { platform: 'GitHub', url: 'https://github.com/adhy2312', iconName: 'FiGithub' },
-      { platform: 'Instagram', url: 'https://instagram.com/zoomout_images', iconName: 'FiInstagram' },
+      { platform: 'Instagram', url: 'https://instagram.com/zoomout_frames', iconName: 'FiInstagram' },
       { platform: 'Email', url: 'mailto:adhithyamohan2312@gmail.com', iconName: 'FiMail' },
     ]
   };
@@ -63,6 +63,10 @@ const Footer = () => {
       transition={{ duration: 0.8 }}
       viewport={{ once: true }}
     >
+      {/* Ambient Glows */}
+      <div className="footer-ambient-glow glow-1"></div>
+      <div className="footer-ambient-glow glow-2"></div>
+
       {/* Animated SVG Wave Top */}
       <div className="footer-wave">
         <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
@@ -73,76 +77,92 @@ const Footer = () => {
       {/* Giant Animated Marquee Text */}
       <div className="footer-marquee-container">
         <div className="footer-marquee">
-          <span>ADHY.</span>
-          <span>ADHY.</span>
-          <span>ADHY.</span>
-          <span>ADHY.</span>
-          <span>ADHY.</span>
-          <span>ADHY.</span>
+          <span> ADHY • ADHY • ADHY • ADHY • ADHY • ADHY •</span>
+          <span>ADHY • ADHY • ADHY • ADHY • ADHY • ADHY • </span>
         </div>
       </div>
 
-      <div className="container footer-inner">
-        {/* Brand column */}
-        <div className="footer-brand">
-          <div className="footer-logo" style={{ visibility: 'hidden' }}>
-            ADHY<span>.</span>
+      <div className="container footer-content-wrapper">
+        {/* Interactive Tech Stack Showcase */}
+        <div className="footer-tech-showcase">
+          <div className="tech-showcase-header">
+            <h3 className="tech-title">&lt;TechStack /&gt;</h3>
+            <div className="tech-status">
+              <span className="status-dot"></span>
+              All systems operational
+            </div>
           </div>
-          <p className="footer-tagline">
-            {displayData.tagline}
-          </p>
-          <div className="footer-socials">
-            {displayData.socialLinks.map((s, idx) => (
-              <a
-                key={idx}
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="footer-social-link"
-                aria-label={s.platform}
-              >
-                {iconMap[s.iconName] || <FiGithub size={18} />}
-              </a>
+          <div className="tech-grid">
+            {['React', 'Node.js', 'Python', 'TypeScript', 'TailwindCSS', 'Framer Motion', 'PostgreSQL', 'Sanity CMS'].map((tech, idx) => (
+              <div key={idx} className={`tech-tag tech-${idx % 4}`}>
+                <span className="tech-syntax">const</span> {tech.toLowerCase().replace(/[^a-z0-9]/g, '')} <span className="tech-syntax">=</span> <span className="tech-string">"{tech}"</span>;
+              </div>
             ))}
           </div>
         </div>
 
-        {/* Navigation column */}
-        <div className="footer-nav">
-          <h4 className="footer-nav-title">Navigation</h4>
-          <ul className="footer-nav-list">
-            {links.map((link) => (
-              <li key={link.target}>
+        <div className="footer-inner">
+          {/* Brand column */}
+          <div className="footer-brand">
+            <div className="footer-logo">
+              ADHY<span>.</span>
+            </div>
+            <p className="footer-tagline">
+              {displayData.tagline}
+            </p>
+            <div className="footer-socials">
+              {displayData.socialLinks.map((s, idx) => (
                 <a
-                  href={`#${link.target}`}
-                  className="footer-nav-link"
-                  onClick={(e) => handleNavClick(e, link.target)}
+                  key={idx}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="footer-social-link"
+                  aria-label={s.platform}
                 >
-                  {link.label}
+                  {iconMap[s.iconName] || <FiGithub size={18} />}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Navigation column */}
+          <div className="footer-nav">
+            <h4 className="footer-nav-title">Navigation</h4>
+            <ul className="footer-nav-list">
+              {links.map((link) => (
+                <li key={link.target}>
+                  <a
+                    href={`#${link.target}`}
+                    className="footer-nav-link"
+                    onClick={(e) => handleNavClick(e, link.target)}
+                  >
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Contact column */}
+          <div className="footer-contact">
+            <h4 className="footer-nav-title">Contact</h4>
+            <ul className="footer-contact-list">
+              <li>
+                <a href={`mailto:${displayData.email}`} className="footer-nav-link">
+                  {displayData.email}
                 </a>
               </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* Contact column */}
-        <div className="footer-contact">
-          <h4 className="footer-nav-title">Contact</h4>
-          <ul className="footer-contact-list">
-            <li>
-              <a href={`mailto:${displayData.email}`} className="footer-nav-link">
-                {displayData.email}
-              </a>
-            </li>
-            <li>
-              <a href={`https://wa.me/${displayData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="footer-nav-link">
-                WhatsApp ↗
-              </a>
-            </li>
-            <li className="footer-location" style={{ display: 'flex', alignItems: 'center' }}>
-              <FiMapPin style={{ marginRight: '6px' }} /> {displayData.location}
-            </li>
-          </ul>
+              <li>
+                <a href={`https://wa.me/${displayData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="footer-nav-link">
+                  WhatsApp ↗
+                </a>
+              </li>
+              <li className="footer-location" style={{ display: 'flex', alignItems: 'center' }}>
+                <FiMapPin style={{ marginRight: '6px' }} /> {displayData.location}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
 

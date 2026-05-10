@@ -75,8 +75,8 @@ const About = () => {
           {/* Text side */}
           <div className="about-text-col">
             <span className="section-label">// who I am</span>
-            <h2 className="section-title about-title">
-              About <span>Me</span>
+            <h2 className="section-title about-title" data-hover="Adhithya Mohan">
+              <span className="section-title-inner">About <span>Me</span></span>
             </h2>
             <div className="section-divider" />
 

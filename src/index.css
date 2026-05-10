@@ -130,11 +130,49 @@ body {
 }
 
 .section-title {
+  position: relative;
+  display: inline-block;
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
+}
+
+.section-title-inner {
+  display: inline-block;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.section-title[data-hover] {
+  cursor: pointer;
+}
+
+.section-title[data-hover]::after {
+  content: attr(data-hover);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  text-align: left;
+  opacity: 0;
+  transform: translateY(15px);
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  pointer-events: none;
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.section-title[data-hover]:hover .section-title-inner {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+
+.section-title[data-hover]:hover::after {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .section-title span {

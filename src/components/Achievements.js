@@ -45,8 +45,8 @@ const Achievements = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// highlights</span>
-          <h2 className="section-title">
-            What I <span>Bring</span>
+          <h2 className="section-title" data-hover="Milestones">
+            <span className="section-title-inner">What I <span>Bring</span></span>
           </h2>
           <div className="section-divider" />
           <p className="section-desc">

@@ -132,3 +132,86 @@
   border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: default;
 }
+
+/* ── Interactive Tool Chips ── */
+.tools-chip-interactive {
+  position: relative;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tools-chip-interactive:hover {
+  border-color: var(--chip-border, rgba(255,255,255,0.15));
+  box-shadow:
+    0 0 0 1px var(--chip-border, transparent),
+    0 8px 24px var(--chip-glow, transparent),
+    6px 6px 12px var(--skeuo-shadow-dark);
+  color: #fff;
+  background: rgba(255,255,255,0.06);
+}
+
+.tools-chip-interactive.tools-chip-active {
+  border-color: var(--chip-border, rgba(255,255,255,0.15));
+}
+
+.chip-emoji {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* Tooltip */
+.chip-tooltip {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) translateY(8px);
+  background: rgba(10, 15, 30, 0.95);
+  border: 1px solid var(--chip-border, rgba(108, 99, 255, 0.4));
+  border-radius: 12px;
+  padding: 10px 16px;
+  min-width: 140px;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+}
+
+.chip-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--chip-border, rgba(108, 99, 255, 0.4));
+}
+
+.tools-chip-interactive:hover .chip-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+.chip-tooltip-title {
+  display: block;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.chip-tooltip-desc {
+  display: block;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: rgba(255,255,255,0.5);
+  letter-spacing: 0.5px;
+}
