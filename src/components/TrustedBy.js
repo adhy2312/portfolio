@@ -49,7 +49,7 @@ const TrustedBy = () => {
                 {brand.isPlaceholder ? (
                    <span className="placeholder-logo">{brand.name}</span>
                 ) : (
-                  brand.logo ? <img src={urlFor(brand.logo).url()} alt={brand.name} /> : <span className="placeholder-logo">{brand.name}</span>
+                  brand.logo ? <img src={urlFor(brand.logo).url()} alt={brand.name} loading="lazy" decoding="async" /> : <span className="placeholder-logo">{brand.name}</span>
                 )}
               </div>
             ))}

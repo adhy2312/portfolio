@@ -66,7 +66,12 @@ const Photography = () => {
               onClick={() => setLightbox(photo)}
             >
               <div className="photo-inner">
-                <img src={photo.src} alt={photo.alt} />
+                <img 
+                  src={photo.src} 
+                  alt={photo.alt} 
+                  loading="lazy"
+                  decoding="async"
+                />
                 <div className="photo-overlay">
                   <span className="photo-category">{photo.category}</span>
                   <span className="photo-caption">{photo.caption}</span>

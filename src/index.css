@@ -204,6 +204,14 @@ body {
   pointer-events: none;
   z-index: 0;
   animation: blobFloat 12s ease-in-out infinite alternate;
+  will-change: transform; /* GPU optimization */
+}
+
+@media (max-width: 768px) {
+  .ambient-blob {
+    filter: blur(60px); /* Reduced blur for mobile performance */
+    opacity: 0.12;
+  }
 }
 
 .ambient-blob-1 {
@@ -250,6 +258,13 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: var(--transition-smooth);
+  will-change: transform, opacity;
+}
+
+@media (max-width: 768px) {
+  .glass-card {
+    backdrop-filter: blur(10px); /* Reduced blur for mobile */
+  }
 }
 
 .glass-card:hover {
@@ -387,6 +402,37 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ═══════════════════════════════════════════
+   HERO NAME WRAPPING
+   ═══════════════════════════════════════════ */
+.hero-name-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+  .hero-name-word {
+    display: block; /* Force "Mohan" to next line */
+  }
+  .hero-name-spacer {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PERFORMANCE UTILITIES
+   ═══════════════════════════════════════════ */
+.optimize-gpu {
+  will-change: transform;
+  transform: translateZ(0);
+}
+
+.low-perf-hide {
+  @media (max-width: 768px) {
+    display: none !important;
+  }
 }
 
 /* ═══════════════════════════════════════════

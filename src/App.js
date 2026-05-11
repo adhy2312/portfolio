@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import GitHubStats from './components/GitHubStats';
-import Photography from './components/Photography';
-import MyWorks from './components/MyWorks';
-import Achievements from './components/Achievements';
-import Testimonials from './components/Testimonials';
-import TrustedBy from './components/TrustedBy';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import CallToAction from './components/CallToAction';
-import PingPongGame from './components/PingPongGame';
-import CustomCursor from './components/CustomCursor';
-import PageLoader from './components/PageLoader';
-import ScrollProgress from './components/ScrollProgress';
+
+// Lazy load below-the-fold components
+const About = lazy(() => import('./components/About'));
+const Skills = lazy(() => import('./components/Skills'));
+const GitHubStats = lazy(() => import('./components/GitHubStats'));
+const Photography = lazy(() => import('./components/Photography'));
+const MyWorks = lazy(() => import('./components/MyWorks'));
+const Achievements = lazy(() => import('./components/Achievements'));
+const Testimonials = lazy(() => import('./components/Testimonials'));
+const TrustedBy = lazy(() => import('./components/TrustedBy'));
+const Contact = lazy(() => import('./components/Contact'));
+const Footer = lazy(() => import('./components/Footer'));
+const CallToAction = lazy(() => import('./components/CallToAction'));
+const PingPongGame = lazy(() => import('./components/PingPongGame'));
+const CustomCursor = lazy(() => import('./components/CustomCursor'));
+const PageLoader = lazy(() => import('./components/PageLoader'));
+const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 import './index.css';
 import { AnimatePresence } from 'framer-motion';
 
@@ -52,31 +54,34 @@ function App() {
 
   return (
     <div className={`App ${spin ? 'spin-easter-egg' : ''}`}>
-      <CustomCursor />
-      <ScrollProgress />
-      {loading && <PageLoader onDone={() => setLoading(false)} />}
-      
-      {/* Ambient background blobs */}
-      <div className="ambient-blob ambient-blob-1" />
-      <div className="ambient-blob ambient-blob-2" />
-      <div className="ambient-blob ambient-blob-3" />
+      <Suspense fallback={null}>
+        <CustomCursor />
+        <ScrollProgress />
+        {loading && <PageLoader onDone={() => setLoading(false)} />}
+        
+        {/* Ambient background blobs */}
+        <div className="ambient-blob ambient-blob-1" />
+        <div className="ambient-blob ambient-blob-2" />
+        <div className="ambient-blob ambient-blob-3" />
 
-      <Navbar />
-      <Hero />
-      <About />
-      <Skills />
-      <GitHubStats />
-      <TrustedBy />
-      <MyWorks />
-      <Photography />
-      <Achievements />
-      <Testimonials />
-      <CallToAction />
-      <Contact />
-      <Footer />
+        <Navbar />
+        <Hero />
+        
+        <About />
+        <Skills />
+        <GitHubStats />
+        <TrustedBy />
+        <MyWorks />
+        <Photography />
+        <Achievements />
+        <Testimonials />
+        <CallToAction />
+        <Contact />
+        <Footer />
 
-      {/* Hidden Easter Egg */}
-      {showPong && <PingPongGame onClose={() => setShowPong(false)} />}
+        {/* Hidden Easter Egg */}
+        {showPong && <PingPongGame onClose={() => setShowPong(false)} />}
+      </Suspense>
     </div>
   );
 }

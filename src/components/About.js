@@ -91,7 +91,14 @@ const About = () => {
                 perspective: 1000 
               }}
             >
-              <img src={displayData.profileImage} alt="Adhithya Mohan" className="about-img" style={{ transform: "translateZ(30px)" }} />
+              <img 
+                src={displayData.profileImage} 
+                alt="Adhithya Mohan" 
+                className="about-img" 
+                style={{ transform: "translateZ(30px)" }} 
+                loading="lazy"
+                decoding="async"
+              />
               <div className="about-img-glow" />
               {/* Experience badge */}
               <motion.div
@@ -104,7 +111,7 @@ const About = () => {
                 <span className="exp-number">{displayData.experienceYears}</span>
                 <span className="exp-label">Years of<br/>Experience</span>
               </motion.div>
-            </div>
+            </motion.div>
           </div>
 
           {/* Text side */}

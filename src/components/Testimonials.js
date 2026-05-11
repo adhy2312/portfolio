@@ -52,7 +52,7 @@ const Testimonials = () => {
               <p className="testimonial-quote">"{item.quote}"</p>
               <div className="testimonial-user">
                 {item.image && (
-                  <img src={urlFor(item.image).url()} alt={item.name} className="user-img" />
+                  <img src={urlFor(item.image).url()} alt={item.name} className="user-img" loading="lazy" decoding="async" />
                 )}
                 <div className="user-info">
                   <h4 className="user-name">{item.name}</h4>
