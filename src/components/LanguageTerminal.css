@@ -101,6 +101,18 @@
   font-size: 0.82rem;
   line-height: 1.7;
   letter-spacing: 0.3px;
+  overflow-x: auto;
+}
+
+.lt-code::-webkit-scrollbar {
+  height: 4px;
+}
+.lt-code::-webkit-scrollbar-track {
+  background: transparent;
+}
+.lt-code::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 2px;
 }
 
 .lt-line {
@@ -159,6 +171,18 @@
   background: var(--dot-color, #6C63FF);
   box-shadow: 0 0 8px var(--dot-color, #6C63FF);
   transform: scale(1.25);
+}
+
+/* Interactive Input */
+.lt-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #A6E3A1;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  width: 100%;
+  margin-left: 8px;
 }
 
 /* Responsive */

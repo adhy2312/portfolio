@@ -120,6 +120,9 @@ const LanguageTerminal = () => {
   const [idx, setIdx] = useState(0);
   const [fade, setFade] = useState(true);
   const [typing, setTyping] = useState(true);
+  const [commandHistory, setCommandHistory] = useState([]);
+  const [inputValue, setInputValue] = useState('');
+  const inputRef = useRef(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -138,6 +141,45 @@ const LanguageTerminal = () => {
 
   const snippet = SNIPPETS[idx];
   const displayedLines = useTypewriter(snippet.lines, typing);
+
+  const handleCommand = (cmd) => {
+    const lowerCmd = cmd.trim().toLowerCase();
+    let response = '';
+    
+    if (!lowerCmd) return;
+    
+    switch (lowerCmd) {
+      case 'help':
+        response = 'Available commands: help, about, skills, ping, clear';
+        break;
+      case 'about':
+        response = 'Hi, I am Adhithya Mohan! I am a full-stack dev and IoT enthusiast.';
+        break;
+      case 'skills':
+        response = 'React, Node.js, Python, C++, Arduino, MongoDB, etc.';
+        break;
+      case 'ping':
+        response = 'pong! 🏓';
+        break;
+      case 'clear':
+        setCommandHistory([]);
+        return;
+      case 'sudo rm -rf /':
+        response = 'Nice try. Permission denied. 😉';
+        break;
+      default:
+        response = `Command not found: ${cmd}. Type 'help' for a list of commands.`;
+    }
+    
+    setCommandHistory(prev => [...prev, { cmd, response }]);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      handleCommand(inputValue);
+      setInputValue('');
+    }
+  };
 
   // Colorize a single displayed (partial) line against its token list
   const colorize = (lineIdx, displayedText) => {
@@ -171,11 +213,18 @@ const LanguageTerminal = () => {
       </div>
 
       {/* Code area */}
-      <div className="lt-body">
+      <div className="lt-body" onClick={() => inputRef.current && inputRef.current.focus()}>
         <div className="lt-line-numbers">
           {snippet.lines.map((_, i) => (
-            <span key={i}>{i + 1}</span>
+            <span key={`sn-${i}`}>{i + 1}</span>
           ))}
+          {commandHistory.map((_, i) => (
+            <React.Fragment key={`ch-${i}`}>
+              <span>{snippet.lines.length + i * 2 + 1}</span>
+              <span>{snippet.lines.length + i * 2 + 2}</span>
+            </React.Fragment>
+          ))}
+          <span>{snippet.lines.length + commandHistory.length * 2 + 1}</span>
         </div>
         <div className="lt-code">
           {snippet.lines.map((line, i) => (
@@ -183,12 +232,36 @@ const LanguageTerminal = () => {
               {displayedLines[i] !== undefined
                 ? colorize(i, displayedLines[i])
                 : null}
-              {/* blinking cursor on the active line */}
-              {i === (displayedLines.length - 1) && typing && (
+              {i === (displayedLines.length - 1) && typing && commandHistory.length === 0 && (
                 <span className="lt-cursor">▌</span>
               )}
             </div>
           ))}
+          
+          {commandHistory.map((item, i) => (
+            <React.Fragment key={i}>
+              <div className="lt-line">
+                <span className="lt-plain">visitor@portfolio:~$ {item.cmd}</span>
+              </div>
+              <div className="lt-line">
+                <span className="lt-str">{item.response}</span>
+              </div>
+            </React.Fragment>
+          ))}
+          
+          <div className="lt-line" style={{ display: 'flex', alignItems: 'center' }}>
+            <span className="lt-plain">visitor@portfolio:~$ </span>
+            <input 
+              ref={inputRef}
+              type="text" 
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="lt-input"
+              spellCheck="false"
+              autoComplete="off"
+            />
+          </div>
         </div>
       </div>
 

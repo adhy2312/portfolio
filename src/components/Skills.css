@@ -215,3 +215,9 @@
   color: rgba(255,255,255,0.5);
   letter-spacing: 0.5px;
 }
+
+@media (max-width: 768px) {
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+}

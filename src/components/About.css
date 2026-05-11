@@ -152,7 +152,20 @@
     gap: 5rem;
   }
   .about-image-col {
-    max-width: 500px;
+    max-width: 100%;
     margin: 0 auto;
+  }
+  .about-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .about-stats {
+    grid-template-columns: 1fr;
+  }
+  .about-exp-badge {
+    bottom: -20px;
+    right: 10px;
   }
 }

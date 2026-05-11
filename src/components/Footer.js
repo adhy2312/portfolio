@@ -83,7 +83,7 @@ const Footer = () => {
       </div>
 
       <div className="container footer-content-wrapper">
-        {/* Interactive Tech Stack Showcase */}
+        {/* Interactive Tech Stack*/}
         <div className="footer-tech-showcase">
           <div className="tech-showcase-header">
             <h3 className="tech-title">&lt;TechStack /&gt;</h3>

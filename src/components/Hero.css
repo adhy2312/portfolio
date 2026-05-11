@@ -45,6 +45,7 @@
   margin: 0;
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
   overflow: hidden;
 }
 
@@ -75,5 +76,9 @@
 @media (max-width: 768px) {
   .hero-name-giant {
     font-size: clamp(3rem, 12vw, 6rem);
+  }
+  .hero-tagline-premium {
+    letter-spacing: 4px !important;
+    font-size: 0.7rem;
   }
 }

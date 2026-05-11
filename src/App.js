@@ -22,15 +22,36 @@ import { AnimatePresence } from 'framer-motion';
 function App() {
   const [showPong, setShowPong] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [spin, setSpin] = useState(false);
 
   useEffect(() => {
     const handler = () => setShowPong(true);
     window.addEventListener('launch-pong', handler);
-    return () => window.removeEventListener('launch-pong', handler);
+    
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+    const keydownHandler = (e) => {
+      if (e.key === konami[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konami.length) {
+          setSpin(true);
+          setTimeout(() => setSpin(false), 3000);
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    };
+    window.addEventListener('keydown', keydownHandler);
+    
+    return () => {
+      window.removeEventListener('launch-pong', handler);
+      window.removeEventListener('keydown', keydownHandler);
+    };
   }, []);
 
   return (
-    <div className="App">
+    <div className={`App ${spin ? 'spin-easter-egg' : ''}`}>
       <CustomCursor />
       <ScrollProgress />
       {loading && <PageLoader onDone={() => setLoading(false)} />}

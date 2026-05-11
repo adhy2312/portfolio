@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './About.css';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import dp from '../assets/dp.jpg';
 import { FiDownload, FiMapPin, FiCalendar, FiAward } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
@@ -43,6 +43,31 @@ const About = () => {
     displayData.profileImage = "https://via.placeholder.com/400";
   }
 
+  // 3D Tilt Effect State
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+
+  const handleMouseMove = (e) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+    const xPct = mouseX / width - 0.5;
+    const yPct = mouseY / height - 0.5;
+    x.set(xPct);
+    y.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
   return (
     <section className="about" id="about">
       <div className="container">
@@ -55,8 +80,18 @@ const About = () => {
         >
           {/* Image side */}
           <div className="about-image-col">
-            <div className="about-img-wrapper">
-              <img src={displayData.profileImage} alt="Adhithya Mohan" className="about-img" />
+            <motion.div 
+              className="about-img-wrapper"
+              onMouseMove={handleMouseMove}
+              onMouseLeave={handleMouseLeave}
+              style={{ 
+                rotateX, 
+                rotateY, 
+                transformStyle: "preserve-3d",
+                perspective: 1000 
+              }}
+            >
+              <img src={displayData.profileImage} alt="Adhithya Mohan" className="about-img" style={{ transform: "translateZ(30px)" }} />
               <div className="about-img-glow" />
               {/* Experience badge */}
               <motion.div
