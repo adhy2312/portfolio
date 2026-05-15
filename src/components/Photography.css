@@ -9,7 +9,19 @@
 }
 
 .photo-header {
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
+  text-align: center;
+}
+
+/* Center the divider and desc within centered header */
+.photo-header .section-divider {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.photo-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── Masonry Grid ── */

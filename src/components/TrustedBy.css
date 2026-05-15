@@ -13,6 +13,17 @@
   margin-bottom: 4rem;
 }
 
+/* Center the divider and desc within centered header */
+.trusted-header .section-divider {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.trusted-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .section-label {
   display: inline-block;
   font-family: 'Fira Code', monospace;

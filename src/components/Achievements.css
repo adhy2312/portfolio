@@ -9,6 +9,19 @@
   z-index: 1;
 }
 
+/* Topo contour lines overlay */
+.achievements::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%234FC3F7' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 350px 350px;
+  background-repeat: repeat;
+}
+
 .ach-header {
   margin-bottom: 3rem;
 }
@@ -20,7 +33,7 @@
   gap: 1.3rem;
 }
 
-/* ── Card ── */
+/* ── Card — Retro Panel ── */
 .ach-card {
   padding: 2rem 1.8rem;
   display: flex;
@@ -29,6 +42,13 @@
   position: relative;
   overflow: hidden;
   transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  /* Retro equipment panel */
+  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  border: 2px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 
+    6px 6px 14px rgba(0,0,0,0.5),
+    -3px -3px 8px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
 .ach-card::before {

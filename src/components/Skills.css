@@ -5,9 +5,33 @@
   z-index: 1;
 }
 
+/* Topo contour overlay on skills */
+.skills::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%236C63FF' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 400px 400px;
+  background-repeat: repeat;
+}
+
 .skills-header {
   text-align: center;
   margin-bottom: 6rem;
+}
+
+/* Center the divider and desc within centered header */
+.skills-header .section-divider {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.skills-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .skills-grid {
@@ -16,24 +40,69 @@
   gap: 3rem;
 }
 
+/* ═══════════════════════════════
+   RETRO EQUIPMENT PANEL CARD
+═══════════════════════════════ */
 .skill-card {
-  background: var(--bg-secondary);
+  background: linear-gradient(145deg, #111827, #0d1117);
   padding: 2.5rem;
-  border-radius: 30px;
+  border-radius: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  /* Heavy retro outer shadow like physical hardware */
   box-shadow: 
-    15px 15px 30px var(--skeuo-shadow-dark),
-    -8px -8px 20px var(--skeuo-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: 0.3s;
+    8px 8px 20px rgba(0,0,0,0.6),
+    -4px -4px 12px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Retro brushed-metal top edge */
+.skill-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255,255,255,0.12) 20%, 
+    rgba(255,255,255,0.06) 50%, 
+    rgba(255,255,255,0.12) 80%, 
+    transparent 100%);
+}
+
+/* Subtle screw dots in corners */
+.skill-card::after {
+  content: '';
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a2a3e, #111 70%);
+  box-shadow: 
+    inset 0 1px 2px rgba(255,255,255,0.08),
+    0 1px 3px rgba(0,0,0,0.5),
+    /* Second screw - top left */
+    -240px 0 0 0 #1a1a2a;
 }
 
 .skill-card:hover {
-  transform: translateY(-10px);
+  transform: translateY(-8px);
   box-shadow: 
-    20px 20px 40px var(--skeuo-shadow-dark),
-    -10px -10px 25px var(--skeuo-shadow-light);
+    12px 12px 30px rgba(0,0,0,0.7),
+    -6px -6px 16px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 60px rgba(108, 99, 255, 0.06);
 }
 
+/* ═══════════════════════════════
+   RETRO ICON — EMBOSSED KNOB
+═══════════════════════════════ */
 .skill-card-header {
   display: flex;
   align-items: center;
@@ -42,18 +111,36 @@
 }
 
 .skill-card-icon {
-  font-size: 1.8rem;
+  font-size: 1.5rem;
   color: var(--accent-primary);
-  background: var(--bg-secondary);
-  width: 60px;
-  height: 60px;
+  width: 52px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 15px;
+  border-radius: 50%;
+  /* Retro embossed knob look */
+  background: radial-gradient(circle at 35% 35%, #2a2a4e, #111827 70%);
+  border: 2px solid rgba(255,255,255,0.04);
   box-shadow: 
-    6px 6px 12px var(--skeuo-shadow-dark),
-    -3px -3px 10px var(--skeuo-shadow-light);
+    4px 4px 10px rgba(0,0,0,0.6),
+    -2px -2px 6px rgba(255,255,255,0.03),
+    inset 0 0 8px rgba(0,0,0,0.4),
+    inset 0 1px 1px rgba(255,255,255,0.08);
+  position: relative;
+}
+
+/* Indicator notch on knob */
+.skill-card-icon::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 6px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 1px;
 }
 
 .skill-card-title {
@@ -71,38 +158,106 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: var(--text-secondary);
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.3px;
 }
 
+.skill-bar-percent {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ═══════════════════════════════
+   RETRO LED-SEGMENT VU METER
+═══════════════════════════════ */
 .skill-bar-track {
-  height: 12px;
-  background: var(--bg-primary);
-  border-radius: 50px;
+  height: 14px;
+  background: #080810;
+  border-radius: 4px;
   box-shadow: 
-    inset 4px 4px 8px var(--skeuo-shadow-dark),
-    inset -2px -2px 6px var(--skeuo-shadow-light);
+    inset 3px 3px 8px rgba(0,0,0,0.8),
+    inset -1px -1px 3px rgba(255,255,255,0.03);
   overflow: hidden;
   padding: 3px;
+  border: 1px solid rgba(0,0,0,0.4);
+  display: flex;
+  gap: 2px;
 }
 
+/* LED segments container */
 .skill-bar-fill {
   height: 100%;
-  border-radius: 50px;
-  background: var(--accent-primary);
-  box-shadow: 0 0 15px rgba(226, 255, 111, 0.3);
+  border-radius: 2px;
+  display: flex;
+  gap: 2px;
+  align-items: stretch;
 }
 
+/* Individual LED segment styling via background pattern */
+.skill-bar-fill {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--bar-color, #6C63FF) 0px,
+    var(--bar-color, #6C63FF) 6px,
+    transparent 6px,
+    transparent 8px
+  );
+  box-shadow: 
+    0 0 10px color-mix(in srgb, var(--bar-color, #6C63FF) 40%, transparent),
+    0 0 3px color-mix(in srgb, var(--bar-color, #6C63FF) 60%, transparent);
+  position: relative;
+}
+
+/* Glass highlight on LED segments */
+.skill-bar-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+  border-radius: 2px 2px 0 0;
+}
+
+/* ═══════════════════════════════
+   RETRO TOOLS PANEL
+═══════════════════════════════ */
 .tools-section {
   margin-top: 8rem;
   text-align: center;
-  background: var(--bg-secondary);
+  background: linear-gradient(145deg, #111827, #0d1117);
   padding: 4rem;
-  border-radius: 40px;
+  border-radius: 24px;
+  border: 2px solid rgba(255,255,255,0.04);
   box-shadow: 
-    inset 10px 10px 20px var(--skeuo-shadow-dark),
-    inset -5px -5px 15px var(--skeuo-shadow-light);
+    8px 8px 20px rgba(0,0,0,0.6),
+    -4px -4px 12px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  position: relative;
+}
+
+/* Panel label plate */
+.tools-section::before {
+  content: 'TECH RACK';
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.3);
+  background: var(--bg-primary);
+  padding: 4px 16px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 4px;
+  box-shadow: 
+    inset 1px 1px 3px rgba(0,0,0,0.4),
+    0 1px 2px rgba(0,0,0,0.3);
 }
 
 .tools-title {
@@ -119,18 +274,31 @@
   gap: 1.2rem;
 }
 
+/* ═══════════════════════════════
+   RETRO EMBOSSED TOOL CHIPS
+═══════════════════════════════ */
 .tools-chip {
   padding: 12px 24px;
-  background: var(--bg-secondary);
+  background: linear-gradient(145deg, #181e30, #0e1220);
   color: var(--text-secondary);
-  border-radius: 50px;
+  border-radius: 10px;
   font-size: 0.9rem;
   font-weight: 600;
+  /* Physical button feel */
   box-shadow: 
-    6px 6px 12px var(--skeuo-shadow-dark),
-    -3px -3px 10px var(--skeuo-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+    4px 4px 10px rgba(0,0,0,0.5),
+    -2px -2px 6px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.04);
   cursor: default;
+  transition: all 0.2s ease;
+}
+
+.tools-chip:active {
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.5),
+    inset -2px -2px 4px rgba(255,255,255,0.03);
+  transform: translateY(1px);
 }
 
 /* ── Interactive Tool Chips ── */
@@ -148,9 +316,9 @@
   box-shadow:
     0 0 0 1px var(--chip-border, transparent),
     0 8px 24px var(--chip-glow, transparent),
-    6px 6px 12px var(--skeuo-shadow-dark);
+    4px 4px 10px rgba(0,0,0,0.5);
   color: #fff;
-  background: rgba(255,255,255,0.06);
+  background: linear-gradient(145deg, #1e2640, #141a2e);
 }
 
 .tools-chip-interactive.tools-chip-active {

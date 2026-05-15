@@ -117,18 +117,35 @@
   padding-bottom: 3rem;
 }
 
-/* ── Interactive Tech Showcase ── */
+/* ── Retro Control Panel Tech Showcase ── */
 .footer-tech-showcase {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 20px;
+  background: linear-gradient(145deg, #111827, #0d1117);
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
   padding: 2rem;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    8px 8px 20px rgba(0,0,0,0.6),
+    -4px -4px 12px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  position: relative;
+}
+
+/* Corner screws */
+.footer-tech-showcase::after {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #2a2a3e, #111 70%);
+  box-shadow: 
+    inset 0 1px 2px rgba(255,255,255,0.08),
+    0 1px 3px rgba(0,0,0,0.5);
 }
 
 .tech-showcase-header {
@@ -146,21 +163,26 @@
   margin: 0;
 }
 
+/* Retro amber LED status */
 .tech-status {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-family: 'Fira Code', monospace;
-  font-size: 0.8rem;
-  color: #10b981; /* Emerald green */
+  font-size: 0.75rem;
+  color: #ffbf00;
+  text-shadow: 0 0 6px rgba(255, 191, 0, 0.3);
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
-  background-color: #10b981;
+  width: 10px;
+  height: 10px;
+  background-color: #39ff14;
   border-radius: 50%;
-  box-shadow: 0 0 10px #10b981;
+  box-shadow: 
+    0 0 4px #39ff14,
+    0 0 12px #39ff14,
+    inset 0 -1px 2px rgba(0,0,0,0.3);
   animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
@@ -175,33 +197,40 @@
   gap: 1rem;
 }
 
+/* Retro inset code tag */
 .tech-tag {
   font-family: 'Fira Code', monospace;
-  font-size: 0.9rem;
-  padding: 0.6rem 1.2rem;
-  background: rgba(10, 15, 30, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  color: var(--text-primary);
+  font-size: 0.85rem;
+  padding: 0.7rem 1.2rem;
+  background: #080810;
+  border: 1px solid rgba(0,0,0,0.4);
+  border-radius: 6px;
+  color: #39ff14;
+  text-shadow: 0 0 4px rgba(57, 255, 20, 0.2);
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   cursor: default;
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6),
+    inset -1px -1px 3px rgba(255,255,255,0.02);
 }
 
 .tech-tag:hover {
-  transform: translateY(-5px) scale(1.05);
-  background: rgba(10, 15, 30, 0.8);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+  transform: translateY(-3px);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.5);
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6),
+    inset -1px -1px 3px rgba(255,255,255,0.02),
+    0 0 12px rgba(57, 255, 20, 0.1);
 }
 
 .tech-syntax { color: #c678dd; } /* Purple keyword */
-.tech-string { color: #98c379; } /* Green string */
+.tech-string { color: #a6e3a1; } /* Green string */
 
-/* Tag variations */
-.tech-0:hover { border-color: #61dafb; box-shadow: 0 10px 20px rgba(97, 218, 251, 0.15); } /* React blue */
-.tech-1:hover { border-color: #339933; box-shadow: 0 10px 20px rgba(51, 153, 51, 0.15); } /* Node green */
-.tech-2:hover { border-color: #3776ab; box-shadow: 0 10px 20px rgba(55, 118, 171, 0.15); } /* Python blue */
-.tech-3:hover { border-color: #ff6b9d; box-shadow: 0 10px 20px rgba(255, 107, 157, 0.15); } /* Pink/Misc */
+/* Tag variations — retro accent colors on hover */
+.tech-0:hover { color: #61dafb; text-shadow: 0 0 8px rgba(97, 218, 251, 0.4); }
+.tech-1:hover { color: #339933; text-shadow: 0 0 8px rgba(51, 153, 51, 0.4); }
+.tech-2:hover { color: #3776ab; text-shadow: 0 0 8px rgba(55, 118, 171, 0.4); }
+.tech-3:hover { color: #ff6b9d; text-shadow: 0 0 8px rgba(255, 107, 157, 0.4); }
 
 /* ── Footer Inner Columns ── */
 .footer-inner {
@@ -238,26 +267,32 @@
   gap: 0.6rem;
 }
 
+/* Retro embossed social buttons */
 .footer-social-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #1e2440, #0d1117 70%);
+  border: 2px solid rgba(255,255,255,0.04);
   color: var(--text-muted);
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    3px 3px 8px rgba(0,0,0,0.5),
+    -1px -1px 4px rgba(255,255,255,0.02),
+    inset 0 1px 1px rgba(255,255,255,0.06);
 }
 
 .footer-social-link:hover {
-  background: rgba(108, 99, 255, 0.15);
-  border-color: rgba(108, 99, 255, 0.4);
-  color: #ffffff;
-  transform: translateY(-5px) scale(1.1);
-  box-shadow: 0 10px 20px rgba(108, 99, 255, 0.2);
+  color: var(--accent-primary);
+  box-shadow: 
+    2px 2px 6px rgba(0,0,0,0.5),
+    -1px -1px 3px rgba(255,255,255,0.02),
+    0 0 16px rgba(108, 99, 255, 0.2);
+  transform: translateY(-4px);
 }
 
 /* ── Navigation ── */

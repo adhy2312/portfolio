@@ -17,13 +17,36 @@
     <!-- Favicon -->
     <link rel="icon" href="favicon.ico" />
 
-    <!-- Google Fonts -->
+    <!-- Google Fonts — optimized with preconnect + display=swap -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
       rel="stylesheet"
     />
+
+    <!-- Critical inline styles for instant LCP / prevent FOUC -->
+    <style>
+      body {
+        margin: 0;
+        background: #060918;
+        color: #F0F4FF;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      /* Inline critical loader frame to reduce CLS */
+      .page-loader {
+        position: fixed;
+        inset: 0;
+        background: #000;
+        z-index: 999999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

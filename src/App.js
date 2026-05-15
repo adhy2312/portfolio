@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 
@@ -18,8 +19,6 @@ const PingPongGame = lazy(() => import('./components/PingPongGame'));
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const PageLoader = lazy(() => import('./components/PageLoader'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
-import './index.css';
-import { AnimatePresence } from 'framer-motion';
 
 function App() {
   const [showPong, setShowPong] = useState(false);
@@ -55,7 +54,8 @@ function App() {
   return (
     <div className={`App ${spin ? 'spin-easter-egg' : ''}`}>
       <Suspense fallback={null}>
-        <CustomCursor />
+        {/* Only render custom cursor on desktop */}
+        {window.innerWidth > 768 && <CustomCursor />}
         <ScrollProgress />
         {loading && <PageLoader onDone={() => setLoading(false)} />}
         
@@ -67,16 +67,37 @@ function App() {
         <Navbar />
         <Hero />
         
-        <About />
-        <Skills />
-        <GitHubStats />
-        <TrustedBy />
-        <MyWorks />
-        <Photography />
-        <Achievements />
-        <Testimonials />
-        <CallToAction />
-        <Contact />
+        {/* Below-fold sections wrapped for content-visibility optimization */}
+        <div className="lazy-section">
+          <About />
+        </div>
+        <div className="lazy-section">
+          <Skills />
+        </div>
+        <div className="lazy-section">
+          <GitHubStats />
+        </div>
+        <div className="lazy-section">
+          <TrustedBy />
+        </div>
+        <div className="lazy-section">
+          <MyWorks />
+        </div>
+        <div className="lazy-section">
+          <Photography />
+        </div>
+        <div className="lazy-section">
+          <Achievements />
+        </div>
+        <div className="lazy-section">
+          <Testimonials />
+        </div>
+        <div className="lazy-section">
+          <CallToAction />
+        </div>
+        <div className="lazy-section">
+          <Contact />
+        </div>
         <Footer />
 
         {/* Hidden Easter Egg */}

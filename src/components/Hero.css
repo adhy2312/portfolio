@@ -10,6 +10,7 @@
   padding: 100px 1.5rem 60px;
 }
 
+/* Radial glow overlay */
 .hero-minimal::before {
   content: '';
   position: absolute;
@@ -20,6 +21,16 @@
   background: radial-gradient(circle at 20% 50%, rgba(108, 99, 255, 0.15) 0%, transparent 50%),
               radial-gradient(circle at 80% 80%, rgba(79, 195, 247, 0.1) 0%, transparent 50%);
   z-index: 1;
+  pointer-events: none;
+}
+
+/* Retro vignette */
+.hero-minimal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -51,25 +62,51 @@
 
 .metallic-char {
   display: inline-block;
-  background: linear-gradient(180deg, #fff 0%, #888 50%, #eee 51%, #444 100%);
+  background: linear-gradient(180deg, #fff 0%, #999 40%, #eee 51%, #555 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   padding: 0 5px;
   position: relative;
+  transition: text-shadow 0.3s ease;
+}
+
+.metallic-char:hover {
+  filter: drop-shadow(0 0 12px rgba(108, 99, 255, 0.5));
 }
 
 .metallic-reveal {
-  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.15));
+  filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
 }
 
 .hero-tagline-premium {
-  font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
   font-weight: 400;
   color: #fff;
   margin-top: 2rem;
   text-transform: uppercase;
+  letter-spacing: 8px;
+  position: relative;
+  padding: 12px 0;
+}
+
+/* Retro dashed underline */
+.hero-tagline-premium::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    rgba(108, 99, 255, 0.5) 0px,
+    rgba(108, 99, 255, 0.5) 4px,
+    transparent 4px,
+    transparent 8px
+  );
 }
 
 /* Responsive */

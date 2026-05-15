@@ -4,6 +4,28 @@
   position: relative;
 }
 
+/* Radar concentric ring contour overlay */
+.about::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 30%;
+  width: 900px;
+  height: 900px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 0;
+  background: 
+    radial-gradient(circle, transparent 60px, rgba(108,99,255,0.3) 61px, transparent 62px),
+    radial-gradient(circle, transparent 120px, rgba(108,99,255,0.25) 121px, transparent 122px),
+    radial-gradient(circle, transparent 180px, rgba(108,99,255,0.2) 181px, transparent 182px),
+    radial-gradient(circle, transparent 240px, rgba(108,99,255,0.15) 241px, transparent 242px),
+    radial-gradient(circle, transparent 300px, rgba(108,99,255,0.1) 301px, transparent 302px),
+    radial-gradient(circle, transparent 360px, rgba(108,99,255,0.08) 361px, transparent 362px),
+    radial-gradient(circle, transparent 420px, rgba(108,99,255,0.06) 421px, transparent 422px);
+}
+
 .about-grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -13,13 +35,17 @@
 
 .about-img-wrapper {
   position: relative;
-  background: var(--bg-secondary);
+  background: linear-gradient(145deg, #0e1428, #0a0f1e);
   padding: 15px;
-  border-radius: 25px;
+  border-radius: 20px;
   box-shadow: 
-    15px 15px 30px var(--skeuo-shadow-dark),
-    -8px -8px 20px var(--skeuo-shadow-light);
+    12px 12px 24px rgba(0, 0, 0, 0.5),
+    -6px -6px 16px rgba(255, 255, 255, 0.03),
+    inset 0 1px 0 rgba(255,255,255,0.05);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  /* Retro TV bezel vibe */
+  outline: 3px solid rgba(0,0,0,0.2);
+  outline-offset: -6px;
 }
 
 .about-img {
@@ -36,31 +62,39 @@
 
 .about-exp-badge {
   position: absolute;
-  bottom: -30px;
-  right: -30px;
-  background: var(--bg-secondary);
-  padding: 1.5rem;
-  border-radius: 20px;
+  bottom: -25px;
+  right: -25px;
+  /* Retro circular gauge */
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #1e2240, #0d1117 70%);
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   box-shadow: 
-    8px 8px 16px var(--skeuo-shadow-dark),
-    -4px -4px 12px var(--skeuo-shadow-light);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  min-width: 120px;
+    6px 6px 16px rgba(0,0,0,0.7),
+    -3px -3px 8px rgba(255,255,255,0.02),
+    inset 0 0 12px rgba(0,0,0,0.4),
+    inset 0 1px 1px rgba(255,255,255,0.08);
+  border: 3px solid rgba(255,255,255,0.04);
+  /* Ring groove around the gauge */
+  outline: 2px solid rgba(108, 99, 255, 0.15);
+  outline-offset: 4px;
 }
 
 .exp-number {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 2.2rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 800;
   color: var(--accent-primary);
   line-height: 1;
+  text-shadow: 0 0 12px var(--glow-primary);
 }
 
 .exp-label {
-  font-size: 0.75rem;
+  font-size: 0.6rem;
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 1px;
@@ -98,13 +132,30 @@
 }
 
 .about-stat {
-  background: var(--bg-secondary);
+  background: linear-gradient(145deg, #0e1428, #0a0f1e);
   padding: 1.5rem;
-  border-radius: 15px;
+  border-radius: 14px;
   text-align: center;
   box-shadow: 
-    inset 5px 5px 10px var(--skeuo-shadow-dark),
-    inset -5px -5px 10px var(--skeuo-shadow-light);
+    inset 3px 3px 8px rgba(0,0,0,0.5),
+    inset -3px -3px 6px rgba(255,255,255,0.03);
+  border: 1px solid rgba(0,0,0,0.2);
+  position: relative;
+  transition: transform 0.3s ease;
+}
+
+.about-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(108,99,255,0.2), transparent);
+}
+
+.about-stat:hover {
+  transform: scale(1.05);
 }
 
 .stat-value {

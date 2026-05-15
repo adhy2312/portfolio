@@ -3,12 +3,20 @@
   position: relative;
 }
 
-.testimonials-header {
-  text-align: center;
+.testi-header {
   margin-bottom: 4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  text-align: center;
+}
+
+/* Center the divider and desc within centered header */
+.testi-header .section-divider {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.testi-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .testimonials-grid {

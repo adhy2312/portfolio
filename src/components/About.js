@@ -2,13 +2,10 @@ import React, { useEffect, useState } from 'react';
 import './About.css';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import dp from '../assets/dp.jpg';
-import { FiDownload, FiMapPin, FiCalendar, FiAward } from 'react-icons/fi';
+import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
 
-const iconMap = {
-  FiCalendar: <FiCalendar />,
-  FiAward: <FiAward />,
-};
+
 
 const defaultStats = [
   { value: '3+', label: 'Years Learning', iconName: 'FiCalendar' },
@@ -100,23 +97,12 @@ const About = () => {
                 decoding="async"
               />
               <div className="about-img-glow" />
-              {/* Experience badge */}
-              <motion.div
-                className="about-exp-badge"
-                initial={{ opacity: 0, scale: 0.7 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.5 }}
-                viewport={{ once: true }}
-              >
-                <span className="exp-number">{displayData.experienceYears}</span>
-                <span className="exp-label">Years of<br/>Experience</span>
-              </motion.div>
             </motion.div>
           </div>
 
           {/* Text side */}
           <div className="about-text-col">
-            <span className="section-label">// who I am</span>
+            <span className="section-label">{"// who I am"}</span>
             <h2 className="section-title about-title" data-hover="Adhithya Mohan">
               <span className="section-title-inner">About <span>Me</span></span>
             </h2>

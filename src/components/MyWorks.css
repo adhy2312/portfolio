@@ -8,8 +8,40 @@
   z-index: 1;
 }
 
+/* Radar concentric ring contour overlay */
+.myworks::before {
+  content: '';
+  position: absolute;
+  top: 40%;
+  right: -100px;
+  width: 700px;
+  height: 700px;
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 0;
+  background: 
+    radial-gradient(circle, transparent 50px, rgba(79,195,247,0.3) 51px, transparent 52px),
+    radial-gradient(circle, transparent 100px, rgba(79,195,247,0.25) 101px, transparent 102px),
+    radial-gradient(circle, transparent 150px, rgba(79,195,247,0.2) 151px, transparent 152px),
+    radial-gradient(circle, transparent 200px, rgba(79,195,247,0.15) 201px, transparent 202px),
+    radial-gradient(circle, transparent 250px, rgba(79,195,247,0.1) 251px, transparent 252px),
+    radial-gradient(circle, transparent 300px, rgba(79,195,247,0.08) 301px, transparent 302px);
+}
+
 .works-header {
   margin-bottom: 3rem;
+  text-align: center;
+}
+
+/* Center the divider and desc within centered header */
+.works-header .section-divider {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.works-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* ── Filters ── */
@@ -58,7 +90,7 @@
   gap: 1.5rem;
 }
 
-/* ── Work Card ── */
+/* ── Work Card — Retro Panel ── */
 .work-card {
   padding: 1.8rem;
   display: flex;
@@ -67,6 +99,14 @@
   position: relative;
   overflow: hidden;
   border-top: 2px solid var(--card-accent, #6C63FF);
+  /* Retro equipment panel */
+  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  border: 2px solid rgba(255,255,255,0.04) !important;
+  border-top: 3px solid var(--card-accent, #6C63FF) !important;
+  box-shadow: 
+    6px 6px 14px rgba(0,0,0,0.5),
+    -3px -3px 8px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
 }
 
 .work-card::before {

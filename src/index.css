@@ -3,6 +3,7 @@
 @font-face {
   font-family: 'Sterion';
   src: url('./assets/fonts/Sterion.otf') format('opentype');
+  font-display: swap;
 }
 
 /* ═══════════════════════════════════════════
@@ -53,6 +54,14 @@
   /* Skeuomorphic Shadows */
   --skeuo-shadow-dark: rgba(0, 0, 0, 0.5);
   --skeuo-shadow-light: rgba(255, 255, 255, 0.05);
+
+  /* Retro Tokens */
+  --retro-bezel: #1a1a2e;
+  --retro-inset: inset 3px 3px 6px rgba(0,0,0,0.6), inset -2px -2px 4px rgba(255,255,255,0.04);
+  --retro-outset: 4px 4px 10px rgba(0,0,0,0.5), -2px -2px 6px rgba(255,255,255,0.03);
+  --retro-led-green: #39ff14;
+  --retro-led-red: #ff3131;
+  --retro-led-amber: #ffbf00;
 }
 
 /* ═══════════════════════════════════════════
@@ -63,21 +72,6 @@
   margin: 0;
   padding: 0;
 }
-
-/* Global Noise Texture — Commented out due to 404 
-body::before {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: url("https://grainy-gradients.vercel.app/noise.svg");
-  opacity: 0.05;
-  pointer-events: none;
-  z-index: 9999;
-}
-*/
 
 html {
   scroll-behavior: smooth;
@@ -104,6 +98,20 @@ body {
 }
 
 /* ═══════════════════════════════════════════
+   CSS GRAIN TEXTURE (Inline — no external fetch)
+═══════════════════════════════════════════ */
+.App::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 128px 128px;
+}
+
+/* ═══════════════════════════════════════════
    SCROLLBAR
 ═══════════════════════════════════════════ */
 ::-webkit-scrollbar {
@@ -121,26 +129,47 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   TYPOGRAPHY UTILITIES
+   TYPOGRAPHY — SECTION HEADING SYSTEM
+   Clean stacked layout: Label → Title → Divider → Desc
 ═══════════════════════════════════════════ */
 .section-label {
   font-family: 'Fira Code', monospace;
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--accent-primary);
-  display: block;
-  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 5px 14px 5px 10px;
+  /* Retro recessed label plate */
+  background: rgba(108, 99, 255, 0.06);
+  border: 1px solid rgba(108, 99, 255, 0.15);
+  border-radius: 6px;
+  box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
+}
+
+/* LED dot before label text */
+.section-label::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 4px var(--accent-primary), 0 0 8px var(--accent-primary);
+  flex-shrink: 0;
 }
 
 .section-title {
   position: relative;
-  display: inline-block;
+  display: block;
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
+  margin-bottom: 0;
 }
 
 .section-title-inner {
@@ -158,7 +187,6 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  text-align: left;
   opacity: 0;
   transform: translateY(15px);
   transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
@@ -191,6 +219,7 @@ body {
   color: var(--text-secondary);
   max-width: 560px;
   line-height: 1.8;
+  margin-top: 0;
 }
 
 /* ═══════════════════════════════════════════
@@ -205,6 +234,7 @@ body {
   z-index: 0;
   animation: blobFloat 12s ease-in-out infinite alternate;
   will-change: transform; /* GPU optimization */
+  contain: strict;
 }
 
 @media (max-width: 768px) {
@@ -364,14 +394,106 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   DIVIDER
+   DIVIDER — Retro Cassette-tape Style
 ═══════════════════════════════════════════ */
 .section-divider {
   width: 60px;
   height: 3px;
   background: var(--gradient-primary);
   border-radius: 2px;
-  margin: 16px 0 40px 0;
+  margin: 16px 0 32px 0;
+  position: relative;
+}
+
+.section-divider::before,
+.section-divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  transform: translateY(-50%);
+  box-shadow: 0 0 6px var(--accent-primary);
+}
+
+.section-divider::before { left: -2px; }
+.section-divider::after { right: -2px; }
+
+/* ═══════════════════════════════════════════
+   TOPOGRAPHIC CONTOUR LINE TEXTURES
+═══════════════════════════════════════════ */
+
+/* Topo contour background — add to any section */
+.topo-texture {
+  position: relative;
+}
+
+.topo-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%236C63FF' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 400px 400px;
+  background-repeat: repeat;
+}
+
+/* Crosshatch texture — subtle engineering paper */
+.crosshatch-texture {
+  position: relative;
+}
+
+.crosshatch-texture::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.018;
+  z-index: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(108, 99, 255, 0.5) 10px,
+      rgba(108, 99, 255, 0.5) 11px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 10px,
+      rgba(108, 99, 255, 0.5) 10px,
+      rgba(108, 99, 255, 0.5) 11px
+    );
+}
+
+/* Concentric ring pattern — radar/sonar feel */
+.radar-rings {
+  position: relative;
+}
+
+.radar-rings::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0.025;
+  z-index: 0;
+  background: 
+    radial-gradient(circle, transparent 60px, rgba(108,99,255,0.3) 61px, transparent 62px),
+    radial-gradient(circle, transparent 120px, rgba(108,99,255,0.25) 121px, transparent 122px),
+    radial-gradient(circle, transparent 180px, rgba(108,99,255,0.2) 181px, transparent 182px),
+    radial-gradient(circle, transparent 240px, rgba(108,99,255,0.15) 241px, transparent 242px),
+    radial-gradient(circle, transparent 300px, rgba(108,99,255,0.1) 301px, transparent 302px),
+    radial-gradient(circle, transparent 360px, rgba(108,99,255,0.08) 361px, transparent 362px);
 }
 
 /* ═══════════════════════════════════════════
@@ -435,12 +557,181 @@ body {
   }
 }
 
+/* Content-visibility for lazy rendering of below-fold sections */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 600px;
+}
+
 /* ═══════════════════════════════════════════
    SELECTION COLOR
 ═══════════════════════════════════════════ */
 ::selection {
   background: rgba(108, 99, 255, 0.4);
   color: #fff;
+}
+
+/* ═══════════════════════════════════════════
+   SKEUOMORPHIC RETRO COMPONENTS
+═══════════════════════════════════════════ */
+
+/* --- Retro LED Indicator --- */
+.retro-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--retro-led-green);
+  box-shadow: 
+    0 0 4px var(--retro-led-green),
+    0 0 12px var(--retro-led-green),
+    inset 0 -1px 2px rgba(0,0,0,0.4);
+  animation: ledPulse 2s ease-in-out infinite;
+}
+
+.retro-led--amber {
+  background: var(--retro-led-amber);
+  box-shadow: 
+    0 0 4px var(--retro-led-amber),
+    0 0 12px var(--retro-led-amber),
+    inset 0 -1px 2px rgba(0,0,0,0.4);
+}
+
+@keyframes ledPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.65; }
+}
+
+/* --- Retro Embossed Panel --- */
+.retro-panel {
+  background: var(--retro-bezel);
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: var(--retro-outset);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.retro-panel::before {
+  content: '';
+  position: absolute;
+  inset: 2px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* --- Retro Inset Display (like a VU meter well) --- */
+.retro-inset {
+  background: #0d0d1a;
+  border-radius: 8px;
+  box-shadow: var(--retro-inset);
+  border: 1px solid rgba(0,0,0,0.3);
+}
+
+/* --- Retro Knob --- */
+.retro-knob {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3a3a5c, #1a1a2e 70%);
+  border: 2px solid rgba(255,255,255,0.06);
+  box-shadow: 
+    3px 3px 8px rgba(0,0,0,0.6),
+    -1px -1px 4px rgba(255,255,255,0.03),
+    inset 0 0 6px rgba(0,0,0,0.4);
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.retro-knob::after {
+  content: '';
+  position: absolute;
+  top: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2px;
+  height: 8px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+}
+
+.retro-knob:hover {
+  transform: rotate(30deg);
+}
+
+/* --- CRT Scanline overlay for terminal --- */
+.crt-scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.08) 2px,
+    rgba(0, 0, 0, 0.08) 4px
+  );
+  z-index: 5;
+  border-radius: inherit;
+}
+
+/* --- Retro Rocker Switch --- */
+.retro-switch {
+  position: relative;
+  width: 52px;
+  height: 28px;
+  border-radius: 14px;
+  background: #0d0d1a;
+  box-shadow: var(--retro-inset);
+  cursor: pointer;
+  transition: background 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.04);
+}
+
+.retro-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #4a4a6a, #2a2a3e 70%);
+  box-shadow: 2px 2px 6px rgba(0,0,0,0.5), -1px -1px 3px rgba(255,255,255,0.04);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.retro-switch.active {
+  background: rgba(108, 99, 255, 0.15);
+}
+
+.retro-switch.active .retro-switch-thumb {
+  transform: translateX(24px);
+  background: radial-gradient(circle at 40% 35%, var(--accent-primary), #4a3acd 70%);
+  box-shadow: 0 0 8px var(--glow-primary), 2px 2px 6px rgba(0,0,0,0.5);
+}
+
+/* --- Retro VU Meter Bar --- */
+.retro-vu-bar {
+  height: 8px;
+  border-radius: 4px;
+  background: #0d0d1a;
+  box-shadow: var(--retro-inset);
+  overflow: hidden;
+  position: relative;
+}
+
+.retro-vu-fill {
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(90deg, 
+    var(--retro-led-green) 0%, 
+    var(--retro-led-green) 60%, 
+    var(--retro-led-amber) 80%, 
+    var(--retro-led-red) 100%);
+  transition: width 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  box-shadow: 0 0 6px rgba(57, 255, 20, 0.3);
 }
 
 /* ═══════════════════════════════════════════
@@ -469,4 +760,30 @@ body {
   0% { transform: rotate(0deg); }
   50% { transform: rotate(360deg) scale(0.5); }
   100% { transform: rotate(720deg) scale(1); }
+}
+
+/* ═══════════════════════════════════════════
+   SMOOTH SECTION REVEAL
+═══════════════════════════════════════════ */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══════════════════════════════════════════
+   REDUCED MOTION PREFERENCES
+═══════════════════════════════════════════ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .ambient-blob { display: none; }
 }

@@ -1,11 +1,36 @@
 /* ═══════════════════════════════
-   CONTACT SECTION
+   CONTACT SECTION — RETRO CONSOLE
 ═══════════════════════════════ */
 .contact {
   padding: var(--section-padding);
   background: linear-gradient(180deg, #080d1f 0%, #060918 100%);
   position: relative;
   z-index: 1;
+}
+
+/* Crosshatch engineering texture */
+.contact::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 12px,
+      rgba(108, 99, 255, 0.4) 12px,
+      rgba(108, 99, 255, 0.4) 13px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 12px,
+      rgba(108, 99, 255, 0.4) 12px,
+      rgba(108, 99, 255, 0.4) 13px
+    );
 }
 
 .contact-header {
@@ -20,10 +45,16 @@
   align-items: start;
 }
 
-/* ── Info Panel ── */
+/* ── Retro Info Panel ── */
 .contact-info-card {
   padding: 2rem;
   height: 100%;
+  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  border: 2px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 
+    6px 6px 16px rgba(0,0,0,0.6),
+    -3px -3px 8px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06) !important;
 }
 
 .contact-info-title {
@@ -60,9 +91,14 @@
   justify-content: center;
   width: 38px;
   height: 38px;
-  border-radius: 10px;
-  background: rgba(108, 99, 255, 0.12);
-  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: 50%;
+  /* Retro embossed icon button */
+  background: radial-gradient(circle at 35% 35%, #1e2440, #0d1117 70%);
+  border: 2px solid rgba(255,255,255,0.04);
+  box-shadow: 
+    3px 3px 8px rgba(0,0,0,0.5),
+    -1px -1px 4px rgba(255,255,255,0.02),
+    inset 0 1px 1px rgba(255,255,255,0.06);
   color: #6C63FF;
   font-size: 1rem;
   flex-shrink: 0;
@@ -95,34 +131,77 @@
   color: var(--accent-primary);
 }
 
+/* Retro LED availability indicator */
 .contact-availability {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.82rem;
-  color: #00E5A0;
+  color: #39ff14;
   font-family: 'Fira Code', monospace;
-  padding: 10px 14px;
-  background: rgba(0, 229, 160, 0.07);
-  border: 1px solid rgba(0, 229, 160, 0.2);
-  border-radius: 10px;
+  padding: 12px 16px;
+  background: #080810;
+  border: 1px solid rgba(0,0,0,0.4);
+  border-radius: 8px;
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6),
+    inset -1px -1px 3px rgba(255,255,255,0.02);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
 }
 
 .avail-dot {
-  width: 8px;
-  height: 8px;
-  background: #00E5A0;
+  width: 10px;
+  height: 10px;
+  background: #39ff14;
   border-radius: 50%;
-  box-shadow: 0 0 8px #00E5A0;
-  animation: pulse 2s infinite;
+  box-shadow: 
+    0 0 4px #39ff14,
+    0 0 12px #39ff14,
+    inset 0 -1px 2px rgba(0,0,0,0.3);
+  animation: ledPulse 2s ease-in-out infinite;
 }
 
-/* ── Form ── */
+@keyframes ledPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* ═══════════════════════════════
+   RETRO TERMINAL FORM
+═══════════════════════════════ */
 .contact-form {
   padding: 2.2rem;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
+  /* Retro equipment panel */
+  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  border: 2px solid rgba(255,255,255,0.04) !important;
+  box-shadow: 
+    6px 6px 16px rgba(0,0,0,0.6),
+    -3px -3px 8px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  border-radius: 20px !important;
+  position: relative;
+}
+
+/* Status LED strip on top of form */
+.contact-form::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 
+    0 0 4px #39ff14,
+    0 0 10px rgba(57, 255, 20, 0.3),
+    -16px 0 0 0 #ffbf00,
+    -16px 0 4px rgba(255, 191, 0, 0.3),
+    -32px 0 0 0 #ff3131,
+    -32px 0 4px rgba(255, 49, 49, 0.2);
 }
 
 .form-row {
@@ -138,48 +217,85 @@
 }
 
 .form-label {
-  font-size: 0.8rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-muted);
   font-family: 'Fira Code', monospace;
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
+/* Retro inset input fields */
 .form-input {
   width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
-  font-size: 0.92rem;
+  padding: 14px 16px;
+  background: #080810;
+  border: 1px solid rgba(0,0,0,0.4);
+  border-radius: 8px;
+  color: #39ff14;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.88rem;
   outline: none;
   transition: all 0.25s ease;
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6),
+    inset -1px -1px 3px rgba(255,255,255,0.02);
+  letter-spacing: 0.5px;
 }
 
 .form-input::placeholder {
-  color: var(--text-muted);
+  color: rgba(57, 255, 20, 0.2);
+  font-family: 'Fira Code', monospace;
 }
 
 .form-input:focus {
-  border-color: rgba(108, 99, 255, 0.6);
-  background: rgba(108, 99, 255, 0.06);
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+  border-color: rgba(57, 255, 20, 0.3);
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.6),
+    inset -1px -1px 3px rgba(255,255,255,0.02),
+    0 0 12px rgba(57, 255, 20, 0.1);
+  color: #39ff14;
+  text-shadow: 0 0 4px rgba(57, 255, 20, 0.3);
 }
 
 .form-textarea {
   resize: vertical;
   min-height: 120px;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Fira Code', monospace;
 }
 
+/* Retro push-button submit */
 .form-submit {
   width: 100%;
   justify-content: center;
-  font-size: 1rem;
-  padding: 15px;
+  font-size: 0.95rem;
+  padding: 16px;
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1a1a3e, #0f0f28) !important;
+  border: 2px solid rgba(108, 99, 255, 0.3) !important;
+  box-shadow: 
+    4px 4px 10px rgba(0,0,0,0.5),
+    -2px -2px 6px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 20px rgba(108, 99, 255, 0.1) !important;
+}
+
+.form-submit:hover {
+  box-shadow: 
+    2px 2px 6px rgba(0,0,0,0.5),
+    -1px -1px 3px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 30px rgba(108, 99, 255, 0.2) !important;
+}
+
+.form-submit:active {
+  box-shadow: 
+    inset 3px 3px 6px rgba(0,0,0,0.5),
+    inset -2px -2px 4px rgba(255,255,255,0.03) !important;
+  transform: translateY(1px);
 }
 
 .submitting {

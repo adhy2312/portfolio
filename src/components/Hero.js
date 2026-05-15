@@ -48,7 +48,7 @@ const Hero = () => {
               value: "#000000",
             },
           },
-          fpsLimit: 60, // Lowered from 120 for better performance
+          fpsLimit: 30, // Lowered for better performance
           interactivity: {
             events: {
               onClick: {
@@ -56,7 +56,7 @@ const Hero = () => {
                 mode: "push",
               },
               onHover: {
-                enable: window.innerWidth > 768, // Disable on hover for mobile
+                enable: false, // Disabled for performance
                 mode: "repulse",
               },
               resize: true,
@@ -97,7 +97,7 @@ const Hero = () => {
                 enable: true,
                 area: 800,
               },
-              value: window.innerWidth > 768 ? 40 : 20, // Reduced from 80
+              value: window.innerWidth > 768 ? 25 : 12, // Reduced for performance
             },
             opacity: {
               value: 0.2, // Reduced opacity

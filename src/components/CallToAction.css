@@ -1,5 +1,5 @@
 /* ═══════════════════════════════
-   CALL TO ACTION SECTION
+   CALL TO ACTION — RETRO PANEL
 ═══════════════════════════════ */
 .cta-section {
   padding: var(--section-padding);
@@ -8,15 +8,48 @@
   z-index: 1;
 }
 
+/* Topo contour overlay */
+.cta-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.02;
+  z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2300E5A0' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 450px 450px;
+  background-repeat: repeat;
+}
+
 .cta-inner {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(108, 99, 255, 0.12) 0%, rgba(79, 195, 247, 0.08) 100%);
-  border: 1px solid rgba(108, 99, 255, 0.25);
-  border-radius: 32px;
+  /* Retro equipment panel */
+  background: linear-gradient(145deg, #111827, #0d1117);
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  border-radius: 24px;
   padding: 5rem 3rem;
   text-align: center;
-  backdrop-filter: blur(20px);
+  box-shadow: 
+    10px 10px 24px rgba(0,0,0,0.6),
+    -5px -5px 14px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06);
+}
+
+/* Brushed metal edge */
+.cta-inner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255,255,255,0.1) 20%, 
+    rgba(255,255,255,0.05) 50%, 
+    rgba(255,255,255,0.1) 80%, 
+    transparent 100%);
 }
 
 /* Background orbs inside CTA */
@@ -29,7 +62,7 @@
 .cta-orb-1 {
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, rgba(108, 99, 255, 0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.15), transparent 70%);
   top: -100px;
   left: -100px;
   filter: blur(60px);
@@ -38,24 +71,48 @@
 .cta-orb-2 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(79, 195, 247, 0.2), transparent 70%);
+  background: radial-gradient(circle, rgba(79, 195, 247, 0.12), transparent 70%);
   bottom: -80px;
   right: -80px;
   filter: blur(60px);
 }
 
+/* Retro badge */
 .cta-eyebrow {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: #00E5A0;
+  color: #39ff14;
   margin-bottom: 1.5rem;
-  padding: 6px 16px;
-  background: rgba(0, 229, 160, 0.08);
-  border: 1px solid rgba(0, 229, 160, 0.2);
-  border-radius: 50px;
+  padding: 8px 20px;
+  /* Retro inset display */
+  background: #080810;
+  border: 1px solid rgba(0,0,0,0.4);
+  border-radius: 8px;
+  box-shadow: 
+    inset 2px 2px 4px rgba(0,0,0,0.5),
+    inset -1px -1px 3px rgba(255,255,255,0.02);
+  text-shadow: 0 0 8px rgba(57, 255, 20, 0.3);
+}
+
+/* Blinking LED before text */
+.cta-eyebrow::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #39ff14;
+  box-shadow: 0 0 4px #39ff14, 0 0 10px #39ff14;
+  animation: ledPulse 2s ease-in-out infinite;
+}
+
+@keyframes ledPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
 .cta-title {
@@ -89,16 +146,52 @@
   flex-wrap: wrap;
 }
 
+/* Retro push-button CTA */
 .cta-btn {
-  font-size: 1rem;
+  font-size: 0.95rem;
   min-width: 200px;
   justify-content: center;
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 1px;
+  border-radius: 10px !important;
+}
+
+.cta-btn.btn-primary {
+  background: linear-gradient(145deg, #1a1a3e, #0f0f28) !important;
+  border: 2px solid rgba(108, 99, 255, 0.3) !important;
+  box-shadow: 
+    4px 4px 10px rgba(0,0,0,0.5),
+    -2px -2px 6px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 20px rgba(108, 99, 255, 0.1) !important;
+}
+
+.cta-btn.btn-primary:hover {
+  box-shadow: 
+    2px 2px 6px rgba(0,0,0,0.5),
+    0 0 30px rgba(108, 99, 255, 0.2) !important;
+}
+
+.cta-btn.btn-outline {
+  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  border: 2px solid rgba(255,255,255,0.06) !important;
+  box-shadow: 
+    4px 4px 10px rgba(0,0,0,0.5),
+    -2px -2px 6px rgba(255,255,255,0.02),
+    inset 0 1px 0 rgba(255,255,255,0.04) !important;
+}
+
+.cta-btn.btn-outline:hover {
+  border-color: rgba(108, 99, 255, 0.2) !important;
+  box-shadow: 
+    2px 2px 6px rgba(0,0,0,0.5),
+    0 0 20px rgba(108, 99, 255, 0.1) !important;
 }
 
 @media (max-width: 600px) {
   .cta-inner {
     padding: 3rem 1.5rem;
-    border-radius: 20px;
+    border-radius: 16px;
   }
 
   .cta-actions {
