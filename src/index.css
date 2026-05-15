@@ -785,6 +785,81 @@ body {
 /* ═══════════════════════════════════════════
    REDUCED MOTION PREFERENCES
 ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════
+   FUNNY EASTER EGG EFFECTS
+═══════════════════════════════════════════ */
+
+/* Barrel Roll */
+.egg-barrelroll {
+  animation: barrelRollEffect 4s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+}
+@keyframes barrelRollEffect {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Gravity - Elements fall down */
+.egg-gravity {
+  overflow: hidden;
+}
+.egg-gravity p, 
+.egg-gravity h1, 
+.egg-gravity h2, 
+.egg-gravity h3, 
+.egg-gravity .section-label,
+.egg-gravity .btn-primary,
+.egg-gravity .btn-outline {
+  transition: transform 3s cubic-bezier(0.47, 0, 0.745, 0.715) !important;
+  transform: translateY(120vh) rotate(15deg) !important;
+}
+
+/* Party Mode - Flashing colors */
+.egg-party {
+  animation: partyBg 0.3s infinite;
+}
+@keyframes partyBg {
+  0% { background-color: rgba(255, 0, 0, 0.2) !important; }
+  20% { background-color: rgba(0, 255, 0, 0.2) !important; }
+  40% { background-color: rgba(0, 0, 255, 0.2) !important; }
+  60% { background-color: rgba(255, 255, 0, 0.2) !important; }
+  80% { background-color: rgba(255, 0, 255, 0.2) !important; }
+  100% { background-color: rgba(0, 255, 255, 0.2) !important; }
+}
+
+/* Zoom Out - The Ant-Man effect */
+.egg-zoomout {
+  animation: zoomOutEffect 5s ease-in-out forwards;
+}
+@keyframes zoomOutEffect {
+  0% { transform: scale(1); }
+  40% { transform: scale(0.05) rotate(10deg); }
+  60% { transform: scale(0.05) rotate(-10deg); }
+  100% { transform: scale(1); }
+}
+
+/* Matrix Effect Overlay */
+.egg-matrix::after {
+  content: '010101101010101101010101';
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: rgba(0, 0, 0, 0.9);
+  color: #00ff00;
+  font-family: 'Fira Code', monospace;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  word-break: break-all;
+  animation: matrixText 0.1s infinite;
+}
+@keyframes matrixText {
+  0% { content: '10101011010101010101\n01101010101110101010\n10101110101010101110'; }
+  50% { content: '01011001010111010110\n11110101010101011010\n00010101110101010101'; }
+  100% { content: '11101010101110101010\n10101010111101010101\n11010101101010110101'; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;

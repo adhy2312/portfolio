@@ -27,6 +27,8 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [spin, setSpin] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [activeEgg, setActiveEgg] = useState(null);
+
 
 
   useEffect(() => {
@@ -52,16 +54,25 @@ function App() {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
     
+    const eggHandler = (e) => {
+      setActiveEgg(e.detail);
+      setTimeout(() => setActiveEgg(null), e.detail === 'matrix' ? 8000 : 5000);
+    };
+    window.addEventListener('trigger-egg', eggHandler);
+    
     return () => {
       window.removeEventListener('launch-pong', handler);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('resize', handleResize);
+      window.removeEventListener('trigger-egg', eggHandler);
     };
   }, []);
 
 
+
   return (
-    <div className={`App ${spin ? 'spin-easter-egg' : ''}`}>
+    <div className={`App ${spin ? 'spin-easter-egg' : ''} ${activeEgg ? `egg-${activeEgg}` : ''}`}>
+
       <Suspense fallback={null}>
         {/* Only render custom cursor on desktop */}
         {window.innerWidth > 768 && <CustomCursor />}

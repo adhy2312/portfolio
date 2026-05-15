@@ -167,12 +167,45 @@ const LanguageTerminal = () => {
       case 'sudo rm -rf /':
         response = 'Nice try. Permission denied. 😉';
         break;
+      case 'matrix':
+        response = 'Entering the matrix...';
+        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'matrix' }));
+        break;
+      case 'barrelroll':
+        response = 'Executing 360 flip...';
+        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'barrelroll' }));
+        break;
+      case 'party':
+        response = 'Initiating party protocols! 🎉';
+        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'party' }));
+        break;
+      case 'gravity':
+        response = 'Disabling physics...';
+        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'gravity' }));
+        break;
+      case 'zoomout':
+        response = 'Initiating Ant-Man mode...';
+        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'zoomout' }));
+        break;
+      case 'rickroll':
+        response = 'Never gonna give you up...';
+        setTimeout(() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank'), 1000);
+        break;
       default:
         response = `Command not found: ${cmd}. Type 'help' for a list of commands.`;
     }
+
     
     setCommandHistory(prev => [...prev, { cmd, response }]);
+    
+    // Auto scroll to bottom
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
   };
+
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
