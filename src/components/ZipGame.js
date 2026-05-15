@@ -1,8 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './ZipGame.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiRefreshCw, FiCheckCircle, FiInfo } from 'react-icons/fi';
 
+/**
+ * Generate a Zip level that matches LinkedIn's logic:
+ * 1. Generate a Hamiltonian path.
+ * 2. Randomly pick points as numbers.
+ * 3. Place barriers in spots NOT used by the path.
+ */
 const generateZipLevel = (id, size) => {
   const totalCells = size * size;
   let solutionPath = [];
@@ -26,7 +32,8 @@ const generateZipLevel = (id, size) => {
   const start = { r: Math.floor(Math.random() * size), c: Math.floor(Math.random() * size) };
   findHamiltonian(start.r, start.c, [start]);
 
-  const numCount = size === 4 ? 3 : 4;
+  // Numbers (dots)
+  const numCount = size === 4 ? 4 : 6;
   const numbers = [{ ...solutionPath[0], val: 1 }];
   const segment = Math.floor((totalCells - 1) / (numCount - 1));
   
@@ -36,10 +43,44 @@ const generateZipLevel = (id, size) => {
   }
   numbers.push({ ...solutionPath[totalCells - 1], val: numCount });
 
+  // Barriers: Place some walls between adjacent cells NOT on the solution path
+  const barriers = [];
+  const allPossibleWalls = [];
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (r < size - 1) allPossibleWalls.push({ r1: r, c1: c, r2: r + 1, c2: c, type: 'h' });
+      if (c < size - 1) allPossibleWalls.push({ r1: r, c1: c, r2: r, c2: c + 1, type: 'v' });
+    }
+  }
+
+  // Filter out walls that would block the solution path
+  const validBarriers = allPossibleWalls.filter(wall => {
+    // Check if the solution path crosses this wall
+    for (let i = 0; i < solutionPath.length - 1; i++) {
+      const p1 = solutionPath[i];
+      const p2 = solutionPath[i + 1];
+      if ((p1.r === wall.r1 && p1.c === wall.c1 && p2.r === wall.r2 && p2.c === wall.c2) ||
+          (p1.r === wall.r2 && p1.c === wall.c2 && p2.r === wall.r1 && p2.c === wall.c1)) {
+        return false;
+      }
+    }
+    return true;
+  });
+
+  // Randomly select some barriers
+  const barrierCount = size === 4 ? 3 : 5;
+  for (let i = 0; i < barrierCount; i++) {
+    if (validBarriers.length > 0) {
+      const idx = Math.floor(Math.random() * validBarriers.length);
+      barriers.push(validBarriers.splice(idx, 1)[0]);
+    }
+  }
+
   return {
     id,
     size,
     numbers,
+    barriers,
     hint: `Connect 1 to ${numCount} while filling all ${totalCells} squares.`
   };
 };
@@ -53,7 +94,6 @@ const ZipGame = ({ onClose }) => {
   
   const gridRef = useRef(null);
 
-  // Initialize first level
   useEffect(() => {
     const size = levelCount <= 3 ? 4 : 5;
     const newLevel = generateZipLevel(levelCount, size);
@@ -62,20 +102,19 @@ const ZipGame = ({ onClose }) => {
     setWon(false);
   }, [levelCount]);
 
+  const handleCellAction = useCallback((r, c) => {
+    if (won || !level) return;
 
-  const handleCellAction = (r, c) => {
-    if (won) return;
-
-    // Check if cell is adjacent to the last path cell
     const last = path[path.length - 1];
     if (!last) return;
 
+    // Check adjacency
     const isAdjacent = (Math.abs(last.r - r) === 1 && last.c === c) || 
                        (Math.abs(last.c - c) === 1 && last.r === r);
 
-    // If clicking the previous cell, undo last move
+    // If touching the previous cell, undo last move
     if (path.length > 1 && path[path.length - 2].r === r && path[path.length - 2].c === c) {
-      setPath(path.slice(0, -1));
+      setPath(prev => prev.slice(0, -1));
       return;
     }
 
@@ -84,14 +123,20 @@ const ZipGame = ({ onClose }) => {
     // Cannot revisit cells
     if (path.some(p => p.r === r && p.c === c)) return;
 
+    // CHECK FOR BARRIERS
+    const hasBarrier = level.barriers.some(b => 
+      (b.r1 === last.r && b.c1 === last.c && b.r2 === r && b.c2 === c) ||
+      (b.r1 === r && b.c1 === c && b.r2 === last.r && b.c2 === last.c)
+    );
+    if (hasBarrier) return;
+
     // Check if we hit a number cell
     const targetNum = level.numbers.find(n => n.r === r && n.c === c);
-    const nextExpectedVal = level.numbers.find(n => {
-      const currentMaxValInPath = Math.max(...level.numbers.filter(ln => 
-        path.some(p => p.r === ln.r && p.c === ln.c)
-      ).map(ln => ln.val));
-      return n.val === currentMaxValInPath + 1;
-    })?.val;
+    
+    // Find what the next number in sequence is
+    const visitedNums = level.numbers.filter(n => path.some(p => p.r === n.r && p.c === n.c));
+    const currentMaxVal = visitedNums.length > 0 ? Math.max(...visitedNums.map(n => n.val)) : 1;
+    const nextExpectedVal = currentMaxVal + 1;
 
     if (targetNum && targetNum.val !== nextExpectedVal) {
       // Hit a number but it's not the next in sequence
@@ -101,7 +146,7 @@ const ZipGame = ({ onClose }) => {
     const newPath = [...path, { r, c }];
     setPath(newPath);
 
-    // Check Win Condition
+    // Win Condition
     const allNumbersVisited = level.numbers.every(n => 
       newPath.some(p => p.r === n.r && p.c === n.c)
     );
@@ -110,6 +155,17 @@ const ZipGame = ({ onClose }) => {
 
     if (allNumbersVisited && allCellsFilled && lastIsFinalNumber) {
       setWon(true);
+    }
+  }, [won, level, path]);
+
+  const onTouchMove = (e) => {
+    if (!isDrawing || won) return;
+    const touch = e.touches[0];
+    const element = document.elementFromPoint(touch.clientX, touch.clientY);
+    if (element && element.dataset.r) {
+      const r = parseInt(element.dataset.r);
+      const c = parseInt(element.dataset.c);
+      handleCellAction(r, c);
     }
   };
 
@@ -123,42 +179,14 @@ const ZipGame = ({ onClose }) => {
     if (levelCount < 10) {
       setLevelCount(levelCount + 1);
     } else {
-      onClose(); // Stop after 10 levels or continue infinitely if you want
+      onClose();
     }
-  };
-
-
-  const renderGrid = () => {
-    const rows = [];
-    for (let r = 0; r < level.size; r++) {
-      const cells = [];
-      for (let c = 0; c < level.size; c++) {
-        const num = level.numbers.find(n => n.r === r && n.c === c);
-        const inPathIdx = path.findIndex(p => p.r === r && p.c === c);
-        const isLast = inPathIdx === path.length - 1 && path.length > 0;
-        
-        cells.push(
-          <div 
-            key={`${r}-${c}`}
-            className={`zip-cell ${inPathIdx !== -1 ? 'in-path' : ''} ${isLast ? 'path-head' : ''} ${num ? 'num-cell' : ''}`}
-            onClick={() => handleCellAction(r, c)}
-            onMouseEnter={() => isDrawing && handleCellAction(r, c)}
-          >
-            {num && <span className="cell-number">{num.val}</span>}
-            {inPathIdx !== -1 && !num && <div className="path-dot" />}
-          </div>
-        );
-      }
-      rows.push(<div key={r} className="zip-row">{cells}</div>);
-    }
-    return rows;
   };
 
   if (!level) return null;
 
   return (
     <div className="zip-overlay">
-
       <motion.div 
         className="zip-modal glass-card"
         initial={{ scale: 0.9, opacity: 0 }}
@@ -167,7 +195,7 @@ const ZipGame = ({ onClose }) => {
       >
         <div className="zip-header">
           <div className="zip-title">
-            <span className="zip-badge">DAILY PUZZLE</span>
+            <span className="zip-badge">DAILY CHALLENGE</span>
             <h2>ZIP_LOGIC</h2>
           </div>
           <button className="zip-close" onClick={onClose}><FiX /></button>
@@ -176,50 +204,82 @@ const ZipGame = ({ onClose }) => {
         <div className="zip-body">
           <div className="zip-stats">
             <span>LEVEL {level.id}</span>
-            <span>{path.length} / {level.size * level.size} CELLS</span>
+            <span>{path.length} / {level.size * level.size}</span>
           </div>
 
           <div 
-            className="zip-grid" 
-            ref={gridRef}
-            onMouseDown={() => setIsDrawing(true)}
-            onMouseUp={() => setIsDrawing(false)}
-            onMouseLeave={() => setIsDrawing(false)}
-            onTouchStart={() => setIsDrawing(true)}
-            onTouchEnd={() => setIsDrawing(false)}
-            style={{ 
-              gridTemplateRows: `repeat(${level.size}, 1fr)`,
-              '--grid-size': level.size
-            }}
+            className="zip-grid-container"
+            style={{ '--grid-size': level.size }}
           >
-            {renderGrid()}
-            
-            {/* SVG Overlay for Path Lines */}
-            <svg className="path-svg">
-              {path.map((p, i) => {
-                if (i === 0) return null;
-                const prev = path[i-1];
+            <div 
+              className="zip-grid" 
+              ref={gridRef}
+              onMouseDown={() => setIsDrawing(true)}
+              onMouseUp={() => setIsDrawing(false)}
+              onMouseLeave={() => setIsDrawing(false)}
+              onTouchStart={() => setIsDrawing(true)}
+              onTouchEnd={() => setIsDrawing(false)}
+              onTouchMove={onTouchMove}
+            >
+              {Array.from({ length: level.size }).map((_, r) => (
+                <div key={r} className="zip-row">
+                  {Array.from({ length: level.size }).map((_, c) => {
+                    const num = level.numbers.find(n => n.r === r && n.c === c);
+                    const inPathIdx = path.findIndex(p => p.r === r && p.c === c);
+                    const isLast = inPathIdx === path.length - 1 && path.length > 0;
+                    
+                    return (
+                      <div 
+                        key={c}
+                        data-r={r}
+                        data-c={c}
+                        className={`zip-cell ${inPathIdx !== -1 ? 'in-path' : ''} ${isLast ? 'path-head' : ''} ${num ? 'num-cell' : ''}`}
+                        onMouseEnter={() => isDrawing && handleCellAction(r, c)}
+                        onClick={() => handleCellAction(r, c)}
+                      >
+                        {num && <span className="cell-dot">{num.val}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+
+              {/* Barriers */}
+              {level.barriers.map((b, i) => {
                 const cellSize = 100 / level.size;
-                return (
-                  <line 
-                    key={i}
-                    x1={`${prev.c * cellSize + cellSize/2}%`}
-                    y1={`${prev.r * cellSize + cellSize/2}%`}
-                    x2={`${p.c * cellSize + cellSize/2}%`}
-                    y2={`${p.r * cellSize + cellSize/2}%`}
-                    className="path-line"
-                  />
-                );
+                const style = b.type === 'h' 
+                  ? { top: `${(b.r1 + 1) * cellSize}%`, left: `${b.c1 * cellSize + 10 / level.size}%`, width: `${cellSize - 20 / level.size}%`, height: '4px' }
+                  : { left: `${(b.c1 + 1) * cellSize}%`, top: `${b.r1 * cellSize + 10 / level.size}%`, height: `${cellSize - 20 / level.size}%`, width: '4px' };
+                return <div key={i} className="zip-barrier" style={style} />;
               })}
-            </svg>
+
+              {/* SVG Overlay for Path Lines */}
+              <svg className="path-svg">
+                {path.map((p, i) => {
+                  if (i === 0) return null;
+                  const prev = path[i-1];
+                  const cellSize = 100 / level.size;
+                  return (
+                    <line 
+                      key={i}
+                      x1={`${prev.c * cellSize + cellSize/2}%`}
+                      y1={`${prev.r * cellSize + cellSize/2}%`}
+                      x2={`${p.c * cellSize + cellSize/2}%`}
+                      y2={`${p.r * cellSize + cellSize/2}%`}
+                      className="path-line"
+                    />
+                  );
+                })}
+              </svg>
+            </div>
           </div>
 
           <div className="zip-controls">
-            <button className="zip-btn-icon" onClick={resetLevel} title="Reset">
+            <button className="zip-btn-icon" onClick={resetLevel}>
               <FiRefreshCw /> Reset
             </button>
             <div className="zip-hint">
-              <FiInfo /> {level.hint}
+              <FiInfo /> Fill every cell in order.
             </div>
           </div>
         </div>
@@ -233,12 +293,11 @@ const ZipGame = ({ onClose }) => {
             >
               <div className="zip-win-content">
                 <FiCheckCircle className="win-icon" />
-                <h3>GRID COMPLETED!</h3>
-                <p>You've connected all sequences and filled the matrix.</p>
+                <h3>SOLVED!</h3>
+                <p>Grid successfully zipped.</p>
                 <button className="btn-primary" onClick={nextLevel}>
-                  {levelCount < 10 ? 'NEXT LEVEL' : 'CLOSE GAME'}
+                  {levelCount < 10 ? 'NEXT LEVEL' : 'DONE'}
                 </button>
-
               </div>
             </motion.div>
           )}
