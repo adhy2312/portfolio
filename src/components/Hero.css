@@ -51,7 +51,7 @@
 }
 
 .hero-name-giant {
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: 'Lakone', 'Space Grotesk', sans-serif;
   font-size: clamp(4rem, 15vw, 11rem);
   font-weight: 800;
   margin: 0;

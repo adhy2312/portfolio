@@ -14,10 +14,10 @@ const TrustedBy = () => {
   }, []);
 
   const defaultBrands = [
-    { name: "Brand 1", isPlaceholder: true },
-    { name: "Brand 2", isPlaceholder: true },
-    { name: "Brand 3", isPlaceholder: true },
-    { name: "Brand 4", isPlaceholder: true },
+    { name: "ISTE MBCET", isPlaceholder: true },
+    { name: "FRAMES MBCET", isPlaceholder: true },
+    { name: "Vercel", isPlaceholder: true },
+    { name: "Figma", isPlaceholder: true },
   ];
 
   const displayBrands = brands.length > 0 ? brands : defaultBrands;

@@ -86,17 +86,18 @@ const PingPongGame = ({ onClose }) => {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Neon glow helper
+    // Neon glow helper (shadow disabled for performance)
     const drawNeon = (color, blur, fn) => {
-      ctx.shadowColor = color;
-      ctx.shadowBlur = blur;
+      // ctx.shadowColor = color; // Disabled to fix severe lag
+      // ctx.shadowBlur = blur;
       fn();
-      ctx.shadowBlur = 0;
+      // ctx.shadowBlur = 0;
     };
 
+
     // Player paddle (left) — purple
-    drawNeon('var(--accent-primary)', 24, () => {
-      ctx.fillStyle = 'var(--accent-primary)';
+    drawNeon('#CBA6F7', 0, () => {
+      ctx.fillStyle = '#CBA6F7';
       const rx = 7;
       const px = 20, py = s.player.y;
       ctx.beginPath();
@@ -114,8 +115,8 @@ const PingPongGame = ({ onClose }) => {
     });
 
     // AI paddle (right) — cyan
-    drawNeon('var(--accent-cyan)', 24, () => {
-      ctx.fillStyle = 'var(--accent-cyan)';
+    drawNeon('#89DCEB', 0, () => {
+      ctx.fillStyle = '#89DCEB';
       const rx = 7;
       const px = W - 20 - PADDLE_W, py = s.ai.y;
       ctx.beginPath();
@@ -133,12 +134,13 @@ const PingPongGame = ({ onClose }) => {
     });
 
     // Ball — neon green
-    drawNeon('var(--accent-green)', 28, () => {
-      ctx.fillStyle = 'var(--accent-green)';
+    drawNeon('#A6E3A1', 0, () => {
+      ctx.fillStyle = '#A6E3A1';
       ctx.beginPath();
       ctx.arc(s.ball.x, s.ball.y, BALL_R, 0, Math.PI * 2);
       ctx.fill();
     });
+
 
     // Ball trail
     ctx.fillStyle = 'rgba(0, 229, 160, 0.15)';
