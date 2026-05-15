@@ -279,11 +279,11 @@
 ═══════════════════════════════ */
 .tools-chip {
   padding: 12px 24px;
-  background: linear-gradient(145deg, #181e30, #0e1220);
-  color: var(--text-secondary);
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  color: #000;
   border-radius: 10px;
   font-size: 0.9rem;
-  font-weight: 600;
+  font-weight: 700;
   /* Physical button feel */
   box-shadow: 
     4px 4px 10px rgba(0,0,0,0.5),

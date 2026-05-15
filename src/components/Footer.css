@@ -36,6 +36,96 @@
 .footer-simple-inner {
   position: relative;
   z-index: 5;
+  perspective: 1500px; /* Enable 3D depth */
+}
+
+/* ── 3D Pop-up Card ── */
+.footer-3d-popup {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  padding: 3.5rem;
+  margin-bottom: 6rem;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 
+    0 20px 50px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transform-style: preserve-3d;
+  text-align: center;
+}
+
+.popup-3d-content {
+  position: relative;
+  z-index: 2;
+  transform: translateZ(50px); /* Lift content off the card */
+}
+
+.popup-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: var(--accent-primary);
+  background: rgba(var(--accent-primary-rgb), 0.1);
+  padding: 4px 12px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  letter-spacing: 2px;
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.2);
+}
+
+.footer-3d-popup h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 1.2rem;
+  line-height: 1.2;
+}
+
+.footer-3d-popup p {
+  font-size: 1.1rem;
+  color: #888;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.6;
+}
+
+.popup-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 40px;
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 50px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
+}
+
+.popup-btn:hover {
+  transform: scale(1.05) translateY(-3px);
+  box-shadow: 0 20px 40px rgba(255, 255, 255, 0.2);
+  background: var(--accent-primary);
+  color: #fff;
+}
+
+/* Subtle inner glow */
+.popup-3d-glow {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.15) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  pointer-events: none;
 }
 
 .footer-main-row {

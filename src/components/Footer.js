@@ -67,7 +67,43 @@ const Footer = () => {
       <div className="footer-contours" />
       
       <div className="container footer-simple-inner">
-        <div className="footer-main-row">
+        {/* 3D Pop-up Card */}
+        <motion.div 
+          className="footer-3d-popup"
+          initial={{ y: 100, opacity: 0, rotateX: 45, scale: 0.8 }}
+          whileInView={{ y: 0, opacity: 1, rotateX: 0, scale: 1 }}
+          transition={{ 
+            type: "spring",
+            stiffness: 100,
+            damping: 15,
+            delay: 0.3
+          }}
+          viewport={{ once: true }}
+          whileHover={{ 
+            translateY: -15,
+            rotateX: 10,
+            rotateY: -5,
+            boxShadow: "0 30px 60px rgba(0,0,0,0.5)"
+          }}
+        >
+          <div className="popup-3d-content">
+            <div className="popup-tag">PROJECT_READY</div>
+            <h3>Let's build your next masterpiece together.</h3>
+            <p>Currently accepting new freelance opportunities and full-time collaborations.</p>
+            <a href="mailto:adhithyamohan2312@gmail.com" className="popup-btn">
+              GET IN TOUCH <FiMail />
+            </a>
+          </div>
+          <div className="popup-3d-glow" />
+        </motion.div>
+
+        <motion.div 
+          className="footer-main-row"
+          initial={{ y: 50, opacity: 0 }}
+          whileInView={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          viewport={{ once: true }}
+        >
           <div className="footer-brand-column">
             <div className="footer-logo-simple">
               ADHY<span>.</span>
@@ -118,7 +154,7 @@ const Footer = () => {
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <div className="footer-simple-bottom">
           <div className="bottom-divider" />
