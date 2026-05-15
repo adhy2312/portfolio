@@ -58,7 +58,7 @@ const Navbar = () => {
           className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
           href="#hero"
           onClick={handleLogoClick}
-          title="Try clicking me 5 times... 🏓"
+          title="Try clicking me 5 times... ✨"
         >
           <span className="logo-text">ADHY</span>
           <span className="logo-dot">.</span>

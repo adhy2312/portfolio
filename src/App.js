@@ -19,11 +19,15 @@ const PingPongGame = lazy(() => import('./components/PingPongGame'));
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const PageLoader = lazy(() => import('./components/PageLoader'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
+const ZipGame = lazy(() => import('./components/ZipGame'));
+
 
 function App() {
   const [showPong, setShowPong] = useState(false);
   const [loading, setLoading] = useState(true);
   const [spin, setSpin] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
 
   useEffect(() => {
     const handler = () => setShowPong(true);
@@ -45,11 +49,16 @@ function App() {
     };
     window.addEventListener('keydown', keydownHandler);
     
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    
     return () => {
       window.removeEventListener('launch-pong', handler);
       window.removeEventListener('keydown', keydownHandler);
+      window.removeEventListener('resize', handleResize);
     };
   }, []);
+
 
   return (
     <div className={`App ${spin ? 'spin-easter-egg' : ''}`}>
@@ -101,7 +110,14 @@ function App() {
         <Footer />
 
         {/* Hidden Easter Egg */}
-        {showPong && <PingPongGame onClose={() => setShowPong(false)} />}
+        {showPong && (
+          isMobile ? (
+            <ZipGame onClose={() => setShowPong(false)} />
+          ) : (
+            <PingPongGame onClose={() => setShowPong(false)} />
+          )
+        )}
+
       </Suspense>
     </div>
   );
