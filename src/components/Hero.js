@@ -21,9 +21,9 @@ const Hero = () => {
     greeting: heroData?.greeting || "Hey there!",
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
-    role: heroData?.role || "Electronics Engineer | React Developer | IoT Enthusiast",
+    role: heroData?.role || "Electronics Engineer | Web Developer | Photographer",
     bio: heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks.",
-    techStack: heroData?.techStack || ["React", "Node.js", "Python", "ESP32", "MongoDB"],
+    techStack: heroData?.techStack || ["React", "Node.js", "Python", "STM32", "SupaBase"],
     resumeUrl: heroData?.resumeUrl || "#",
     heroImage: heroData?.heroImage ? urlFor(heroData.heroImage).url() : null
   };
@@ -114,7 +114,7 @@ const Hero = () => {
       />
 
       <div className="hero-minimal-content optimize-gpu">
-        <motion.h1 
+        <motion.h1
           className="hero-name-giant metallic-reveal"
           initial="hidden"
           animate="visible"
@@ -122,7 +122,7 @@ const Hero = () => {
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { 
+              transition: {
                 staggerChildren: 0.1, // Slower for typewriter feel
                 delayChildren: 0.5
               }
@@ -148,17 +148,17 @@ const Hero = () => {
               {wordIdx === 0 && <span className="hero-name-spacer">&nbsp;</span>}
             </span>
           ))}
-          <motion.span 
+          <motion.span
             className="typewriter-cursor"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 3 }} // Appear after name finishes roughly
           />
         </motion.h1>
-        
+
         <LanguageTerminal />
 
-        <motion.div 
+        <motion.div
           className="hero-tagline-premium"
           initial={{ opacity: 0, letterSpacing: "20px" }}
           animate={{ opacity: 0.6, letterSpacing: "8px" }}

@@ -90,7 +90,7 @@ const ZipGame = ({ onClose }) => {
       const currentMaxValInPath = Math.max(...level.numbers.filter(ln => 
         path.some(p => p.r === ln.r && p.c === ln.c)
       ).map(ln => ln.val));
-      return ln.val === currentMaxValInPath + 1;
+      return n.val === currentMaxValInPath + 1;
     })?.val;
 
     if (targetNum && targetNum.val !== nextExpectedVal) {

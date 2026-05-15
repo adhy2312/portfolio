@@ -52,10 +52,10 @@
   position: relative;
   overflow: hidden;
   /* Heavy retro outer shadow like physical hardware */
-  box-shadow: 
-    8px 8px 20px rgba(0,0,0,0.6),
-    -4px -4px 12px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+  box-shadow:
+    8px 8px 20px rgba(0, 0, 0, 0.6),
+    -4px -4px 12px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 /* Retro brushed-metal top edge */
@@ -66,12 +66,12 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, 
-    transparent 0%, 
-    rgba(255,255,255,0.12) 20%, 
-    rgba(255,255,255,0.06) 50%, 
-    rgba(255,255,255,0.12) 80%, 
-    transparent 100%);
+  background: linear-gradient(90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.12) 20%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.12) 80%,
+      transparent 100%);
 }
 
 /* Subtle screw dots in corners */
@@ -84,19 +84,19 @@
   height: 8px;
   border-radius: 50%;
   background: radial-gradient(circle at 35% 35%, #2a2a3e, #111 70%);
-  box-shadow: 
-    inset 0 1px 2px rgba(255,255,255,0.08),
-    0 1px 3px rgba(0,0,0,0.5),
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.5),
     /* Second screw - top left */
     -240px 0 0 0 #1a1a2a;
 }
 
 .skill-card:hover {
   transform: translateY(-8px);
-  box-shadow: 
-    12px 12px 30px rgba(0,0,0,0.7),
-    -6px -6px 16px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06),
+  box-shadow:
+    12px 12px 30px rgba(0, 0, 0, 0.7),
+    -6px -6px 16px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
     0 0 60px rgba(var(--accent-primary-rgb), 0.06);
 }
 
@@ -121,12 +121,12 @@
   border-radius: 50%;
   /* Retro embossed knob look */
   background: radial-gradient(circle at 35% 35%, #2a2a4e, var(--panel-grad-start) 70%);
-  border: 2px solid rgba(255,255,255,0.04);
-  box-shadow: 
-    4px 4px 10px rgba(0,0,0,0.6),
-    -2px -2px 6px rgba(255,255,255,0.03),
-    inset 0 0 8px rgba(0,0,0,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.08);
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    4px 4px 10px rgba(0, 0, 0, 0.6),
+    -2px -2px 6px rgba(255, 255, 255, 0.03),
+    inset 0 0 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.08);
   position: relative;
 }
 
@@ -139,7 +139,7 @@
   transform: translateX(-50%);
   width: 3px;
   height: 6px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 1px;
 }
 
@@ -177,12 +177,12 @@
   height: 14px;
   background: #080810;
   border-radius: 4px;
-  box-shadow: 
-    inset 3px 3px 8px rgba(0,0,0,0.8),
-    inset -1px -1px 3px rgba(255,255,255,0.03);
+  box-shadow:
+    inset 3px 3px 8px rgba(0, 0, 0, 0.8),
+    inset -1px -1px 3px rgba(255, 255, 255, 0.03);
   overflow: hidden;
   padding: 3px;
-  border: 1px solid rgba(0,0,0,0.4);
+  border: 1px solid rgba(0, 0, 0, 0.4);
   display: flex;
   gap: 2px;
 }
@@ -198,14 +198,12 @@
 
 /* Individual LED segment styling via background pattern */
 .skill-bar-fill {
-  background: repeating-linear-gradient(
-    90deg,
-    var(--bar-color, var(--accent-primary)) 0px,
-    var(--bar-color, var(--accent-primary)) 6px,
-    transparent 6px,
-    transparent 8px
-  );
-  box-shadow: 
+  background: repeating-linear-gradient(90deg,
+      var(--bar-color, var(--accent-primary)) 0px,
+      var(--bar-color, var(--accent-primary)) 6px,
+      transparent 6px,
+      transparent 8px);
+  box-shadow:
     0 0 10px color-mix(in srgb, var(--bar-color, var(--accent-primary)) 40%, transparent),
     0 0 3px color-mix(in srgb, var(--bar-color, var(--accent-primary)) 60%, transparent);
   position: relative;
@@ -219,7 +217,7 @@
   left: 0;
   right: 0;
   height: 40%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.25), transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent);
   border-radius: 2px 2px 0 0;
 }
 
@@ -232,11 +230,11 @@
   background: linear-gradient(145deg, var(--panel-grad-start), var(--panel-grad-end));
   padding: 4rem;
   border-radius: 24px;
-  border: 2px solid rgba(255,255,255,0.04);
-  box-shadow: 
-    8px 8px 20px rgba(0,0,0,0.6),
-    -4px -4px 12px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+  border: 2px solid rgba(255, 255, 255, 0.04);
+  box-shadow:
+    8px 8px 20px rgba(0, 0, 0, 0.6),
+    -4px -4px 12px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   position: relative;
 }
 
@@ -250,21 +248,21 @@
   font-family: 'Fira Code', monospace;
   font-size: 0.65rem;
   letter-spacing: 4px;
-  color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
   background: var(--bg-primary);
   padding: 4px 16px;
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 4px;
-  box-shadow: 
-    inset 1px 1px 3px rgba(0,0,0,0.4),
-    0 1px 2px rgba(0,0,0,0.3);
+  box-shadow:
+    inset 1px 1px 3px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .tools-title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.8rem;
   margin-bottom: 3rem;
-  color: #fff;
+  color: #060606;
 }
 
 .tools-cloud {
@@ -285,19 +283,19 @@
   font-size: 0.9rem;
   font-weight: 700;
   /* Physical button feel */
-  box-shadow: 
-    4px 4px 10px rgba(0,0,0,0.5),
-    -2px -2px 6px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow:
+    4px 4px 10px rgba(0, 0, 0, 0.5),
+    -2px -2px 6px rgba(255, 255, 255, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.04);
   cursor: default;
   transition: all 0.2s ease;
 }
 
 .tools-chip:active {
-  box-shadow: 
-    inset 3px 3px 6px rgba(0,0,0,0.5),
-    inset -2px -2px 4px rgba(255,255,255,0.03);
+  box-shadow:
+    inset 3px 3px 6px rgba(0, 0, 0, 0.5),
+    inset -2px -2px 4px rgba(255, 255, 255, 0.03);
   transform: translateY(1px);
 }
 
@@ -312,17 +310,17 @@
 }
 
 .tools-chip-interactive:hover {
-  border-color: var(--chip-border, rgba(255,255,255,0.15));
+  border-color: var(--chip-border, rgba(255, 255, 255, 0.15));
   box-shadow:
     0 0 0 1px var(--chip-border, transparent),
     0 8px 24px var(--chip-glow, transparent),
-    4px 4px 10px rgba(0,0,0,0.5);
+    4px 4px 10px rgba(0, 0, 0, 0.5);
   color: #fff;
   background: linear-gradient(145deg, #1e2640, #141a2e);
 }
 
 .tools-chip-interactive.tools-chip-active {
-  border-color: var(--chip-border, rgba(255,255,255,0.15));
+  border-color: var(--chip-border, rgba(255, 255, 255, 0.15));
 }
 
 .chip-emoji {
@@ -348,7 +346,7 @@
   transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   z-index: 100;
   backdrop-filter: blur(12px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 
 .chip-tooltip::after {
@@ -380,7 +378,7 @@
   display: block;
   font-family: 'Fira Code', monospace;
   font-size: 0.68rem;
-  color: rgba(255,255,255,0.5);
+  color: rgba(255, 255, 255, 0.5);
   letter-spacing: 0.5px;
 }
 
