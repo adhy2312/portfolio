@@ -17,13 +17,13 @@
   opacity: 0.02;
   z-index: 0;
   background: 
-    radial-gradient(circle, transparent 60px, rgba(108,99,255,0.3) 61px, transparent 62px),
-    radial-gradient(circle, transparent 120px, rgba(108,99,255,0.25) 121px, transparent 122px),
-    radial-gradient(circle, transparent 180px, rgba(108,99,255,0.2) 181px, transparent 182px),
-    radial-gradient(circle, transparent 240px, rgba(108,99,255,0.15) 241px, transparent 242px),
-    radial-gradient(circle, transparent 300px, rgba(108,99,255,0.1) 301px, transparent 302px),
-    radial-gradient(circle, transparent 360px, rgba(108,99,255,0.08) 361px, transparent 362px),
-    radial-gradient(circle, transparent 420px, rgba(108,99,255,0.06) 421px, transparent 422px);
+    radial-gradient(circle, transparent 60px, rgba(var(--accent-primary-rgb),0.3) 61px, transparent 62px),
+    radial-gradient(circle, transparent 120px, rgba(var(--accent-primary-rgb),0.25) 121px, transparent 122px),
+    radial-gradient(circle, transparent 180px, rgba(var(--accent-primary-rgb),0.2) 181px, transparent 182px),
+    radial-gradient(circle, transparent 240px, rgba(var(--accent-primary-rgb),0.15) 241px, transparent 242px),
+    radial-gradient(circle, transparent 300px, rgba(var(--accent-primary-rgb),0.1) 301px, transparent 302px),
+    radial-gradient(circle, transparent 360px, rgba(var(--accent-primary-rgb),0.08) 361px, transparent 362px),
+    radial-gradient(circle, transparent 420px, rgba(var(--accent-primary-rgb),0.06) 421px, transparent 422px);
 }
 
 .about-grid {
@@ -68,7 +68,7 @@
   width: 110px;
   height: 110px;
   border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #1e2240, #0d1117 70%);
+  background: radial-gradient(circle at 40% 35%, #1e2240, var(--panel-grad-end) 70%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -80,7 +80,7 @@
     inset 0 1px 1px rgba(255,255,255,0.08);
   border: 3px solid rgba(255,255,255,0.04);
   /* Ring groove around the gauge */
-  outline: 2px solid rgba(108, 99, 255, 0.15);
+  outline: 2px solid rgba(var(--accent-primary-rgb), 0.15);
   outline-offset: 4px;
 }
 
@@ -151,7 +151,7 @@
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(108,99,255,0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(var(--accent-primary-rgb),0.2), transparent);
 }
 
 .about-stat:hover {

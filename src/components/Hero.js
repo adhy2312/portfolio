@@ -45,7 +45,7 @@ const Hero = () => {
         options={{
           background: {
             color: {
-              value: "#000000",
+              value: "#060918",
             },
           },
           fpsLimit: 30, // Lowered for better performance
@@ -116,13 +116,16 @@ const Hero = () => {
       <div className="hero-minimal-content optimize-gpu">
         <motion.h1 
           className="hero-name-giant metallic-reveal"
-          initial="visible"
+          initial="hidden"
           animate="visible"
           variants={{
             hidden: { opacity: 0 },
             visible: {
               opacity: 1,
-              transition: { staggerChildren: 0.05 }
+              transition: { 
+                staggerChildren: 0.1, // Slower for typewriter feel
+                delayChildren: 0.5
+              }
             }
           }}
         >
@@ -132,10 +135,10 @@ const Hero = () => {
                 <motion.span
                   key={charIdx}
                   variants={{
-                    hidden: { opacity: 0 },
-                    visible: { opacity: 1 }
+                    hidden: { display: 'none', opacity: 0, x: -10 },
+                    visible: { display: 'inline-block', opacity: 1, x: 0 }
                   }}
-                  transition={{ duration: 0.05 }}
+                  transition={{ duration: 0.1 }}
                   className="metallic-char"
                 >
                   {char}
@@ -145,6 +148,12 @@ const Hero = () => {
               {wordIdx === 0 && <span className="hero-name-spacer">&nbsp;</span>}
             </span>
           ))}
+          <motion.span 
+            className="typewriter-cursor"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 3 }} // Appear after name finishes roughly
+          />
         </motion.h1>
         
         <LanguageTerminal />

@@ -15,7 +15,7 @@ const skillCategories = [
   {
     category: 'Frontend Development',
     icon: <FiMonitor />,
-    color: '#6C63FF',
+    color: 'var(--accent-primary)',
     skills: [
       { name: 'React.js', level: 85 },
       { name: 'HTML5 & CSS3', level: 92 },
@@ -27,7 +27,7 @@ const skillCategories = [
   {
     category: 'Backend & Databases',
     icon: <FiSettings />,
-    color: '#4FC3F7',
+    color: 'var(--accent-cyan)',
     skills: [
       { name: 'Node.js & Express', level: 76 },
       { name: 'REST APIs', level: 80 },
@@ -39,7 +39,7 @@ const skillCategories = [
   {
     category: 'UI/UX & Design',
     icon: <FiPenTool />,
-    color: '#F5A623',
+    color: 'var(--accent-gold)',
     skills: [
       { name: 'Figma', level: 88 },
       { name: 'Prototyping', level: 82 },
@@ -51,7 +51,7 @@ const skillCategories = [
   {
     category: 'Electronics & IoT',
     icon: <FiZap />,
-    color: '#00E5A0',
+    color: 'var(--accent-green)',
     skills: [
       { name: 'Arduino', level: 85 },
       { name: 'ESP32 / ESP8266', level: 80 },
@@ -83,10 +83,10 @@ const toolMeta = {
 };
 
 const groupColors = {
-  frontend: { border: '#6C63FF', glow: 'rgba(108, 99, 255, 0.35)' },
-  backend:  { border: '#4FC3F7', glow: 'rgba(79, 195, 247, 0.35)' },
-  design:   { border: '#F5A623', glow: 'rgba(245, 166, 35, 0.35)' },
-  iot:      { border: '#00E5A0', glow: 'rgba(0, 229, 160, 0.35)' },
+  frontend: { border: 'var(--accent-primary)', glow: 'rgba(108, 99, 255, 0.35)' },
+  backend:  { border: 'var(--accent-cyan)', glow: 'rgba(79, 195, 247, 0.35)' },
+  design:   { border: 'var(--accent-gold)', glow: 'rgba(245, 166, 35, 0.35)' },
+  iot:      { border: 'var(--accent-green)', glow: 'rgba(0, 229, 160, 0.35)' },
   tools:    { border: '#CBA6F7', glow: 'rgba(203, 166, 247, 0.35)' },
 };
 
@@ -143,7 +143,7 @@ const Skills = () => {
             >
               <div className="skill-card-header">
                 <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
-                <h3 className="skill-card-title" style={{ color: cat.color || '#6C63FF' }}>
+                <h3 className="skill-card-title" style={{ color: cat.color || 'var(--accent-primary)' }}>
                   {cat.title || cat.category}
                 </h3>
               </div>
@@ -158,7 +158,7 @@ const Skills = () => {
                     <div className="skill-bar-track">
                       <motion.div
                         className="skill-bar-fill"
-                        style={{ '--bar-color': cat.color || '#6C63FF' }}
+                        style={{ '--bar-color': cat.color || 'var(--accent-primary)' }}
                         initial={{ width: 0 }}
                         whileInView={{ width: `${skill.level}%` }}
                         transition={{ duration: 1, delay: 0.3 + skillIdx * 0.1, ease: 'easeOut' }}

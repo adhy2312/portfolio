@@ -95,8 +95,8 @@ const PingPongGame = ({ onClose }) => {
     };
 
     // Player paddle (left) — purple
-    drawNeon('#6C63FF', 24, () => {
-      ctx.fillStyle = '#6C63FF';
+    drawNeon('var(--accent-primary)', 24, () => {
+      ctx.fillStyle = 'var(--accent-primary)';
       const rx = 7;
       const px = 20, py = s.player.y;
       ctx.beginPath();
@@ -114,8 +114,8 @@ const PingPongGame = ({ onClose }) => {
     });
 
     // AI paddle (right) — cyan
-    drawNeon('#4FC3F7', 24, () => {
-      ctx.fillStyle = '#4FC3F7';
+    drawNeon('var(--accent-cyan)', 24, () => {
+      ctx.fillStyle = 'var(--accent-cyan)';
       const rx = 7;
       const px = W - 20 - PADDLE_W, py = s.ai.y;
       ctx.beginPath();
@@ -133,8 +133,8 @@ const PingPongGame = ({ onClose }) => {
     });
 
     // Ball — neon green
-    drawNeon('#00E5A0', 28, () => {
-      ctx.fillStyle = '#00E5A0';
+    drawNeon('var(--accent-green)', 28, () => {
+      ctx.fillStyle = 'var(--accent-green)';
       ctx.beginPath();
       ctx.arc(s.ball.x, s.ball.y, BALL_R, 0, Math.PI * 2);
       ctx.fill();
@@ -295,13 +295,13 @@ const PingPongGame = ({ onClose }) => {
         {/* Score */}
         <div className="ppg-score">
           <div className="ppg-score-side">
-            <span className="ppg-score-label" style={{ color: '#6C63FF' }}>YOU</span>
-            <span className="ppg-score-num" style={{ color: '#6C63FF' }}>{scores.player}</span>
+            <span className="ppg-score-label" style={{ color: 'var(--accent-primary)' }}>YOU</span>
+            <span className="ppg-score-num" style={{ color: 'var(--accent-primary)' }}>{scores.player}</span>
           </div>
           <div className="ppg-score-divider">:</div>
           <div className="ppg-score-side">
-            <span className="ppg-score-num" style={{ color: '#4FC3F7' }}>{scores.ai}</span>
-            <span className="ppg-score-label" style={{ color: '#4FC3F7' }}>CPU</span>
+            <span className="ppg-score-num" style={{ color: 'var(--accent-cyan)' }}>{scores.ai}</span>
+            <span className="ppg-score-label" style={{ color: 'var(--accent-cyan)' }}>CPU</span>
           </div>
         </div>
 
@@ -335,7 +335,7 @@ const PingPongGame = ({ onClose }) => {
 
         {/* Footer hint */}
         <div className="ppg-footer-hint">
-          First to <strong>{MAX_SCORE}</strong> wins &nbsp;·&nbsp; You control the <span style={{ color: '#6C63FF' }}>purple</span> paddle
+          First to <strong>{MAX_SCORE}</strong> wins &nbsp;·&nbsp; You control the <span style={{ color: 'var(--accent-primary)' }}>purple</span> paddle
         </div>
       </div>
     </div>

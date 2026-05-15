@@ -3,7 +3,7 @@
 ═══════════════════════════════ */
 .photography {
   padding: var(--section-padding);
-  background: linear-gradient(180deg, #0a0e20 0%, #080d1f 100%);
+  background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   position: relative;
   z-index: 1;
 }
@@ -85,7 +85,7 @@
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: #4FC3F7;
+  color: var(--accent-secondary);
   margin-bottom: 4px;
 }
 
@@ -153,8 +153,8 @@
 }
 
 .lightbox-close:hover {
-  background: rgba(108, 99, 255, 0.4);
-  border-color: #6C63FF;
+  background: rgba(var(--accent-primary-rgb), 0.4);
+  border-color: var(--accent-primary);
 }
 
 /* ── Responsive ── */

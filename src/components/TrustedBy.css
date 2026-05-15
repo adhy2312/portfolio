@@ -1,8 +1,8 @@
 .trusted-by {
-  padding: 3rem 0;
-  background: rgba(255, 255, 255, 0.02);
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 6rem 0;
+  background: var(--bg-primary);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
   overflow: hidden;
   position: relative;
   z-index: 1;
@@ -84,32 +84,31 @@
 .logo-marquee {
   display: flex;
   width: max-content;
-  animation: scroll-logos 30s linear infinite;
+  animation: scroll-logos 40s linear infinite;
 }
 
 .logo-item {
-  padding: 0 3rem;
+  padding: 0 4rem;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logo-item img {
-  height: 40px;
-  filter: grayscale(100%) brightness(0.8);
-  opacity: 0.6;
-  transition: all 0.3s ease;
+  height: 45px;
+  filter: grayscale(100%) contrast(0.5) opacity(0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .logo-item img:hover {
-  filter: grayscale(0%) brightness(1);
-  opacity: 1;
+  filter: grayscale(0%) contrast(1) opacity(1);
+  transform: scale(1.15);
 }
 
 .placeholder-logo {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.2);
+  color: rgba(0, 0, 0, 0.1);
   font-size: 1.5rem;
   white-space: nowrap;
 }

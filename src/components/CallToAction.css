@@ -3,7 +3,7 @@
 ═══════════════════════════════ */
 .cta-section {
   padding: var(--section-padding);
-  background: linear-gradient(180deg, #080d1f 0%, #060918 100%);
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
   position: relative;
   z-index: 1;
 }
@@ -16,7 +16,7 @@
   pointer-events: none;
   opacity: 0.02;
   z-index: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%2300E5A0' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='600' height='600' viewBox='0 0 600 600' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23000000' stroke-width='1'%3E%3Cellipse cx='300' cy='300' rx='280' ry='200'/%3E%3Cellipse cx='300' cy='300' rx='240' ry='170'/%3E%3Cellipse cx='300' cy='300' rx='200' ry='140'/%3E%3Cellipse cx='300' cy='300' rx='160' ry='110'/%3E%3Cellipse cx='300' cy='300' rx='120' ry='80'/%3E%3Cellipse cx='300' cy='300' rx='80' ry='50'/%3E%3Cellipse cx='300' cy='300' rx='40' ry='25'/%3E%3C/g%3E%3C/svg%3E");
   background-size: 450px 450px;
   background-repeat: repeat;
 }
@@ -25,7 +25,7 @@
   position: relative;
   overflow: hidden;
   /* Retro equipment panel */
-  background: linear-gradient(145deg, #111827, #0d1117);
+  background: linear-gradient(145deg, var(--panel-grad-start), var(--panel-grad-end));
   border: 2px solid rgba(255, 255, 255, 0.04);
   border-radius: 24px;
   padding: 5rem 3rem;
@@ -62,7 +62,7 @@
 .cta-orb-1 {
   width: 350px;
   height: 350px;
-  background: radial-gradient(circle, rgba(108, 99, 255, 0.15), transparent 70%);
+  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.15), transparent 70%);
   top: -100px;
   left: -100px;
   filter: blur(60px);
@@ -71,7 +71,7 @@
 .cta-orb-2 {
   width: 300px;
   height: 300px;
-  background: radial-gradient(circle, rgba(79, 195, 247, 0.12), transparent 70%);
+  background: radial-gradient(circle, rgba(0, 240, 255, 0.12), transparent 70%);
   bottom: -80px;
   right: -80px;
   filter: blur(60px);
@@ -125,7 +125,7 @@
 }
 
 .cta-title span {
-  background: linear-gradient(135deg, #6C63FF 0%, #4FC3F7 100%);
+  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -158,22 +158,22 @@
 
 .cta-btn.btn-primary {
   background: linear-gradient(145deg, #1a1a3e, #0f0f28) !important;
-  border: 2px solid rgba(108, 99, 255, 0.3) !important;
+  border: 2px solid rgba(var(--accent-primary-rgb), 0.3) !important;
   box-shadow: 
     4px 4px 10px rgba(0,0,0,0.5),
     -2px -2px 6px rgba(255,255,255,0.02),
     inset 0 1px 0 rgba(255,255,255,0.06),
-    0 0 20px rgba(108, 99, 255, 0.1) !important;
+    0 0 20px rgba(var(--accent-primary-rgb), 0.1) !important;
 }
 
 .cta-btn.btn-primary:hover {
   box-shadow: 
     2px 2px 6px rgba(0,0,0,0.5),
-    0 0 30px rgba(108, 99, 255, 0.2) !important;
+    0 0 30px rgba(var(--accent-primary-rgb), 0.2) !important;
 }
 
 .cta-btn.btn-outline {
-  background: linear-gradient(145deg, #111827, #0d1117) !important;
+  background: linear-gradient(145deg, var(--panel-grad-start), var(--panel-grad-end)) !important;
   border: 2px solid rgba(255,255,255,0.06) !important;
   box-shadow: 
     4px 4px 10px rgba(0,0,0,0.5),
@@ -182,10 +182,10 @@
 }
 
 .cta-btn.btn-outline:hover {
-  border-color: rgba(108, 99, 255, 0.2) !important;
+  border-color: rgba(var(--accent-primary-rgb), 0.2) !important;
   box-shadow: 
     2px 2px 6px rgba(0,0,0,0.5),
-    0 0 20px rgba(108, 99, 255, 0.1) !important;
+    0 0 20px rgba(var(--accent-primary-rgb), 0.1) !important;
 }
 
 @media (max-width: 600px) {

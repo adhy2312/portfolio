@@ -13,7 +13,7 @@ const projects = [
     category: 'fullstack',
     link: '#',
     github: '#',
-    accent: '#6C63FF',
+    accent: 'var(--accent-primary)',
     icon: <FiGlobe />,
   },
   {
@@ -24,7 +24,7 @@ const projects = [
     category: 'electronics',
     link: '#',
     github: '#',
-    accent: '#00E5A0',
+    accent: 'var(--accent-green)',
     icon: <FiZap />,
   },
   {
@@ -35,7 +35,7 @@ const projects = [
     category: 'frontend',
     link: '#',
     github: '#',
-    accent: '#4FC3F7',
+    accent: 'var(--accent-cyan)',
     icon: <FiStar />,
   },
   {
@@ -46,7 +46,7 @@ const projects = [
     category: 'design',
     link: '#',
     github: '#',
-    accent: '#F5A623',
+    accent: 'var(--accent-gold)',
     icon: <FiPenTool />,
   },
   {
@@ -57,7 +57,7 @@ const projects = [
     category: 'photography',
     link: '#',
     github: null,
-    accent: '#a78bfa',
+    accent: 'var(--accent-magenta)',
     icon: <FiCamera />,
   },
   {
@@ -68,7 +68,7 @@ const projects = [
     category: 'electronics',
     link: '#',
     github: '#',
-    accent: '#00E5A0',
+    accent: 'var(--accent-green)',
     icon: <FiHome />,
   },
 ];

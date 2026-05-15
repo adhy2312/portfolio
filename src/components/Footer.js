@@ -57,67 +57,32 @@ const Footer = () => {
 
   return (
     <motion.footer
-      className="footer"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
+      className="footer-retro-simple"
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       transition={{ duration: 0.8 }}
       viewport={{ once: true }}
     >
-      {/* Ambient Glows */}
-      <div className="footer-ambient-glow glow-1"></div>
-      <div className="footer-ambient-glow glow-2"></div>
-
-      {/* Animated SVG Wave Top */}
-      <div className="footer-wave">
-        <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
-          <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" className="shape-fill"></path>
-        </svg>
-      </div>
-
-      {/* Giant Animated Marquee Text */}
-      <div className="footer-marquee-container">
-        <div className="footer-marquee">
-          <span> ADHY • ADHY • ADHY • ADHY • ADHY • ADHY •</span>
-          <span>ADHY • ADHY • ADHY • ADHY • ADHY • ADHY • </span>
-        </div>
-      </div>
-
-      <div className="container footer-content-wrapper">
-        {/* Interactive Tech Stack*/}
-        <div className="footer-tech-showcase">
-          <div className="tech-showcase-header">
-            <h3 className="tech-title">&lt;TechStack /&gt;</h3>
-            <div className="tech-status">
-              <span className="status-dot"></span>
-              All systems operational
-            </div>
-          </div>
-          <div className="tech-grid">
-            {['React', 'Node.js', 'Python', 'TypeScript', 'TailwindCSS', 'Framer Motion', 'PostgreSQL', 'Sanity CMS'].map((tech, idx) => (
-              <div key={idx} className={`tech-tag tech-${idx % 4}`}>
-                <span className="tech-syntax">const</span> {tech.toLowerCase().replace(/[^a-z0-9]/g, '')} <span className="tech-syntax">=</span> <span className="tech-string">"{tech}"</span>;
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="footer-inner">
-          {/* Brand column */}
-          <div className="footer-brand">
-            <div className="footer-logo">
+      {/* Elegant Topographic Contours */}
+      <div className="footer-contours" />
+      
+      <div className="container footer-simple-inner">
+        <div className="footer-main-row">
+          <div className="footer-brand-column">
+            <div className="footer-logo-simple">
               ADHY<span>.</span>
             </div>
-            <p className="footer-tagline">
+            <p className="footer-simple-tagline">
               {displayData.tagline}
             </p>
-            <div className="footer-socials">
+            <div className="footer-simple-socials">
               {displayData.socialLinks.map((s, idx) => (
                 <a
                   key={idx}
                   href={s.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="footer-social-link"
+                  className="retro-icon-btn"
                   aria-label={s.platform}
                 >
                   {iconMap[s.iconName] || <FiGithub size={18} />}
@@ -126,16 +91,15 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Navigation column */}
-          <div className="footer-nav">
-            <h4 className="footer-nav-title">Navigation</h4>
-            <ul className="footer-nav-list">
+          <div className="footer-links-column">
+            <h4 className="column-title">Directory</h4>
+            <ul className="footer-simple-nav">
               {links.map((link) => (
                 <li key={link.target}>
                   <a
                     href={`#${link.target}`}
-                    className="footer-nav-link"
                     onClick={(e) => handleNavClick(e, link.target)}
+                    className="retro-nav-link"
                   >
                     {link.label}
                   </a>
@@ -144,37 +108,26 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact column */}
-          <div className="footer-contact">
-            <h4 className="footer-nav-title">Contact</h4>
-            <ul className="footer-contact-list">
-              <li>
-                <a href={`mailto:${displayData.email}`} className="footer-nav-link">
-                  {displayData.email}
-                </a>
-              </li>
-              <li>
-                <a href={`https://wa.me/${displayData.whatsapp}`} target="_blank" rel="noopener noreferrer" className="footer-nav-link">
-                  WhatsApp ↗
-                </a>
-              </li>
-              <li className="footer-location" style={{ display: 'flex', alignItems: 'center' }}>
-                <FiMapPin style={{ marginRight: '6px' }} /> {displayData.location}
-              </li>
-            </ul>
+          <div className="footer-contact-column">
+            <h4 className="column-title">Contact</h4>
+            <div className="contact-details">
+              <a href={`mailto:${displayData.email}`} className="retro-nav-link">{displayData.email}</a>
+              <p className="retro-text-muted">Kerala, India</p>
+              <div className="system-status-badge">
+                <span className="status-indicator-green" /> SYSTEM_ONLINE
+              </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Bottom bar */}
-      <div className="footer-bottom">
-        <div className="container footer-bottom-inner">
-          <p className="footer-copy">
-            © {new Date().getFullYear()} Adhithya Mohan. All rights reserved.
-          </p>
-          <p className="footer-made">
-            Made with <FiHeart size={12} className="heart-icon" /> using React & Framer Motion
-          </p>
+        <div className="footer-simple-bottom">
+          <div className="bottom-divider" />
+          <div className="bottom-flex">
+            <p className="retro-copy">© {new Date().getFullYear()} ADHITHYA MOHAN</p>
+            <div className="retro-made">
+              CRAFTED WITH <FiHeart className="heart-icon-simple" /> IN KERALA
+            </div>
+          </div>
         </div>
       </div>
     </motion.footer>

@@ -4,7 +4,7 @@
 .page-loader {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: #ffffff;
   z-index: 999999;
   display: flex;
   align-items: center;
@@ -59,7 +59,7 @@
   background-clip: text;
   opacity: 0;
   animation: loaderCharIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  filter: drop-shadow(0 0 8px rgba(108, 99, 255, 0.3));
+  filter: drop-shadow(0 0 8px rgba(var(--accent-primary-rgb), 0.3));
 }
 
 @keyframes loaderCharIn {
@@ -71,9 +71,9 @@
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 800;
-  color: #6C63FF;
+  color: var(--accent-primary);
   animation: loaderCharIn 0.5s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  text-shadow: 0 0 16px rgba(108, 99, 255, 0.6);
+  text-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.6);
 }
 
 /* Retro VU-meter style loading bar */
@@ -91,10 +91,10 @@
 
 .loader-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6C63FF, #4FC3F7, #00E5A0);
+  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary), #00E5A0);
   border-radius: 2px;
   transition: width 0.15s ease;
-  box-shadow: 0 0 12px rgba(108, 99, 255, 0.6);
+  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.6);
   position: relative;
 }
 
@@ -116,5 +116,5 @@
   color: rgba(255,255,255,0.35);
   letter-spacing: 2px;
   text-transform: uppercase;
-  text-shadow: 0 0 8px rgba(108, 99, 255, 0.2);
+  text-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.2);
 }

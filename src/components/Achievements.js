@@ -14,11 +14,11 @@ const iconMap = {
 };
 
 const defaultAchievements = [
-  { iconName: 'FiAward', title: 'PR & Media Head, ISTE', desc: 'PR and Media Head, and lead web developer for the ISTE MBCET chapter — driving digital presence and building the official portal.', accent: '#6C63FF' },
-  { iconName: 'FiZap', title: 'IoT Projects', desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.', accent: '#00E5A0' },
-  { iconName: 'FiPenTool', title: 'Figma Designer', desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.', accent: '#F5A623' },
-  { iconName: 'FiCamera', title: 'Photographer', desc: 'Running @zoomout_images on Instagram — passionate street, portrait, and nature photographer.', accent: '#4FC3F7' },
-  { iconName: 'FiGlobe', title: 'Full-Stack Dev', desc: 'Built end-to-end web apps with React, Node.js, and MongoDB — from database design to pixel-perfect UIs.', accent: '#a78bfa' },
+  { iconName: 'FiAward', title: 'PR & Media Head, ISTE', desc: 'PR and Media Head, and lead web developer for the ISTE MBCET chapter — driving digital presence and building the official portal.', accent: 'var(--accent-primary)' },
+  { iconName: 'FiZap', title: 'IoT Projects', desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.', accent: 'var(--accent-green)' },
+  { iconName: 'FiPenTool', title: 'Figma Designer', desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.', accent: 'var(--accent-gold)' },
+  { iconName: 'FiCamera', title: 'Photographer', desc: 'Running @zoomout_images on Instagram — passionate street, portrait, and nature photographer.', accent: 'var(--accent-cyan)' },
+  { iconName: 'FiGlobe', title: 'Full-Stack Dev', desc: 'Built end-to-end web apps with React, Node.js, and MongoDB — from database design to pixel-perfect UIs.', accent: 'var(--accent-magenta)' },
   { iconName: 'FiBookOpen', title: 'ECE Student', desc: 'Pursuing Electronics and Communication Engineering (ECE) with a passion for blending hardware design with modern software.', accent: '#ff6b9d' },
 ];
 
