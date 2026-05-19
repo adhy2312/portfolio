@@ -9,6 +9,8 @@ import LanguageTerminal from './LanguageTerminal';
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
+  const [typedCharsCount, setTypedCharsCount] = useState(0);
+  const [typingComplete, setTypingComplete] = useState(false);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
@@ -27,6 +29,23 @@ const Hero = () => {
     resumeUrl: heroData?.resumeUrl || "#",
     heroImage: heroData?.heroImage ? urlFor(heroData.heroImage).url() : null
   };
+
+  useEffect(() => {
+    const nameStr = displayData.name;
+    let currentIdx = 0;
+    setTypedCharsCount(0);
+    setTypingComplete(false);
+
+    const interval = setInterval(() => {
+      currentIdx++;
+      setTypedCharsCount(currentIdx);
+      if (currentIdx >= nameStr.length) {
+        clearInterval(interval);
+        setTypingComplete(true);
+      }
+    }, 95); // 95ms per character for natural typing flow
+    return () => clearInterval(interval);
+  }, [heroData]); // eslint-disable-line
 
   const particlesInit = useCallback(async engine => {
     await loadBasic(engine);
@@ -50,7 +69,7 @@ const Hero = () => {
           },
           particles: {
             color: { value: "#ffffff" },
-            links: { enable: false }, // Disabling links is the biggest perf win
+            links: { enable: false }, // Disabling links is the biggest win
             move: {
               enable: true,
               speed: 0.5,
@@ -71,47 +90,50 @@ const Hero = () => {
       />
 
       <div className="hero-minimal-content optimize-gpu">
-        <motion.h1
-          className="hero-name-giant metallic-reveal"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: {
-              opacity: 1,
-              transition: {
-                staggerChildren: 0.1, // Slower for typewriter feel
-                delayChildren: 0.5
-              }
-            }
-          }}
-        >
-          {(displayData.name || "ADHITHYA MOHAN").split(" ").map((word, wordIdx) => (
-            <span key={wordIdx} className="hero-name-word">
-              {word.split("").map((char, charIdx) => (
-                <motion.span
-                  key={charIdx}
-                  variants={{
-                    hidden: { display: 'none', opacity: 0, x: -10 },
-                    visible: { display: 'inline-block', opacity: 1, x: 0 }
-                  }}
-                  transition={{ duration: 0.1 }}
-                  className="metallic-char"
-                >
-                  {char}
-                </motion.span>
-              ))}
-              {/* Add space between words */}
-              {wordIdx === 0 && <span className="hero-name-spacer">&nbsp;</span>}
-            </span>
-          ))}
-          <motion.span
-            className="typewriter-cursor"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 3 }} // Appear after name finishes roughly
-          />
-        </motion.h1>
+        <h1 className="hero-name-giant metallic-reveal">
+          {(() => {
+            const nameStr = displayData.name;
+            const words = nameStr.split(" ");
+            let flatIdx = 0;
+
+            return words.map((word, wordIdx) => {
+              return (
+                <span key={wordIdx} className="hero-name-word">
+                  {word.split("").map((char, charIdx) => {
+                    const currentCharIdx = flatIdx;
+                    flatIdx++;
+                    const isRevealed = currentCharIdx < typedCharsCount;
+                    const isLastTyped = currentCharIdx === typedCharsCount - 1;
+
+                    return (
+                      <span
+                        key={charIdx}
+                        className={`metallic-char ${isRevealed ? 'char-typed-visible' : 'char-typed-hidden'}`}
+                        style={{
+                          visibility: isRevealed ? 'visible' : 'hidden',
+                          display: 'inline-block'
+                        }}
+                      >
+                        {char}
+                        {isLastTyped && !typingComplete && (
+                          <span className="typewriter-cursor-active">|</span>
+                        )}
+                      </span>
+                    );
+                  })}
+                  {/* Counter increments for space between words */}
+                  {wordIdx < words.length - 1 && (() => {
+                    flatIdx++;
+                    return <span className="hero-name-spacer">&nbsp;</span>;
+                  })()}
+                </span>
+              );
+            });
+          })()}
+          {typingComplete && (
+            <span className="typewriter-cursor-complete">|</span>
+          )}
+        </h1>
 
         <LanguageTerminal />
 

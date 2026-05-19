@@ -106,7 +106,7 @@ body {
 /* CSS Grain Texture */
 .App::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
