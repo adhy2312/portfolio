@@ -5,7 +5,7 @@ export const client = createClient({
   projectId: process.env.REACT_APP_SANITY_PROJECT_ID || 'uefti8ya',
   dataset: process.env.REACT_APP_SANITY_DATASET || 'production',
   apiVersion: '2023-05-03',
-  useCdn: true,
+  useCdn: false,
   token: process.env.REACT_APP_SANITY_TOKEN,
 });
 

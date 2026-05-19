@@ -6,6 +6,7 @@ import Hero from './components/Hero';
 // Lazy load below-the-fold components
 const About = lazy(() => import('./components/About'));
 const Skills = lazy(() => import('./components/Skills'));
+const Experience = lazy(() => import('./components/Experience'));
 const GitHubStats = lazy(() => import('./components/GitHubStats'));
 const Photography = lazy(() => import('./components/Photography'));
 const MyWorks = lazy(() => import('./components/MyWorks'));
@@ -93,6 +94,9 @@ function App() {
         </div>
         <div className="lazy-section">
           <Skills />
+        </div>
+        <div className="lazy-section">
+          <Experience />
         </div>
         <div className="lazy-section">
           <GitHubStats />

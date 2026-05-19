@@ -1,0 +1,241 @@
+{
+  "hero": {
+    "_createdAt": "2026-05-19T08:13:15Z",
+    "_id": "hero",
+    "_rev": "vnZzCzn6q0gJcDt7iwWBky",
+    "_type": "hero",
+    "_updatedAt": "2026-05-19T08:13:15Z",
+    "bio": "Building responsive web apps and IoT solutions with modern tech stacks.",
+    "greeting": "Hey there!",
+    "heading": "Full-Stack Developer & Creator",
+    "name": "Adhithya Mohan",
+    "resumeUrl": "https://example.com/resume.pdf",
+    "role": "Electronics Engineer | Web Developer | Photographer",
+    "techStack": [
+      "React",
+      "Node.js",
+      "Python",
+      "STM32",
+      "SupaBase"
+    ]
+  },
+  "about": {
+    "_createdAt": "2026-05-19T08:13:20Z",
+    "_id": "about",
+    "_rev": "r8YD3VcICpg5Bh1F4fiMaG",
+    "_type": "about",
+    "_updatedAt": "2026-05-19T08:13:20Z",
+    "bioParagraphs": [
+      "I'm a passionate full-stack developer and electronics engineer based in Kerala. I love building high-performance web applications and IoT solutions.",
+      "When I'm not coding, I'm usually behind a camera capturing moments, or tinkering with hardware circuits."
+    ],
+    "experienceYears": "3+",
+    "location": "Kerala, India",
+    "stats": [
+      {
+        "_key": "1",
+        "iconName": "FiCheckCircle",
+        "label": "Projects Completed",
+        "value": "20+"
+      },
+      {
+        "_key": "2",
+        "iconName": "FiUsers",
+        "label": "Happy Clients",
+        "value": "10+"
+      },
+      {
+        "_key": "3",
+        "iconName": "FiClock",
+        "label": "Years Experience",
+        "value": "3+"
+      }
+    ]
+  },
+  "footer": {
+    "_createdAt": "2026-05-19T08:13:30Z",
+    "_id": "footer",
+    "_rev": "vnZzCzn6q0gJcDt7iwWE4C",
+    "_type": "footer",
+    "_updatedAt": "2026-05-19T08:13:30Z",
+    "email": "hello@adhithyamohan.com",
+    "location": "Kerala, India",
+    "socialLinks": [
+      {
+        "_key": "soc1",
+        "iconName": "FiGithub",
+        "platform": "GitHub",
+        "url": "https://github.com"
+      },
+      {
+        "_key": "soc2",
+        "iconName": "FiLinkedin",
+        "platform": "LinkedIn",
+        "url": "https://linkedin.com"
+      }
+    ],
+    "tagline": "Let's build something amazing together.",
+    "whatsapp": "+91 9876543210"
+  },
+  "experience": [
+    {
+      "_createdAt": "2026-05-19T07:54:14Z",
+      "_id": "2ffebd88-c376-468f-8fea-17b68f0c8cec",
+      "_rev": "vnZzCzn6q0gJcDt7iwSMuS",
+      "_system": {
+        "base": {
+          "id": "2ffebd88-c376-468f-8fea-17b68f0c8cec",
+          "rev": "vnZzCzn6q0gJcDt7iwRvV6"
+        }
+      },
+      "_type": "experience",
+      "_updatedAt": "2026-05-19T08:00:36Z",
+      "order": 1,
+      "organization": "FRAMES MBCET-Photography club",
+      "roles": [
+        {
+          "_key": "f26372ad0a2d",
+          "startDate": "Aug 2025",
+          "title": "Creative Curator"
+        },
+        {
+          "_key": "5813ad206965",
+          "endDate": "August 2025",
+          "startDate": "January 2025",
+          "title": "Active member"
+        }
+      ]
+    },
+    {
+      "_createdAt": "2026-05-19T07:43:02Z",
+      "_id": "9843b348-2d22-497c-81ec-a302f34b63a4",
+      "_rev": "r8YD3VcICpg5Bh1F4fVoQ0",
+      "_system": {
+        "base": {
+          "id": "9843b348-2d22-497c-81ec-a302f34b63a4",
+          "rev": "0pXjMSMgY9SUJGEYdbwJap"
+        }
+      },
+      "_type": "experience",
+      "_updatedAt": "2026-05-19T08:00:27Z",
+      "logo": {
+        "_type": "image",
+        "asset": {
+          "_ref": "image-0d78126270f91fb665446727aca1d35e015dcec2-117x120-png",
+          "_type": "reference"
+        }
+      },
+      "order": 0,
+      "organization": "ISTE MBCET STUDENT CHAPTER",
+      "roles": [
+        {
+          "_key": "1dce9e4bbdc5",
+          "description": "Leading the PR & Media team at ISTE MBCET, overseeing branding, digital outreach, and creative communication strategies. Managing promotional campaigns, media production, and visual storytelling to strengthen the chapter’s presence and engagement.",
+          "startDate": "Sep 2025",
+          "title": "PR and Media Head"
+        },
+        {
+          "_key": "61b55e350cbc",
+          "description": "Led PR & media initiatives for ISTE MBCET, managing event promotions, content strategy, and creative communications across digital platforms. Coordinated branding efforts and contributed to student engagement through photography, and media coverage.",
+          "endDate": "September 2025",
+          "startDate": "March 2025",
+          "title": "PR and Media - Subhead"
+        }
+      ]
+    }
+  ],
+  "skillCategory": [
+    {
+      "_createdAt": "2026-05-19T08:13:25Z",
+      "_id": "skill-backend",
+      "_rev": "F6Nkbb2qrglTICnSmb9ZZX",
+      "_type": "skillCategory",
+      "_updatedAt": "2026-05-19T08:13:25Z",
+      "color": "#89DCEB",
+      "iconName": "FiServer",
+      "skills": [
+        {
+          "_key": "s4",
+          "level": 85,
+          "name": "Node.js / Express"
+        },
+        {
+          "_key": "s5",
+          "level": 80,
+          "name": "Python"
+        },
+        {
+          "_key": "s6",
+          "level": 75,
+          "name": "MongoDB / SQL"
+        }
+      ],
+      "title": "Backend & Systems"
+    },
+    {
+      "_createdAt": "2026-05-19T08:13:22Z",
+      "_id": "skill-frontend",
+      "_rev": "r8YD3VcICpg5Bh1F4fiNxA",
+      "_type": "skillCategory",
+      "_updatedAt": "2026-05-19T08:13:22Z",
+      "color": "#CBA6F7",
+      "iconName": "FiMonitor",
+      "skills": [
+        {
+          "_key": "s1",
+          "level": 90,
+          "name": "React / Next.js"
+        },
+        {
+          "_key": "s2",
+          "level": 85,
+          "name": "JavaScript / TypeScript"
+        },
+        {
+          "_key": "s3",
+          "level": 80,
+          "name": "CSS / Framer Motion"
+        }
+      ],
+      "title": "Frontend Development"
+    }
+  ],
+  "trustedBy": [
+    {
+      "_createdAt": "2026-05-19T08:13:26Z",
+      "_id": "trusted-1",
+      "_rev": "vnZzCzn6q0gJcDt7iwWDZE",
+      "_type": "trustedBy",
+      "_updatedAt": "2026-05-19T08:13:26Z",
+      "name": "ISTE MBCET",
+      "order": 1
+    },
+    {
+      "_createdAt": "2026-05-19T08:13:27Z",
+      "_id": "trusted-2",
+      "_rev": "a02xIJKx6TOh8YCioBrRvh",
+      "_type": "trustedBy",
+      "_updatedAt": "2026-05-19T08:13:27Z",
+      "name": "FRAMES MBCET",
+      "order": 2
+    },
+    {
+      "_createdAt": "2026-05-19T08:13:28Z",
+      "_id": "trusted-3",
+      "_rev": "vnZzCzn6q0gJcDt7iwWDwS",
+      "_type": "trustedBy",
+      "_updatedAt": "2026-05-19T08:13:28Z",
+      "name": "Vercel",
+      "order": 3
+    },
+    {
+      "_createdAt": "2026-05-19T08:13:29Z",
+      "_id": "trusted-4",
+      "_rev": "a02xIJKx6TOh8YCioBrS4T",
+      "_type": "trustedBy",
+      "_updatedAt": "2026-05-19T08:13:29Z",
+      "name": "Figma",
+      "order": 4
+    }
+  ]
+}

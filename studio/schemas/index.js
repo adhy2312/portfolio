@@ -8,6 +8,7 @@ import footer from './footer'
 import testimonial from './testimonial'
 import trustedBy from './trustedBy'
 import contact from './contact'
+import experience from './experience'
 
 export const schemaTypes = [
   hero,
@@ -19,5 +20,6 @@ export const schemaTypes = [
   footer,
   testimonial,
   trustedBy,
-  contact
+  contact,
+  experience
 ]

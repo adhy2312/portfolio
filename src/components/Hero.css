@@ -51,7 +51,7 @@
 }
 
 .hero-name-giant {
-  font-family: 'Lakone', 'Space Grotesk', sans-serif;
+  font-family: 'Bodoni Moda', 'Playfair Display', 'Cormorant Garamond', serif;
   font-size: clamp(4rem, 15vw, 11rem);
   font-weight: 800;
   margin: 0;
@@ -63,37 +63,56 @@
 
 .metallic-char {
   display: inline-block;
-  /* Premium Silver Finish */
-  background: linear-gradient(180deg, #f0f0f0 0%, #bbbbbb 45%, #ffffff 50%, #888888 100%);
+  /* Premium Retro-Future Horizon Chrome Finish */
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #e2e8f0 30%,
+    #94a3b8 47%,
+    #0f172a 49%,
+    #7c3aed 51%,
+    #a78bfa 75%,
+    #ffffff 100%
+  );
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  padding: 0 5px;
+  padding: 0 8px;
   position: relative;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: all 0.45s cubic-bezier(0.25, 0.8, 0.25, 1);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.2);
   
-  /* Initial Skeuomorphic Depth */
+  /* Deep Skeuomorphic Extrusion & Neomorphic Backglow */
   text-shadow: 
-    1px 1px 0px #aaa,
-    2px 2px 0px #888,
-    3px 3px 0px #666,
-    4px 4px 15px rgba(0,0,0,0.5);
+    -0.5px -0.5px 0px rgba(255, 255, 255, 0.85),
+    1px 1px 0px #1e1b4b,
+    2px 2px 0px #17172c,
+    3px 3px 0px #0f0f1c,
+    4px 4px 0px #08080f,
+    5px 5px 12px rgba(0, 0, 0, 0.9),
+    0px 0px 20px rgba(124, 58, 237, 0.35),
+    0px 0px 40px rgba(0, 240, 255, 0.15);
   
-  transform: rotateX(5deg) rotateY(-5deg);
+  transform: rotateX(8deg) rotateY(-8deg) translateZ(0);
 }
 
 .metallic-char:hover {
-  transform: translateZ(50px) rotateX(0deg) rotateY(0deg) scale(1.1);
-  filter: drop-shadow(0 0 20px rgba(var(--accent-primary-rgb), 0.3));
+  /* Lift letter and apply advanced hover state */
+  transform: translate3d(0, -18px, 60px) rotateX(12deg) rotateY(-6deg) scale(1.15);
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.45);
   
-  /* Increased 3D popout depth on hover */
+  /* Enhanced depth extrusion and powerful cyber neon illumination */
   text-shadow: 
-    1px 1px 0px #444,
-    2px 2px 0px #333,
-    3px 3px 0px #222,
-    4px 4px 0px #111,
-    5px 5px 0px #000,
-    10px 15px 30px rgba(0,0,0,0.8);
+    -1px -1px 0px rgba(255, 255, 255, 0.95),
+    1px 1px 0px #1e1b4b,
+    2px 2px 0px #17172c,
+    3px 3px 0px #0f0f1c,
+    4px 4px 0px #08080f,
+    5px 5px 0px #05050a,
+    6px 6px 0px #020205,
+    12px 18px 24px rgba(0, 0, 0, 0.9),
+    0px 0px 35px rgba(124, 58, 237, 0.75),
+    0px 0px 60px rgba(0, 240, 255, 0.55);
 }
 
 .metallic-reveal {
