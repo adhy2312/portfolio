@@ -118,7 +118,7 @@ const Photography = () => {
           viewport={{ once: true }}
         >
           <a
-            href="https://instagram.com/zoomout_images"
+            href="https://instagram.com/zoomout_frames"
             target="_blank"
             rel="noopener noreferrer"
             className="btn-outline"
