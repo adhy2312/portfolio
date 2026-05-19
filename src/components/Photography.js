@@ -13,9 +13,42 @@ const photos = [
   { src: photo3, alt: 'Nature Capture', caption: 'Nature Silence', category: 'Nature' },
 ];
 
+const PhotoCard = ({ photo, index, onClick }) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  return (
+    <motion.div
+      className="photo-item"
+      initial={{ opacity: 0, y: 35 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay: index * 0.08 }}
+      viewport={{ once: true }}
+      onClick={onClick}
+    >
+      <div className="photo-inner">
+        {!isLoaded && <div className="photo-shimmer-loader" />}
+        <img 
+          src={photo.src} 
+          alt={photo.alt} 
+          onLoad={() => setIsLoaded(true)}
+          style={{ opacity: isLoaded ? 1 : 0, transition: 'opacity 0.7s ease' }}
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="photo-overlay" style={{ opacity: isLoaded ? undefined : 0 }}>
+          <span className="photo-category">{photo.category}</span>
+          <span className="photo-caption">{photo.caption}</span>
+          <FiZoomIn size={22} className="photo-zoom-icon" />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 const Photography = () => {
   const [lightbox, setLightbox] = useState(null);
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => {
     const query = '*[_type == "photo"] | order(order asc)';
@@ -29,7 +62,9 @@ const Photography = () => {
         }));
         setFetchedPhotos(formattedData);
       }
-    }).catch(console.error);
+    })
+    .catch(console.error)
+    .finally(() => setLoadingData(false));
   }, []);
 
   const displayPhotos = fetchedPhotos.length > 0 ? fetchedPhotos : photos;
@@ -55,31 +90,24 @@ const Photography = () => {
         </motion.div>
 
         <div className="photo-masonry">
-          {displayPhotos.map((photo, index) => (
-            <motion.div
-              className="photo-item"
-              key={index}
-              initial={{ opacity: 1, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.15 }}
-              viewport={{ once: true }}
-              onClick={() => setLightbox(photo)}
-            >
-              <div className="photo-inner">
-                <img 
-                  src={photo.src} 
-                  alt={photo.alt} 
-                  loading="lazy"
-                  decoding="async"
-                />
-                <div className="photo-overlay">
-                  <span className="photo-category">{photo.category}</span>
-                  <span className="photo-caption">{photo.caption}</span>
-                  <FiZoomIn size={22} className="photo-zoom-icon" />
+          {loadingData ? (
+            Array(3).fill(null).map((_, i) => (
+              <div className="photo-item" key={`skeleton-${i}`}>
+                <div className="photo-inner">
+                  <div className="photo-shimmer-loader" />
                 </div>
               </div>
-            </motion.div>
-          ))}
+            ))
+          ) : (
+            displayPhotos.map((photo, index) => (
+              <PhotoCard
+                key={index}
+                photo={photo}
+                index={index}
+                onClick={() => setLightbox(photo)}
+              />
+            ))
+          )}
         </div>
 
         <motion.div

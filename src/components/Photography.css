@@ -166,3 +166,24 @@
     margin-right: auto;
   }
 }
+
+/* Shimmer Loader Skeleton */
+.photo-shimmer-loader {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.03) 25%,
+    rgba(0, 0, 0, 0.08) 37%,
+    rgba(0, 0, 0, 0.03) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer-effect 1.4s ease-in-out infinite;
+  border-radius: 16px;
+  z-index: 1;
+}
+
+@keyframes shimmer-effect {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
