@@ -8,9 +8,18 @@ const Navbar = () => {
   const clickTimerRef = useRef(null);
   const [logoGlow, setLogoGlow] = useState(false);
 
+  const scrolledRef = useRef(false);
+
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 50;
+      // Only trigger re-render when state actually changes
+      if (isScrolled !== scrolledRef.current) {
+        scrolledRef.current = isScrolled;
+        setScrolled(isScrolled);
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

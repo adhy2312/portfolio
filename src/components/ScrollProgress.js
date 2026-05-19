@@ -1,23 +1,29 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import './ScrollProgress.css';
 
+// Direct DOM mutation — zero React re-renders on scroll
 const ScrollProgress = () => {
-  const [pct, setPct] = useState(0);
+  const barRef = useRef(null);
 
   useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+
     const onScroll = () => {
       const el = document.documentElement;
       const scrolled = el.scrollTop || document.body.scrollTop;
       const total = el.scrollHeight - el.clientHeight;
-      setPct(total > 0 ? (scrolled / total) * 100 : 0);
+      const pct = total > 0 ? (scrolled / total) * 100 : 0;
+      bar.style.width = `${pct}%`;
     };
+
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
     <div className="scroll-progress-track">
-      <div className="scroll-progress-bar" style={{ width: `${pct}%` }} />
+      <div ref={barRef} className="scroll-progress-bar" style={{ width: '0%' }} />
     </div>
   );
 };

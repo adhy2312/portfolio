@@ -103,19 +103,23 @@ body {
   position: relative;
 }
 
-/* ═══════════════════════════════════════════
-   CSS GRAIN TEXTURE (Inline — no external fetch)
-═══════════════════════════════════════════ */
+/* CSS Grain Texture */
 .App::after {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 9998;
-  opacity: 0.025;
+  opacity: 0.022;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 128px 128px;
+  contain: strict;
 }
+/* Mobile: keep grain but reduce further */
+@media (max-width: 768px) {
+  .App::after { opacity: 0.014; }
+}
+
 
 /* ═══════════════════════════════════════════
    SCROLLBAR
@@ -234,21 +238,24 @@ body {
 .ambient-blob {
   position: fixed;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.18;
+  filter: blur(90px); /* 90px vs original 120px — still beautiful, noticeably lighter */
+  opacity: 0.16;
   pointer-events: none;
   z-index: 0;
-  animation: blobFloat 12s ease-in-out infinite alternate;
-  will-change: transform; /* GPU optimization */
+  animation: blobFloat 16s ease-in-out infinite alternate;
+  will-change: transform;
   contain: strict;
 }
 
 @media (max-width: 768px) {
   .ambient-blob {
-    filter: blur(60px); /* Reduced blur for mobile performance */
-    opacity: 0.12;
+    /* Keep blobs on mobile but much cheaper */
+    filter: blur(55px);
+    opacity: 0.11;
+    animation-duration: 22s; /* slower = fewer repaints */
   }
 }
+
 
 .ambient-blob-1 {
   width: 600px;
@@ -294,8 +301,9 @@ body {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: var(--transition-smooth);
-  will-change: transform, opacity;
+  /* Removed will-change: misuse here creates excess compositor layers */
 }
+
 
 @media (max-width: 768px) {
   .glass-card {
@@ -384,20 +392,26 @@ body {
   padding: 0 2rem;
 }
 
-/* ═══════════════════════════════════════════
-   GRID NOISE TEXTURE OVERLAY
-═══════════════════════════════════════════ */
+/* Grid overlay — absolute avoids scroll repaint */
 .App::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
   background-size: 60px 60px;
   pointer-events: none;
   z-index: 0;
 }
+/* Mobile: keep but make it even more subtle */
+@media (max-width: 768px) {
+  .App::before {
+    opacity: 0.6;
+    background-size: 80px 80px; /* larger grid = fewer lines = cheaper */
+  }
+}
+
 
 /* ═══════════════════════════════════════════
    DIVIDER — Retro Cassette-tape Style

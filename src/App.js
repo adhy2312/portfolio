@@ -74,8 +74,8 @@ function App() {
     <div className={`App ${spin ? 'spin-easter-egg' : ''} ${activeEgg ? `egg-${activeEgg}` : ''}`}>
 
       <Suspense fallback={null}>
-        {/* Only render custom cursor on desktop */}
-        {window.innerWidth > 768 && <CustomCursor />}
+        {/* CustomCursor handles its own pointer-device detection internally */}
+        <CustomCursor />
         <ScrollProgress />
         {loading && <PageLoader onDone={() => setLoading(false)} />}
         

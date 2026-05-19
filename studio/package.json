@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "dev": "sanity dev",
+    "start": "sanity dev",
+    "build": "sanity build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

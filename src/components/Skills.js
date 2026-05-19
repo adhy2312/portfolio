@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import './Skills.css';
 import { motion } from 'framer-motion';
 import { FiMonitor, FiSettings, FiPenTool, FiZap } from 'react-icons/fi';
@@ -98,7 +98,7 @@ const tools = [
 
 const Skills = () => {
   const [fetchedCategories, setFetchedCategories] = useState([]);
-  const [hoveredTool, setHoveredTool] = useState(null);
+  const gridRef = useRef(null);
 
   useEffect(() => {
     const query = '*[_type == "skillCategory"]';
@@ -106,6 +106,22 @@ const Skills = () => {
       if (data && data.length > 0) setFetchedCategories(data);
     }).catch(console.error);
   }, []);
+
+  // Trigger CSS skill-bar animations when cards enter viewport
+  useEffect(() => {
+    const bars = gridRef.current?.querySelectorAll('.skill-bar-fill-css');
+    if (!bars || !window.IntersectionObserver) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('animate');
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.2 });
+    bars.forEach(b => obs.observe(b));
+    return () => obs.disconnect();
+  }, [fetchedCategories]);
 
   const displayCategories = fetchedCategories.length > 0 ? fetchedCategories : skillCategories;
 
@@ -131,16 +147,9 @@ const Skills = () => {
         </motion.div>
 
         {/* Skill category cards */}
-        <div className="skills-grid">
+        <div className="skills-grid" ref={gridRef}>
           {displayCategories.map((cat, catIdx) => (
-            <motion.div
-              key={catIdx}
-              className="skill-card glass-card"
-              initial={{ opacity: 1, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: catIdx * 0.1 }}
-              viewport={{ once: true }}
-            >
+            <div key={catIdx} className="skill-card glass-card">
               <div className="skill-card-header">
                 <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
                 <h3 className="skill-card-title" style={{ color: cat.color || 'var(--accent-primary)' }}>
@@ -156,19 +165,19 @@ const Skills = () => {
                       <span className="skill-bar-percent">{skill.level}%</span>
                     </div>
                     <div className="skill-bar-track">
-                      <motion.div
-                        className="skill-bar-fill"
-                        style={{ '--bar-color': cat.color || 'var(--accent-primary)' }}
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${skill.level}%` }}
-                        transition={{ duration: 1, delay: 0.3 + skillIdx * 0.1, ease: 'easeOut' }}
-                        viewport={{ once: true }}
+                      <div
+                        className="skill-bar-fill skill-bar-fill-css"
+                        style={{
+                          '--bar-color': cat.color || 'var(--accent-primary)',
+                          '--bar-width': `${skill.level}%`,
+                          transitionDelay: `${0.1 + skillIdx * 0.08}s`,
+                        }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -186,29 +195,21 @@ const Skills = () => {
               const meta = toolMeta[tool] || { group: 'tools', snippet: tool, emoji: '🔧' };
               const colors = groupColors[meta.group] || groupColors.tools;
               return (
-                <motion.span
+                <span
                   key={i}
-                  className={`tech-tag tools-chip tools-chip-interactive ${hoveredTool === tool ? 'tools-chip-active' : ''}`}
+                  className="tech-tag tools-chip tools-chip-interactive"
                   style={{
                     '--chip-border': colors.border,
                     '--chip-glow': colors.glow,
                   }}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: i * 0.04, duration: 0.3 }}
-                  viewport={{ once: true }}
-                  whileHover={{ scale: 1.12, y: -4 }}
-                  onMouseEnter={() => setHoveredTool(tool)}
-                  onMouseLeave={() => setHoveredTool(null)}
                 >
                   <span className="chip-emoji">{meta.emoji}</span>
                   {tool}
-                  {/* Tooltip */}
                   <span className="chip-tooltip">
                     <span className="chip-tooltip-title">{meta.emoji} {tool}</span>
                     <span className="chip-tooltip-desc">{meta.snippet}</span>
                   </span>
-                </motion.span>
+                </span>
               );
             })}
           </div>

@@ -43,73 +43,30 @@ const Hero = () => {
         init={particlesInit}
         loaded={particlesLoaded}
         options={{
-          background: {
-            color: {
-              value: "#060918",
-            },
-          },
-          fpsLimit: 30, // Lowered for better performance
+          background: { color: { value: "#060918" } },
+          fpsLimit: 24,
           interactivity: {
-            events: {
-              onClick: {
-                enable: true,
-                mode: "push",
-              },
-              onHover: {
-                enable: false, // Disabled for performance
-                mode: "repulse",
-              },
-              resize: true,
-            },
-            modes: {
-              push: {
-                quantity: 2, // Reduced from 4
-              },
-              repulse: {
-                distance: 100, // Reduced from 200
-                duration: 0.4,
-              },
-            },
+            events: { onClick: { enable: false }, onHover: { enable: false }, resize: false },
           },
           particles: {
-            color: {
-              value: "#ffffff",
-            },
-            links: {
-              color: "#ffffff",
-              distance: 150,
-              enable: true,
-              opacity: 0.15, // Reduced opacity
-              width: 1,
-            },
+            color: { value: "#ffffff" },
+            links: { enable: false }, // Disabling links is the biggest perf win
             move: {
-              direction: "none",
               enable: true,
-              outModes: {
-                default: "bounce",
-              },
-              random: false,
-              speed: 0.8, // Slightly slower for smoother feel
-              straight: false,
+              speed: 0.5,
+              direction: "none",
+              outModes: { default: "out" },
+              random: true,
             },
             number: {
-              density: {
-                enable: true,
-                area: 800,
-              },
-              value: window.innerWidth > 768 ? 25 : 12, // Reduced for performance
+              value: window.innerWidth > 768 ? 18 : 0, // 0 on mobile = no particles
+              density: { enable: false },
             },
-            opacity: {
-              value: 0.2, // Reduced opacity
-            },
-            shape: {
-              type: "circle",
-            },
-            size: {
-              value: { min: 1, max: 2 }, // Smaller max size
-            },
+            opacity: { value: 0.25 },
+            shape: { type: "circle" },
+            size: { value: { min: 1, max: 2 } },
           },
-          detectRetina: false, // Disabled retina detection for performance
+          detectRetina: false,
         }}
       />
 

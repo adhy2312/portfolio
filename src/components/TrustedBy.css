@@ -85,6 +85,7 @@
   display: flex;
   width: max-content;
   animation: scroll-logos 40s linear infinite;
+  will-change: transform; /* promotes to own compositor layer */
 }
 
 .logo-item {
@@ -97,7 +98,7 @@
 .logo-item img {
   height: 45px;
   filter: grayscale(100%) contrast(0.5) opacity(0.5);
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: filter 0.3s ease, transform 0.3s ease;
 }
 
 .logo-item img:hover {
@@ -116,4 +117,14 @@
 @keyframes scroll-logos {
   0% { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+/* Mobile: slow down and simplify */
+@media (max-width: 768px) {
+  .logo-marquee {
+    animation-duration: 20s;
+  }
+  .logo-item {
+    padding: 0 2.5rem;
+  }
 }

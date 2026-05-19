@@ -8,9 +8,10 @@ import { client, urlFor } from '../sanity';
 
 
 const defaultStats = [
-  { value: '3+', label: 'Years Learning', iconName: 'FiCalendar' },
-  { value: '15+', label: 'Projects Built', iconName: 'FiAward' },
-  { value: '10+', label: 'Tech Stacks', iconName: 'FiAward' },
+  { value: '3+',  label: 'Years Learning',               iconName: 'FiCalendar' },
+  { value: '15+', label: 'Projects Built',                iconName: 'FiAward'    },
+  { value: '10+', label: 'Designs Done · More on the way',iconName: 'FiPenTool'  },
+  { value: '10+', label: 'Tech Stacks',                   iconName: 'FiAward'    },
 ];
 
 const About = () => {

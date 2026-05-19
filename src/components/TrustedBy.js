@@ -16,8 +16,7 @@ const TrustedBy = () => {
   const defaultBrands = [
     { name: "ISTE MBCET", isPlaceholder: true },
     { name: "FRAMES MBCET", isPlaceholder: true },
-    { name: "Vercel", isPlaceholder: true },
-    { name: "Figma", isPlaceholder: true },
+
   ];
 
   const displayBrands = brands.length > 0 ? brands : defaultBrands;
@@ -38,16 +37,16 @@ const TrustedBy = () => {
           </h2>
           <div className="section-divider" />
           <p className="section-desc">
-            Collaborating with amazing companies and teams worldwide
+            Collaborating with amazing people and teams
           </p>
         </motion.div>
-        <p className="trusted-title">Featured Clients & Partners</p>
+        <p className="trusted-title">Featured Organizations</p>
         <div className="logo-marquee-container">
           <div className="logo-marquee">
             {[...displayBrands, ...displayBrands].map((brand, i) => (
               <div key={i} className="logo-item">
                 {brand.isPlaceholder ? (
-                   <span className="placeholder-logo">{brand.name}</span>
+                  <span className="placeholder-logo">{brand.name}</span>
                 ) : (
                   brand.logo ? <img src={urlFor(brand.logo).url()} alt={brand.name} loading="lazy" decoding="async" /> : <span className="placeholder-logo">{brand.name}</span>
                 )}
