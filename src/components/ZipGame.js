@@ -159,12 +159,25 @@ const ZipGame = ({ onClose }) => {
   }, [won, level, path]);
 
   const onTouchMove = (e) => {
-    if (!isDrawing || won) return;
+    if (!isDrawing || won || !gridRef.current) return;
     const touch = e.touches[0];
-    const element = document.elementFromPoint(touch.clientX, touch.clientY);
-    if (element && element.dataset.r) {
-      const r = parseInt(element.dataset.r);
-      const c = parseInt(element.dataset.c);
+    const rect = gridRef.current.getBoundingClientRect();
+    
+    if (
+      touch.clientX < rect.left || 
+      touch.clientX > rect.right || 
+      touch.clientY < rect.top || 
+      touch.clientY > rect.bottom
+    ) return;
+
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+    
+    const cellSize = rect.width / level.size;
+    const c = Math.floor(x / cellSize);
+    const r = Math.floor(y / cellSize);
+
+    if (r >= 0 && r < level.size && c >= 0 && c < level.size) {
       handleCellAction(r, c);
     }
   };
