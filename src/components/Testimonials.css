@@ -2,78 +2,184 @@
   padding: 8rem 0;
   background: var(--bg-primary);
   position: relative;
+  /* clip-path keeps overflow invisible without blocking the GPU compositor */
+  clip-path: inset(0);
 }
 
-.testi-header {
+.testimonials-header {
   margin-bottom: 4rem;
-  text-align: center;
+  text-align: left;
 }
 
-/* Center the divider and desc within centered header */
-.testi-header .section-divider {
-  margin-left: auto;
-  margin-right: auto;
+/* ── Marquee ── */
+.marquee-container {
+  width: 100vw;
+  max-width: 100%;
+  overflow: hidden;
+  position: relative;
+  padding: 2rem 0;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 8%,
+    rgba(0, 0, 0, 1) 92%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 1) 8%,
+    rgba(0, 0, 0, 1) 92%,
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
-.testi-header .section-desc {
-  margin-left: auto;
-  margin-right: auto;
+.marquee-track {
+  display: flex;
+  width: max-content;
 }
 
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+.marquee-track:hover .marquee-content {
+  animation-play-state: paused;
+}
+
+.marquee-content {
+  display: flex;
   gap: 2rem;
+  padding-right: 2rem;
+  animation: scrollMarquee 35s linear infinite;
+  /* promote to own GPU layer — eliminates jank */
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
+@keyframes scrollMarquee {
+  /* translate3d forces GPU compositing path */
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-100%, 0, 0); }
+}
+
+/* ── Card ── */
 .testimonial-card {
-  padding: 2.5rem;
+  width: 380px;
+  padding: 2rem 2rem 1.75rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
   position: relative;
+  flex-shrink: 0;
+  white-space: normal;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  /* prevent each card triggering layout recalculations on its siblings */
+  contain: layout style;
 }
 
+.testimonial-card:hover {
+  transform: translateY(-6px);
+}
+
+@media (max-width: 768px) {
+  .testimonial-card {
+    width: 290px;
+    padding: 1.5rem;
+  }
+}
+
+/* ── Quote icon ── */
 .quote-icon {
   position: absolute;
-  top: 1.5rem;
-  right: 1.5rem;
-  font-size: 2rem;
+  top: 1.25rem;
+  right: 1.25rem;
+  font-size: 1.75rem;
   color: var(--accent-primary);
-  opacity: 0.2;
+  opacity: 0.18;
+  pointer-events: none;
 }
 
+/* ── Quote text ── */
 .testimonial-quote {
   font-style: italic;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.8;
   color: var(--text-primary);
+  flex: 1;
 }
 
+/* ── User row ── */
 .testimonial-user {
   display: flex;
   align-items: center;
   gap: 1rem;
   margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ── Avatar ── */
+.avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Shared size for both img and placeholder */
+.user-img,
+.user-avatar-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
 }
 
 .user-img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
   object-fit: cover;
+  display: block;
+}
+
+/* Gradient circle shown when no photo is uploaded */
+.user-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary, #7c3aed));
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+/* Glowing accent ring around the avatar */
+.avatar-ring {
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
   border: 2px solid var(--accent-primary);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* ── Name / designation ── */
+.user-info {
+  overflow: hidden;
 }
 
 .user-name {
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin: 0;
+  margin: 0 0 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
+  font-size: 0.8rem;
+  color: var(--accent-primary);
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 500;
 }
