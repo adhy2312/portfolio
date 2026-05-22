@@ -87,7 +87,7 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
   overflow-x: hidden;
@@ -326,7 +326,7 @@ body {
   padding: 14px 32px;
   background: var(--gradient-primary);
   color: #fff;
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
   border: none;
@@ -364,7 +364,7 @@ body {
   padding: 13px 32px;
   background: transparent;
   color: var(--text-primary);
-  font-family: 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   font-size: 0.95rem;
   border: 1.5px solid var(--border-accent);
