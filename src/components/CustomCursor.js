@@ -73,8 +73,22 @@ const CustomCursor = () => {
       ref={cursorRef}
       className={`liquid-cursor state-${cursorState} ${visible ? 'cursor-visible' : 'cursor-hidden'}`}
     >
-      {/* Inner dot — the precise click hotspot */}
-      <div className="liquid-cursor-dot" />
+      <div className="liquid-cursor-shape" />
+      <svg
+        className="liquid-cursor-outline"
+        width="32"
+        height="32"
+        viewBox="0 0 32 32"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <polygon
+          points="0,0 0,26 8,18.5 13.5,27.5 18,25 12.5,16 23,15"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+      </svg>
     </div>
   );
 };

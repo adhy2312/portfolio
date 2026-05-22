@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { FiLinkedin, FiInstagram } from 'react-icons/fi';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -22,6 +23,16 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
 
   const handleNavClick = (e, target) => {
     e.preventDefault();
@@ -61,52 +72,94 @@ const Navbar = () => {
   ];
 
   return (
-    <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
-      <div className="navbar-inner">
-        <a
-          className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
-          href="#hero"
-          onClick={handleLogoClick}
-          title="Try clicking me 5 times... ✨"
-        >
-          <span className="logo-text">ADHY</span>
-          <span className="logo-dot">.</span>
-        </a>
+    <>
+      {/* Backdrop overlay for mobile menu */}
+      <div
+        className={`mobile-menu-backdrop ${menuOpen ? 'backdrop-visible' : ''}`}
+        onClick={() => setMenuOpen(false)}
+      />
 
-        <ul className={`nav-links ${menuOpen ? 'nav-links-open' : ''}`}>
-          {links.map((link) => (
-            <li key={link.target}>
+      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
+        <div className="navbar-inner">
+          <a
+            className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
+            href="#hero"
+            onClick={handleLogoClick}
+            title="Try clicking me 5 times... ✨"
+          >
+            <span className="logo-text">ADHY</span>
+            <span className="logo-dot">.</span>
+          </a>
+
+          <ul className={`nav-links ${menuOpen ? 'nav-links-open' : ''}`}>
+            {/* Mobile-only section label */}
+            <li className="mobile-menu-label" aria-hidden="true">
+              NAVIGATION
+            </li>
+
+            {links.map((link, idx) => (
+              <li key={link.target}>
+                <a
+                  href={`#${link.target}`}
+                  className="nav-link"
+                  onClick={(e) => handleNavClick(e, link.target)}
+                >
+                  <span className="nav-link-index">0{idx + 1}</span>
+                  {link.label}
+                </a>
+              </li>
+            ))}
+            <li>
               <a
-                href={`#${link.target}`}
-                className="nav-link"
-                onClick={(e) => handleNavClick(e, link.target)}
+                href="/resume.pdf"
+                download
+                className="nav-resume-btn"
               >
-                {link.label}
+                Resume ↓
               </a>
             </li>
-          ))}
-          <li>
-            <a
-              href="/resume.pdf"
-              download
-              className="nav-resume-btn"
-            >
-              Resume ↓
-            </a>
-          </li>
-        </ul>
 
-        <button
-          className={`hamburger ${menuOpen ? 'hamburger-open' : ''}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-          aria-label="Toggle menu"
-        >
-          <span></span>
-          <span></span>
-          <span></span>
-        </button>
-      </div>
-    </nav>
+            {/* Mobile-only divider */}
+            <li className="mobile-menu-divider" aria-hidden="true" />
+
+            {/* Mobile-only social links */}
+            <li className="mobile-menu-socials">
+              <div className="mobile-socials-label">CONNECT</div>
+              <div className="mobile-socials-row">
+                <a
+                  href="https://www.linkedin.com/in/adhithya-mohan-s"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mobile-social-link"
+                  aria-label="LinkedIn"
+                >
+                  <FiLinkedin />
+                </a>
+                <a
+                  href="https://instagram.com/zoomout_frames"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mobile-social-link"
+                  aria-label="Instagram"
+                >
+                  <FiInstagram />
+                </a>
+              </div>
+            </li>
+          </ul>
+
+          <button
+            className={`hamburger ${menuOpen ? 'hamburger-open' : ''}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label="Toggle menu"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+        </div>
+      </nav>
+    </>
   );
 };
 
