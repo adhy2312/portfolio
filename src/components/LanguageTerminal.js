@@ -142,63 +142,129 @@ const LanguageTerminal = () => {
   const snippet = SNIPPETS[idx];
   const displayedLines = useTypewriter(snippet.lines, typing);
 
+  const fireEgg = (name, duration) => {
+    window.dispatchEvent(new CustomEvent('trigger-egg', { detail: { name, duration } }));
+  };
+
   const handleCommand = (cmd) => {
-    const lowerCmd = cmd.trim().toLowerCase();
+    const raw = cmd.trim();
+    const lowerCmd = raw.toLowerCase();
     let response = '';
-    
+
     if (!lowerCmd) return;
-    
+
     switch (lowerCmd) {
+
+      /* ── INFO ── */
       case 'help':
-        response = 'Available commands: help, about, skills, ping, clear';
+        response = '📋 Commands: help | about | skills | contact | ping | clear | rickroll\n💡 Psst… there are secret commands hidden on the site 👀';
         break;
       case 'about':
-        response = 'Hi, I am Adhithya Mohan! I am a full-stack dev and IoT enthusiast.';
+        response = '👋 Hi! I\'m Adhithya Mohan — full-stack dev, IoT nerd, and lens-lover based in Kerala, India.';
         break;
       case 'skills':
-        response = 'React, Node.js, Python, C++, Arduino, MongoDB, etc.';
+        response = '⚡ React · Node.js · Python · C++ · ESP32 · Arduino · Figma · MongoDB · Firebase · STM32';
+        break;
+      case 'contact':
+        response = '📬 adhithyamohan2312@gmail.com | linkedin: adhithya-mohan-s | ig: @zoomout_frames';
         break;
       case 'ping':
-        response = 'pong! 🏓';
+        response = '🏓 pong! (0.42ms — you\'re fast!)';
+        break;
+      case 'date':
+        response = `📅 ${new Date().toDateString()} — still coding at this hour?`;
+        break;
+      case 'whoami':
+        response = '🕵️ You are: visitor. Clearance level: curious. Welcome.';
+        break;
+      case 'ls':
+      case 'dir':
+        response = '📁 /about  /skills  /works  /photography  /contact  /secret 👀';
         break;
       case 'clear':
         setCommandHistory([]);
         return;
+
+      /* ── EASTER EGGS ── */
       case 'sudo rm -rf /':
-        response = 'Nice try. Permission denied. 😉';
+        response = '🚫 Permission denied. Nice try though, system stays alive.';
         break;
-      case 'matrix':
-        response = 'Entering the matrix...';
-        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'matrix' }));
-        break;
-      case 'barrelroll':
-        response = 'Executing 360 flip...';
-        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'barrelroll' }));
-        break;
+
       case 'party':
-        response = 'Initiating party protocols! 🎉';
-        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'party' }));
+        response = '🎉 PARTY MODE ACTIVATED! Get those lights flashing! 💃🕺';
+        fireEgg('party', 6000);
         break;
+
       case 'gravity':
-        response = 'Disabling physics...';
-        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'gravity' }));
+        response = '🌍 Disabling physics engine… EVERYTHING IS FALLING! 😱';
+        fireEgg('gravity', 5000);
         break;
+
+      case 'barrelroll':
+      case 'barrel roll':
+      case 'do a barrel roll':
+        response = '🔄 Executing barrel roll manoeuver… hold on!';
+        fireEgg('barrelroll', 1800);
+        break;
+
+      case 'matrix':
+        response = '💊 You took the red pill. Welcome to the Matrix, Neo.';
+        fireEgg('matrix', 8000);
+        break;
+
       case 'zoomout':
-        response = 'Initiating Ant-Man mode...';
-        window.dispatchEvent(new CustomEvent('trigger-egg', { detail: 'zoomout' }));
+        response = '🐜 Initiating Ant-Man protocol… shrinking to quantum realm!';
+        fireEgg('zoomout', 3000);
         break;
+
+      case 'vibe':
+      case 'vibes':
+        response = '✨ Maximum vibes unlocked. This is the way.';
+        fireEgg('vibe', 4000);
+        break;
+
+      case 'coffee':
+        response = '☕ Fuelling up… 90% of code runs on coffee anyway.';
+        fireEgg('coffee', 3500);
+        break;
+
+      case 'tictactoe':
+      case 'tic tac toe':
+      case 'game':
+        response = '🎮 Launching Tic-Tac-Toe… try to beat the AI!';
+        setTimeout(() => window.dispatchEvent(new CustomEvent('launch-ttt')), 500);
+        break;
+
+      case 'thanos':
+        response = '✨ Perfectly balanced, as all things should be. *snap*';
+        fireEgg('thanos', 15000);
+        break;
+
+      case 'glitch':
+        response = '⚡ Ẉ̣̣͗́̎́́ŕ̻̣n̮͒͏i̶̻̱̓n̶̻̪g̶̰̞̣͛ ̶̻̟̖͈r̻͐͛e̶̹͍a̶͚͋l̶͋i̵̻t̶͋y̶͋ ̶̻̟f̶͋͋l̶͋͋i̶͈͋c̶̰͇k̶͋͋e̶͋͋r̶͋͋i̶͈͋n̶͋͋g̶͋͋ ̶͋͋d̶͋͋e̶͋͋t̶͋͋e̶͋͋c̶̰͋t̶͋͋e̶͋͋d̶͋͋.';
+        fireEgg('matrix', 4000);
+        break;
+
       case 'rickroll':
-        response = 'Never gonna give you up...';
-        setTimeout(() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank'), 1000);
+        response = '🎵 Never gonna give you up… (opening in 3s, you asked for it)';
+        setTimeout(() => window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank'), 3000);
         break;
+
+      case 'konami':
+        response = '🕹️ Hint: ↑↑↓↓←→←→BA — try it on your keyboard for a surprise!';
+        break;
+
+      case 'adhy':
+      case 'adhithya':
+        response = '👨‍💻 That\'s me! ECE student, builder, photographer. Say hi → adhithyamohan2312@gmail.com';
+        break;
+
       default:
-        response = `Command not found: ${cmd}. Type 'help' for a list of commands.`;
+        response = `❌ Command not found: "${raw}"\n💡 Type 'help' for commands. (or try something creative…)`;
     }
 
-    
-    setCommandHistory(prev => [...prev, { cmd, response }]);
-    
-    // Auto scroll to bottom
+    setCommandHistory(prev => [...prev, { cmd: raw, response }]);
+
     setTimeout(() => {
       if (inputRef.current) {
         inputRef.current.scrollIntoView({ behavior: 'smooth' });

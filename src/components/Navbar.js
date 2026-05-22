@@ -59,7 +59,7 @@ const Navbar = () => {
     if (clickCountRef.current >= 5) {
       clickCountRef.current = 0;
       clearTimeout(clickTimerRef.current);
-      window.dispatchEvent(new CustomEvent('launch-pong'));
+      window.dispatchEvent(new CustomEvent('launch-ttt'));
     }
   };
 
@@ -79,6 +79,64 @@ const Navbar = () => {
         onClick={() => setMenuOpen(false)}
       />
 
+      {/* Mobile Slide-in Menu (Rendered outside of navbar-inner to prevent clipping) */}
+      <div className={`mobile-menu-panel ${menuOpen ? 'mobile-menu-open' : ''}`}>
+        <ul className="mobile-nav-links">
+          <li className="mobile-menu-label" aria-hidden="true">
+            NAVIGATION
+          </li>
+
+          {links.map((link, idx) => (
+            <li key={link.target}>
+              <a
+                href={`#${link.target}`}
+                className="mobile-nav-link"
+                onClick={(e) => handleNavClick(e, link.target)}
+              >
+                <span className="mobile-nav-link-index">0{idx + 1}</span>
+                {link.label}
+              </a>
+            </li>
+          ))}
+          <li>
+            <a
+              href="/resume.pdf"
+              download
+              className="mobile-nav-resume-btn"
+            >
+              Resume ↓
+            </a>
+          </li>
+
+          <li className="mobile-menu-divider" aria-hidden="true" />
+
+          <li className="mobile-menu-socials">
+            <div className="mobile-socials-label">CONNECT</div>
+            <div className="mobile-socials-row">
+              <a
+                href="https://www.linkedin.com/in/adhithya-mohan-s"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mobile-social-link"
+                aria-label="LinkedIn"
+              >
+                <FiLinkedin />
+              </a>
+              <a
+                href="https://instagram.com/zoomout_frames"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mobile-social-link"
+                aria-label="Instagram"
+              >
+                <FiInstagram />
+              </a>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      {/* Desktop Navbar */}
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
         <div className="navbar-inner">
           <a
@@ -91,20 +149,15 @@ const Navbar = () => {
             <span className="logo-dot">.</span>
           </a>
 
-          <ul className={`nav-links ${menuOpen ? 'nav-links-open' : ''}`}>
-            {/* Mobile-only section label */}
-            <li className="mobile-menu-label" aria-hidden="true">
-              NAVIGATION
-            </li>
-
-            {links.map((link, idx) => (
+          {/* Desktop Nav Links */}
+          <ul className="desktop-nav-links">
+            {links.map((link) => (
               <li key={link.target}>
                 <a
                   href={`#${link.target}`}
                   className="nav-link"
                   onClick={(e) => handleNavClick(e, link.target)}
                 >
-                  <span className="nav-link-index">0{idx + 1}</span>
                   {link.label}
                 </a>
               </li>
@@ -117,34 +170,6 @@ const Navbar = () => {
               >
                 Resume ↓
               </a>
-            </li>
-
-            {/* Mobile-only divider */}
-            <li className="mobile-menu-divider" aria-hidden="true" />
-
-            {/* Mobile-only social links */}
-            <li className="mobile-menu-socials">
-              <div className="mobile-socials-label">CONNECT</div>
-              <div className="mobile-socials-row">
-                <a
-                  href="https://www.linkedin.com/in/adhithya-mohan-s"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mobile-social-link"
-                  aria-label="LinkedIn"
-                >
-                  <FiLinkedin />
-                </a>
-                <a
-                  href="https://instagram.com/zoomout_frames"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mobile-social-link"
-                  aria-label="Instagram"
-                >
-                  <FiInstagram />
-                </a>
-              </div>
             </li>
           </ul>
 

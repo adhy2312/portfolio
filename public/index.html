@@ -14,16 +14,30 @@
     <meta property="og:description" content="Building impactful digital experiences with code, design, and creativity." />
     <meta property="og:type" content="website" />
 
-    <!-- Favicon -->
-    <link rel="icon" href="favicon.png" />
+    <!-- Favicon (smaller ico) -->
+    <link rel="icon" href="favicon.ico" />
 
-    <!-- Google Fonts — optimized with preconnect + display=swap -->
+    <!-- Google Fonts — critical UI fonts only (render-blocking kept minimal) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Only load the 3 fonts actually used across the entire UI on first paint -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Bodoni+Moda:ital,wght@0,400..900;1,400..900&family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <!-- Heavy display serifs used ONLY in hero h1 — load non-blocking after page renders -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="preload"
+      as="style"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+    </noscript>
+    <!-- DNS prefetch for GitHub API (used by GitHubStats) -->
+    <link rel="dns-prefetch" href="https://api.github.com" />
+    <link rel="dns-prefetch" href="https://cdn.sanity.io" />
 
     <!-- Critical inline styles for instant LCP / prevent FOUC -->
     <style>

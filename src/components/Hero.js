@@ -11,12 +11,16 @@ const Hero = () => {
   const [heroData, setHeroData] = useState(null);
   const [typedCharsCount, setTypedCharsCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
+  const [showParticles, setShowParticles] = useState(false);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
     client.fetch(query).then((data) => {
       if (data) setHeroData(data);
     }).catch(console.error);
+    // Defer particles until after first paint
+    const t = setTimeout(() => setShowParticles(true), 2000);
+    return () => clearTimeout(t);
   }, []);
 
   const displayData = {
@@ -57,37 +61,39 @@ const Hero = () => {
 
   return (
     <section id="hero" className="hero-minimal">
-      <Particles
-        id="tsparticles"
-        init={particlesInit}
-        loaded={particlesLoaded}
-        options={{
-          background: { color: { value: "#060918" } },
-          fpsLimit: 24,
-          interactivity: {
-            events: { onClick: { enable: false }, onHover: { enable: false }, resize: false },
-          },
-          particles: {
-            color: { value: "#ffffff" },
-            links: { enable: false }, // Disabling links is the biggest win
-            move: {
-              enable: true,
-              speed: 0.5,
-              direction: "none",
-              outModes: { default: "out" },
-              random: true,
+      {showParticles && (
+        <Particles
+          id="tsparticles"
+          init={particlesInit}
+          loaded={particlesLoaded}
+          options={{
+            background: { color: { value: "#060918" } },
+            fpsLimit: 24,
+            interactivity: {
+              events: { onClick: { enable: false }, onHover: { enable: false }, resize: false },
             },
-            number: {
-              value: window.innerWidth > 768 ? 18 : 0, // 0 on mobile = no particles
-              density: { enable: false },
+            particles: {
+              color: { value: "#ffffff" },
+              links: { enable: false },
+              move: {
+                enable: true,
+                speed: 0.5,
+                direction: "none",
+                outModes: { default: "out" },
+                random: true,
+              },
+              number: {
+                value: window.matchMedia('(max-width: 768px)').matches ? 0 : 18,
+                density: { enable: false },
+              },
+              opacity: { value: 0.25 },
+              shape: { type: "circle" },
+              size: { value: { min: 1, max: 2 } },
             },
-            opacity: { value: 0.25 },
-            shape: { type: "circle" },
-            size: { value: { min: 1, max: 2 } },
-          },
-          detectRetina: false,
-        }}
-      />
+            detectRetina: false,
+          }}
+        />
+      )}
 
       <div className="hero-minimal-content optimize-gpu">
         <h1 className="hero-name-giant metallic-reveal">

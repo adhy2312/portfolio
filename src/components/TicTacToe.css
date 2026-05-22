@@ -1,0 +1,205 @@
+/* ═══════════════════════════════════════════
+   TIC TAC TOE — Premium glassmorphic game
+═══════════════════════════════════════════ */
+.ttt-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.ttt-modal {
+  background: linear-gradient(135deg, rgba(15,15,40,0.97) 0%, rgba(8,8,28,0.99) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 24px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.05) inset,
+    0 40px 80px rgba(0,0,0,0.6),
+    0 0 60px rgba(108,99,255,0.12);
+}
+
+/* Header */
+.ttt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.ttt-title h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  margin: 0.3rem 0 0;
+  letter-spacing: 2px;
+}
+
+.ttt-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent-primary, #6C63FF);
+  background: rgba(108,99,255,0.12);
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 50px;
+  padding: 3px 10px;
+}
+
+.ttt-subtitle {
+  font-size: 0.78rem;
+  color: rgba(255,255,255,0.35);
+  margin: 0.3rem 0 0;
+}
+
+.ttt-close {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 10px;
+  color: rgba(255,255,255,0.5);
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.ttt-close:hover {
+  color: #fff;
+  background: rgba(255,255,255,0.1);
+}
+
+/* Score bar */
+.ttt-scores {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 0.8rem 1.5rem;
+  margin-bottom: 1.2rem;
+}
+
+.ttt-score-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+}
+
+.ttt-score-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 1.5px;
+  color: rgba(255,255,255,0.3);
+}
+
+.ttt-score-val {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.x-color   { color: #60A5FA; }
+.o-color   { color: #F87171; }
+.draw-color { color: rgba(255,255,255,0.4); }
+
+.ttt-score-sep {
+  color: rgba(255,255,255,0.15);
+  font-size: 1rem;
+}
+
+/* Status */
+.ttt-status {
+  text-align: center;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.55);
+  margin-bottom: 1.5rem;
+  min-height: 1.4rem;
+  transition: color 0.3s ease;
+}
+
+.ttt-status.status-win  { color: #4ADE80; }
+.ttt-status.status-lose { color: #F87171; }
+.ttt-status.status-draw { color: #FBBF24; }
+
+/* Board */
+.ttt-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+
+.ttt-cell {
+  aspect-ratio: 1;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 14px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ttt-cell:hover:not(:disabled) {
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.2);
+}
+
+.ttt-cell.ttt-x { color: #60A5FA; }
+.ttt-cell.ttt-o { color: #F87171; }
+
+.ttt-cell.ttt-win-cell {
+  background: rgba(108,99,255,0.18);
+  border-color: rgba(108,99,255,0.5);
+  box-shadow: 0 0 20px rgba(108,99,255,0.25);
+}
+
+/* Reset button */
+.ttt-reset {
+  width: 100%;
+  padding: 12px;
+  background: rgba(108,99,255,0.15);
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.8);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.ttt-reset:hover {
+  background: rgba(108,99,255,0.28);
+  border-color: rgba(108,99,255,0.5);
+  color: #fff;
+}

@@ -82,35 +82,41 @@ const filters = [
   { label: 'Photography', value: 'photography' },
 ];
 
+const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
+
 const TiltCard = ({ children, project, index }) => {
   const ref = useRef(null);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
-
   const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
   const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["12.5deg", "-12.5deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12.5deg", "12.5deg"]);
 
   const handleMouseMove = (e) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
   };
+  const handleMouseLeave = () => { x.set(0); y.set(0); };
 
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
+  // Touch/mobile: skip 3D physics layers, use simple fade-in
+  if (isTouchDevice) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.5, delay: index * 0.06 }}
+        className="work-card-wrapper"
+        style={{ '--card-accent': project.accent }}
+      >
+        <div className="work-card glass-card">{children}</div>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -120,19 +126,10 @@ const TiltCard = ({ children, project, index }) => {
       initial={{ opacity: 1, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      style={{
-        rotateX,
-        rotateY,
-        transformStyle: "preserve-3d",
-        perspective: "1000px",
-        '--card-accent': project.accent
-      }}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: "1000px", '--card-accent': project.accent }}
       className="work-card-wrapper"
     >
-      <div 
-        className="work-card glass-card"
-        style={{ transform: "translateZ(50px)" }}
-      >
+      <div className="work-card glass-card" style={{ transform: "translateZ(50px)" }}>
         {children}
       </div>
     </motion.div>

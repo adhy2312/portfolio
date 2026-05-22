@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+/* Fonts are loaded in index.html to avoid duplicate requests. Only @font-face overrides here. */
 
 @font-face {
   font-family: 'Sterion';
@@ -238,21 +238,19 @@ body {
 .ambient-blob {
   position: fixed;
   border-radius: 50%;
-  filter: blur(90px); /* 90px vs original 120px — still beautiful, noticeably lighter */
-  opacity: 0.16;
+  filter: blur(80px);
+  opacity: 0.14;
   pointer-events: none;
   z-index: 0;
-  animation: blobFloat 16s ease-in-out infinite alternate;
+  animation: blobFloat 20s ease-in-out infinite alternate;
   will-change: transform;
-  contain: strict;
+  contain: layout style;
 }
 
+/* Mobile: hide blobs — expensive GPU compositing with zero user benefit on small screens */
 @media (max-width: 768px) {
   .ambient-blob {
-    /* Keep blobs on mobile but much cheaper */
-    filter: blur(55px);
-    opacity: 0.11;
-    animation-duration: 22s; /* slower = fewer repaints */
+    display: none;
   }
 }
 
@@ -803,75 +801,47 @@ body {
    FUNNY EASTER EGG EFFECTS
 ═══════════════════════════════════════════ */
 
-/* Barrel Roll */
+/* Barrel Roll — whole page spins once */
 .egg-barrelroll {
-  animation: barrelRollEffect 4s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+  animation: appBarrelRoll 1.2s cubic-bezier(0.45, 0, 0.55, 1) forwards !important;
+  transform-origin: center center;
 }
-@keyframes barrelRollEffect {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* Gravity - Elements fall down */
-.egg-gravity {
-  overflow: hidden;
-}
-.egg-gravity p, 
-.egg-gravity h1, 
-.egg-gravity h2, 
-.egg-gravity h3, 
-.egg-gravity .section-label,
-.egg-gravity .btn-primary,
-.egg-gravity .btn-outline {
-  transition: transform 3s cubic-bezier(0.47, 0, 0.745, 0.715) !important;
-  transform: translateY(120vh) rotate(15deg) !important;
+@keyframes appBarrelRoll {
+  0%   { transform: rotate(0deg) scale(1); }
+  25%  { transform: rotate(90deg) scale(0.88); }
+  50%  { transform: rotate(180deg) scale(0.82); }
+  75%  { transform: rotate(270deg) scale(0.88); }
+  100% { transform: rotate(360deg) scale(1); }
 }
 
-/* Party Mode - Flashing colors */
-.egg-party {
-  animation: partyBg 0.3s infinite;
+/* Gravity — sections slide off screen */
+.egg-gravity { overflow: hidden; }
+.egg-gravity section {
+  animation: gravityFall 2.5s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
 }
-@keyframes partyBg {
-  0% { background-color: rgba(255, 0, 0, 0.2) !important; }
-  20% { background-color: rgba(0, 255, 0, 0.2) !important; }
-  40% { background-color: rgba(0, 0, 255, 0.2) !important; }
-  60% { background-color: rgba(255, 255, 0, 0.2) !important; }
-  80% { background-color: rgba(255, 0, 255, 0.2) !important; }
-  100% { background-color: rgba(0, 255, 255, 0.2) !important; }
+.egg-gravity section:nth-child(1) { animation-delay: 0.00s; }
+.egg-gravity section:nth-child(2) { animation-delay: 0.10s; }
+.egg-gravity section:nth-child(3) { animation-delay: 0.18s; }
+.egg-gravity section:nth-child(4) { animation-delay: 0.26s; }
+.egg-gravity section:nth-child(5) { animation-delay: 0.34s; }
+.egg-gravity section:nth-child(6) { animation-delay: 0.42s; }
+.egg-gravity section:nth-child(7) { animation-delay: 0.50s; }
+.egg-gravity section:nth-child(8) { animation-delay: 0.58s; }
+@keyframes gravityFall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(120vh) rotate(8deg); opacity: 0; }
 }
 
-/* Zoom Out - The Ant-Man effect */
+/* Zoom Out — Ant-Man shrink-and-return */
 .egg-zoomout {
-  animation: zoomOutEffect 5s ease-in-out forwards;
+  animation: appZoomOut 3s ease-in-out forwards !important;
+  transform-origin: center center;
 }
-@keyframes zoomOutEffect {
-  0% { transform: scale(1); }
-  40% { transform: scale(0.05) rotate(10deg); }
-  60% { transform: scale(0.05) rotate(-10deg); }
+@keyframes appZoomOut {
+  0%   { transform: scale(1); }
+  38%  { transform: scale(0.06) rotate(8deg); }
+  62%  { transform: scale(0.06) rotate(-8deg); }
   100% { transform: scale(1); }
-}
-
-/* Matrix Effect Overlay */
-.egg-matrix::after {
-  content: '010101101010101101010101';
-  position: fixed;
-  inset: 0;
-  z-index: 10001;
-  background: rgba(0, 0, 0, 0.9);
-  color: #00ff00;
-  font-family: 'Fira Code', monospace;
-  font-size: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  word-break: break-all;
-  animation: matrixText 0.1s infinite;
-}
-@keyframes matrixText {
-  0% { content: '10101011010101010101\n01101010101110101010\n10101110101010101110'; }
-  50% { content: '01011001010111010110\n11110101010101011010\n00010101110101010101'; }
-  100% { content: '11101010101110101010\n10101010111101010101\n11010101101010110101'; }
 }
 
 @media (prefers-reduced-motion: reduce) {

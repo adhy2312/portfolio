@@ -43,37 +43,95 @@
   z-index: 2;
 }
 
-.loader-logo {
+.loader-name-wrap {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
 }
 
-.loader-char {
+.loader-name-text {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(3rem, 10vw, 6.5rem);
   font-weight: 800;
-  background: linear-gradient(180deg, #fff 0%, #888 50%, #eee 51%, #444 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  opacity: 0;
-  animation: loaderCharIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  filter: drop-shadow(0 0 8px rgba(var(--accent-primary-rgb), 0.3));
+  color: #111;
+  letter-spacing: 6px;
+  line-height: 1;
+  animation: loaderCharIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  transition: color 0.1s ease;
+  position: relative;
+  display: inline-block;
+}
+
+/* Glitch state — chromatic aberration + flicker */
+.loader-name-text.loader-glitching {
+  animation: glitchFlicker 0.04s steps(1) infinite !important;
+  color: #000;
+}
+
+.loader-name-text.loader-glitching::before,
+.loader-name-text.loader-glitching::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+.loader-name-text.loader-glitching::before {
+  color: #ff003c;
+  animation: glitchR 0.04s steps(1) infinite;
+  clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+}
+
+.loader-name-text.loader-glitching::after {
+  color: #00e5ff;
+  animation: glitchB 0.04s steps(1) infinite;
+  clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+}
+
+@keyframes glitchFlicker {
+  0%,100% { opacity: 1; transform: translateX(0); }
+  25%      { opacity: 0.7; transform: translateX(-3px); }
+  50%      { opacity: 0.9; transform: translateX(3px); }
+  75%      { opacity: 0.6; transform: translateX(-2px); }
+}
+
+@keyframes glitchR {
+  0%,100% { transform: translateX(-4px); opacity: 0.8; }
+  50%      { transform: translateX(4px); opacity: 0.6; }
+}
+
+@keyframes glitchB {
+  0%,100% { transform: translateX(4px); opacity: 0.8; }
+  50%      { transform: translateX(-4px); opacity: 0.6; }
 }
 
 @keyframes loaderCharIn {
-  from { opacity: 0; transform: translateY(30px); }
+  from { opacity: 0; transform: translateY(24px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 .loader-dot {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(3rem, 8vw, 6rem);
+  font-size: clamp(3rem, 10vw, 6.5rem);
   font-weight: 800;
-  color: var(--accent-primary);
-  animation: loaderCharIn 0.5s 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  text-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.6);
+  color: var(--accent-primary, #6C63FF);
+  line-height: 1;
+  text-shadow: 0 0 16px rgba(108, 99, 255, 0.6);
+}
+
+/* Language label beneath the name */
+.loader-lang-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: rgba(0, 0, 0, 0.35);
+  transition: opacity 0.2s ease;
+  min-height: 1em;
 }
 
 /* Retro VU-meter style loading bar */
