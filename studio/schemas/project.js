@@ -14,6 +14,21 @@ export default {
       type: 'text',
     },
     {
+      name: 'category',
+      title: 'Category',
+      type: 'string',
+      options: {
+        list: [
+          { title: 'Full-Stack', value: 'fullstack' },
+          { title: 'Frontend', value: 'frontend' },
+          { title: 'Electronics / IoT', value: 'electronics' },
+          { title: 'Design', value: 'design' },
+          { title: 'Photography', value: 'photography' },
+        ],
+        layout: 'radio',
+      },
+    },
+    {
       name: 'tags',
       title: 'Tags',
       type: 'array',
@@ -28,11 +43,13 @@ export default {
     {
       name: 'githubLink',
       title: 'GitHub Link',
+      description: 'Leave empty to hide the GitHub button on the card.',
       type: 'url',
     },
     {
       name: 'liveLink',
-      title: 'Live Link',
+      title: 'Live / Demo Link',
+      description: 'Leave empty to hide the View Project button on the card.',
       type: 'url',
     },
   ],

@@ -11,8 +11,8 @@ const projects = [
       'A full-featured organizational portal for ISTE MBCET — built with Next.js and Sanity CMS. Features membership management, event listings, internship launchpad, and a premium glassmorphism UI.',
     tags: ['Next.js', 'Sanity CMS', 'Supabase', 'Framer Motion'],
     category: 'fullstack',
-    link: '#',
-    github: '#',
+    liveLink: null,
+    githubLink: null,
     accent: 'var(--accent-primary)',
     icon: <FiGlobe />,
   },
@@ -22,8 +22,8 @@ const projects = [
       'An ESP32-based intelligent lighting controller that reacts to ambient light and motion. Features Bluetooth configuration, LDR sensor integration, and real-time PWM dimming.',
     tags: ['ESP32', 'Arduino', 'Embedded C', 'IoT'],
     category: 'electronics',
-    link: '#',
-    github: '#',
+    liveLink: null,
+    githubLink: null,
     accent: 'var(--accent-green)',
     icon: <FiZap />,
   },
@@ -33,8 +33,8 @@ const projects = [
       'This very portfolio — crafted with React, Framer Motion, and a custom design system. Features animated hero, skill bars, particle effects, and full EmailJS integration.',
     tags: ['React', 'Framer Motion', 'CSS3', 'EmailJS'],
     category: 'frontend',
-    link: '#',
-    github: '#',
+    liveLink: null,
+    githubLink: null,
     accent: 'var(--accent-cyan)',
     icon: <FiStar />,
   },
@@ -44,8 +44,8 @@ const projects = [
       'A comprehensive UI kit and design system built in Figma — includes component library, color palette, typography scale, spacing grid, and interactive prototypes.',
     tags: ['Figma', 'UI/UX', 'Prototyping', 'Design System'],
     category: 'design',
-    link: '#',
-    github: '#',
+    liveLink: null,
+    githubLink: null,
     accent: 'var(--accent-gold)',
     icon: <FiPenTool />,
   },
@@ -55,8 +55,8 @@ const projects = [
       'A curated visual storytelling project capturing human emotion, urban textures, and golden-hour landscapes. Shot and edited using Adobe Lightroom.',
     tags: ['Photography', 'Lightroom', 'Street', 'Documentary'],
     category: 'photography',
-    link: '#',
-    github: null,
+    liveLink: 'https://www.instagram.com/zoomout_frames',
+    githubLink: null,
     accent: 'var(--accent-magenta)',
     icon: <FiCamera />,
   },
@@ -66,8 +66,8 @@ const projects = [
       'A wireless home automation prototype using NodeMCU and MQTT protocol. Control appliances via a custom-built React dashboard with real-time state sync.',
     tags: ['NodeMCU', 'MQTT', 'React', 'IoT'],
     category: 'electronics',
-    link: '#',
-    github: '#',
+    liveLink: null,
+    githubLink: null,
     accent: 'var(--accent-green)',
     icon: <FiHome />,
   },
@@ -141,7 +141,7 @@ const MyWorks = () => {
   const [fetchedProjects, setFetchedProjects] = useState([]);
 
   useEffect(() => {
-    const query = '*[_type == "project"]';
+    const query = '*[_type == "project"] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink }';
     client.fetch(query).then((data) => {
       if (data && data.length > 0) {
         setFetchedProjects(data);
@@ -210,14 +210,16 @@ const MyWorks = () => {
                 <div className="work-card-top" style={{ transform: "translateZ(30px)" }}>
                   <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
                   <div className="work-card-links">
-                    {project.github && (
-                      <a href={project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub">
+                    {(project.githubLink || project.github) && (
+                      <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub">
                         <FiGithub size={16} />
                       </a>
                     )}
-                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="Live">
-                      <FiExternalLink size={16} />
-                    </a>
+                    {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' && (
+                      <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="Live">
+                        <FiExternalLink size={16} />
+                      </a>
+                    )}
                   </div>
                 </div>
 
@@ -233,9 +235,15 @@ const MyWorks = () => {
                 </div>
 
                 <div className="work-card-footer" style={{ transform: "translateZ(35px)" }}>
-                  <a href={project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
-                    View Project <FiArrowRight size={14} />
-                  </a>
+                  {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
+                    <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
+                      View Project <FiArrowRight size={14} />
+                    </a>
+                  ) : (
+                    <span className="work-view-link work-view-link-disabled">
+                      Coming Soon
+                    </span>
+                  )}
                 </div>
               </TiltCard>
             ))}
