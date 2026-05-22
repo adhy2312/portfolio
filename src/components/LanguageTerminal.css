@@ -157,7 +157,6 @@
 }
 
 /* Syntax token colors */
-.lt-token { }
 .lt-plain { color: #CDD6F4; }
 .lt-kw    { color: #CBA6F7; } /* purple – keywords */
 .lt-fn    { color: #89DCEB; } /* cyan – functions */
