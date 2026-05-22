@@ -20,14 +20,19 @@ const Footer      = lazy(() => import('./components/Footer'));
 const CallToAction = lazy(() => import('./components/CallToAction'));
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
+const ZipGame       = lazy(() => import('./components/ZipGame'));
 const TicTacToe   = lazy(() => import('./components/TicTacToe'));
 
 function App() {
   const [showGame, setShowGame]   = useState(false);
   const [loading, setLoading]     = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
+  const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
 
   useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+
     // launch-ttt event (from logo 5-click easter egg)
     const handleLaunch = () => setShowGame(true);
     window.addEventListener('launch-ttt', handleLaunch);
@@ -55,6 +60,7 @@ function App() {
     window.addEventListener('trigger-egg', eggHandler);
 
     return () => {
+      window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
@@ -99,8 +105,14 @@ function App() {
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
 
-      {/* TicTacToe game — outside Suspense */}
-      {showGame && <TicTacToe onClose={() => setShowGame(false)} />}
+      {/* Easter egg games — outside Suspense */}
+      {showGame && (
+        isMobile ? (
+          <ZipGame onClose={() => setShowGame(false)} />
+        ) : (
+          <TicTacToe onClose={() => setShowGame(false)} />
+        )
+      )}
 
     </div>
   );

@@ -116,7 +116,7 @@ const TicTacToe = ({ onClose }) => {
         {/* Header */}
         <div className="ttt-header">
           <div className="ttt-title">
-            <span className="ttt-badge">EASTER EGG 🥚</span>
+            <span className="ttt-badge">Game time</span>
             <h2>TIC_TAC_TOE</h2>
             <p className="ttt-subtitle">You vs. AI — good luck!</p>
           </div>
