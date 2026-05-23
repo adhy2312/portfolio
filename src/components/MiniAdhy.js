@@ -401,15 +401,15 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
     body: JSON.stringify(body),
   });
 
-  if (res.status === 429) {
+  if (res.status === 429 || res.status >= 500) {
     if (retryCount < RETRY_DELAYS.length) {
-      // Rate limited — wait with exponential backoff then retry
-      console.warn(`Gemini rate limited (429). Retrying in ${RETRY_DELAYS[retryCount] / 1000}s… (attempt ${retryCount + 1}/${RETRY_DELAYS.length})`);
+      // Rate limited or Server Error — wait with exponential backoff then retry
+      console.warn(`Gemini API error (${res.status}). Retrying in ${RETRY_DELAYS[retryCount] / 1000}s… (attempt ${retryCount + 1}/${RETRY_DELAYS.length})`);
       await new Promise(r => setTimeout(r, RETRY_DELAYS[retryCount]));
       return sendToGemini(history, activePrompt, retryCount + 1, maxTokens);
     } else {
       // All retries exhausted — throw a friendly error
-      throw new Error('RATE_LIMITED');
+      throw new Error(res.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR');
     }
   }
 
@@ -640,9 +640,12 @@ const MiniAdhy = () => {
       setMessages(prev => [...prev, { role: 'bot', text: reply }]);
     } catch (e) {
       console.error('Mini-Adhy error:', e);
-      const errorText = e.message === 'RATE_LIMITED'
-        ? "I'm getting too many requests right now — give it a minute and try again da 😅 (Gemini free tier rate limit)"
-        : `Something went wrong — ${e.message?.slice(0, 60)}`;
+      let errorText = `Something went wrong — ${e.message?.slice(0, 60)}`;
+      if (e.message === 'RATE_LIMITED') {
+        errorText = "I'm getting too many requests right now — give it a minute and try again da 😅 (Gemini free tier rate limit)";
+      } else if (e.message === 'SERVER_ERROR') {
+        errorText = "The Gemini servers are currently overloaded (503). Give it a few seconds and try again! ⚡";
+      }
       setMessages(prev => [...prev, { role: 'bot', text: errorText }]);
     } finally {
       setLoading(false);
