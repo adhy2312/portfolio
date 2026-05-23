@@ -162,7 +162,8 @@ body {
 
 /* Center the section label in centered headers */
 .skills-header .section-label,
-.trusted-header .section-label {
+.trusted-header .section-label,
+.photo-header .section-label {
   margin-left: auto;
   margin-right: auto;
 }
@@ -200,7 +201,8 @@ body {
 
 /* Center title wrapper in centered headers */
 .skills-header .section-title-wrapper,
-.trusted-header .section-title-wrapper {
+.trusted-header .section-title-wrapper,
+.photo-header .section-title-wrapper {
   justify-content: center;
 }
 

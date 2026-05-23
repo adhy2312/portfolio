@@ -381,4 +381,4 @@ const LanguageTerminal = () => {
   );
 };
 
-export default LanguageTerminal;
+export default React.memo(LanguageTerminal);

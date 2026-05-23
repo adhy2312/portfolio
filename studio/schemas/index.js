@@ -11,6 +11,7 @@ import contact from './contact'
 import experience from './experience'
 import chatbotKnowledge from './chatbotKnowledge'
 import sectionStory from './sectionStory'
+import quoteCanvas from './quoteCanvas'
 
 export const schemaTypes = [
   hero,
@@ -25,5 +26,6 @@ export const schemaTypes = [
   contact,
   experience,
   chatbotKnowledge,
-  sectionStory
+  sectionStory,
+  quoteCanvas
 ]

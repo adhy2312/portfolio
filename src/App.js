@@ -21,10 +21,36 @@ const TrustedBy   = lazy(() => import('./components/TrustedBy'));
 const Contact     = lazy(() => import('./components/Contact'));
 const Footer      = lazy(() => import('./components/Footer'));
 const CallToAction = lazy(() => import('./components/CallToAction'));
+const QuoteCanvas = lazy(() => import('./components/QuoteCanvas'));
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame       = lazy(() => import('./components/ZipGame'));
 const TicTacToe   = lazy(() => import('./components/TicTacToe'));
+
+function LazySection({ children }) {
+  const [inView, setInView] = useState(false);
+  const ref = React.useRef();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: '600px' } // Pre-load 600px before scroll
+    );
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref} className="lazy-section-container" style={{ minHeight: inView ? 'auto' : '100vh' }}>
+      {inView && <Suspense fallback={<div className="lazy-loading-skeleton" />}>{children}</Suspense>}
+    </div>
+  );
+}
 
 function App() {
   const [showGame, setShowGame]   = useState(false);
@@ -82,29 +108,30 @@ function App() {
       <Suspense fallback={null}>
         <CustomCursor />
         <ScrollProgress />
-        {loading && <PageLoader onDone={() => setLoading(false)} />}
-
-        {/* Ambient background blobs — desktop only */}
-        <div className="ambient-blob ambient-blob-1" />
-        <div className="ambient-blob ambient-blob-2" />
-
-        <Navbar />
-        <Hero />
-
-        <div className="lazy-section"><About /></div>
-        <div className="lazy-section"><Skills /></div>
-        <div className="lazy-section"><Experience /></div>
-        <div className="lazy-section"><GitHubStats /></div>
-        <div className="lazy-section"><TrustedBy /></div>
-        <div className="lazy-section"><MyWorks /></div>
-        <div className="lazy-section"><Photography /></div>
-        <div className="lazy-section"><Achievements /></div>
-        <div className="lazy-section"><Testimonials /></div>
-        <div className="lazy-section"><CallToAction /></div>
-        <div className="lazy-section"><Contact /></div>
-        <Footer />
-
       </Suspense>
+      {loading && <PageLoader onDone={() => setLoading(false)} />}
+
+      {/* Ambient background blobs — desktop only */}
+      <div className="ambient-blob ambient-blob-1" />
+      <div className="ambient-blob ambient-blob-2" />
+
+      <Navbar />
+      <Hero />
+
+      {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
+      <LazySection><About /></LazySection>
+      <LazySection><Skills /></LazySection>
+      <LazySection><Experience /></LazySection>
+      <LazySection><GitHubStats /></LazySection>
+      <LazySection><TrustedBy /></LazySection>
+      <LazySection><MyWorks /></LazySection>
+      <LazySection><Photography /></LazySection>
+      <LazySection><Achievements /></LazySection>
+      <LazySection><Testimonials /></LazySection>
+      <LazySection><CallToAction /></LazySection>
+      <LazySection><Contact /></LazySection>
+      <LazySection><QuoteCanvas /></LazySection>
+      <LazySection><Footer /></LazySection>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />

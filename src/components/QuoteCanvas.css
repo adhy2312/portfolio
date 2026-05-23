@@ -1,0 +1,115 @@
+@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
+
+.quote-canvas-section {
+  padding: 8rem 0 6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: var(--bg-primary); /* Blend seamlessly before footer */
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.quote-canvas-container {
+  max-width: 800px;
+  width: 90%;
+  position: relative;
+  perspective: 1000px;
+}
+
+.quote-paper {
+  background: #fdfaf6;
+  padding: 5rem 4rem;
+  border-radius: 4px;
+  position: relative;
+  box-shadow: 
+    0 25px 50px -12px rgba(0,0,0,0.5),
+    inset 0 0 60px rgba(0,0,0,0.03);
+  /* Subtle canvas/paper texture */
+  background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.08'/%3E%3C/svg%3E");
+  transform-style: preserve-3d;
+}
+
+/* Slightly darken the edges to make it look old/authentic */
+.quote-paper::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+.quote-content {
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+.quote-text {
+  font-family: 'Caveat', cursive;
+  font-size: clamp(3rem, 6vw, 4.5rem);
+  font-weight: 600;
+  color: #1a1a2e; /* Dark ink color */
+  line-height: 1.3;
+  margin: 0;
+  letter-spacing: 1px;
+  text-shadow: 1px 1px 1px rgba(0,0,0,0.1);
+}
+
+.quote-author {
+  font-family: 'Caveat', cursive;
+  font-size: 2.2rem;
+  color: #4a4a5a;
+  margin-top: 1.5rem;
+  font-weight: 700;
+  text-align: right;
+  padding-right: 2rem;
+}
+
+/* Semi-transparent tape effect */
+.tape {
+  position: absolute;
+  width: 140px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1), inset 0 0 10px rgba(255,255,255,0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 3;
+}
+
+.tape-top-left {
+  top: -15px;
+  left: -35px;
+  transform: rotate(-12deg);
+}
+
+.tape-bottom-right {
+  bottom: -15px;
+  right: -35px;
+  transform: rotate(-8deg);
+}
+
+@media (max-width: 768px) {
+  .quote-paper {
+    padding: 3.5rem 2rem;
+  }
+  .tape {
+    width: 100px;
+    height: 30px;
+  }
+  .tape-top-left {
+    top: -10px;
+    left: -20px;
+  }
+  .tape-bottom-right {
+    bottom: -10px;
+    right: -20px;
+  }
+  .quote-author {
+    padding-right: 0;
+    text-align: center;
+  }
+}

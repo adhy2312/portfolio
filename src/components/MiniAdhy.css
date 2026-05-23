@@ -30,6 +30,7 @@
   color: #a78bfa;
   transition: padding 0.2s ease, box-shadow 0.2s ease;
   animation: ma-dockslide 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
 }
 
 @keyframes ma-dockslide {
@@ -93,6 +94,7 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
 
   animation: ma-popin 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform, opacity;
 }
 
 @keyframes ma-popin {
