@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiLinkedin, FiInstagram } from 'react-icons/fi';
+import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow } from 'react-icons/fi';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -9,12 +9,81 @@ const Navbar = () => {
   const clickTimerRef = useRef(null);
   const [logoGlow, setLogoGlow] = useState(false);
 
+  // Weather Ambient State
+  const [weatherData, setWeatherData] = useState(null);
+  const [ambientClass, setAmbientClass] = useState('');
+
   const scrolledRef = useRef(false);
+
+  // Fetch Weather Data
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        // South Kerala (Trivandrum) coordinates
+        const lat = 8.5241;
+        const lon = 76.9366;
+        const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
+        const data = await res.json();
+        
+        if (data.cod === 200 && data.weather && data.weather.length > 0) {
+          setWeatherData({
+            condition: data.weather[0].main,
+            temp: Math.round(data.main.temp),
+            isDay: data.dt > data.sys.sunrise && data.dt < data.sys.sunset
+          });
+        } else {
+          // API key might be inactive (401), fallback to a default visual state
+          console.warn("Weather API returned non-200. Using default ambient state.");
+          setWeatherData({
+            condition: 'Clear',
+            temp: 28,
+            isDay: true
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch ambient weather data:", error);
+        // Fallback visual state on network error
+        setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+      }
+    };
+
+    fetchWeather();
+  }, []);
+
+  // Determine Ambient Class
+  useEffect(() => {
+    if (!weatherData) return;
+    const { condition, isDay } = weatherData;
+    let newClass = '';
+    
+    switch (condition) {
+      case 'Clear':
+        newClass = isDay ? 'ambient-clear-day' : 'ambient-clear-night';
+        break;
+      case 'Clouds':
+        newClass = 'ambient-clouds';
+        break;
+      case 'Rain':
+      case 'Drizzle':
+        newClass = 'ambient-rain';
+        break;
+      case 'Thunderstorm':
+        newClass = 'ambient-thunderstorm';
+        break;
+      case 'Snow':
+        newClass = 'ambient-snow';
+        break;
+      default:
+        newClass = 'ambient-clouds'; // Default fallback
+    }
+    setAmbientClass(newClass);
+  }, [weatherData]);
+
 
   useEffect(() => {
     const handleScroll = () => {
       const isScrolled = window.scrollY > 50;
-      // Only trigger re-render when state actually changes
       if (isScrolled !== scrolledRef.current) {
         scrolledRef.current = isScrolled;
         setScrolled(isScrolled);
@@ -24,7 +93,6 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when menu is open
   useEffect(() => {
     if (menuOpen) {
       document.body.style.overflow = 'hidden';
@@ -43,10 +111,8 @@ const Navbar = () => {
 
   const handleLogoClick = (e) => {
     e.preventDefault();
-    // Scroll to top on single click
     handleNavClick(e, 'hero');
 
-    // Easter egg: 5 rapid clicks → launch ping pong
     clickCountRef.current += 1;
     setLogoGlow(true);
     setTimeout(() => setLogoGlow(false), 300);
@@ -71,15 +137,24 @@ const Navbar = () => {
     { label: 'Contact', target: 'contact' },
   ];
 
+  const renderWeatherIcon = () => {
+    if (!weatherData) return null;
+    const { condition, isDay } = weatherData;
+    if (condition === 'Clear') return isDay ? <FiSun className="weather-icon" /> : <FiMoon className="weather-icon" />;
+    if (condition === 'Clouds') return <FiCloud className="weather-icon" />;
+    if (condition === 'Rain' || condition === 'Drizzle') return <FiCloudRain className="weather-icon" />;
+    if (condition === 'Thunderstorm') return <FiCloudLightning className="weather-icon" />;
+    if (condition === 'Snow') return <FiCloudSnow className="weather-icon" />;
+    return <FiCloud className="weather-icon" />;
+  };
+
   return (
     <>
-      {/* Backdrop overlay for mobile menu */}
       <div
         className={`mobile-menu-backdrop ${menuOpen ? 'backdrop-visible' : ''}`}
         onClick={() => setMenuOpen(false)}
       />
 
-      {/* Mobile Slide-in Menu (Rendered outside of navbar-inner to prevent clipping) */}
       <div className={`mobile-menu-panel ${menuOpen ? 'mobile-menu-open' : ''}`}>
         <ul className="mobile-nav-links">
           <li className="mobile-menu-label" aria-hidden="true">
@@ -136,8 +211,7 @@ const Navbar = () => {
         </ul>
       </div>
 
-      {/* Desktop Navbar */}
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`}>
+      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`}>
         <div className="navbar-inner">
           <a
             className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
@@ -148,6 +222,13 @@ const Navbar = () => {
             <span className="logo-text">ADHY</span>
             <span className="logo-dot">.</span>
           </a>
+
+          {weatherData && (
+            <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>
+              {renderWeatherIcon()}
+              <span>{weatherData.temp}°C</span>
+            </div>
+          )}
 
           {/* Desktop Nav Links */}
           <ul className="desktop-nav-links">

@@ -131,6 +131,68 @@
   color: var(--accent-primary);
 }
 
+/* ── Click-to-copy Email Button ── */
+.copy-email-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-align: left;
+}
+
+.copy-email-text {
+  display: block;
+  font-size: 0.88rem;
+  color: var(--accent-secondary);
+  font-family: 'DM Sans', sans-serif;
+  transition: color 0.2s ease;
+}
+
+.copy-email-btn:hover .copy-email-text {
+  color: var(--accent-primary);
+}
+
+.copy-email-btn--copied .copy-email-text {
+  color: #39ff14;
+}
+
+.copy-email-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.65rem;
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.copy-email-btn:hover .copy-email-hint,
+.copy-email-btn--copied .copy-email-hint {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.copy-email-btn--copied .copy-email-hint {
+  color: #39ff14;
+  animation: copy-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes copy-pop {
+  0%   { transform: scale(0.8) translateY(0); }
+  60%  { transform: scale(1.15) translateY(0); }
+  100% { transform: scale(1) translateY(0); }
+}
+
 /* Retro LED availability indicator */
 .contact-availability {
   display: flex;

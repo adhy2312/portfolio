@@ -3,8 +3,36 @@ import React, { useRef, useState, useEffect } from 'react';
 import './Contact.css';
 import emailjs from 'emailjs-com';
 import { motion } from 'framer-motion';
-import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle, FiCheck, FiCopy } from 'react-icons/fi';
 import { client } from '../sanity';
+
+// ── Click-to-copy email component ──────────────────
+const CopyEmail = ({ email }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    });
+  };
+
+  return (
+    <button
+      className={`copy-email-btn ${copied ? 'copy-email-btn--copied' : ''}`}
+      onClick={handleCopy}
+      aria-label={copied ? 'Email copied!' : 'Click to copy email'}
+      title={copied ? 'Copied!' : 'Click to copy'}
+    >
+      <span className="copy-email-text">{email}</span>
+      <span className="copy-email-hint">
+        {copied
+          ? <><FiCheck size={11} /> Copied!</>
+          : <><FiCopy size={11} /> Click to copy</>}
+      </span>
+    </button>
+  );
+};
 
 const defaultContactInfo = [
   {
@@ -106,7 +134,9 @@ const Contact = () => {
                     <span className="contact-info-icon">{item.icon}</span>
                     <div>
                       <span className="contact-info-label">{item.label}</span>
-                      {item.href ? (
+                      {item.label === 'Email' ? (
+                        <CopyEmail email={item.value} />
+                      ) : item.href ? (
                         <a href={item.href} target="_blank" rel="noopener noreferrer" className="contact-info-value link">
                           {item.value}
                         </a>
