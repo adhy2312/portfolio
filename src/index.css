@@ -183,11 +183,13 @@ body {
   position: relative;
   display: inline-block;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.6rem, 7vw, 3rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
   margin-bottom: 0;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .section-title-wrapper {
@@ -197,6 +199,7 @@ body {
   align-items: center;
   gap: 16px;
   margin-bottom: 2rem;
+  flex-wrap: wrap;
 }
 
 /* Center title wrapper in centered headers */
