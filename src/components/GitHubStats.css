@@ -11,27 +11,34 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 3rem;
-  color: var(--text-secondary);
+  color: #a0a0b0; /* Light gray for dark background */
   flex-wrap: wrap;
 }
 
-/* The section-label inside github-header inherits the pill badge style */
+/* The section-label inside github-header inherits the pill badge style but needs to be light */
 .github-header .section-label {
   margin-bottom: 0;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+.github-header .section-label::before {
+  background: #ffffff;
+  box-shadow: 0 0 4px #ffffff, 0 0 8px #ffffff;
 }
 
 .gh-profile-link {
   margin-left: auto;
   font-family: 'Fira Code', monospace;
   font-size: 0.82rem;
-  color: var(--accent-primary);
+  color: #ffffff;
   text-decoration: none;
-  border: 1px solid rgba(var(--accent-primary-rgb), 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   padding: 6px 14px;
   border-radius: 20px;
   transition: all 0.2s ease;
 }
-.gh-profile-link:hover { background: rgba(var(--accent-primary-rgb), 0.12); }
+.gh-profile-link:hover { background: rgba(255, 255, 255, 0.12); }
 
 /* Loading skeleton */
 .gh-loading { display: flex; gap: 1.5rem; flex-wrap: wrap; }
