@@ -19,11 +19,9 @@ const Navbar = () => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        // South Kerala (Trivandrum) coordinates
-        const lat = 8.5241;
-        const lon = 76.9366;
+        // Fetching specifically for Thiruvananthapuram, Kerala
         const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
         const data = await res.json();
         
         if (data.cod === 200 && data.weather && data.weather.length > 0) {

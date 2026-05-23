@@ -445,10 +445,47 @@
 .ambient-clouds .logo-text { color: #8e9ba8; text-shadow: 0 0 10px rgba(180,190,200,0.5); }
 
 .ambient-rain .navbar-inner {
-  box-shadow: 0 10px 50px -5px rgba(0, 180, 255, 0.5), 0 8px 32px rgba(0,0,0,0.1) !important;
-  border-bottom: 1px solid rgba(0, 180, 255, 0.5) !important;
+  background: rgba(10, 25, 40, 0.65) !important;
+  backdrop-filter: blur(24px) contrast(1.1) brightness(0.9) !important;
+  -webkit-backdrop-filter: blur(24px) contrast(1.1) brightness(0.9) !important;
+  box-shadow: 0 10px 50px -5px rgba(0, 150, 255, 0.4), inset 0 -1px 15px rgba(0, 200, 255, 0.15), 0 8px 32px rgba(0,0,0,0.2) !important;
+  border-bottom: 1px solid rgba(0, 180, 255, 0.6) !important;
+  position: relative;
 }
-.ambient-rain .logo-text { color: #00a2ff; text-shadow: 0 0 10px rgba(0,180,255,0.6); }
+
+/* Water droplets hanging from the bottom */
+.ambient-rain .navbar-inner::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 5%;
+  right: 5%;
+  height: 4px;
+  background-image: 
+    radial-gradient(circle at center 0%, rgba(200,240,255,0.8) 0%, transparent 60%),
+    radial-gradient(circle at center 0%, rgba(255,255,255,0.6) 0%, transparent 50%);
+  background-size: 30px 4px, 20px 3px;
+  background-position: 0 0, 15px 0;
+  background-repeat: repeat-x;
+  filter: drop-shadow(0 2px 4px rgba(0, 180, 255, 0.6));
+  animation: rain-drip-drops 3s infinite linear;
+  pointer-events: none;
+}
+
+@keyframes rain-drip-drops {
+  0% { background-position: 0 0, 15px 0; }
+  100% { background-position: 120px 0, 135px 0; }
+}
+
+/* Liquid watery blue text with inner highlight and outer glow */
+.ambient-rain .logo-text { 
+  color: #bdf0ff; 
+  text-shadow: 
+    0 -1px 2px rgba(255, 255, 255, 0.8),
+    0 2px 2px rgba(0, 80, 150, 0.8),
+    0 0 12px rgba(0, 180, 255, 0.9), 
+    0 0 24px rgba(0, 120, 255, 0.6);
+}
 
 .ambient-snow .navbar-inner {
   box-shadow: 0 10px 50px -5px rgba(230, 245, 255, 0.6), 0 8px 32px rgba(0,0,0,0.1) !important;
