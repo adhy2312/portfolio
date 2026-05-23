@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import './Photography.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun } from 'react-icons/fi';
@@ -257,40 +258,44 @@ const Photography = () => {
         </motion.div>
       </div>
 
-      {/* Lightbox */}
-      <AnimatePresence>
-        {lightbox && (
-          <motion.div
-            className="lightbox"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setLightbox(null)}
-          >
-            <div className="lightbox-content" onClick={e => e.stopPropagation()}>
-              <motion.img
-                src={lightbox.src}
-                alt={lightbox.alt}
-                className="lightbox-img"
-                initial={{ scale: 0.85, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.85, opacity: 0 }}
-                transition={{ duration: 0.32 }}
-              />
+      {/* Lightbox rendered in Portal to escape stacking context */}
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {lightbox && (
+            <motion.div
+              className="lightbox"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setLightbox(null)}
+            >
+              <div className="lightbox-content">
+                <motion.img
+                  src={lightbox.src}
+                  alt={lightbox.alt}
+                  className="lightbox-img"
+                  onClick={e => e.stopPropagation()}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
+                  transition={{ duration: 0.32 }}
+                />
 
-              <div className="lightbox-footer">
-                <div className="lightbox-meta">
-                  <span className="lightbox-category">{lightbox.category}</span>
-                  <span className="lightbox-caption">{lightbox.caption}</span>
+                <div className="lightbox-footer" onClick={e => e.stopPropagation()}>
+                  <div className="lightbox-meta">
+                    <span className="lightbox-category">{lightbox.category}</span>
+                    <span className="lightbox-caption">{lightbox.caption}</span>
+                  </div>
+                  <ExifPanel src={lightbox.src} />
                 </div>
-                <ExifPanel src={lightbox.src} />
               </div>
-            </div>
 
-            <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </section>
   );
 };
