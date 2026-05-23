@@ -42,14 +42,14 @@ const TestimonialCard = memo(({ item }) => (
 ));
 
 const defaultQuotes = [
-  { name: 'Placeholder Client', role: 'CEO, Tech Corp',     quote: 'Adhithya is a phenomenal developer who brings engineering precision to every project. Highly recommended!' },
-  { name: 'Design Lead',        role: 'Creative Studio',    quote: 'An amazing eye for detail. The UI/UX work produced was top-notch and exactly what we needed.' },
-  { name: 'Tech Lead',          role: 'Startup Inc',        quote: 'Delivered beyond expectations. The system architecture is robust, scalable, and extremely well-documented.' },
+  { name: 'Placeholder Client', role: 'CEO, Tech Corp', quote: 'Adhithya is a phenomenal developer who brings engineering precision to every project. Highly recommended!' },
+  { name: 'Design Lead', role: 'Creative Studio', quote: 'An amazing eye for detail. The UI/UX work produced was top-notch and exactly what we needed.' },
+  { name: 'Tech Lead', role: 'Startup Inc', quote: 'Delivered beyond expectations. The system architecture is robust, scalable, and extremely well-documented.' },
 ];
 
 const Testimonials = () => {
   const [quotes, setQuotes] = useState([]);
-  
+
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('testimonials');
 
@@ -85,7 +85,7 @@ const Testimonials = () => {
           <span className="section-label">{"// recommendations"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Endorsements">
-              <span className="section-title-inner">Kind <span>Words</span></span>
+              <span className="section-title-inner">Testimonials</span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('testimonials')} aria-label="Read story behind this section">
