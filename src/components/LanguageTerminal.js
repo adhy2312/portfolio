@@ -359,6 +359,7 @@ const LanguageTerminal = () => {
               className="lt-input"
               spellCheck="false"
               autoComplete="off"
+              aria-label="Terminal input"
             />
           </div>
         </div>
