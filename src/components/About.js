@@ -4,6 +4,7 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import dp from '../assets/dp.jpg';
 import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 
 
@@ -16,6 +17,8 @@ const defaultStats = [
 
 const About = () => {
   const [aboutData, setAboutData] = useState(null);
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('about');
 
   useEffect(() => {
     const query = '*[_type == "about"][0]';
@@ -104,9 +107,16 @@ const About = () => {
           {/* Text side */}
           <div className="about-text-col">
             <span className="section-label">{"// who I am"}</span>
-            <h2 className="section-title about-title" data-hover="Adhithya Mohan">
-              <span className="section-title-inner">About <span>Me</span></span>
-            </h2>
+            <div className="section-title-wrapper">
+              <h2 className="section-title about-title" data-hover="Adhithya Mohan">
+                <span className="section-title-inner">About <span>Me</span></span>
+              </h2>
+              {hasStory && (
+                <button className="story-btn" onClick={() => openStory('about')} aria-label="Read story behind this section">
+                  <span>✦</span> See Story
+                </button>
+              )}
+            </div>
             <div className="section-divider" />
 
             <div className="about-location">

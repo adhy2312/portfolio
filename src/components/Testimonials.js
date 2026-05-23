@@ -3,6 +3,7 @@ import './Testimonials.css';
 import { motion } from 'framer-motion';
 import { client, urlFor } from '../sanity';
 import { FiMessageCircle } from 'react-icons/fi';
+import { useStory } from '../contexts/StoryContext';
 
 /* ── Helpers (module-level — never recreated) ── */
 const getInitials = (name = '') =>
@@ -48,6 +49,9 @@ const defaultQuotes = [
 
 const Testimonials = () => {
   const [quotes, setQuotes] = useState([]);
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('testimonials');
 
   useEffect(() => {
     client
@@ -79,9 +83,16 @@ const Testimonials = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">{"// recommendations"}</span>
-          <h2 className="section-title" data-hover="Endorsements">
-            <span className="section-title-inner">Kind <span>Words</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="Endorsements">
+              <span className="section-title-inner">Kind <span>Words</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('testimonials')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
         </motion.div>
       </div>

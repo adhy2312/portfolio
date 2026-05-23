@@ -2,9 +2,12 @@ import React, { useEffect, useState } from 'react';
 import './TrustedBy.css';
 import { motion } from 'framer-motion';
 import { client, urlFor } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 const TrustedBy = () => {
   const [brands, setBrands] = useState([]);
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('trusted');
 
   useEffect(() => {
     const query = '*[_type == "trustedBy"] | order(order asc)';
@@ -32,9 +35,16 @@ const TrustedBy = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// trusted partners</span>
-          <h2 className="section-title">
-            Trusted <span>By</span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title">
+              Trusted <span>By</span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('trusted')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
           <p className="section-desc">
             Collaborating with amazing people and teams

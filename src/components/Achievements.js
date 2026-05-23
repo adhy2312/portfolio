@@ -3,6 +3,7 @@ import './Achievements.css';
 import { motion } from 'framer-motion';
 import { FiAward, FiZap, FiPenTool, FiCamera, FiGlobe, FiBookOpen } from 'react-icons/fi';
 import { client } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 const iconMap = {
   FiAward: <FiAward />,
@@ -24,6 +25,9 @@ const defaultAchievements = [
 
 const Achievements = () => {
   const [fetchedAchievements, setFetchedAchievements] = useState([]);
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('achievements');
 
   useEffect(() => {
     const query = '*[_type == "achievement"] | order(order asc)';
@@ -45,9 +49,16 @@ const Achievements = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// highlights</span>
-          <h2 className="section-title" data-hover="Milestones">
-            <span className="section-title-inner">What I <span>Bring</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="Milestones">
+              <span className="section-title-inner">What I <span>Bring</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('achievements')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
           <p className="section-desc">
             A diverse toolkit spanning software, hardware, design, and creative arts — I don't just write code, I create experiences.

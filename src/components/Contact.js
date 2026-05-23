@@ -5,6 +5,7 @@ import emailjs from 'emailjs-com';
 import { motion } from 'framer-motion';
 import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle, FiCheck, FiCopy } from 'react-icons/fi';
 import { client } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 // ── Click-to-copy email component ──────────────────
 const CopyEmail = ({ email }) => {
@@ -58,6 +59,9 @@ const defaultContactInfo = [
 const Contact = () => {
   const form = useRef();
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('contact');
   const [contactData, setContactData] = useState(null);
 
   useEffect(() => {
@@ -102,9 +106,16 @@ const Contact = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// say hello</span>
-          <h2 className="section-title" data-hover="Get in Touch">
-            <span className="section-title-inner">Let's <span>Connect</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="Get in Touch">
+              <span className="section-title-inner">Let's <span>Connect</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('contact')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
           <p className="section-desc">
             Whether you have a project in mind, a collaboration idea, or just want to say hi —

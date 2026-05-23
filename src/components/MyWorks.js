@@ -3,6 +3,7 @@ import './MyWorks.css';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 const projects = [
   {
@@ -139,6 +140,9 @@ const TiltCard = ({ children, project, index }) => {
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [fetchedProjects, setFetchedProjects] = useState([]);
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('projects');
 
   useEffect(() => {
     const query = '*[_type == "project"] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink }';
@@ -167,9 +171,16 @@ const MyWorks = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// what I've built</span>
-          <h2 className="section-title" data-hover="Masterpieces">
-            <span className="section-title-inner">Featured <span>Projects</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="Masterpieces">
+              <span className="section-title-inner">Featured <span>Projects</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('projects')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
           <p className="section-desc">
             A selection of projects spanning web development, hardware prototypes, UI design, and creative photography.

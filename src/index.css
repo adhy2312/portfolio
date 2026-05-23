@@ -160,6 +160,13 @@ body {
   box-shadow: inset 1px 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Center the section label in centered headers */
+.skills-header .section-label,
+.trusted-header .section-label {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* LED dot before label text */
 .section-label::before {
   content: '';
@@ -173,13 +180,71 @@ body {
 
 .section-title {
   position: relative;
-  display: block;
+  display: inline-block;
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1.15;
   margin-bottom: 0;
+}
+
+.section-title-wrapper {
+  position: relative;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+/* Center title wrapper in centered headers */
+.skills-header .section-title-wrapper,
+.trusted-header .section-title-wrapper {
+  justify-content: center;
+}
+
+.story-btn {
+  opacity: 0;
+  transform: translateX(-10px);
+  background: rgba(108, 99, 255, 0.1);
+  border: 1px solid rgba(108, 99, 255, 0.3);
+  color: #c4b5fd;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.05em;
+  padding: 4px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-transform: uppercase;
+  position: relative;
+}
+
+/* Bridge the gap so hover doesn't flicker */
+.story-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -16px;
+  width: 16px;
+}
+
+.section-title:hover ~ .story-btn,
+.story-btn:hover {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.story-btn:hover {
+  background: rgba(108, 99, 255, 0.2);
+  border-color: rgba(108, 99, 255, 0.6);
+  color: #fff;
+  transform: translateX(0) scale(1.05);
 }
 
 .section-title-inner {

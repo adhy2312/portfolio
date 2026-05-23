@@ -2,144 +2,256 @@
    PHOTOGRAPHY SECTION
 ═══════════════════════════════ */
 .photography {
-  padding: var(--section-padding);
+  padding: var(--section-padding) 0;
   background: linear-gradient(180deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
   position: relative;
   z-index: 1;
+  overflow: hidden;
 }
 
 .photo-header {
-  margin-bottom: 4rem;
+  margin-bottom: 3.5rem;
   text-align: center;
 }
 
-/* Center the divider and desc within centered header */
-.photo-header .section-divider {
-  margin-left: auto;
-  margin-right: auto;
-}
-
+.photo-header .section-divider,
 .photo-header .section-desc {
   margin-left: auto;
   margin-right: auto;
 }
 
-/* ── Masonry Grid ── */
-.photo-masonry {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
+/* ─── Full-bleed marquee wrapper ─── */
+.marquee-section {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   gap: 1.2rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 3rem;
+  /* Edge fade-out masks */
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
 }
 
-/* ── Photo Item ── */
-.photo-item {
-  cursor: pointer;
-  border-radius: 16px;
+/* ─── Viewport clip per row ─── */
+.marquee-viewport {
   overflow: hidden;
+  width: 100%;
+  cursor: grab;
 }
 
-.photo-inner {
+.marquee-viewport:active {
+  cursor: grabbing;
+}
+
+/* ─── The actual moving strip (CSS-driven) ─── */
+@keyframes marquee-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-25%); }   /* 4× duplicates → 25% = one full set */
+}
+
+@keyframes marquee-right {
+  from { transform: translateX(-25%); }
+  to   { transform: translateX(0); }
+}
+
+.marquee-track {
+  display: flex;
+  gap: 1rem;
+  width: max-content;
+  animation: marquee-left linear infinite;
+  /* duration injected inline via style prop */
+}
+
+.marquee-track.marquee-reverse {
+  animation-name: marquee-right;
+}
+
+/* Pause entire row on hover */
+.marquee-viewport:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ─── Individual photo card ─── */
+.marquee-card {
   position: relative;
-  border-radius: 16px;
+  width: 280px;
+  height: 380px;
+  border-radius: 18px;
   overflow: hidden;
-  aspect-ratio: 3/4;
+  flex-shrink: 0;
+  cursor: pointer;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.photo-inner img {
+.marquee-card:hover {
+  transform: scale(1.03) translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+
+.marquee-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.photo-item:hover .photo-inner img {
+.marquee-card:hover img {
   transform: scale(1.08);
 }
 
-/* Overlay */
-.photo-overlay {
+/* ─── Hover overlay ─── */
+.marquee-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     0deg,
-    rgba(6, 9, 24, 0.85) 0%,
-    rgba(6, 9, 24, 0.2) 60%,
+    rgba(6, 9, 24, 0.88) 0%,
+    rgba(6, 9, 24, 0.15) 55%,
     transparent 100%
   );
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 1.5rem;
+  padding: 1.4rem;
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity 0.35s ease;
 }
 
-.photo-item:hover .photo-overlay {
+.marquee-card:hover .marquee-overlay {
   opacity: 1;
 }
 
-.photo-category {
+.marquee-category {
   font-family: 'Fira Code', monospace;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 2.5px;
   color: var(--accent-secondary);
   margin-bottom: 4px;
 }
 
-.photo-caption {
+.marquee-caption {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: #fff;
 }
 
-.photo-zoom-icon {
+.marquee-zoom {
   position: absolute;
   top: 1rem;
   right: 1rem;
-  color: rgba(255,255,255,0.8);
-  background: rgba(0,0,0,0.4);
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(0, 0, 0, 0.35);
   border-radius: 8px;
-  padding: 4px;
-  width: 32px;
-  height: 32px;
+  padding: 5px;
+  width: 30px;
+  height: 30px;
+  backdrop-filter: blur(4px);
 }
 
+/* ─── Skeleton ─── */
+.marquee-skeleton {
+  display: flex;
+  gap: 1rem;
+  padding: 0 5%;
+  overflow: hidden;
+}
+
+.marquee-skeleton-card {
+  width: 280px;
+  height: 380px;
+  border-radius: 18px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.04) 25%,
+    rgba(0, 0, 0, 0.09) 37%,
+    rgba(0, 0, 0, 0.04) 63%
+  );
+  background-size: 400% 100%;
+  animation: shimmer-effect 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer-effect {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Instagram CTA ─── */
 .photo-ig-cta {
   text-align: center;
+  padding-bottom: 1rem;
 }
 
-/* ── Lightbox ── */
+/* ─── Lightbox ─── */
 .lightbox {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.92);
+  background: rgba(0, 0, 0, 0.93);
   z-index: 9000;
   display: flex;
   align-items: center;
   justify-content: center;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(10px);
   cursor: pointer;
+  flex-direction: column;
+  gap: 1.2rem;
 }
 
 .lightbox-img {
   max-width: 88vw;
-  max-height: 88vh;
+  max-height: 80vh;
   border-radius: 16px;
   object-fit: contain;
   box-shadow: 0 30px 80px rgba(0, 0, 0, 0.8);
   cursor: default;
 }
 
+.lightbox-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  cursor: default;
+}
+
+.lightbox-category {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent-secondary);
+}
+
+.lightbox-caption {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+
 .lightbox-close {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  background: rgba(255,255,255,0.1);
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
   color: #fff;
   font-size: 1.2rem;
   width: 44px;
@@ -157,33 +269,129 @@
   border-color: var(--accent-primary);
 }
 
-/* ── Responsive ── */
+/* ─── Mobile ─── */
 @media (max-width: 768px) {
-  .photo-masonry {
-    grid-template-columns: 1fr;
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
+  .marquee-card {
+    width: 220px;
+    height: 300px;
+  }
+
+  .marquee-skeleton-card {
+    width: 220px;
+    height: 300px;
   }
 }
 
-/* Shimmer Loader Skeleton */
-.photo-shimmer-loader {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    rgba(0, 0, 0, 0.03) 25%,
-    rgba(0, 0, 0, 0.08) 37%,
-    rgba(0, 0, 0, 0.03) 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer-effect 1.4s ease-in-out infinite;
-  border-radius: 16px;
-  z-index: 1;
+/* ─── EXIF mini-strip inside marquee overlay ─── */
+.marquee-exif-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
 }
 
-@keyframes shimmer-effect {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+.marquee-exif-strip span {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(6px);
+  padding: 2px 7px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Lightbox content wrapper ─── */
+.lightbox-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: default;
+  max-width: 92vw;
+}
+
+.lightbox-footer {
+  display: flex;
+  align-items: flex-start;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+  padding: 0 0.5rem;
+}
+
+.lightbox-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 120px;
+}
+
+/* ─── EXIF panel in lightbox ─── */
+.exif-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px 12px;
+  flex: 1;
+}
+
+.exif-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 5px 12px;
+}
+
+.exif-icon {
+  color: var(--accent-secondary);
+  display: flex;
+  align-items: center;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+}
+
+.exif-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.exif-value {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.exif-loading {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.3);
+  letter-spacing: 1px;
+  animation: pulse-opacity 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse-opacity {
+  0%, 100% { opacity: 0.3; }
+  50%       { opacity: 0.8; }
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .lightbox-footer {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .exif-panel {
+    gap: 6px;
+  }
+  .exif-row {
+    padding: 4px 9px;
+  }
 }

@@ -3,6 +3,7 @@ import './Skills.css';
 import { motion } from 'framer-motion';
 import { FiMonitor, FiSettings, FiPenTool, FiZap } from 'react-icons/fi';
 import { client } from '../sanity';
+import { useStory } from '../contexts/StoryContext';
 
 const iconMap = {
   FiMonitor: <FiMonitor />,
@@ -99,6 +100,9 @@ const tools = [
 const Skills = () => {
   const [fetchedCategories, setFetchedCategories] = useState([]);
   const gridRef = useRef(null);
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('skills');
 
   useEffect(() => {
     const query = '*[_type == "skillCategory"]';
@@ -136,9 +140,16 @@ const Skills = () => {
           viewport={{ once: true }}
         >
           <span className="section-label">// what I know</span>
-          <h2 className="section-title" data-hover="My Arsenal">
-            <span className="section-title-inner">Skills & <span>Expertise</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="My Arsenal">
+              <span className="section-title-inner">Skills & <span>Expertise</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('skills')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
           <p className="section-desc">
             From building full-stack web applications and crafting pixel-perfect designs in Figma,

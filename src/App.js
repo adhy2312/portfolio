@@ -5,6 +5,8 @@ import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
 import NowPlaying from './components/NowPlaying';
+import MiniAdhy from './components/MiniAdhy';
+import { StoryProvider } from './contexts/StoryContext';
 
 // Lazy load below-the-fold components
 const About       = lazy(() => import('./components/About'));
@@ -74,7 +76,8 @@ function App() {
   };
 
   return (
-    <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''}`}>
+    <StoryProvider>
+      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''}`}>
 
       <Suspense fallback={null}>
         <CustomCursor />
@@ -109,6 +112,9 @@ function App() {
       {/* Spotify Now Playing — fixed widget, outside Suspense */}
       <NowPlaying />
 
+      {/* Mini-Adhy AI chatbot — fixed dock, outside Suspense */}
+      <MiniAdhy />
+
       {/* Easter egg games — outside Suspense */}
       {showGame && (
         isMobile ? (
@@ -118,7 +124,8 @@ function App() {
         )
       )}
 
-    </div>
+      </div>
+    </StoryProvider>
   );
 }
 

@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { client, urlFor } from '../sanity';
 import './Experience.css';
+import { useStory } from '../contexts/StoryContext';
 
 const Experience = () => {
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  const { getStoryForSection, openStory } = useStory();
+  const hasStory = !!getStoryForSection('experience');
 
   useEffect(() => {
     const fetchExperiences = async () => {
@@ -35,9 +39,16 @@ const Experience = () => {
       <div className="experience-container">
         <div className="experience-header" data-aos="fade-up">
           <span className="section-label">// my journey</span>
-          <h2 className="section-title" data-hover="Career Path">
-            <span className="section-title-inner">Professional <span>Experience</span></span>
-          </h2>
+          <div className="section-title-wrapper">
+            <h2 className="section-title" data-hover="Career Path">
+              <span className="section-title-inner">Professional <span>Experience</span></span>
+            </h2>
+            {hasStory && (
+              <button className="story-btn" onClick={() => openStory('experience')} aria-label="Read story behind this section">
+                <span>✦</span> See Story
+              </button>
+            )}
+          </div>
           <div className="section-divider" />
         </div>
         
