@@ -31,11 +31,11 @@ const projects = [
   {
     title: 'Portfolio Website',
     description:
-      'This very portfolio — crafted with React, Framer Motion, and a custom design system. Features animated hero, skill bars, particle effects, and full EmailJS integration.',
-    tags: ['React', 'Framer Motion', 'CSS3', 'EmailJS'],
-    category: 'frontend',
-    liveLink: null,
-    githubLink: null,
+      'This very portfolio — a premium, interactive full-stack app. Features an AI chatbot persona (Mini-Adhy) powered by Gemini, real-time Spotify "Now Playing" integration, infinite marquees, and dynamic content managed via Sanity CMS.',
+    tags: ['React.js', 'Sanity CMS', 'Gemini API', 'Spotify API', 'Framer Motion'],
+    category: 'fullstack',
+    liveLink: 'https://portfolio-adhym.vercel.app/',
+    githubLink: 'https://github.com/adhy2312/portfolio',
     accent: 'var(--accent-cyan)',
     icon: <FiStar />,
   },
