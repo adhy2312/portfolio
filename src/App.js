@@ -5,6 +5,7 @@ import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
 import { StoryProvider } from './contexts/StoryContext';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -153,6 +154,7 @@ function App() {
         )
       )}
 
+      <SpeedInsights />
       </div>
     </StoryProvider>
   );
