@@ -131,12 +131,73 @@ Reinforce: creativity · intelligence · intentionality · personality · techni
 
 If you don't know something specific, say: "Hmm, that's one for the real Adhy — reach out directly and he'll probably talk your ear off about it." Never make things up.`;
 
+/* ────────────────────────────────────────────────
+   OWNER MODE — Secret configuration system
+──────────────────────────────────────────────── */
+const OWNER_CODE = 'adhy::root';
+
+const OWNER_HELP = `Owner mode commands:
+  /remember <fact>   — add to session memory
+  /forget            — clear session memory
+  /context <text>    — inject context into AI prompt
+  /instruct <text>   — add a direct instruction
+  /tone <style>      — cinematic | casual | technical | deep | default
+  /tokens <number>   — set max response length (50–2000)
+  /reset             — clear all overrides
+  /status            — show current config
+  /lock              — exit owner mode
+  /help              — show this list`;
+
+const TONE_MAP = {
+  cinematic: 'Use highly cinematic language, visual metaphors, and atmospheric descriptions.',
+  casual:    'Be extra casual and conversational, like chatting with a close friend.',
+  technical: 'Go deep on technical details, architecture decisions, and implementation specifics.',
+  deep:      'Give thoughtful, expansive answers. Prioritize depth and nuance over brevity.',
+};
+
+const processOwnerCommand = (text) => {
+  const firstWord = text.trim().split(' ')[0].toLowerCase();
+  const rest      = text.trim().slice(firstWord.length).trim();
+  switch (firstWord) {
+    case '/remember': return rest ? { action: 'remember', value: rest } : { action: 'error', msg: 'Usage: /remember <fact>' };
+    case '/forget':   return { action: 'forget' };
+    case '/context':  return rest ? { action: 'context',  value: rest } : { action: 'error', msg: 'Usage: /context <text>' };
+    case '/instruct': return rest ? { action: 'instruct', value: rest } : { action: 'error', msg: 'Usage: /instruct <text>' };
+    case '/tone': {
+      const valid = ['cinematic','casual','technical','deep','default'];
+      return valid.includes(rest) ? { action: 'tone', value: rest } : { action: 'error', msg: `Valid tones: ${valid.join(', ')}` };
+    }
+    case '/tokens': {
+      const n = parseInt(rest, 10);
+      return (!isNaN(n) && n >= 50 && n <= 2000) ? { action: 'tokens', value: n } : { action: 'error', msg: 'Usage: /tokens <50–2000>' };
+    }
+    case '/reset':  return { action: 'reset' };
+    case '/status': return { action: 'status' };
+    case '/lock':   return { action: 'lock' };
+    case '/help':   return { action: 'help' };
+    default:
+      if (text.startsWith('/')) return { action: 'error', msg: `Unknown command: ${firstWord}. Type /help.` };
+      return { action: 'instruct', value: text };
+  }
+};
+
+const buildActivePrompt = (base, owner) => {
+  if (!owner.active) return base;
+  let ext = '\n\n━━━ OWNER RUNTIME OVERRIDES (highest priority) ━━━';
+  if (owner.tone && owner.tone !== 'default') ext += `\n[TONE]: ${TONE_MAP[owner.tone]}`;
+  if (owner.tokens) ext += `\n[LENGTH]: Target ${owner.tokens < 200 ? 'very short' : owner.tokens < 400 ? 'concise' : 'detailed'} responses.`;
+  if (owner.context) ext += `\n[SESSION CONTEXT]: ${owner.context}`;
+  if (owner.memory.length)       ext += `\n[MEMORY]:\n` + owner.memory.map((m,i) => `  ${i+1}. ${m}`).join('\n');
+  if (owner.instructions.length) ext += `\n[INSTRUCTIONS]:\n` + owner.instructions.map((m,i) => `  ${i+1}. ${m}`).join('\n');
+  return base + ext;
+};
+
 const API_KEY   = process.env.REACT_APP_GEMINI_API_KEY;
 const MODEL     = 'gemini-2.5-flash';
 const API_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
 
 /* Call Gemini REST API — with 1 auto-retry on 429 rate limit */
-const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0) => {
+const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
   const body = {
     system_instruction: {
       parts: [{ text: activePrompt }]
@@ -144,7 +205,7 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
     contents: history,
     generationConfig: {
       temperature: 0.9,
-      maxOutputTokens: 600,
+      maxOutputTokens: maxTokens,
     },
   };
 
@@ -157,7 +218,7 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
   if (res.status === 429 && retryCount < 2) {
     // Rate limited — wait 2s and retry
     await new Promise(r => setTimeout(r, 2000));
-    return sendToGemini(history, activePrompt, retryCount + 1);
+    return sendToGemini(history, activePrompt, retryCount + 1, maxTokens);
   }
 
   if (!res.ok) {
@@ -224,6 +285,10 @@ const MiniAdhy = () => {
   const [loading,      setLoading]      = useState(false);
   const [noKey,        setNoKey]        = useState(!API_KEY);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
+  const [ownerState,   setOwnerState]   = useState({
+    active: false, tone: 'default', tokens: null,
+    context: '', memory: [], instructions: [],
+  });
 
   /* Fetch extra knowledge from Sanity CMS and append to system prompt */
   useEffect(() => {
@@ -283,33 +348,99 @@ const MiniAdhy = () => {
     if (!trimmed || loading) return;
     if (!API_KEY) { setNoKey(true); return; }
 
-    /* Append user message to UI and history */
+    /* ── Secret unlock code ── */
+    if (trimmed === OWNER_CODE) {
+      setInput('');
+      setOwnerState(prev => ({ ...prev, active: true }));
+      setMessages(prev => [
+        ...prev,
+        { role: 'owner-cmd', text: '••••••••••' },
+        { role: 'system', text: '⚙ Owner mode activated.\nType /help to see available commands.' },
+      ]);
+      return;
+    }
+
+    /* ── Owner mode commands ── */
+    if (ownerState.active) {
+      const result = processOwnerCommand(trimmed);
+      setInput('');
+      const cmdBubble = { role: 'owner-cmd', text: trimmed };
+
+      if (result.action === 'help') {
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: OWNER_HELP }]);
+        return;
+      }
+      if (result.action === 'status') {
+        const s = ownerState;
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text:
+          `Owner Mode: Active\nTone: ${s.tone}\nMax Tokens: ${s.tokens ?? '600 (default)'}\nContext: ${s.context || 'none'}\nMemory: ${s.memory.length} item(s)\nInstructions: ${s.instructions.length} item(s)` }]);
+        return;
+      }
+      if (result.action === 'lock') {
+        setOwnerState({ active: false, tone: 'default', tokens: null, context: '', memory: [], instructions: [] });
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: '🔒 Owner mode locked.' }]);
+        return;
+      }
+      if (result.action === 'reset') {
+        setOwnerState({ active: true, tone: 'default', tokens: null, context: '', memory: [], instructions: [] });
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: '✓ All overrides reset to defaults.' }]);
+        return;
+      }
+      if (result.action === 'remember') {
+        setOwnerState(prev => ({ ...prev, memory: [...prev.memory, result.value] }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Memory added: "${result.value}"` }]);
+        return;
+      }
+      if (result.action === 'forget') {
+        setOwnerState(prev => ({ ...prev, memory: [] }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: '✓ Session memory cleared.' }]);
+        return;
+      }
+      if (result.action === 'context') {
+        setOwnerState(prev => ({ ...prev, context: result.value }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Context set: "${result.value}"` }]);
+        return;
+      }
+      if (result.action === 'instruct') {
+        setOwnerState(prev => ({ ...prev, instructions: [...prev.instructions, result.value] }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Instruction added: "${result.value}"` }]);
+        return;
+      }
+      if (result.action === 'tone') {
+        setOwnerState(prev => ({ ...prev, tone: result.value }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Tone set to: ${result.value}` }]);
+        return;
+      }
+      if (result.action === 'tokens') {
+        setOwnerState(prev => ({ ...prev, tokens: result.value }));
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Max tokens set to: ${result.value}` }]);
+        return;
+      }
+      if (result.action === 'error') {
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✗ ${result.msg}` }]);
+        return;
+      }
+    }
+
+    /* ── Normal AI message (with enhanced prompt if owner active) ── */
     setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
 
-    /* Build REST-format history */
     const newHistory = [
       ...historyRef.current,
       { role: 'user', parts: [{ text: trimmed }] },
     ];
+    const activePrompt = buildActivePrompt(systemPrompt, ownerState);
+    const activeTokens = ownerState.tokens ?? 600;
 
     try {
-      const reply = await sendToGemini(newHistory, systemPrompt);
-
-      /* Persist full conversation in history ref */
-      historyRef.current = [
-        ...newHistory,
-        { role: 'model', parts: [{ text: reply }] },
-      ];
-
+      const reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
+      historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
       setMessages(prev => [...prev, { role: 'bot', text: reply }]);
     } catch (e) {
       console.error('Mini-Adhy error:', e);
-      setMessages(prev => [...prev, {
-        role: 'bot',
-        text: `Something went wrong da 😅 (${e.message?.slice(0, 60)})`,
-      }]);
+      setMessages(prev => [...prev, { role: 'bot', text: `Something went wrong — ${e.message?.slice(0, 60)}` }]);
     } finally {
       setLoading(false);
     }
@@ -352,25 +483,36 @@ const MiniAdhy = () => {
       {open && (
         <div className={`ma-window ${open ? 'ma-window--open' : ''}`}>
           {/* Header */}
-          <div className="ma-header">
+          <div className={`ma-header ${ownerState.active ? 'ma-header--owner' : ''}`}>
             <BotAvatar />
             <div className="ma-header-info">
               <span className="ma-header-name">Mini-Adhy</span>
               <span className="ma-header-status">AI • Always online ✨</span>
             </div>
+            {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
           </div>
 
           {/* Messages */}
           <div className="ma-messages">
-            {messages.map((msg, i) => (
-              <div key={i} className={`ma-msg ma-msg--${msg.role}`}>
-                {msg.role === 'bot' && <BotAvatar />}
-                <div className={`ma-bubble ma-bubble--${msg.role}`}>
-                  {msg.text}
+            {messages.map((msg, i) => {
+              if (msg.role === 'system') return (
+                <div key={i} className="ma-msg ma-msg--system">
+                  <div className="ma-bubble ma-bubble--system">{msg.text}</div>
                 </div>
-              </div>
-            ))}
+              );
+              if (msg.role === 'owner-cmd') return (
+                <div key={i} className="ma-msg ma-msg--owner-cmd">
+                  <div className="ma-bubble ma-bubble--owner-cmd">{msg.text}</div>
+                </div>
+              );
+              return (
+                <div key={i} className={`ma-msg ma-msg--${msg.role}`}>
+                  {msg.role === 'bot' && <BotAvatar />}
+                  <div className={`ma-bubble ma-bubble--${msg.role}`}>{msg.text}</div>
+                </div>
+              );
+            })}
 
             {loading && <TypingBubble />}
 
@@ -395,11 +537,16 @@ const MiniAdhy = () => {
           </div>
 
           {/* Input */}
+          {ownerState.active && (
+            <div className="ma-owner-hint">
+              ⚙ owner mode — type /help for commands
+            </div>
+          )}
           <div className="ma-input-row">
             <input
               ref={inputRef}
-              className="ma-input"
-              placeholder="Ask me anything..."
+              className={`ma-input ${ownerState.active ? 'ma-input--owner' : ''}`}
+              placeholder={ownerState.active ? '/ command or type a message…' : 'Ask me anything…'}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
