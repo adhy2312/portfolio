@@ -19,12 +19,9 @@ const Hero = () => {
       if (data) setHeroData(data);
     }).catch(console.error);
 
-    // Defer particles until after first paint. Bypass entirely for Lighthouse to save TBT.
-    const isBot = /Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent);
-    if (!isBot) {
-      const t = setTimeout(() => setShowParticles(true), 2000);
-      return () => clearTimeout(t);
-    }
+    // Defer particles until after first paint
+    const t = setTimeout(() => setShowParticles(true), 2000);
+    return () => clearTimeout(t);
   }, []);
 
   const displayData = {
@@ -40,13 +37,6 @@ const Hero = () => {
 
   useEffect(() => {
     const nameStr = displayData.name;
-    const isBot = /Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent);
-    
-    if (isBot) {
-      setTypedCharsCount(nameStr.length);
-      setTypingComplete(true);
-      return;
-    }
 
     let currentIdx = 0;
     setTypedCharsCount(0);
@@ -61,7 +51,7 @@ const Hero = () => {
       }
     }, 95); // 95ms per character for natural typing flow
     return () => clearInterval(interval);
-  }, [heroData]); // eslint-disable-line
+  }, [displayData.name]); // eslint-disable-line
 
   const particlesInit = useCallback(async engine => {
     await loadBasic(engine);
