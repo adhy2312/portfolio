@@ -13,24 +13,44 @@ const generateZipLevel = (id, size) => {
   const totalCells = size * size;
   let solutionPath = [];
   
-  const findHamiltonian = (r, c, visited) => {
-    if (visited.length === totalCells) {
-      solutionPath = visited;
-      return true;
-    }
+  // Wrap in a retry loop to be 100% safe against DFS worst-case scenarios
+  while (solutionPath.length === 0) {
+    let attempts = 0;
+    
+    const findHamiltonian = (r, c, visited) => {
+      attempts++;
+      // Failsafe: if we get stuck in a bad branch, abort and try a new random start
+      if (attempts > 50000) return false;
 
-    const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]].sort(() => Math.random() - 0.5);
-    for (const [dr, dc] of dirs) {
-      const nr = r + dr, nc = c + dc;
-      if (nr >= 0 && nr < size && nc >= 0 && nc < size && !visited.some(v => v.r === nr && v.c === nc)) {
-        if (findHamiltonian(nr, nc, [...visited, { r: nr, c: nc }])) return true;
+      if (visited.length === totalCells) {
+        solutionPath = visited;
+        return true;
       }
-    }
-    return false;
-  };
 
-  const start = { r: Math.floor(Math.random() * size), c: Math.floor(Math.random() * size) };
-  findHamiltonian(start.r, start.c, [start]);
+      const dirs = [[0, 1], [1, 0], [0, -1], [-1, 0]].sort(() => Math.random() - 0.5);
+      for (const [dr, dc] of dirs) {
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < size && nc >= 0 && nc < size && !visited.some(v => v.r === nr && v.c === nc)) {
+          if (findHamiltonian(nr, nc, [...visited, { r: nr, c: nc }])) return true;
+        }
+      }
+      return false;
+    };
+
+    let start;
+    if (size % 2 !== 0) {
+      // CRITICAL MATH FIX: A 5x5 grid (25 cells) is a bipartite graph with 13 "even" cells and 12 "odd" cells.
+      // A Hamiltonian path MUST start on an "even" cell. If it starts on an "odd" cell, it's mathematically impossible
+      // to fill the grid, causing the DFS to search the entire tree and freeze the browser forever.
+      do {
+        start = { r: Math.floor(Math.random() * size), c: Math.floor(Math.random() * size) };
+      } while ((start.r + start.c) % 2 !== 0);
+    } else {
+      start = { r: Math.floor(Math.random() * size), c: Math.floor(Math.random() * size) };
+    }
+
+    findHamiltonian(start.r, start.c, [start]);
+  }
 
   // Numbers (dots)
   const numCount = size === 4 ? 4 : 6;
