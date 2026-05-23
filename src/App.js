@@ -4,9 +4,11 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
-import NowPlaying from './components/NowPlaying';
-import MiniAdhy from './components/MiniAdhy';
 import { StoryProvider } from './contexts/StoryContext';
+
+// Lazy load heavy components
+const NowPlaying = lazy(() => import('./components/NowPlaying'));
+const MiniAdhy   = lazy(() => import('./components/MiniAdhy'));
 
 // Lazy load below-the-fold components
 const About       = lazy(() => import('./components/About'));
@@ -136,11 +138,11 @@ function App() {
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
 
-      {/* Spotify Now Playing — fixed widget, outside Suspense */}
-      <NowPlaying />
-
-      {/* Mini-Adhy AI chatbot — fixed dock, outside Suspense */}
-      <MiniAdhy />
+      {/* Spotify & Chatbot — Lazy loaded to save Main Thread execution time */}
+      <Suspense fallback={null}>
+        <NowPlaying />
+        <MiniAdhy />
+      </Suspense>
 
       {/* Easter egg games — outside Suspense */}
       {showGame && (
