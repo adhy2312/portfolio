@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
+import NowPlaying from './components/NowPlaying';
 
 // Lazy load below-the-fold components
 const About       = lazy(() => import('./components/About'));
@@ -104,6 +105,9 @@ function App() {
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
+
+      {/* Spotify Now Playing — fixed widget, outside Suspense */}
+      <NowPlaying />
 
       {/* Easter egg games — outside Suspense */}
       {showGame && (

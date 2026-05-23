@@ -130,7 +130,7 @@ const Skills = () => {
       <div className="container">
         <motion.div
           className="skills-header"
-          initial={{ opacity: 1, y: 40 }}
+          initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}

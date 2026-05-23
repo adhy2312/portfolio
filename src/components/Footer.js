@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './Footer.css';
 import { motion } from 'framer-motion';
-import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiHeart, FiMapPin } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiHeart, FiMessageCircle } from 'react-icons/fi';
 import { client } from '../sanity';
 
 const iconMap = {
@@ -9,6 +9,7 @@ const iconMap = {
   FiGithub: <FiGithub size={18} />,
   FiInstagram: <FiInstagram size={18} />,
   FiMail: <FiMail size={18} />,
+  FiMessageCircle: <FiMessageCircle size={18} />,
 };
 
 const links = [
@@ -19,12 +20,6 @@ const links = [
   { label: 'Contact', target: 'contact' },
 ];
 
-const socials = [
-  { icon: <FiLinkedin size={18} />, href: 'https://www.linkedin.com/in/adhithya-mohan-s', label: 'LinkedIn' },
-  { icon: <FiGithub size={18} />, href: 'https://github.com/adhy2312', label: 'GitHub' },
-  { icon: <FiInstagram size={18} />, href: 'https://instagram.com/zoomout_frames', label: 'Instagram' },
-  { icon: <FiMail size={18} />, href: 'mailto:adhithyamohan2312@gmail.com', label: 'Email' },
-];
 
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
@@ -42,17 +37,25 @@ const Footer = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const whatsappNumber = footerData?.whatsapp || '919539066643';
+  const baseSocialLinks = footerData?.socialLinks || [
+    { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/adhithya-mohan-s', iconName: 'FiLinkedin' },
+    { platform: 'GitHub', url: 'https://github.com/adhy2312', iconName: 'FiGithub' },
+    { platform: 'Instagram', url: 'https://instagram.com/zoomout_frames', iconName: 'FiInstagram' },
+    { platform: 'Email', url: 'mailto:adhithyamohan2312@gmail.com', iconName: 'FiMail' },
+  ];
+
+  // Always ensure WhatsApp is present (Sanity may not include it)
+  const socialLinksWithWhatsApp = baseSocialLinks.some(s => s.platform === 'WhatsApp')
+    ? baseSocialLinks
+    : [...baseSocialLinks, { platform: 'WhatsApp', url: `https://wa.me/${whatsappNumber}`, iconName: 'FiMessageCircle' }];
+
   const displayData = {
     tagline: footerData?.tagline || "Building digital experiences that matter — with code, design, and creativity.",
     email: footerData?.email || "adhithyamohan2312@gmail.com",
-    whatsapp: footerData?.whatsapp || "919539066643",
+    whatsapp: whatsappNumber,
     location: footerData?.location || "Kerala, India",
-    socialLinks: footerData?.socialLinks || [
-      { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/adhithya-mohan-s', iconName: 'FiLinkedin' },
-      { platform: 'GitHub', url: 'https://github.com/adhy2312', iconName: 'FiGithub' },
-      { platform: 'Instagram', url: 'https://instagram.com/zoomout_frames', iconName: 'FiInstagram' },
-      { platform: 'Email', url: 'mailto:adhithyamohan2312@gmail.com', iconName: 'FiMail' },
-    ]
+    socialLinks: socialLinksWithWhatsApp,
   };
 
   return (
