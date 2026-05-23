@@ -18,8 +18,8 @@ const SYSTEM_PROMPT = `You are Mini-Adhy, a tiny AI version of Adhithya Mohan S 
 - Full name: Adhithya Mohan S
 - Age: 20 years old (born 2005)
 - Hometown: Kollam, Kerala, India
-- Currently studying at MBCET (Mar Baselios College of Engineering and Technology), Trivandrum
-- Branch: Computer Science & Engineering (CSE)
+- Currently studying at MBCET (Mar Baselios College of Engineering and Technology), Thiruvananthapuram
+- Branch: Electronics & Communication Engineering (ECE)
 - Currently in 3rd year of B.Tech Engineering
 
 == INTERESTS & PASSIONS ==
@@ -185,24 +185,41 @@ const MiniAdhy = () => {
 
   /* Fetch extra knowledge from Sanity CMS and append to system prompt */
   useEffect(() => {
-    client.fetch(
-      `*[_type == "chatbotKnowledge" && isActive != false] | order(order asc) { category, title, content }`
-    ).then(entries => {
-      if (!entries || entries.length === 0) return;
-      const grouped = entries.reduce((acc, e) => {
-        const cat = e.category || 'other';
-        if (!acc[cat]) acc[cat] = [];
-        acc[cat].push(`- ${e.title}: ${e.content}`);
-        return acc;
-      }, {});
-      const extra = [
-        '\n\n== ADDITIONAL KNOWLEDGE FROM CMS (these override defaults if conflicting) ==',
-        ...Object.entries(grouped).map(([cat, lines]) =>
-          `\n[${cat.toUpperCase()}]\n${lines.join('\n')}`
-        )
-      ].join('\n');
-      setSystemPrompt(SYSTEM_PROMPT + extra);
-    }).catch(() => { /* keep hardcoded prompt on failure */ });
+    const fetchBotKnowledge = async () => {
+      try {
+        const [knowledge, skills, experiences] = await Promise.all([
+          client.fetch(`*[_type == "chatbotKnowledge" && isActive != false] | order(order asc) { category, title, content }`),
+          client.fetch(`*[_type == "skillCategory"] | order(order asc) { title, "skills": skills[].name }`),
+          client.fetch(`*[_type == "experience"] | order(order asc) { role, company, duration, description }`)
+        ]);
+
+        let extra = '\n\n== ADDITIONAL KNOWLEDGE FROM CMS (these override defaults if conflicting) ==';
+
+        if (knowledge?.length > 0) {
+          const grouped = knowledge.reduce((acc, e) => {
+            const cat = e.category || 'other';
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push(`- ${e.title}: ${e.content}`);
+            return acc;
+          }, {});
+          extra += Object.entries(grouped).map(([cat, lines]) => `\n[${cat.toUpperCase()}]\n${lines.join('\n')}`).join('');
+        }
+
+        if (skills?.length > 0) {
+          extra += '\n\n[LIVE SKILLS]\n' + skills.map(cat => `- ${cat.title}: ${cat.skills?.join(', ')}`).join('\n');
+        }
+
+        if (experiences?.length > 0) {
+          extra += '\n\n[LIVE EXPERIENCE]\n' + experiences.map(exp => `- ${exp.role} at ${exp.company} (${exp.duration}): ${exp.description}`).join('\n');
+        }
+
+        setSystemPrompt(SYSTEM_PROMPT + extra);
+      } catch (err) {
+        console.error('Error fetching CMS knowledge for bot:', err);
+      }
+    };
+
+    fetchBotKnowledge();
   }, []);
 
   /* Gemini conversation history in REST format */
