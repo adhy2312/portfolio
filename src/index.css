@@ -205,7 +205,8 @@ body {
 /* Center title wrapper in centered headers */
 .skills-header .section-title-wrapper,
 .trusted-header .section-title-wrapper,
-.photo-header .section-title-wrapper {
+.photo-header .section-title-wrapper,
+.works-header .section-title-wrapper {
   justify-content: center;
 }
 
