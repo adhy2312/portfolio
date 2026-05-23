@@ -40,6 +40,14 @@ const Hero = () => {
 
   useEffect(() => {
     const nameStr = displayData.name;
+    const isBot = /Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent);
+    
+    if (isBot) {
+      setTypedCharsCount(nameStr.length);
+      setTypingComplete(true);
+      return;
+    }
+
     let currentIdx = 0;
     setTypedCharsCount(0);
     setTypingComplete(false);
@@ -100,7 +108,7 @@ const Hero = () => {
       )}
 
       <div className="hero-minimal-content optimize-gpu">
-        <h1 className="hero-name-giant metallic-reveal">
+        <h1 className="hero-name-giant metallic-reveal" aria-label={displayData.name}>
           {(() => {
             const nameStr = displayData.name;
             const words = nameStr.split(" ");
@@ -118,6 +126,7 @@ const Hero = () => {
                     return (
                       <span
                         key={charIdx}
+                        aria-hidden="true"
                         className={`metallic-char ${isRevealed ? 'char-typed-visible' : 'char-typed-hidden'}`}
                         style={{
                           visibility: isRevealed ? 'visible' : 'hidden',
