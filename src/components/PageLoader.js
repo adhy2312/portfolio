@@ -44,7 +44,7 @@ function useGlitchCycle(names, intervalMs = 700) {
             () => GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
           ).join('');
           setDisplay(scrambled);
-          rafRef.current = setTimeout(tick, 20);
+          rafRef.current = setTimeout(tick, 60);
         } else {
           setDisplay(targetText);
           setLangLabel(targetLang);

@@ -19,8 +19,8 @@ const Hero = () => {
       if (data) setHeroData(data);
     }).catch(console.error);
 
-    // Defer particles until after first paint
-    const t = setTimeout(() => setShowParticles(true), 2000);
+    // Defer particles until after the PageLoader finishes (3.5s) to avoid Main Thread gridlock
+    const t = setTimeout(() => setShowParticles(true), 4500);
     return () => clearTimeout(t);
   }, []);
 
