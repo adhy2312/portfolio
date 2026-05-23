@@ -20,11 +20,21 @@
     <!-- Google Fonts — critical UI fonts only (render-blocking kept minimal) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <!-- Only load the 3 fonts actually used across the entire UI on first paint -->
+    <!-- Only load the 3 fonts actually used across the entire UI on first paint (NON-BLOCKING) -->
     <link
+      rel="preload"
+      as="style"
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
-      rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" />
+    </noscript>
     <!-- Heavy display serifs used ONLY in hero h1 — load non-blocking after page renders -->
     <link
       href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700;800&family=Playfair+Display:wght@700;800&display=swap"
@@ -35,9 +45,8 @@
     <noscript>
       <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:wght@700;800&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
     </noscript>
-    <!-- DNS prefetch for GitHub API (used by GitHubStats) -->
-    <link rel="dns-prefetch" href="https://api.github.com" />
-    <link rel="dns-prefetch" href="https://cdn.sanity.io" />
+    <link rel="preconnect" href="https://api.github.com" crossorigin />
+    <link rel="preconnect" href="https://cdn.sanity.io" crossorigin />
 
     <!-- Critical inline styles for instant LCP / prevent FOUC -->
     <style>
