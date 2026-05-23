@@ -376,9 +376,7 @@ const buildActivePrompt = (base, owner) => {
   return base + ext;
 };
 
-const API_KEY   = process.env.REACT_APP_GEMINI_API_KEY;
-const MODEL     = 'gemini-2.5-flash';
-const API_URL   = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+const API_URL = '/api/gemini';
 
 /* Call Gemini REST API — with exponential backoff on 429 rate limit */
 const RETRY_DELAYS = [2000, 6000, 12000]; // 2s → 6s → 12s
@@ -475,7 +473,7 @@ const MiniAdhy = () => {
   ]);
   const [input,        setInput]        = useState('');
   const [loading,      setLoading]      = useState(false);
-  const [noKey,        setNoKey]        = useState(!API_KEY);
+  const [noKey,        setNoKey]        = useState(false); // Can be removed later, keeping for now so state works
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
@@ -541,7 +539,6 @@ const MiniAdhy = () => {
   const sendMessage = async (text) => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
-    if (!API_KEY) { setNoKey(true); return; }
 
     /* Debounce: ignore if last send was < 1.5s ago */
     const now = Date.now();
