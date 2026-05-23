@@ -58,10 +58,21 @@ const GitHubStats = () => {
   return (
     <section className="github-stats-section" id="github">
       <div className="container">
-        <div className="github-header">
-          <FiGithub size={22} />
-          <span className="section-label">// open source</span>
-          <a href={`https://github.com/${USERNAME}`} target="_blank" rel="noopener noreferrer" className="gh-profile-link">
+        <div className="github-section-header" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span className="section-label" style={{ color: '#ffffff', background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.15)' }}>
+            {"// open source"}
+          </span>
+          <div className="section-title-wrapper" style={{ justifyContent: 'center' }}>
+            <h2 className="section-title" data-hover="Repositories" style={{ color: '#ffffff' }}>
+              <span className="section-title-inner">
+                <FiGithub size={38} style={{ verticalAlign: 'middle', marginRight: '14px', paddingBottom: '6px' }} />
+                GitHub <span style={{ background: 'linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Stats</span>
+              </span>
+            </h2>
+          </div>
+          <div className="section-divider" style={{ background: '#ffffff' }} />
+          
+          <a href={`https://github.com/${USERNAME}`} target="_blank" rel="noopener noreferrer" className="gh-profile-link" style={{ marginBottom: '2.5rem', marginTop: '-1rem' }}>
             @{USERNAME} ↗
           </a>
         </div>
