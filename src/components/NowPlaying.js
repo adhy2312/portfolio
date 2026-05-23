@@ -32,11 +32,6 @@ const NowPlaying = () => {
   const progressRef  = useRef(null);
   const lastTrackRef = useRef(null); // cache last good track
 
-  const hasCredentials =
-    process.env.REACT_APP_SPOTIFY_CLIENT_ID &&
-    process.env.REACT_APP_SPOTIFY_CLIENT_SECRET &&
-    process.env.REACT_APP_SPOTIFY_REFRESH_TOKEN &&
-    process.env.REACT_APP_SPOTIFY_CLIENT_ID !== 'your_client_id_here';
 
   const fetchTrack = async () => {
     try {
@@ -54,7 +49,6 @@ const NowPlaying = () => {
   };
 
   useEffect(() => {
-    if (!hasCredentials) return;
     fetchTrack();
     intervalRef.current = setInterval(fetchTrack, POLL_INTERVAL);
     return () => clearInterval(intervalRef.current);
@@ -87,7 +81,7 @@ const NowPlaying = () => {
     localStorage.setItem(LS_KEY, String(next));
   };
 
-  if (!hasCredentials || (loading && !lastTrackRef.current)) return null;
+  if (loading && !lastTrackRef.current) return null;
 
   const progressPct = track?.duration
     ? (track.progress / track.duration) * 100
