@@ -135,6 +135,42 @@
   color: #1ed760;
 }
 
+.np-play-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  z-index: 2;
+}
+
+.np-art-wrap {
+  position: relative;
+}
+
+.np-art-wrap:hover .np-play-overlay,
+.np-play-overlay.playing {
+  opacity: 1;
+}
+
+.np-play-overlay svg {
+  color: #fff;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.np-play-overlay:hover svg {
+  transform: scale(1.15);
+}
+.np-play-overlay:active svg {
+  transform: scale(0.95);
+}
+
 @keyframes np-spin {
   from { transform: rotate(0deg); }
   to   { transform: rotate(360deg); }

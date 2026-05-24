@@ -36,6 +36,28 @@ const NowPlaying = () => {
   );
   const intervalRef  = useRef(null);
   const progressRef  = useRef(null);
+  const audioRef     = useRef(null);
+  const [previewPlaying, setPreviewPlaying] = useState(false);
+
+  // Sync audio with track changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setPreviewPlaying(false);
+    }
+  }, [track?.songUrl]);
+
+  const togglePreview = (e) => {
+    e.stopPropagation();
+    if (!audioRef.current) return;
+    if (previewPlaying) {
+      audioRef.current.pause();
+      setPreviewPlaying(false);
+    } else {
+      audioRef.current.volume = 0.4; // not too loud
+      audioRef.current.play().then(() => setPreviewPlaying(true)).catch(() => {});
+    }
+  };
 
   const fetchTrack = async () => {
     try {
@@ -129,14 +151,34 @@ const NowPlaying = () => {
         ✕
       </button>
 
+      {/* Audio Element for Preview */}
+      {track?.previewUrl && (
+        <audio 
+          ref={audioRef} 
+          src={track.previewUrl} 
+          onEnded={() => setPreviewPlaying(false)} 
+        />
+      )}
+
       {/* Album art */}
-      <div className="np-art-wrap">
+      <div className="np-art-wrap" onClick={track?.previewUrl ? togglePreview : undefined} style={{ cursor: track?.previewUrl ? 'pointer' : 'default' }}>
         {track?.albumArt ? (
-          <img
-            src={track.albumArt}
-            alt={track?.album}
-            className={`np-art ${track?.isPlaying ? 'np-art--spinning' : ''}`}
-          />
+          <>
+            <img
+              src={track.albumArt}
+              alt={track?.album}
+              className={`np-art ${track?.isPlaying ? 'np-art--spinning' : ''}`}
+            />
+            {track?.previewUrl && (
+              <div className={`np-play-overlay ${previewPlaying ? 'playing' : ''}`}>
+                {previewPlaying ? (
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+                )}
+              </div>
+            )}
+          </>
         ) : (
           <div className="np-art np-art--placeholder">
             <SpotifyIcon size={20} />

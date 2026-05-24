@@ -48,6 +48,7 @@ export default async function handler(req, res) {
         album: item.album.name,
         albumArt: item.album.images?.[0]?.url || null,
         songUrl: item.external_urls?.spotify,
+        previewUrl: item.preview_url || null,
         progress: 0,
         duration: item.duration_ms,
       });
@@ -64,6 +65,7 @@ export default async function handler(req, res) {
       album: item.album.name,
       albumArt: item.album.images?.[0]?.url || null,
       songUrl: item.external_urls?.spotify,
+      previewUrl: item.preview_url || null,
       progress: data.progress_ms,
       duration: item.duration_ms,
     });
