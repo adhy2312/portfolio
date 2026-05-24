@@ -93,7 +93,15 @@ const Footer = () => {
             <div className="popup-tag">PROJECT_READY</div>
             <h3>Let's build your next masterpiece together.</h3>
             <p>Currently accepting new freelance opportunities and full-time collaborations.</p>
-            <a href="mailto:adhithyamohan2312@gmail.com" className="popup-btn">
+            <a 
+              href="#contact" 
+              className="popup-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                const el = document.getElementById('contact');
+                if (el) el.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
               GET IN TOUCH <FiMail />
             </a>
           </div>

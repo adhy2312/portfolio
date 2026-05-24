@@ -83,12 +83,14 @@ const Contact = () => {
         'dcGuY9_4lV1xSr5zN'
       )
       .then(
-        () => {
+        (response) => {
+          console.log('SUCCESS!', response.status, response.text);
           setStatus('success');
           form.current.reset();
           setTimeout(() => setStatus('idle'), 5000);
         },
-        () => {
+        (error) => {
+          console.error('FAILED...', error);
           setStatus('error');
           setTimeout(() => setStatus('idle'), 5000);
         }
