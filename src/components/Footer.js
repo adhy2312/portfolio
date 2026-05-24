@@ -68,21 +68,21 @@ const Footer = () => {
     >
       {/* Elegant Topographic Contours */}
       <div className="footer-contours" />
-      
+
       <div className="container footer-simple-inner">
         {/* 3D Pop-up Card */}
-        <motion.div 
+        <motion.div
           className="footer-3d-popup"
           initial={{ y: 100, opacity: 0, rotateX: 45, scale: 0.8 }}
           whileInView={{ y: 0, opacity: 1, rotateX: 0, scale: 1 }}
-          transition={{ 
+          transition={{
             type: "spring",
             stiffness: 100,
             damping: 15,
             delay: 0.3
           }}
           viewport={{ once: true }}
-          whileHover={{ 
+          whileHover={{
             translateY: -15,
             rotateX: 10,
             rotateY: -5,
@@ -100,7 +100,7 @@ const Footer = () => {
           <div className="popup-3d-glow" />
         </motion.div>
 
-        <motion.div 
+        <motion.div
           className="footer-main-row"
           initial={{ y: 50, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
@@ -162,9 +162,11 @@ const Footer = () => {
         <div className="footer-simple-bottom">
           <div className="bottom-divider" />
           <div className="bottom-flex">
-            <p className="retro-copy">© {new Date().getFullYear()} ADHITHYA MOHAN</p>
+            <p className="retro-copy" style={{ opacity: 0.6, fontSize: '0.65rem' }}>
+              <span className="retro-text-muted">HINT:</span> TRY CLICKING THE LOGO 5 TIMES ✨
+            </p>
             <div className="retro-made">
-              CRAFTED WITH <FiHeart className="heart-icon-simple" /> IN KERALA
+              BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE
             </div>
           </div>
         </div>

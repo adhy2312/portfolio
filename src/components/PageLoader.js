@@ -1,7 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './PageLoader.css';
 
-const PHRASES = ['Building...', 'Compiling...', 'Shipping...', 'Launching...'];
+const PHRASES = [
+  'Finding the right light...',
+  'Writing the first line...',
+  'Connecting the dots...',
+  'Namakk sett aakam.'
+];
 
 // "Adhy" transliterated into Indian scripts
 const LANG_NAMES = [
