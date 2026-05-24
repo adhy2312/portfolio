@@ -14,6 +14,7 @@ const MiniAdhy   = lazy(() => import('./components/MiniAdhy'));
 const About       = lazy(() => import('./components/About'));
 const Skills      = lazy(() => import('./components/Skills'));
 const Experience  = lazy(() => import('./components/Experience'));
+const Timeline    = lazy(() => import('./components/Timeline'));
 const GitHubStats = lazy(() => import('./components/GitHubStats'));
 const Photography = lazy(() => import('./components/Photography'));
 const MyWorks     = lazy(() => import('./components/MyWorks'));
@@ -48,7 +49,7 @@ function LazySection({ children }) {
   }, []);
 
   return (
-    <div ref={ref} className="lazy-section-container" style={{ minHeight: inView ? 'auto' : '100vh' }}>
+    <div ref={ref} className="lazy-section-container" style={{ minHeight: inView ? 'auto' : '100vh' }} data-xray="[SYSTEM: LAZY_LOADER]&#10;Strategy: IntersectionObserver&#10;RootMargin: 600px&#10;Fallback: Skeleton UI">
       {inView && <Suspense fallback={<div className="lazy-loading-skeleton" />}>{children}</Suspense>}
     </div>
   );
@@ -124,6 +125,7 @@ function App() {
       <LazySection><About /></LazySection>
       <LazySection><Skills /></LazySection>
       <LazySection><Experience /></LazySection>
+      <LazySection><Timeline /></LazySection>
       <LazySection><GitHubStats /></LazySection>
       <LazySection><TrustedBy /></LazySection>
       <LazySection><MyWorks /></LazySection>

@@ -161,7 +161,7 @@ const MyWorks = () => {
       : currentProjects.filter((p) => p.category === activeFilter);
 
   return (
-    <section className="myworks" id="works">
+    <section className="myworks" id="works" data-xray="[SECTION: PROJECTS]&#10;Data Source: Sanity.io CMS&#10;Cards: 3D Tilt via Framer Motion useSpring&#10;Images: @sanity/image-url (Optimized CDN)&#10;Performance: AnimatePresence for filter transitions">
       <div className="container">
         <motion.div
           className="works-header"

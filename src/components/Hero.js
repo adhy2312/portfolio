@@ -64,7 +64,7 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="hero" className="hero-minimal">
+    <section id="hero" className="hero-minimal" data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: framer-motion springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount">
       {showParticles && (
         <Particles
           id="tsparticles"

@@ -1,0 +1,90 @@
+/* src/components/XRayMode.css */
+body.xray-mode {
+  background: #050505 !important;
+  color: #00ff00 !important;
+  font-family: 'Fira Code', monospace !important;
+}
+
+body.xray-mode * {
+  outline: 1px dashed rgba(0, 255, 0, 0.3) !important;
+  background-color: rgba(0, 20, 0, 0.05) !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  transition: all 0.3s ease;
+}
+
+body.xray-mode img, 
+body.xray-mode canvas, 
+body.xray-mode video,
+body.xray-mode svg {
+  opacity: 0.3 !important;
+  filter: grayscale(100%) sepia(100%) hue-rotate(90deg) !important;
+}
+
+body.xray-mode [data-xray] {
+  position: relative !important;
+}
+
+body.xray-mode [data-xray]::before {
+  content: attr(data-xray);
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(0, 15, 0, 0.95) !important;
+  color: #00ff00 !important;
+  border: 1px solid #00ff00 !important;
+  font-family: 'Fira Code', monospace !important;
+  font-size: 10px !important;
+  padding: 6px 10px !important;
+  z-index: 999999 !important;
+  pointer-events: none !important;
+  white-space: pre-wrap !important;
+  max-width: 350px !important;
+  line-height: 1.4 !important;
+  backdrop-filter: blur(4px) !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  box-shadow: 0 0 10px rgba(0, 255, 0, 0.2) !important;
+}
+
+/* Force text colors to terminal green */
+body.xray-mode h1, body.xray-mode h2, body.xray-mode h3, body.xray-mode h4,
+body.xray-mode p, body.xray-mode span, body.xray-mode a, body.xray-mode div {
+  color: #00ff00 !important;
+  text-shadow: 0 0 5px rgba(0, 255, 0, 0.3) !important;
+  background: transparent !important;
+  -webkit-text-fill-color: #00ff00 !important;
+}
+
+.xray-toggle-btn {
+  background: rgba(0,0,0,0.5);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 0;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  cursor: pointer;
+  font-family: 'Fira Code', monospace;
+  font-size: 14px;
+  margin-left: auto;
+  margin-right: 15px;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.xray-toggle-btn:hover {
+  border-color: #00ff00;
+  color: #00ff00;
+  box-shadow: 0 0 8px rgba(0, 255, 0, 0.4);
+}
+
+body.xray-mode .xray-toggle-btn {
+  background: #00ff00 !important;
+  color: #000 !important;
+  border-color: #00ff00 !important;
+  -webkit-text-fill-color: #000 !important;
+  text-shadow: none !important;
+}

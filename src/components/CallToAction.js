@@ -1,6 +1,7 @@
 import React from 'react';
 import './CallToAction.css';
 import { motion } from 'framer-motion';
+import MagneticButton from './MagneticButton';
 
 const CallToAction = () => {
   const handleClick = (e) => {
@@ -34,18 +35,22 @@ const CallToAction = () => {
           </p>
 
           <div className="cta-actions">
-            <motion.a
-              href="#contact"
-              className="btn-primary cta-btn"
-              onClick={handleClick}
-              whileHover={{ scale: 1.04 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Start a Conversation →
-            </motion.a>
-            <a href="/resume.pdf" download className="btn-outline cta-btn">
-              Download Resume
-            </a>
+            <MagneticButton>
+              <motion.a
+                href="#contact"
+                className="btn-primary cta-btn"
+                onClick={handleClick}
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Start a Conversation →
+              </motion.a>
+            </MagneticButton>
+            <MagneticButton>
+              <a href="/resume.pdf" download className="btn-outline cta-btn">
+                Download Resume
+              </a>
+            </MagneticButton>
           </div>
         </motion.div>
       </div>

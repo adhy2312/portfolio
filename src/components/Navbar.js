@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow } from 'react-icons/fi';
+import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
 import './Navbar.css';
+import './XRayMode.css';
+import MagneticButton from './MagneticButton';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -8,6 +10,12 @@ const Navbar = () => {
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef(null);
   const [logoGlow, setLogoGlow] = useState(false);
+  const [xrayActive, setXrayActive] = useState(false);
+
+  const toggleXray = () => {
+    setXrayActive(!xrayActive);
+    document.body.classList.toggle('xray-mode');
+  };
 
   // Weather Ambient State
   const [weatherData, setWeatherData] = useState(null);
@@ -209,7 +217,7 @@ const Navbar = () => {
         </ul>
       </div>
 
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`}>
+      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`} data-xray="[COMPONENT: NAVBAR]&#10;API: OpenWeatherMap&#10;Logic: Dynamic ambient classes&#10;Listener: passive true">
         <div className="navbar-inner">
           <a
             className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
@@ -228,6 +236,10 @@ const Navbar = () => {
             </div>
           )}
 
+          <button className="xray-toggle-btn" onClick={toggleXray} title="Toggle X-Ray / Developer Mode">
+            <FiActivity />
+          </button>
+
           {/* Desktop Nav Links */}
           <ul className="desktop-nav-links">
             {links.map((link) => (
@@ -242,13 +254,15 @@ const Navbar = () => {
               </li>
             ))}
             <li>
-              <a
-                href="/resume.pdf"
-                download
-                className="nav-resume-btn"
-              >
-                Resume ↓
-              </a>
+              <MagneticButton>
+                <a
+                  href="/resume.pdf"
+                  download
+                  className="nav-resume-btn"
+                >
+                  Resume ↓
+                </a>
+              </MagneticButton>
             </li>
           </ul>
 

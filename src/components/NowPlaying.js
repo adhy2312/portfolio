@@ -4,6 +4,7 @@ import { getNowPlaying } from '../utils/spotify';
 
 const POLL_INTERVAL = 30000;
 const LS_KEY = 'np_minimized';
+const CACHE_KEY = 'np_last_track';
 
 const SpotifyIcon = ({ size = 14 }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>
@@ -23,26 +24,39 @@ const formatMs = (ms) => {
 };
 
 const NowPlaying = () => {
-  const [track, setTrack]           = useState(null);
+  const [track, setTrack]           = useState(() => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      return cached ? JSON.parse(cached) : null;
+    } catch { return null; }
+  });
   const [loading, setLoading]       = useState(true);
   const [minimized, setMinimized]   = useState(
     () => localStorage.getItem(LS_KEY) === 'true'
   );
   const intervalRef  = useRef(null);
   const progressRef  = useRef(null);
-  const lastTrackRef = useRef(null); // cache last good track
-
 
   const fetchTrack = async () => {
     try {
       const data = await getNowPlaying();
-      if (data && (data.title || data.isPlaying !== undefined)) {
-        setTrack(data);
-        lastTrackRef.current = data;
+      if (data) {
+        if (data.title) {
+          setTrack(data);
+          localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } else if (data.isPlaying === false) {
+          setTrack(prev => {
+            if (prev && prev.title) {
+              const updated = { ...prev, isPlaying: false };
+              localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
+              return updated;
+            }
+            return data;
+          });
+        }
       }
     } catch {
-      // On error, keep showing the last known track — never blank out
-      if (lastTrackRef.current) setTrack(lastTrackRef.current);
+      // Keep existing track on error
     } finally {
       setLoading(false);
     }
@@ -81,7 +95,7 @@ const NowPlaying = () => {
     localStorage.setItem(LS_KEY, String(next));
   };
 
-  if (loading && !lastTrackRef.current) return null;
+  if (loading && !track) return null;
 
   const progressPct = track?.duration
     ? (track.progress / track.duration) * 100
