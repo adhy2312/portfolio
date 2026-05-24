@@ -1,0 +1,38 @@
+/* 
+  Digital Textures Engine
+  Extremely lightweight (no JS calculation, hardware accelerated composites)
+  Combines: Sensor grain (SVG), Scanlines (Linear Gradient), Chromatic Aberration (RGB Gradient), Vignette/Paper (Radial)
+*/
+
+.digital-texture-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9995; /* Sit over everything except absolute top modals/loaders */
+}
+
+/* 1. Sensor Grain / Analog Noise */
+.digital-texture-overlay::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.04; /* Ultra-light noise */
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  background-size: 150px 150px;
+}
+
+/* 2. Scanlines + Chromatic Aberration + Paper Texture Vignette */
+.digital-texture-overlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.12; /* Subtle structural lines */
+  background: 
+    /* Paper/Vignette Texture overlay */
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.01) 0%, rgba(0, 0, 0, 0.15) 100%),
+    /* Horizontal scanlines */
+    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
+    /* Vertical RGB chromatic aberration */
+    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  background-size: 100% 100%, 100% 3px, 3px 100%;
+}

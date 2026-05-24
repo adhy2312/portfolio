@@ -4,6 +4,7 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
+import DigitalTextures from './components/DigitalTextures';
 import { StoryProvider } from './contexts/StoryContext';
 
 // Lazy load heavy components
@@ -117,6 +118,9 @@ function App() {
       {/* Ambient background blobs — desktop only */}
       <div className="ambient-blob ambient-blob-1" />
       <div className="ambient-blob ambient-blob-2" />
+
+      {/* Ultra-lightweight digital textures (noise, scanlines, chromatic aberration) */}
+      <DigitalTextures />
 
       <Navbar />
       <Hero />
