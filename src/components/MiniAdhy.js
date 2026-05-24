@@ -219,6 +219,7 @@ const MiniAdhy = () => {
 
   // System Consciousness: Proactive messages
   const lastProactiveRef = useRef(Date.now());
+  const hasWarnedPerformanceRef = useRef(false);
   
   useEffect(() => {
     if (!consciousness) return;
@@ -252,7 +253,8 @@ const MiniAdhy = () => {
     
     // Performance awareness thought
     const currentFps = consciousness.fpsRef?.current || 60;
-    if (currentFps < 40 && Math.random() > 0.95 && currentIdleTime > 5) {
+    if (currentFps < 40 && !hasWarnedPerformanceRef.current && currentIdleTime > 5) {
+      hasWarnedPerformanceRef.current = true;
       consciousness.triggerThought("Reducing visual chaos for stability. GPU under heavy load.");
     }
     
