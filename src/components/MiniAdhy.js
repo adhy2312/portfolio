@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './MiniAdhy.css';
 import { client } from '../sanity';
+import '@google/model-viewer';
 
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — Adhithya's full personality & bio
@@ -194,6 +195,7 @@ const MiniAdhy = () => {
     { role: 'bot', text: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it." },
   ]);
   const [input,        setInput]        = useState('');
+  const [showAR,       setShowAR]       = useState(false);
   const [loading,      setLoading]      = useState(false);
   const [noKey,        setNoKey]        = useState(false); // Can be removed later, keeping for now so state works
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
@@ -482,6 +484,40 @@ const MiniAdhy = () => {
 
   return (
     <>
+      {/* ── AR Overlay ── */}
+      {showAR && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(0,0,0,0.9)',
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <button 
+            onClick={() => setShowAR(false)}
+            style={{ position: 'absolute', top: 20, right: 20, padding: '10px 20px', background: '#333', color: '#fff', border: 'none', borderRadius: '20px', cursor: 'pointer' }}
+          >
+            Close AR
+          </button>
+          <model-viewer
+            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
+            ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
+            ar
+            ar-modes="webxr scene-viewer quick-look"
+            camera-controls
+            auto-rotate
+            shadow-intensity="1"
+            style={{ width: '100%', height: '80vh' }}
+          >
+            <button slot="ar-button" style={{
+              backgroundColor: '#fff', borderRadius: '24px', border: 'none', position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', padding: '12px 24px', fontWeight: 'bold'
+            }}>
+              👋 Launch AR on Desk
+            </button>
+          </model-viewer>
+          <p style={{ color: '#fff', marginTop: '1rem', textAlign: 'center', opacity: 0.7, maxWidth: '300px' }}>
+            Tap the button above on a compatible mobile device to place this placeholder model on your real desk!
+          </p>
+        </div>
+      )}
+
       {/* ── Dock tab (always visible) ── */}
       <button
         className="ma-dock"
@@ -517,7 +553,18 @@ const MiniAdhy = () => {
               <span className="ma-header-status">AI • Always online ✨</span>
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
-            <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
+            
+            <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+              <button 
+                className="ma-close" 
+                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
+                onClick={() => setShowAR(true)} 
+                title="View Mini-Adhy in AR (Mobile)"
+              >
+                AR Mode 🌌
+              </button>
+              <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
+            </div>
           </div>
 
           {/* Messages */}

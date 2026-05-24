@@ -61,6 +61,17 @@
   --skeuo-shadow-dark: rgba(0, 0, 0, 0.15);
   --skeuo-shadow-light: rgba(255, 255, 255, 0.8);
 
+  /* Real-Time Solar Lighting */
+  --solar-x: 0px;
+  --solar-y: 10px;
+  --solar-blur: 20px;
+  --solar-opacity: 0.15;
+  --solar-shadow: var(--solar-x) var(--solar-y) var(--solar-blur) rgba(0,0,0,var(--solar-opacity));
+
+  /* Dynamic Font */
+  --dynamic-weight: 700;
+  --dynamic-slant: 0deg;
+
   /* Retro Tokens */
   --retro-bezel: #e8e8e8;
   --retro-inset: inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,0.9);
@@ -184,12 +195,15 @@ body {
   display: inline-block;
   font-family: 'Space Grotesk', sans-serif;
   font-size: clamp(1.6rem, 7vw, 3rem);
-  font-weight: 700;
+  font-weight: var(--dynamic-weight, 700);
+  transform: skewX(var(--dynamic-slant, 0deg));
   color: var(--text-primary);
   line-height: 1.15;
   margin-bottom: 0;
   max-width: 100%;
   word-wrap: break-word;
+  text-shadow: var(--solar-shadow);
+  transition: font-weight 0.3s ease-out, transform 0.3s ease-out, text-shadow 1s linear;
 }
 
 .section-title-wrapper {

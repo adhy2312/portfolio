@@ -8,6 +8,7 @@ import DigitalTextures from './components/DigitalTextures';
 import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
 import AmbientThoughts from './components/AmbientThoughts';
+import { useSolarLighting } from './hooks/useSolarLighting';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -76,6 +77,7 @@ function LazySection({ name, children }) {
 }
 
 function App() {
+  useSolarLighting(); // Active global lighting calculations
   const [showGame, setShowGame]   = useState(false);
   const [loading, setLoading]     = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
