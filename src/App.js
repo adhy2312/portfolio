@@ -6,6 +6,8 @@ import PageLoader from './components/PageLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
 import DigitalTextures from './components/DigitalTextures';
 import { StoryProvider } from './contexts/StoryContext';
+import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
+import AmbientThoughts from './components/AmbientThoughts';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -32,22 +34,38 @@ const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame       = lazy(() => import('./components/ZipGame'));
 const TicTacToe   = lazy(() => import('./components/TicTacToe'));
 
-function LazySection({ children }) {
+function LazySection({ name, children }) {
   const [inView, setInView] = useState(false);
   const ref = React.useRef();
+  const { setActiveSection } = useConsciousness();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
           setInView(true);
-          observer.disconnect();
+          setActiveSection(name);
         }
       },
-      { rootMargin: '600px' } // Pre-load 600px before scroll
+      { rootMargin: '-10% 0px -50% 0px' } // triggers when section is decently in view
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
+  }, [name, setActiveSection]);
+
+  // Keep original preloader observer for actual mounting
+  useEffect(() => {
+    const preloader = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInView(true);
+          preloader.disconnect();
+        }
+      },
+      { rootMargin: '600px' } 
+    );
+    if (ref.current) preloader.observe(ref.current);
+    return () => preloader.disconnect();
   }, []);
 
   return (
@@ -107,10 +125,13 @@ function App() {
   };
 
   return (
-    <StoryProvider>
-      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''}`}>
+    <ConsciousnessProvider>
+      <StoryProvider>
+        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''}`}>
 
-      <Suspense fallback={null}>
+        <AmbientThoughts />
+
+        <Suspense fallback={null}>
         <CustomCursor />
         <ScrollProgress />
       </Suspense>
@@ -127,21 +148,21 @@ function App() {
       <Hero />
 
       {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
-      <LazySection><About /></LazySection>
-      <LazySection><Skills /></LazySection>
-      <LazySection><NeuralMap /></LazySection>
-      <LazySection><Experience /></LazySection>
-      <LazySection><Timeline /></LazySection>
-      <LazySection><GitHubStats /></LazySection>
-      <LazySection><TrustedBy /></LazySection>
-      <LazySection><MyWorks /></LazySection>
-      <LazySection><Photography /></LazySection>
-      <LazySection><Achievements /></LazySection>
-      <LazySection><Testimonials /></LazySection>
-      <LazySection><CallToAction /></LazySection>
-      <LazySection><Contact /></LazySection>
-      <LazySection><QuoteCanvas /></LazySection>
-      <LazySection><Footer /></LazySection>
+      <LazySection name="About"><About /></LazySection>
+      <LazySection name="Skills"><Skills /></LazySection>
+      <LazySection name="NeuralMap"><NeuralMap /></LazySection>
+      <LazySection name="Experience"><Experience /></LazySection>
+      <LazySection name="Timeline"><Timeline /></LazySection>
+      <LazySection name="GitHubStats"><GitHubStats /></LazySection>
+      <LazySection name="TrustedBy"><TrustedBy /></LazySection>
+      <LazySection name="MyWorks"><MyWorks /></LazySection>
+      <LazySection name="Photography"><Photography /></LazySection>
+      <LazySection name="Achievements"><Achievements /></LazySection>
+      <LazySection name="Testimonials"><Testimonials /></LazySection>
+      <LazySection name="CallToAction"><CallToAction /></LazySection>
+      <LazySection name="Contact"><Contact /></LazySection>
+      <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>
+      <LazySection name="Footer"><Footer /></LazySection>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
@@ -162,7 +183,8 @@ function App() {
       )}
 
       </div>
-    </StoryProvider>
+      </StoryProvider>
+    </ConsciousnessProvider>
   );
 }
 

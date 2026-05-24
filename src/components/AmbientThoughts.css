@@ -1,0 +1,51 @@
+.ambient-thought-container {
+  position: fixed;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ambient-thought-container.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ambient-thought {
+  background: rgba(10, 10, 15, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 10px 20px;
+  border-radius: 50px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: float-ambient 4s ease-in-out infinite;
+}
+
+.thought-icon {
+  font-size: 1rem;
+  animation: pulse-ambient 2s infinite;
+}
+
+.thought-text {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  letter-spacing: 0.5px;
+}
+
+@keyframes float-ambient {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes pulse-ambient {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}

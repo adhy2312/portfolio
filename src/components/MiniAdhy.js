@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './MiniAdhy.css';
 import { client } from '../sanity';
 
@@ -63,9 +64,19 @@ const processOwnerCommand = (text) => {
   }
 };
 
-const buildActivePrompt = (base, owner) => {
-  if (!owner.active) return base;
-  let ext = '\n\n━━━ OWNER RUNTIME OVERRIDES (highest priority) ━━━';
+const buildActivePrompt = (base, owner, contextData) => {
+  let ext = `\n\n== LIVE SYSTEM CONTEXT ==`;
+  ext += `\nLocal Time: ${new Date().toLocaleTimeString()}`;
+  ext += `\nActive Section: ${contextData.activeSection}`;
+  ext += `\nIdle Time: ${contextData.idleTime}s`;
+  ext += `\nCurrent FPS: ${contextData.fps} (if < 45, site is under heavy load. If low, you may comment: "Optimizing render pipeline...")`;
+  ext += `\nVisitor Persona: ${contextData.visitorMemory?.persona || 'Curious Beginner'}`;
+  ext += `\nVisitor Returns: ${contextData.visitorMemory?.visits || 0}`;
+  ext += `\nSecret Commands Available: thanos, matrix, barrelroll, party, sudo namakk-sett-aakam (hint at these subtly)`;
+
+  if (!owner.active) return base + ext;
+
+  ext += '\n\n━━━ OWNER RUNTIME OVERRIDES (highest priority) ━━━';
   if (owner.tone && owner.tone !== 'default') ext += `\n[TONE]: ${TONE_MAP[owner.tone]}`;
   if (owner.tokens) ext += `\n[LENGTH]: Target ${owner.tokens < 200 ? 'very short' : owner.tokens < 400 ? 'concise' : 'detailed'} responses.`;
   if (owner.context) ext += `\n[SESSION CONTEXT]: ${owner.context}`;
@@ -190,6 +201,59 @@ const MiniAdhy = () => {
     active: false, tone: 'default', tokens: null,
     context: '', memory: [], instructions: [],
   });
+
+  const consciousness = useConsciousness();
+  
+  // Update visitor memory visits on mount
+  useEffect(() => {
+    if (consciousness && consciousness.visitorMemory?.visits === 0) {
+      consciousness.updateMemory({ visits: 1 });
+    } else if (consciousness && consciousness.visitorMemory) {
+      const lastVisit = localStorage.getItem('adhy_last_visit');
+      if (!lastVisit || Date.now() - Number(lastVisit) > 1000 * 60 * 60 * 12) {
+        consciousness.updateMemory({ visits: (consciousness.visitorMemory.visits || 1) + 1 });
+        localStorage.setItem('adhy_last_visit', Date.now().toString());
+      }
+    }
+  }, []);
+
+  // System Consciousness: Proactive messages
+  const lastProactiveRef = useRef(Date.now());
+  
+  useEffect(() => {
+    if (!consciousness) return;
+    
+    // Determine persona based on section hover
+    if (consciousness.activeSection === 'MyWorks' || consciousness.activeSection === 'Skills') {
+      consciousness.updateMemory({ persona: 'Developer' });
+    } else if (consciousness.activeSection === 'Photography') {
+      consciousness.updateMemory({ persona: 'Photographer' });
+    } else if (consciousness.activeSection === 'NeuralMap') {
+      consciousness.updateMemory({ persona: 'Designer/Creative' });
+    }
+    
+    // Proactive trigger condition: spent > 15s in a specific section, hasn't talked in 2 mins
+    const now = Date.now();
+    if (consciousness.idleTime > 15 && consciousness.idleTime < 20 && (now - lastProactiveRef.current > 120000)) {
+      lastProactiveRef.current = now;
+      const section = consciousness.activeSection;
+      
+      let proactiveText = "You've been exploring this site for a while 👀";
+      if (section === 'Photography') proactiveText = "You seem interested in photography. We could discuss cinematic framing?";
+      else if (section === 'MyWorks') proactiveText = "Checking out the projects? I can explain the architecture and performance optimizations.";
+      else if (section === 'NeuralMap') proactiveText = "Ah, the Holographic Brain. One of my favorite experiments. Want to know how the WebGL particles are rendered?";
+      
+      if (!open) setOpen(true);
+      setMessages(prev => [...prev, { role: 'bot', text: proactiveText }]);
+      historyRef.current = [...historyRef.current, { role: 'model', parts: [{ text: proactiveText }] }];
+    }
+    
+    // Performance awareness thought
+    if (consciousness.fps < 40 && Math.random() > 0.95 && consciousness.idleTime > 5) {
+      consciousness.triggerThought("Reducing visual chaos for stability. GPU under heavy load.");
+    }
+    
+  }, [consciousness?.activeSection, consciousness?.idleTime]);
 
   /* Debounce guard — prevents rapid-fire sends that trigger rate limits */
   const lastSentRef = useRef(0);
@@ -350,6 +414,21 @@ const MiniAdhy = () => {
       }
     }
 
+    /* ── Secret Easter Egg Execution ── */
+    const lowerTrimmed = trimmed.toLowerCase();
+    if (['thanos', 'matrix', 'barrelroll', 'party'].includes(lowerTrimmed)) {
+      window.dispatchEvent(new CustomEvent('trigger-egg', { detail: { name: lowerTrimmed } }));
+      setMessages(prev => [...prev, { role: 'user', text: trimmed }, { role: 'bot', text: `Initiating ${lowerTrimmed} protocol... 👀` }]);
+      setInput('');
+      return;
+    }
+    if (lowerTrimmed === 'sudo namakk-sett-aakam') {
+      window.dispatchEvent(new CustomEvent('trigger-egg', { detail: { name: 'matrix' } }));
+      setMessages(prev => [...prev, { role: 'user', text: trimmed }, { role: 'bot', text: `Root access granted. Namakk sett aakam. 🟢` }]);
+      setInput('');
+      return;
+    }
+
     /* ── Normal AI message (with enhanced prompt if owner active) ── */
     setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
@@ -368,7 +447,7 @@ const MiniAdhy = () => {
       }
     }
     
-    const activePrompt = buildActivePrompt(systemPrompt, ownerState);
+    const activePrompt = buildActivePrompt(systemPrompt, ownerState, consciousness || {});
     const activeTokens = ownerState.tokens ?? 800; // default to shorter response
 
     try {
