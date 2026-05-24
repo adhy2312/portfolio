@@ -3,16 +3,16 @@ import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './AmbientThoughts.css';
 
 const AmbientThoughts = () => {
-  const { ambientThought, idleTime } = useConsciousness();
+  const { ambientThought, idleState, performanceState } = useConsciousness();
 
-  if (!ambientThought && idleTime < 30) return null;
+  if (!ambientThought && idleState !== 'dreaming' && performanceState !== 'degraded') return null;
 
   return (
-    <div className={`ambient-thought-container ${ambientThought || idleTime >= 30 ? 'visible' : ''}`}>
+    <div className={`ambient-thought-container ${ambientThought || idleState === 'dreaming' || performanceState === 'degraded' ? 'visible' : ''}`}>
       <div className="ambient-thought">
         <span className="thought-icon">✨</span>
         <span className="thought-text">
-          {ambientThought || (idleTime >= 30 ? "The website is dreaming... Rendering idle atmosphere." : "")}
+          {ambientThought || (idleState === 'dreaming' ? "The website is dreaming... Rendering idle atmosphere." : "Reducing visual chaos for stability. GPU under heavy load.")}
         </span>
       </div>
     </div>

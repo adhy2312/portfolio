@@ -52,5 +52,23 @@ export default {
       description: 'Leave empty to hide the View Project button on the card.',
       type: 'url',
     },
+    {
+      name: 'buildTime',
+      title: 'Build Timestamp',
+      description: 'e.g., "Built at 2:14 AM"',
+      type: 'string',
+    },
+    {
+      name: 'soundtrack',
+      title: 'Development Soundtrack',
+      description: 'e.g., "listening to synthwave"',
+      type: 'string',
+    },
+    {
+      name: 'emotionalNote',
+      title: 'Emotional Note / Lessons Learned',
+      description: 'e.g., "This animation nearly destroyed performance."',
+      type: 'text',
+    },
   ],
 }

@@ -68,8 +68,8 @@ const buildActivePrompt = (base, owner, contextData) => {
   let ext = `\n\n== LIVE SYSTEM CONTEXT ==`;
   ext += `\nLocal Time: ${new Date().toLocaleTimeString()}`;
   ext += `\nActive Section: ${contextData.activeSection}`;
-  ext += `\nIdle Time: ${contextData.idleTime}s`;
-  ext += `\nCurrent FPS: ${contextData.fps} (if < 45, site is under heavy load. If low, you may comment: "Optimizing render pipeline...")`;
+  ext += `\nIdle State: ${contextData.idleState} (active/inactive/dreaming)`;
+  ext += `\nPerformance: ${contextData.performanceState} (if degraded, you may comment: "Optimizing render pipeline...")`;
   ext += `\nVisitor Persona: ${contextData.visitorMemory?.persona || 'Curious Beginner'}`;
   ext += `\nVisitor Returns: ${contextData.visitorMemory?.visits || 0}`;
   ext += `\nSecret Commands Available: thanos, matrix, barrelroll, party, sudo namakk-sett-aakam (hint at these subtly)`;
@@ -234,7 +234,9 @@ const MiniAdhy = () => {
     
     // Proactive trigger condition: spent > 15s in a specific section, hasn't talked in 2 mins
     const now = Date.now();
-    if (consciousness.idleTime > 15 && consciousness.idleTime < 20 && (now - lastProactiveRef.current > 120000)) {
+    const currentIdleTime = consciousness.idleTimeRef?.current || 0;
+    
+    if (currentIdleTime > 15 && currentIdleTime < 20 && (now - lastProactiveRef.current > 120000)) {
       lastProactiveRef.current = now;
       const section = consciousness.activeSection;
       
@@ -249,11 +251,12 @@ const MiniAdhy = () => {
     }
     
     // Performance awareness thought
-    if (consciousness.fps < 40 && Math.random() > 0.95 && consciousness.idleTime > 5) {
+    const currentFps = consciousness.fpsRef?.current || 60;
+    if (currentFps < 40 && Math.random() > 0.95 && currentIdleTime > 5) {
       consciousness.triggerThought("Reducing visual chaos for stability. GPU under heavy load.");
     }
     
-  }, [consciousness?.activeSection, consciousness?.idleTime]);
+  }, [consciousness?.activeSection, consciousness?.idleState, consciousness?.performanceState]);
 
   /* Debounce guard — prevents rapid-fire sends that trigger rate limits */
   const lastSentRef = useRef(0);

@@ -79,13 +79,31 @@ By the third chat message, I was blasting the API with over 5,000 tokens per req
 
 **The Fix:** I had to become ruthless with my token economy. I compressed the massive 300-line persona into a punchy 10-line text summary that preserved the exact same vibe. Then, I wrote a slicing algorithm in the chat history array to ensure that Gemini only ever receives the last 6 messages (the last 3 interactions). The frontend UI still shows the whole chat, but the AI only reads the recent context. Token usage dropped by 70%, and the bot became lightning fast and perfectly stable.
 
+## Phase 7: The Immersive Intelligence System
+
+I wanted the portfolio to feel less like a static page and more like a *living digital environment*. So, I built a `ConsciousnessProvider`—a global context layer that constantly monitors the website's pulse without destroying the GPU.
+
+It tracks:
+- **Active Section:** Knowing exactly what you are reading.
+- **Visitor Memory:** Storing visits and categorizing your persona (Developer vs. Designer) via `localStorage`.
+- **Idle Dreaming:** If you leave the page inactive for 30 seconds, an `AmbientThoughts` component renders cinematic thoughts like *"The website is dreaming... Rendering idle atmosphere."*
+- **Performance Telemetry:** It silently tracks frame rates via `requestAnimationFrame`. If your device drops below 40fps, the system flags a 'degraded' performance state.
+
+I took all of this telemetry and injected it directly into Mini-Adhy's prompt context. Mini-Adhy now knows if you're idling, what section you're stuck on, and will *spontaneously* message you if you hover over a section for too long. If you type secret CLI commands (`thanos`, `matrix`, `sudo namakk-sett-aakam`) directly to Mini-Adhy, it intercepts them and executes the global easter eggs.
+
+## Phase 8: Digital Memory Metadata
+
+Projects shouldn't just be screenshots and descriptions. I updated my Sanity CMS schemas to include "Digital Memory"—hidden metadata revealing *how* a project was built. 
+
+Now, on the project cards, you can click a subtle sparkle icon to reveal the memory overlay, exposing the `Build Timestamp` (e.g., "Built at 2:14 AM"), the `Development Soundtrack` (e.g., "Synthwave"), and raw `Emotional Notes / Lessons Learned`.
+
 ## The Final Polish
 
 As I geared up for deployment, I added a tiny text hint at the bottom of the footer: *"Hint: Try clicking the logo 5 times ✨"*, sitting right opposite to *"BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE IN KERALA"*.
 
 Building this wasn't just about putting my projects on a screen. It was an exercise in debugging, optimizing, and finding the balance between wild creative ideas and strict Lighthouse performance scores. 
 
-There were moments where things completely broke—like the time my local dev server crashed because I renamed the Gemini API key without prefixing it properly, leading to a weird fallback error loop. But every bug forced me to dig deeper into React hooks, intersection observers, and browser rendering pipelines.
+There were moments where things completely broke—like the time my local dev server crashed because I renamed the Gemini API key without prefixing it properly, leading to a weird fallback error loop, or when my `mousemove` event listeners in the Consciousness Engine accidentally triggered 60 React state updates per second. But every bug forced me to dig deeper into React hooks, intersection observers, and browser rendering pipelines.
 
 The result is a piece of the internet that feels entirely mine. It's built, it's shipped, and it's alive. 
 

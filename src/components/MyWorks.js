@@ -71,6 +71,9 @@ const projects = [
     githubLink: null,
     accent: 'var(--accent-green)',
     icon: <FiHome />,
+    buildTime: 'Built during the 2021 lockdown',
+    soundtrack: 'listening to lo-fi beats',
+    emotionalNote: 'Debugging hardware over Wi-Fi taught me patience the hard way.'
   },
 ];
 
@@ -87,6 +90,7 @@ const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover
 
 const TiltCard = ({ children, project, index }) => {
   const ref = useRef(null);
+  const [showMemory, setShowMemory] = useState(false);
 
   const x = useMotionValue(0);
   const y = useMotionValue(0);
@@ -128,10 +132,56 @@ const TiltCard = ({ children, project, index }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: "1000px", '--card-accent': project.accent }}
-      className="work-card-wrapper"
+      className={`work-card-wrapper ${showMemory ? 'memory-active' : ''}`}
     >
       <div className="work-card glass-card" style={{ transform: "translateZ(50px)" }}>
-        {children}
+        {showMemory ? (
+          <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
+            <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>
+            <div className="memory-header">
+              <span className="memory-icon">🧠</span>
+              <h4>Digital Memory</h4>
+            </div>
+            
+            <div className="memory-content">
+              {project.buildTime && (
+                <div className="memory-item">
+                  <span className="memory-label">TIMELINE</span>
+                  <p>{project.buildTime}</p>
+                </div>
+              )}
+              {project.soundtrack && (
+                <div className="memory-item">
+                  <span className="memory-label">SOUNDTRACK</span>
+                  <p>{project.soundtrack}</p>
+                </div>
+              )}
+              {project.emotionalNote && (
+                <div className="memory-item">
+                  <span className="memory-label">PROCESS NOTE</span>
+                  <p>{project.emotionalNote}</p>
+                </div>
+              )}
+              {!project.buildTime && !project.soundtrack && !project.emotionalNote && (
+                <p className="memory-empty">Memory fragment corrupted or not recorded for this project.</p>
+              )}
+            </div>
+          </div>
+        ) : (
+          <>
+            {children}
+            {(project.buildTime || project.soundtrack || project.emotionalNote) && (
+              <button 
+                className="reveal-memory-btn" 
+                onClick={(e) => { e.stopPropagation(); setShowMemory(true); }}
+                style={{ transform: "translateZ(30px)" }}
+                title="View Digital Memory"
+              >
+                ✦
+              </button>
+            )}
+          </>
+        )}
       </div>
     </motion.div>
   );
@@ -145,7 +195,7 @@ const MyWorks = () => {
   const hasStory = !!getStoryForSection('projects');
 
   useEffect(() => {
-    const query = '*[_type == "project"] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink }';
+    const query = '*[_type == "project"] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink, buildTime, soundtrack, emotionalNote }';
     client.fetch(query).then((data) => {
       if (data && data.length > 0) {
         setFetchedProjects(data);

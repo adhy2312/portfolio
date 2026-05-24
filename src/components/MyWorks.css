@@ -255,3 +255,121 @@
     font-size: 0.8rem;
   }
 }
+
+/* ────────────────────────────────────────────────
+   Digital Memory UI
+──────────────────────────────────────────────── */
+.reveal-memory-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--accent-primary, #fff);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  cursor: pointer;
+  z-index: 10;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.reveal-memory-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.digital-memory-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 5, 10, 0.95);
+  backdrop-filter: blur(15px);
+  border-radius: 12px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.close-memory-btn {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.close-memory-btn:hover {
+  color: #fff;
+}
+
+.memory-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 15px;
+}
+
+.memory-icon {
+  font-size: 20px;
+}
+
+.memory-header h4 {
+  font-family: 'Fira Code', monospace;
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.memory-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.memory-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.memory-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: var(--accent-primary, #888);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.memory-item p {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.5;
+  margin: 0;
+  font-style: italic;
+}
+
+.memory-empty {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+  margin-top: 40px;
+  font-style: italic;
+}
