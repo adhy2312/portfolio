@@ -15,6 +15,7 @@ const MiniAdhy   = lazy(() => import('./components/MiniAdhy'));
 const About       = lazy(() => import('./components/About'));
 const Skills      = lazy(() => import('./components/Skills'));
 const Experience  = lazy(() => import('./components/Experience'));
+const NeuralMap   = lazy(() => import('./components/NeuralMap'));
 const Timeline    = lazy(() => import('./components/Timeline'));
 const GitHubStats = lazy(() => import('./components/GitHubStats'));
 const Photography = lazy(() => import('./components/Photography'));
@@ -128,6 +129,7 @@ function App() {
       {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
       <LazySection><About /></LazySection>
       <LazySection><Skills /></LazySection>
+      <LazySection><NeuralMap /></LazySection>
       <LazySection><Experience /></LazySection>
       <LazySection><Timeline /></LazySection>
       <LazySection><GitHubStats /></LazySection>

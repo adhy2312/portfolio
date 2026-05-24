@@ -13,6 +13,7 @@ import chatbotKnowledge from './chatbotKnowledge'
 import sectionStory from './sectionStory'
 import quoteCanvas from './quoteCanvas'
 import milestone from './milestone'
+import neuralMap from './neuralMap'
 
 export const schemaTypes = [
   hero,
@@ -29,5 +30,6 @@ export const schemaTypes = [
   chatbotKnowledge,
   sectionStory,
   quoteCanvas,
-  milestone
+  milestone,
+  neuralMap
 ]

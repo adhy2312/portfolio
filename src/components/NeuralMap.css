@@ -1,0 +1,232 @@
+/* 3D Neural Map Styles */
+
+.neural-map-section {
+  padding: 100px 20px;
+  background-color: var(--bg-primary);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 10;
+}
+
+.neural-map-header {
+  text-align: center;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+.neural-map-container {
+  width: 100%;
+  max-width: 1200px;
+  height: 700px;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  background: radial-gradient(circle at center, #1a1a2e 0%, #05050a 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 0 100px rgba(0,0,0,0.8), 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+}
+
+.hub-text-3d {
+  font-family: 'Fira Code', monospace;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #fff;
+  text-shadow: 0 0 15px rgba(255,255,255,0.8);
+  pointer-events: none;
+  user-select: none;
+}
+
+.node-html-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  cursor: pointer;
+  transform: translate3d(0,0,0); /* Hardware accel */
+}
+
+.node-icon-3d {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: rgba(10, 10, 15, 0.8);
+  border: 2px solid var(--node-color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  box-shadow: 0 0 15px var(--node-color);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.node-html-container:hover .node-icon-3d {
+  transform: scale(1.1);
+  box-shadow: 0 0 25px var(--node-color);
+}
+
+.node-html-container.active .node-icon-3d {
+  width: 70px;
+  height: 70px;
+  font-size: 2.2rem;
+  box-shadow: 0 0 40px var(--node-color);
+  background: rgba(10, 10, 15, 0.95);
+}
+
+.node-label-3d {
+  margin-top: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 5px rgba(0,0,0,0.8);
+  background: rgba(0, 0, 0, 0.6);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(4px);
+  transition: all 0.3s ease;
+}
+
+.node-html-container.active .node-label-3d {
+  font-size: 1.2rem;
+  margin-top: 15px;
+  color: var(--node-color);
+  border-color: var(--node-color);
+  box-shadow: 0 0 15px rgba(0,0,0,0.5);
+}
+
+/* Sub nodes grid for 3D layout */
+.sub-nodes-grid {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  width: 500px;
+  pointer-events: none; /* Let clicks pass through */
+}
+
+.sub-node-3d {
+  background: rgba(15, 15, 20, 0.85);
+  border: 1px solid var(--node-color);
+  border-radius: 12px;
+  padding: 15px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.5);
+  animation: floatUp 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  pointer-events: auto; /* Re-enable clicks for items if needed */
+}
+
+.sub-node-3d h4 {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  color: var(--node-color);
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  padding-bottom: 6px;
+}
+
+.sub-node-3d ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sub-node-3d ul li {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 8px;
+  line-height: 1.4;
+  position: relative;
+  padding-left: 14px;
+}
+
+.sub-node-3d ul li::before {
+  content: '▹';
+  position: absolute;
+  left: 0;
+  color: var(--node-color);
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 768px) {
+  .neural-map-container {
+    height: 600px;
+  }
+  
+  .sub-nodes-grid {
+    grid-template-columns: 1fr;
+    width: 280px;
+    top: 100px;
+    gap: 10px;
+  }
+  
+  .sub-node-3d {
+    padding: 12px;
+  }
+  
+  .sub-node-3d h4 {
+    font-size: 0.8rem;
+    margin-bottom: 8px;
+  }
+  
+  .sub-node-3d ul li {
+    font-size: 0.75rem;
+    margin-bottom: 6px;
+  }
+}
+
+/* Unlock 3D View Button */
+.unlock-3d-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  background: rgba(10, 10, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 50px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.unlock-3d-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+.unlock-3d-btn.active {
+  background: rgba(0, 210, 255, 0.2);
+  border-color: #00d2ff;
+  color: #00d2ff;
+}
