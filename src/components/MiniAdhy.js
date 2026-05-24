@@ -393,11 +393,24 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
     },
   };
 
-  const res = await fetch(API_URL, {
+  let res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
+
+  // Local Dev Fallback: If Vercel API route is missing, dev server returns index.html
+  const contentType = res.headers.get("content-type");
+  if (contentType && contentType.includes("text/html")) {
+    const localKey = process.env.REACT_APP_GEMINI_API_KEY;
+    if (!localKey) throw new Error("API route missing and no local REACT_APP_GEMINI_API_KEY found");
+    
+    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${localKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  }
 
   if (res.status === 429 || res.status >= 500) {
     if (retryCount < RETRY_DELAYS.length) {
@@ -487,10 +500,14 @@ const MiniAdhy = () => {
   useEffect(() => {
     const fetchBotKnowledge = async () => {
       try {
-        const [knowledge, skills, experiences] = await Promise.all([
+        const [knowledge, skills, experiences, projects, about, achievements, milestones] = await Promise.all([
           client.fetch(`*[_type == "chatbotKnowledge" && isActive != false] | order(order asc) { category, title, content }`),
           client.fetch(`*[_type == "skillCategory"] | order(order asc) { title, "skills": skills[].name }`),
-          client.fetch(`*[_type == "experience"] | order(order asc) { role, company, duration, description }`)
+          client.fetch(`*[_type == "experience"] | order(order asc) { role, company, duration, description }`),
+          client.fetch(`*[_type == "project"] { title, description, category, tags }`),
+          client.fetch(`*[_type == "about"][0] { shortBio, "interests": interests[].name }`),
+          client.fetch(`*[_type == "achievement"] | order(order asc) { title, subtitle }`),
+          client.fetch(`*[_type == "milestone"] | order(date desc) { date, title, description }`)
         ]);
 
         let extra = '\n\n== ADDITIONAL KNOWLEDGE FROM CMS (these override defaults if conflicting) ==';
@@ -511,6 +528,22 @@ const MiniAdhy = () => {
 
         if (experiences?.length > 0) {
           extra += '\n\n[LIVE EXPERIENCE]\n' + experiences.map(exp => `- ${exp.role} at ${exp.company} (${exp.duration}): ${exp.description}`).join('\n');
+        }
+
+        if (projects?.length > 0) {
+          extra += '\n\n[PORTFOLIO PROJECTS]\n' + projects.map(p => `- ${p.title} (${p.category}): ${p.description} [Tags: ${(p.tags || []).join(', ')}]`).join('\n');
+        }
+
+        if (achievements?.length > 0) {
+          extra += '\n\n[ACHIEVEMENTS & AWARDS]\n' + achievements.map(a => `- ${a.title}: ${a.subtitle}`).join('\n');
+        }
+
+        if (milestones?.length > 0) {
+          extra += '\n\n[TIMELINE MILESTONES]\n' + milestones.map(m => `- ${m.date}: ${m.title} — ${m.description}`).join('\n');
+        }
+
+        if (about) {
+          extra += `\n\n[ABOUT ADHY]\nBio: ${about.shortBio}\nInterests: ${(about.interests || []).join(', ')}`;
         }
 
         setSystemPrompt(SYSTEM_PROMPT + extra);

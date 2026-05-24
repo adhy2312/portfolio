@@ -1,8 +1,150 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
 import './Navbar.css';
 import './XRayMode.css';
 import MagneticButton from './MagneticButton';
+
+/* ────────────────────────────────────────────────
+   RainDroplets — realistic water beads on glass
+──────────────────────────────────────────────── */
+const RainDroplets = () => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+
+    const setSize = () => {
+      const parent = canvas.parentElement;
+      if (!parent) return;
+      canvas.width  = parent.offsetWidth;
+      canvas.height = parent.offsetHeight;
+    };
+    setSize();
+
+    const ro = new ResizeObserver(setSize);
+    ro.observe(canvas.parentElement);
+
+    /* ——— Droplet class ——— */
+    class Drop {
+      constructor(spread) {
+        this.spawn(spread);
+      }
+      spawn(spread = false) {
+        this.r        = 1.5 + Math.random() * 2.8;          // radius 1.5–4.3 px
+        this.x        = this.r + Math.random() * (canvas.width  - this.r * 2);
+        this.y        = spread
+                          ? Math.random() * canvas.height        // initial spread
+                          : this.r + Math.random() * canvas.height * 0.25; // spawn in top 25%
+        this.vy       = 0.18 + Math.random() * 0.28;           // slow slide speed
+        this.wobble   = Math.random() * Math.PI * 2;           // phase offset
+        this.wobbleS  = 0.018 + Math.random() * 0.016;        // wobble speed
+        this.wobbleA  = 0.18 + Math.random() * 0.22;          // horizontal wobble amplitude
+        this.opacity  = 0.22 + Math.random() * 0.18;  // subtle: 0.22–0.40
+        this.stuck    = false;
+        this.stuckFor = 0;
+        this.stuckMax = 140 + Math.random() * 200;            // frames to stay stuck
+        this.fadeOut  = 1;                                     // 1 = fully visible
+      }
+      update() {
+        if (this.stuck) {
+          this.stuckFor++;
+          // slowly fade out after a while
+          if (this.stuckFor > this.stuckMax * 0.65) {
+            this.fadeOut -= 0.005;
+          }
+          if (this.fadeOut <= 0) this.spawn();
+          return;
+        }
+        this.wobble += this.wobbleS;
+        this.x += Math.sin(this.wobble) * this.wobbleA;
+        this.y += this.vy;
+
+        // clamp horizontally
+        this.x = Math.max(this.r, Math.min(canvas.width - this.r, this.x));
+
+        // stick near bottom edge
+        if (this.y >= canvas.height - this.r - 3) {
+          this.y    = canvas.height - this.r - 3;
+          this.stuck = true;
+        }
+      }
+      draw() {
+        const alpha = this.opacity * this.fadeOut;
+        
+        // shadow
+        ctx.fillStyle = `rgba(0, 30, 80, ${alpha * 0.15})`;
+        ctx.beginPath();
+        ctx.arc(this.x + 1, this.y + 1, this.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // main body
+        ctx.fillStyle = `rgba(160, 220, 255, ${alpha * 0.6})`;
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        // highlight
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.8})`;
+        ctx.beginPath();
+        ctx.arc(this.x - this.r * 0.3, this.y - this.r * 0.3, this.r * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+
+    /* initialise drops spread across the surface */
+    const COUNT = 18;  // fewer drops = more subtle
+    const drops = Array.from({ length: COUNT }, () => new Drop(true));
+
+    /* occasionally spawn a fresh drop at top */
+    let spawnTimer = 0;
+
+    let animId;
+    let lastTime = 0;
+    const animate = (time) => {
+      animId = requestAnimationFrame(animate);
+      
+      // Throttle to roughly 30fps for performance
+      if (time - lastTime < 33) return;
+      lastTime = time;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      spawnTimer++;
+      if (spawnTimer > 15) {
+        spawnTimer = 0;
+        // find a stuck or faded drop to recycle
+        const candidates = drops.filter(d => d.stuck && d.fadeOut < 0.4);
+        const target = candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : null;
+        if (target) target.spawn();
+      }
+
+      drops.forEach(d => { d.update(); d.draw(); });
+    };
+    animId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animId);
+      ro.disconnect();
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      style={{
+        position: 'absolute',
+        inset: 0,
+        borderRadius: 'inherit',
+        pointerEvents: 'none',
+        zIndex: 2,
+      }}
+    />
+  );
+};
+
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -219,6 +361,7 @@ const Navbar = () => {
 
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`} data-xray="[COMPONENT: NAVBAR]&#10;API: OpenWeatherMap&#10;Logic: Dynamic ambient classes&#10;Listener: passive true">
         <div className="navbar-inner">
+          {ambientClass === 'ambient-rain' && <RainDroplets />}
           <a
             className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
             href="#hero"
