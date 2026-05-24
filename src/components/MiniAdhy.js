@@ -453,7 +453,7 @@ const MiniAdhy = () => {
     }
     
     const activePrompt = buildActivePrompt(systemPrompt, ownerState, consciousness || {});
-    const activeTokens = ownerState.tokens ?? 800; // default to shorter response
+    const activeTokens = ownerState.tokens ?? 2048; // drastically increased to prevent truncation
 
     try {
       const reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);

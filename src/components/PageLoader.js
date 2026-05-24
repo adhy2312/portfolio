@@ -11,7 +11,7 @@ const PHRASES = [
 // "Adhy" transliterated into Indian scripts
 const LANG_NAMES = [
   { text: 'ADHY',      lang: 'English'    },
-  { text: 'ആധി',       lang: 'Malayalam'  },
+  { text: 'ആദി',       lang: 'Malayalam'  },
   { text: 'आधी',       lang: 'Hindi'      },
   { text: 'அத்ய',      lang: 'Tamil'      },
   { text: 'ಅಧ್ಯ',      lang: 'Kannada'    },
