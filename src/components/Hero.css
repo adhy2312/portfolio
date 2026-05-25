@@ -61,6 +61,15 @@
   perspective: 1000px; /* Enable 3D space */
 }
 
+.hero-name-word {
+  display: inline-block;
+  white-space: nowrap;
+  margin: 0 12px;
+}
+.hero-name-word:last-child {
+  margin-right: 0;
+}
+
 .metallic-char {
   display: inline-block;
   /* Premium Retro-Future Horizon Chrome Finish */
@@ -180,10 +189,20 @@
 /* Responsive */
 @media (max-width: 768px) {
   .hero-name-giant {
-    font-size: clamp(3rem, 12vw, 6rem);
+    font-size: clamp(2.5rem, 10vw, 4rem);
+    line-height: 1.2;
+    gap: 8px;
+  }
+  .hero-name-word {
+    margin: 0; /* use flex gap instead */
+  }
+  .metallic-char {
+    padding: 0 1px; /* Remove massive padding that causes overflow */
   }
   .hero-tagline-premium {
     letter-spacing: 4px !important;
     font-size: 0.7rem;
+    padding: 0 16px;
+    line-height: 1.6;
   }
 }

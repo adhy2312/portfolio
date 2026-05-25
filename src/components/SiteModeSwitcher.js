@@ -6,7 +6,7 @@ import './SiteModeSwitcher.css';
 
 import './SiteModeSwitcher.css';
 
-export const SiteModePanel = ({ inline = false }) => {
+export const SiteModePanel = ({ inline = false, onClose }) => {
   const { mode, setMode, a11y, toggleA11y, isExpert } = useSiteMode();
 
   const modes = [
@@ -26,8 +26,19 @@ export const SiteModePanel = ({ inline = false }) => {
   return (
     <div className={`smp-content ${inline ? 'smp-inline' : ''}`}>
       <div className="smp-header">
-        <span className="smp-label">SITE MODE</span>
-        {isExpert && <span className="smp-badge">EXPERT</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span className="smp-label">SITE MODE</span>
+          {isExpert && <span className="smp-badge">EXPERT</span>}
+        </div>
+        {onClose && (
+          <button 
+            className="smp-close-btn" 
+            onClick={onClose} 
+            style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: 0 }}
+          >
+            <FiX size={18} />
+          </button>
+        )}
       </div>
 
       <div className="smp-modes">
@@ -101,7 +112,7 @@ const SiteModeSwitcher = () => {
             exit={{ opacity: 0, y: 30, scale: 0.9 }}
             transition={{ type: 'spring', stiffness: 300, damping: 25 }}
           >
-            <SiteModePanel />
+            <SiteModePanel onClose={() => setIsOpen(false)} />
           </motion.div>
         )}
       </AnimatePresence>
