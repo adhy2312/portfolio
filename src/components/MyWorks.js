@@ -220,7 +220,7 @@ const MyWorks = () => {
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <span className="section-label">// what I've built</span>
+          <span className="section-label">{"// what I've built"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Masterpieces">
               <span className="section-title-inner">Featured <span>Projects</span></span>

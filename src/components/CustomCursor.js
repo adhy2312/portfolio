@@ -33,10 +33,18 @@ const CustomCursor = () => {
     raf = requestAnimationFrame(tick);
 
     const onOver = (e) => {
-      const isHover = !!e.target.closest(
-        'a, button, [data-cursor="hover"], input, textarea, select, label, [role="button"]'
-      );
-      const next = isHover ? 'hover' : 'default';
+      const el = e.target;
+      const isText = !!el.closest('p, h1, h2, h3, h4, h5, h6, span:not(.ma-dock-label)');
+      const isMagnetic = !!el.closest('.magnetic-btn');
+      const isHover = !!el.closest('a, button, [data-cursor="hover"], input, textarea, select, label, [role="button"]');
+      const isGrab = !!el.closest('.neural-map-container, model-viewer');
+
+      let next = 'default';
+      if (isGrab) next = 'grab';
+      else if (isMagnetic) next = 'magnetic';
+      else if (isHover) next = 'hover';
+      else if (isText) next = 'text';
+
       if (next !== stateRef.current) {
         stateRef.current = next;
         setCursorState(next);

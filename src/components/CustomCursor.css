@@ -130,3 +130,33 @@
 .liquid-cursor.cursor-click .liquid-cursor-outline {
   transform: scale(0.85);
 }
+
+/* ─── TEXT STATE (I-Beam) ─── */
+.liquid-cursor.state-text .liquid-cursor-shape {
+  clip-path: polygon(45% 0, 55% 0, 55% 100%, 45% 100%);
+  transform: scale(0.6, 1.5);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(200, 200, 255, 0.3) 100%);
+}
+.liquid-cursor.state-text .liquid-cursor-outline {
+  transform: scale(0.6, 1.5);
+  color: rgba(200, 200, 255, 0.5);
+}
+
+/* ─── MAGNETIC STATE ─── */
+.liquid-cursor.state-magnetic .liquid-cursor-shape {
+  transform: scale(0.3); /* Becomes a tiny dot when inside a button */
+  background: #fff;
+  border-radius: 50%;
+  clip-path: circle(50% at 50% 50%);
+}
+.liquid-cursor.state-magnetic .liquid-cursor-outline {
+  opacity: 0;
+}
+
+/* ─── GRAB STATE ─── */
+.liquid-cursor.state-grab .liquid-cursor-shape {
+  transform: scale(1.5);
+  clip-path: circle(40% at 50% 50%);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255,255,255,0.5);
+}

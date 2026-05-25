@@ -223,7 +223,7 @@ const Contact = () => {
 
               <button
                 type="submit"
-                className={`btn-primary form-submit ${status === 'sending' ? 'submitting' : ''}`}
+                className={`btn-primary form-submit magnetic-btn ${status === 'sending' ? 'submitting' : ''}`}
                 disabled={status === 'sending'}
               >
                 {status === 'sending' ? (

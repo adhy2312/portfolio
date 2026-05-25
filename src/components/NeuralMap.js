@@ -261,6 +261,19 @@ export default function NeuralMap3D() {
   const [activeNode, setActiveNode] = useState(null);
   const [isInteractive, setIsInteractive] = useState(false);
   const [brainData, setBrainData] = useState(BRAIN_DATA);
+  const [isInView, setIsInView] = useState(false);
+  const sectionRef = useRef(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      setIsInView(entry.isIntersecting);
+    }, { threshold: 0 });
+    
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    
+    const obsRef = sectionRef.current;
+    return () => { if (obsRef) observer.unobserve(obsRef); };
+  }, []);
 
   React.useEffect(() => {
     client.fetch('*[_type == "neuralMap"]')
@@ -285,7 +298,7 @@ export default function NeuralMap3D() {
   }, []);
 
   return (
-    <section className="neural-map-section" id="neural-map" onClick={() => setActiveNode(null)}>
+    <section className="neural-map-section" id="neural-map" ref={sectionRef} onClick={() => setActiveNode(null)}>
       <div className="neural-map-header section-title-wrapper" style={{ justifyContent: 'center', flexDirection: 'column' }}>
         <div className="section-label">NEURAL MAP</div>
         <h2 className="section-title" data-hover="HOLOGRAPHIC BRAIN">
@@ -306,7 +319,7 @@ export default function NeuralMap3D() {
           {isInteractive ? 'Lock 3D View' : 'Unlock 3D Rotation'}
         </button>
 
-        <Canvas camera={{ position: [0, 0, 12], fov: 60 }} dpr={1}>
+        <Canvas frameloop={isInView ? "always" : "demand"} camera={{ position: [0, 0, 12], fov: 60 }} dpr={1}>
           <ambientLight intensity={0.2} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           

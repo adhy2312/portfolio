@@ -61,8 +61,10 @@ export const ConsciousnessProvider = ({ children }) => {
   useEffect(() => {
     const resetIdle = () => {
       lastActive.current = Date.now();
-      idleTimeRef.current = 0;
-      setIdleState(prev => prev !== 'active' ? 'active' : prev);
+      if (idleTimeRef.current > 0) {
+        idleTimeRef.current = 0;
+        setIdleState(prev => prev !== 'active' ? 'active' : prev);
+      }
     };
 
     window.addEventListener('mousemove', resetIdle, { passive: true });

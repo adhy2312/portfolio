@@ -43,7 +43,7 @@ const Timeline = () => {
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <span className="section-label">// my journey</span>
+          <span className="section-label">{"// my journey"}</span>
           <h2 className="section-title">
             The <span>Timeline</span>
           </h2>

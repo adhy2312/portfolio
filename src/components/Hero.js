@@ -27,8 +27,15 @@ const Hero = () => {
     }
   }, []);
 
+  const hour = new Date().getHours();
+  let timeGreeting = "Hey there!";
+  if (hour < 5 || hour >= 23) timeGreeting = "Late night hacking? ☕";
+  else if (hour < 12) timeGreeting = "Good morning! 🌅";
+  else if (hour < 18) timeGreeting = "Good afternoon! ☀️";
+  else timeGreeting = "Good evening! 🌙";
+
   const displayData = {
-    greeting: heroData?.greeting || "Hey there!",
+    greeting: heroData?.greeting && heroData.greeting !== 'Hey there!' ? heroData.greeting : timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
     role: heroData?.role || "Electronics Engineer | Web Developer | Photographer",

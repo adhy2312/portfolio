@@ -139,7 +139,7 @@ const Skills = () => {
           transition={{ duration: 0.7 }}
           viewport={{ once: true }}
         >
-          <span className="section-label">// what I know</span>
+          <span className="section-label">{"// what I know"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="My Arsenal">
               <span className="section-title-inner">Skills & <span>Expertise</span></span>

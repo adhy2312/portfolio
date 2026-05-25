@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
+import Lenis from 'lenis';
 import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -84,6 +85,25 @@ function App() {
   const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
 
   useEffect(() => {
+    // Lenis Smooth Scrolling
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      mouseMultiplier: 1,
+      smoothTouch: false,
+      touchMultiplier: 2,
+      infinite: false,
+    });
+    
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
@@ -113,11 +133,81 @@ function App() {
     };
     window.addEventListener('trigger-egg', eggHandler);
 
+    // 1. Magnetic Buttons Physics
+    const magneticBtns = document.querySelectorAll('.magnetic-btn');
+    const handleMouseMove = (e) => {
+      const btn = e.currentTarget;
+      const rect = btn.getBoundingClientRect();
+      const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
+      const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    };
+    const handleMouseLeave = (e) => {
+      const btn = e.currentTarget;
+      btn.style.transform = `translate(0px, 0px)`;
+    };
+    magneticBtns.forEach(btn => {
+      btn.addEventListener('mousemove', handleMouseMove);
+      btn.addEventListener('mouseleave', handleMouseLeave);
+      // Ensure smooth return transition but snappy follow
+      btn.style.transition = 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s ease, color 0.3s ease';
+    });
+
+    // 2. Hacker Decode Reveal
+    const hackerTexts = document.querySelectorAll('.section-title span, .section-label, .hacker-decode');
+    const chars = "!<>-_\\\\/[]{}—=+*^?#________";
+    const decodeObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const el = entry.target;
+          if (el.dataset.decoded) return;
+          el.dataset.decoded = "true";
+          
+          const originalText = el.innerText || el.dataset.value;
+          if (!el.dataset.value) el.dataset.value = originalText;
+          
+          let iteration = 0;
+          const interval = setInterval(() => {
+            el.innerText = originalText.split("").map((letter, index) => {
+              if (index < iteration) return originalText[index];
+              return chars[Math.floor(Math.random() * 26)] || "_";
+            }).join("");
+            if (iteration >= originalText.length) {
+              clearInterval(interval);
+              el.innerText = originalText; // Ensure exact match
+            }
+            iteration += 1 / 3;
+          }, 30);
+        }
+      });
+    }, { threshold: 0.1 });
+    
+    hackerTexts.forEach(txt => decodeObserver.observe(txt));
+
+    // 3. Console Easter Egg
+    console.log(`
+    █████╗ ██████╗ ██╗  ██╗██╗
+   ██╔══██╗██╔══██╗██║  ██║╚██╗
+   ███████║██║  ██║███████║ ╚██╗
+   ██╔══██║██║  ██║██╔══██║ ██╔╝
+   ██║  ██║██████╔╝██║  ██║██╔╝
+   ╚═╝  ╚═╝╚═════╝ ╚═╝  ╚═╝╚═╝
+   "Building digital architecture." 
+   
+   Secret Code for Mini-Adhy: sudo namakk-sett-aakam
+    `);
+
     return () => {
+      lenis.destroy();
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
+      magneticBtns.forEach(btn => {
+        btn.removeEventListener('mousemove', handleMouseMove);
+        btn.removeEventListener('mouseleave', handleMouseLeave);
+      });
+      decodeObserver.disconnect();
     };
   }, []);
 
