@@ -147,33 +147,76 @@ body.mode-expert .ambient-blob, body.mode-expert .particle-network {
   display: none !important;
 }
 
-/* 3. EXPERIMENTAL MODE - Aggressive Cyberpunk Vaporwave */
+/* 3. EXPERIMENTAL MODE - Biological Lifeform / Heartbeat */
 body.mode-experimental .App {
-  background-color: #0a0014 !important;
+  background-color: #0d0612 !important;
+  background-image: radial-gradient(circle at 50% 50%, rgba(20, 5, 25, 0.8) 0%, #0d0612 100%) !important;
+  color: #e0d5e6 !important;
 }
+
+/* Lifeform Breathing Animation */
 body.mode-experimental section, body.mode-experimental .hero-minimal, body.mode-experimental .glass-card, body.mode-experimental .timeline-item, body.mode-experimental .project-card, body.mode-experimental .skill-card, body.mode-experimental .navbar-inner {
-  background: rgba(20, 0, 30, 0.7) !important;
-  border: 2px dashed #ff00ea !important;
-  border-radius: 0 !important;
-  box-shadow: 6px 6px 0px #00eaff !important;
+  background: rgba(25, 10, 30, 0.4) !important;
+  border: 1px solid rgba(255, 100, 150, 0.15) !important;
+  border-radius: 20px !important;
+  box-shadow: inset 0 0 20px rgba(255, 50, 100, 0.05), 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+  animation: lifeform-breathe 8s ease-in-out infinite alternate !important;
+  transition: border-radius 0.3s ease !important;
 }
-body.mode-experimental .glass-card:hover, body.mode-experimental .project-card:hover {
-  transform: skewX(-2deg) scale(1.02) !important;
+
+@keyframes lifeform-breathe {
+  0% { transform: scale(1) translateY(0); box-shadow: inset 0 0 10px rgba(255, 50, 100, 0.02); }
+  100% { transform: scale(1.01) translateY(-3px); box-shadow: inset 0 0 40px rgba(255, 50, 100, 0.12); }
 }
+
+/* Adrenaline Pulse on Hover */
+body.mode-experimental .glass-card:hover, body.mode-experimental .project-card:hover, body.mode-experimental .skill-card:hover {
+  animation: adrenaline-shake 0.3s cubic-bezier(.36,.07,.19,.97) both !important;
+  border-color: rgba(255, 50, 80, 0.6) !important;
+  box-shadow: 0 0 50px rgba(255, 20, 60, 0.3) !important;
+  border-radius: 12px !important; /* Sharpens on tension */
+}
+
+@keyframes adrenaline-shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0) scale(1.02); }
+  20%, 80% { transform: translate3d(2px, 0, 0) scale(1.02); }
+  30%, 50%, 70% { transform: translate3d(-3px, 3px, 0) scale(1.02); }
+  40%, 60% { transform: translate3d(3px, -3px, 0) scale(1.02); }
+}
+
+/* Core Heartbeat Global Overlay */
+body.mode-experimental .App::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at center, transparent 40%, rgba(255, 0, 40, 0.06) 100%);
+  animation: heartbeat-pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  z-index: 9999;
+}
+
+@keyframes heartbeat-pulse {
+  0% { opacity: 0.1; transform: scale(1); }
+  15% { opacity: 0.8; transform: scale(1.02); }
+  30% { opacity: 0.1; transform: scale(1); }
+  45% { opacity: 0.5; transform: scale(1.01); }
+  100% { opacity: 0.1; transform: scale(1); }
+}
+
 body.mode-experimental h1, body.mode-experimental h2, body.mode-experimental h3, body.mode-experimental h4 {
-  color: #ff00ea !important;
-  font-family: 'Space Grotesk', sans-serif !important;
-  -webkit-text-fill-color: #ff00ea !important;
-  text-shadow: 2px 2px 0px #00eaff !important;
-  text-transform: uppercase !important;
+  color: #ffb3c6 !important;
+  font-family: 'Inter', sans-serif !important;
+  -webkit-text-fill-color: #ffb3c6 !important;
+  text-shadow: 0 0 15px rgba(255, 50, 100, 0.4) !important;
+  letter-spacing: 1px !important;
 }
+
 body.mode-experimental p, body.mode-experimental span, body.mode-experimental a {
-  color: #00eaff !important;
-  text-shadow: 1px 1px 0px #ff00ea !important;
+  color: #f8e5ee !important;
 }
+
 body.mode-experimental img {
-  filter: hue-rotate(90deg) saturate(3) contrast(1.2) !important;
-  mix-blend-mode: screen !important;
+  filter: sepia(0.5) hue-rotate(320deg) saturate(1.5) !important;
 }
 
 
