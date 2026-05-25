@@ -2,8 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './MiniAdhy.css';
 import { client } from '../sanity';
-import '@google/model-viewer';
-
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — Adhithya's full personality & bio
 ──────────────────────────────────────────────── */
@@ -499,10 +497,10 @@ const MiniAdhy = () => {
           <model-viewer
             src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
             ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
-            ar
+            ar="true"
             ar-modes="webxr scene-viewer quick-look"
-            camera-controls
-            auto-rotate
+            camera-controls="true"
+            auto-rotate="true"
             shadow-intensity="1"
             style={{ width: '100%', height: '80vh' }}
           >
