@@ -209,9 +209,16 @@
 
 /* ─── Mobile ─── */
 @media (max-width: 768px) {
-  /* Hide the FAB and floating panel entirely on mobile, we use the inline version in the hamburger menu */
-  .site-mode-fab,
-  .site-mode-panel {
+  /* Hide the FAB entirely on mobile, we use the settings button in the hamburger menu */
+  .site-mode-fab {
     display: none !important;
+  }
+  .site-mode-panel {
+    bottom: 20px;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    max-width: none;
+    z-index: 1061; /* Ensure it stays above the mobile hamburger panel */
   }
 }

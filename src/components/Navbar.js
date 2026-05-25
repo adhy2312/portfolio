@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
+import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
 import { motion } from 'framer-motion';
 import './Navbar.css';
 import './XRayMode.css';
@@ -7,7 +7,6 @@ import MagneticButton from './MagneticButton';
 import { playClickSound } from '../utils/sound';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import RainDroplets from './RainDroplets';
-import { SiteModePanel } from './SiteModeSwitcher';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -132,6 +131,34 @@ const Navbar = () => {
       />
 
       <div className={`mobile-menu-panel ${menuOpen ? 'mobile-menu-open' : ''}`}>
+        <button
+          className="mobile-settings-icon"
+          aria-label="Site Settings"
+          title="Site Modes"
+          onClick={(e) => {
+            e.preventDefault();
+            setMenuOpen(false);
+            window.dispatchEvent(new CustomEvent('toggle-site-mode'));
+          }}
+          style={{
+            position: 'absolute',
+            top: '24px',
+            right: '24px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            color: '#fff',
+            width: '40px',
+            height: '40px',
+            borderRadius: '50%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10
+          }}
+        >
+          <FiSettings size={18} />
+        </button>
         <ul className="mobile-nav-links">
           <li className="mobile-menu-label" aria-hidden="true">
             NAVIGATION
@@ -186,9 +213,6 @@ const Navbar = () => {
             </div>
           </li>
         </ul>
-        <div className="mobile-menu-settings">
-          <SiteModePanel inline={true} />
-        </div>
       </div>
 
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`} data-xray="[COMPONENT: NAVBAR]&#10;API: OpenWeatherMap&#10;Logic: Dynamic ambient classes&#10;Listener: passive true">

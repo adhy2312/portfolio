@@ -213,10 +213,19 @@
 /* Responsive */
 @media (max-width: 600px) {
   .lang-terminal {
-    max-width: 100%;
+    max-width: 92vw;
     font-size: 0.78rem;
+    margin: 20px auto 0;
   }
   .lt-code {
-    font-size: 0.75rem;
+    font-size: 0.70rem;
+    padding: 0 10px;
+  }
+  .lt-line-numbers {
+    padding: 0 8px;
+    min-width: 32px;
+  }
+  .lt-topbar {
+    padding: 8px 12px;
   }
 }

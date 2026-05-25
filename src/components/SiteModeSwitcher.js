@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteMode, MODES } from '../contexts/SiteModeContext';
 import { FiSettings, FiX, FiBriefcase, FiCpu, FiZap, FiEye, FiMonitor, FiType, FiMousePointer } from 'react-icons/fi';
@@ -10,7 +10,7 @@ export const SiteModePanel = ({ inline = false }) => {
   const { mode, setMode, a11y, toggleA11y, isExpert } = useSiteMode();
 
   const modes = [
-    { key: MODES.NORMAL,       icon: <FiSettings size={16} />,   label: 'Normal',          desc: 'Standard fast experience' },
+    { key: MODES.NORMAL,       icon: <FiSettings size={16} />,   label: 'Default (Original)', desc: 'Standard fast experience' },
     { key: MODES.RECRUITER,    icon: <FiBriefcase size={16} />,  label: 'Recruiter',       desc: 'Focused portfolio view' },
     { key: MODES.EXPERT,       icon: <FiCpu size={16} />,        label: 'Expert',          desc: 'Full technical depth' },
     { key: MODES.EXPERIMENTAL, icon: <FiZap size={16} />,        label: 'Experimental Lab', desc: 'Bleeding-edge effects' },
@@ -69,6 +69,12 @@ export const SiteModePanel = ({ inline = false }) => {
 
 const SiteModeSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    const handleToggle = () => setIsOpen(prev => !prev);
+    window.addEventListener('toggle-site-mode', handleToggle);
+    return () => window.removeEventListener('toggle-site-mode', handleToggle);
+  }, []);
 
   return (
     <>

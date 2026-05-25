@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import './MiniAdhy.css';
+import HiveMind from './HiveMind';
 import { client } from '../sanity';
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — Adhithya's full personality & bio
@@ -217,6 +218,7 @@ const MiniAdhy = () => {
   ]);
   const [input,        setInput]        = useState('');
   const [showAR,       setShowAR]       = useState(false);
+  const [showHiveMind, setShowHiveMind] = useState(false);
   const [arSpeech,     setArSpeech]     = useState('Hello there! 👋');
   const [arInput,      setArInput]      = useState('');
   const [isArAnswering, setIsArAnswering] = useState(false);
@@ -563,6 +565,14 @@ const MiniAdhy = () => {
 
   return (
     <>
+      {showHiveMind && (
+        <HiveMind 
+          onClose={() => setShowHiveMind(false)} 
+          isThinking={loading} 
+          currentThought={messages[messages.length - 1]?.text || ''} 
+        />
+      )}
+
       {/* ── AR Overlay ── */}
       {showAR && (
         <div style={{
@@ -708,7 +718,15 @@ const MiniAdhy = () => {
             <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
               <button 
                 className="ma-close" 
-                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
+                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7', marginLeft: '8px' }}
+                onClick={() => setShowHiveMind(true)} 
+                title="Connect to Hive Mind"
+              >
+                Hive Mind 🧠
+              </button>
+              <button 
+                className="ma-close" 
+                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7', marginLeft: '8px' }}
                 onClick={() => setShowAR(true)} 
                 title="View Mini-Adhy in AR (Mobile)"
               >

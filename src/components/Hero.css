@@ -181,24 +181,9 @@
 @media (max-width: 768px) {
   .hero-name-giant {
     font-size: clamp(3rem, 12vw, 6rem);
-    perspective: none; /* disable costly 3D perspective on mobile */
   }
   .hero-tagline-premium {
     letter-spacing: 4px !important;
     font-size: 0.7rem;
-  }
-  /* Lighter 3D shadow on mobile — beautiful but cheaper than desktop */
-  .metallic-char {
-    text-shadow:
-      1px 1px 0px #aaa,
-      2px 2px 6px rgba(0,0,0,0.35);
-    transform: none; /* skip rotateX/Y — costly on mobile compositing */
-    transition: none; /* skip char transitions on mobile */
-  }
-  .metallic-char:hover {
-    transform: scale(1.05); /* keep a tiny lift on mobile */
-    text-shadow:
-      1px 1px 0px #666,
-      3px 6px 15px rgba(0,0,0,0.5);
   }
 }

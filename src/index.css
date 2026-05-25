@@ -90,6 +90,95 @@
 }
 
 /* ═══════════════════════════════════════════
+   EXTREME SITE MODES VISUAL TRANSFORMATIONS
+═══════════════════════════════════════════ */
+
+/* 1. RECRUITER MODE - Pure, Minimal, Print-like */
+body.mode-recruiter .App {
+  background: #ffffff !important;
+}
+body.mode-recruiter section, body.mode-recruiter .hero-minimal {
+  background: #ffffff !important;
+}
+body.mode-recruiter .glass-card, body.mode-recruiter .timeline-item, body.mode-recruiter .project-card, body.mode-recruiter .skill-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 4px !important;
+}
+body.mode-recruiter h1, body.mode-recruiter h2, body.mode-recruiter h3, body.mode-recruiter p, body.mode-recruiter span, body.mode-recruiter .nav-link, body.mode-recruiter .section-label {
+  color: #0f172a !important;
+  font-family: 'Inter', sans-serif !important;
+}
+body.mode-recruiter .metallic-char, body.mode-recruiter .section-title span, body.mode-recruiter .hero-name-giant {
+  -webkit-text-fill-color: #0f172a !important;
+  text-shadow: none !important;
+}
+body.mode-recruiter .ambient-blob, body.mode-recruiter canvas {
+  display: none !important; /* Remove distractions */
+}
+
+/* 2. EXPERT MODE - Matrix / Hacker Terminal */
+body.mode-expert .App {
+  background-color: #050505 !important;
+  background-image: 
+    linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px) !important;
+  background-size: 30px 30px !important;
+}
+body.mode-expert section, body.mode-expert .hero-minimal, body.mode-expert .glass-card, body.mode-expert .timeline-item, body.mode-expert .project-card, body.mode-expert .skill-card, body.mode-expert .navbar-inner {
+  background: rgba(0, 10, 0, 0.8) !important;
+  border: 1px solid #00ff41 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+body.mode-expert h1, body.mode-expert h2, body.mode-expert h3, body.mode-expert p, body.mode-expert span, body.mode-expert a, body.mode-expert .section-label {
+  color: #00ff41 !important;
+  font-family: 'Fira Code', monospace !important;
+  -webkit-text-fill-color: #00ff41 !important;
+  text-shadow: none !important;
+  text-transform: lowercase !important;
+}
+body.mode-expert img, body.mode-expert video {
+  filter: grayscale(100%) sepia(100%) hue-rotate(70deg) contrast(1.5) !important;
+  border: 1px solid #00ff41 !important;
+}
+body.mode-expert .ambient-blob, body.mode-expert .particle-network {
+  display: none !important;
+}
+
+/* 3. EXPERIMENTAL MODE - Aggressive Cyberpunk Vaporwave */
+body.mode-experimental .App {
+  background-color: #0a0014 !important;
+}
+body.mode-experimental section, body.mode-experimental .hero-minimal, body.mode-experimental .glass-card, body.mode-experimental .timeline-item, body.mode-experimental .project-card, body.mode-experimental .skill-card, body.mode-experimental .navbar-inner {
+  background: rgba(20, 0, 30, 0.7) !important;
+  border: 2px dashed #ff00ea !important;
+  border-radius: 0 !important;
+  box-shadow: 6px 6px 0px #00eaff !important;
+}
+body.mode-experimental .glass-card:hover, body.mode-experimental .project-card:hover {
+  transform: skewX(-2deg) scale(1.02) !important;
+}
+body.mode-experimental h1, body.mode-experimental h2, body.mode-experimental h3, body.mode-experimental h4 {
+  color: #ff00ea !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  -webkit-text-fill-color: #ff00ea !important;
+  text-shadow: 2px 2px 0px #00eaff !important;
+  text-transform: uppercase !important;
+}
+body.mode-experimental p, body.mode-experimental span, body.mode-experimental a {
+  color: #00eaff !important;
+  text-shadow: 1px 1px 0px #ff00ea !important;
+}
+body.mode-experimental img {
+  filter: hue-rotate(90deg) saturate(3) contrast(1.2) !important;
+  mix-blend-mode: screen !important;
+}
+
+
+
+/* ═══════════════════════════════════════════
    RESET & BASE
 ═══════════════════════════════════════════ */
 *, *::before, *::after {
@@ -121,9 +210,7 @@ body {
   max-width: 100vw;
   position: relative;
   
-  /* Digital Subconscious constraint */
-  filter: saturate(calc(1 - var(--subconscious-restraint) * 0.8)) contrast(calc(1 - var(--subconscious-restraint) * 0.2));
-  transition: filter 1s ease-in-out;
+  /* Removed filter constraint as it breaks position: fixed for child elements like Spotify dock */
 }
 
 /* CSS Grain Texture (Removed full-screen SVG filter for massive GPU performance boost) */
