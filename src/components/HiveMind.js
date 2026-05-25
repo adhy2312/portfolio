@@ -1,7 +1,8 @@
 import React, { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Line, Sphere, Html } from '@react-three/drei';
+import { OrbitControls, Line, Html } from '@react-three/drei';
 import * as THREE from 'three';
+import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './HiveMind.css';
 
 const NODE_COUNT = 150;
@@ -70,6 +71,17 @@ function Network({ isThinking }) {
         />
       ))}
 
+      {/* Core Memories labeled with HTML */}
+      <Html position={nodes[0]} center>
+        <div className="hm-node-label">SKILLS_CORE</div>
+      </Html>
+      <Html position={nodes[10]} center>
+        <div className="hm-node-label">PROJECT_MEMORY</div>
+      </Html>
+      <Html position={nodes[20]} center>
+        <div className="hm-node-label">USER_CONTEXT</div>
+      </Html>
+
       {/* Central Core */}
       <mesh>
         <sphereGeometry args={[1.5, 32, 32]} />
@@ -79,7 +91,22 @@ function Network({ isThinking }) {
   );
 }
 
-export default function HiveMind({ onClose, isThinking, currentThought }) {
+export default function HiveMind({ onClose, isThinking, currentThought, ownerState, setOwnerState }) {
+  const { activeSection, weatherData } = useConsciousness();
+  const [injectInput, setInjectInput] = React.useState('');
+
+  const handleInject = (e) => {
+    e.preventDefault();
+    if (!injectInput.trim()) return;
+    
+    setOwnerState(prev => ({
+      ...prev,
+      active: true,
+      instructions: [...prev.instructions, injectInput.trim()]
+    }));
+    setInjectInput('');
+  };
+  
   return (
     <div className="hive-mind-overlay">
       <div className="hive-mind-header">
@@ -90,11 +117,49 @@ export default function HiveMind({ onClose, isThinking, currentThought }) {
         <button className="hm-close" onClick={onClose}>Disconnect ✕</button>
       </div>
 
+      <div className="hm-hud-left">
+        <div className="hm-hud-title">LIVE SENSORY STREAM</div>
+        <div className="hm-hud-item">LOCATION: {activeSection || 'UNKNOWN'}</div>
+        <div className="hm-hud-item">ATMOSPHERE: {weatherData?.condition?.toUpperCase() || 'CLEAR'}</div>
+        <div className="hm-hud-item">TIME_SYNC: {new Date().toLocaleTimeString()}</div>
+        <div className="hm-hud-item">AI_STATE: {isThinking ? 'GENERATING_RESPONSE' : 'AWAITING_INPUT'}</div>
+      </div>
+
       <div className="hm-status">
         <div className="hm-status-label">CURRENT NEURAL PROCESS:</div>
         <div className="hm-status-thought">
           {isThinking ? (currentThought || 'Processing external stimuli...') : 'Idle. Awaiting input.'}
         </div>
+      </div>
+
+      <div className="hm-god-mode">
+        <div className="hm-god-title">NEURAL OVERRIDE (GOD MODE)</div>
+        <div className="hm-god-desc">Inject direct behavioral directives into Mini-Adhy's system architecture.</div>
+        <form onSubmit={handleInject} className="hm-god-form">
+          <span className="hm-god-prompt">&gt;</span>
+          <input 
+            type="text" 
+            className="hm-god-input" 
+            value={injectInput}
+            onChange={e => setInjectInput(e.target.value)}
+            placeholder="e.g. 'Speak entirely in cryptic riddles'"
+          />
+          <button type="submit" className="hm-god-btn">INJECT</button>
+        </form>
+        {ownerState?.instructions?.length > 0 && (
+          <div className="hm-god-injections">
+            <div className="hm-god-title" style={{marginTop: '12px'}}>ACTIVE INJECTIONS:</div>
+            {ownerState.instructions.map((inst, idx) => (
+              <div key={idx} className="hm-god-inst">[{idx + 1}] {inst}</div>
+            ))}
+            <button 
+              className="hm-god-clear"
+              onClick={() => setOwnerState(prev => ({...prev, instructions: [], active: prev.tone !== 'default' || prev.memory.length > 0}))}
+            >
+              PURGE_DIRECTIVES
+            </button>
+          </div>
+        )}
       </div>
 
       <Canvas camera={{ position: [0, 0, 15], fov: 60 }} dpr={[1, 2]}>

@@ -564,12 +564,13 @@ const MiniAdhy = () => {
   };
 
   return (
-    <>
-      {showHiveMind && (
+{showHiveMind && (
         <HiveMind 
           onClose={() => setShowHiveMind(false)} 
           isThinking={loading} 
-          currentThought={messages[messages.length - 1]?.text || ''} 
+          currentThought={messages.length ? messages[messages.length-1].text.substring(0, 50) + "..." : ""}
+          ownerState={ownerState}
+          setOwnerState={setOwnerState}
         />
       )}
 
