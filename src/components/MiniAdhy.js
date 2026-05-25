@@ -564,7 +564,8 @@ const MiniAdhy = () => {
   };
 
   return (
-{showHiveMind && (
+    <>
+      {showHiveMind && (
         <HiveMind 
           onClose={() => setShowHiveMind(false)} 
           isThinking={loading} 
@@ -679,6 +680,32 @@ const MiniAdhy = () => {
           </p>
         </div>
       )}
+
+      {/* ── Hive Mind Dock (always visible) ── */}
+      <button
+        className="hm-dock"
+        onClick={() => setShowHiveMind(true)}
+        aria-label="Open Hive Mind"
+        title="Connect to Hive Mind 🧠"
+      >
+        <svg viewBox="0 0 36 36" fill="none" width="18" height="18">
+          <circle cx="18" cy="18" r="18" fill="url(#hmDockGrad)" />
+          {/* Network nodes icon representation */}
+          <circle cx="12" cy="12" r="2.5" fill="#fff" opacity="0.9" />
+          <circle cx="24" cy="15" r="2.5" fill="#fff" opacity="0.9" />
+          <circle cx="16" cy="24" r="2.5" fill="#fff" opacity="0.9" />
+          <path d="M12 12 L24 15 L16 24 Z" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.6" />
+          <defs>
+            <linearGradient id="hmDockGrad" x1="0" y1="0" x2="36" y2="36">
+              <stop offset="0%" stopColor="#d946ef" />
+              <stop offset="100%" stopColor="#8b5cf6" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <span className="hm-dock-label">Hive Mind</span>
+        {/* Pulse dot */}
+        <span className="ma-pulse" style={{ background: '#e879f9', boxShadow: '0 0 0 0 rgba(232, 121, 249, 0.6)' }} />
+      </button>
 
       {/* ── Dock tab (always visible) ── */}
       <button
