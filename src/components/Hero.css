@@ -198,6 +198,14 @@
   }
   .metallic-char {
     padding: 0 1px; /* Remove massive padding that causes overflow */
+    text-shadow:
+      1px 1px 0px rgba(255, 255, 255, 0.4),
+      2px 2px 6px rgba(0,0,0,0.5);
+    -webkit-text-stroke: 0px;
+    transform: none !important;
+  }
+  .metallic-char:hover {
+    transform: scale(1.02) !important;
   }
   .hero-tagline-premium {
     letter-spacing: 4px !important;
