@@ -18,40 +18,11 @@ const ScrollProgress = () => {
       const total = el.scrollHeight - el.clientHeight;
       const pct = total > 0 ? (scrolled / total) * 100 : 0;
       bar.style.width = `${pct}%`;
-
-      // Velocity calculation for Typography
-      const now = performance.now();
-      const dt = now - lastTime || 16;
-      const dy = scrolled - lastScrollY;
-      const velocity = dy / dt; // pixels per ms
-      
-      // Map velocity to a skew angle (max 15 degrees)
-      // Positive velocity (scrolling down) -> negative skew (leaning forward)
-      const targetSlant = Math.max(-15, Math.min(15, -velocity * 3));
-      const targetWeight = Math.min(900, Math.max(400, 700 + Math.abs(velocity * 100)));
-
-      root.style.setProperty('--dynamic-slant', `${targetSlant.toFixed(1)}deg`);
-      root.style.setProperty('--dynamic-weight', targetWeight.toFixed(0));
-
-      lastScrollY = scrolled;
-      lastTime = now;
     };
 
-    // Auto-reset typography when scrolling stops
-    let scrollTimeout;
-    const scrollEndHandler = () => {
-      clearTimeout(scrollTimeout);
-      onScroll();
-      scrollTimeout = setTimeout(() => {
-        root.style.setProperty('--dynamic-slant', '0deg');
-        root.style.setProperty('--dynamic-weight', '700');
-      }, 150);
-    };
-
-    window.addEventListener('scroll', scrollEndHandler, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      window.removeEventListener('scroll', scrollEndHandler);
-      clearTimeout(scrollTimeout);
+      window.removeEventListener('scroll', onScroll);
     };
   }, []);
 

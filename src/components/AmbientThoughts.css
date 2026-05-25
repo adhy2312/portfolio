@@ -15,17 +15,15 @@
 }
 
 .ambient-thought {
-  background: rgba(10, 10, 15, 0.6);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 20px;
+  background: radial-gradient(circle at center, rgba(15, 15, 25, 0.4), transparent 90%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 10px 24px;
   border-radius: 50px;
   display: flex;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  animation: float-ambient 4s ease-in-out infinite;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  animation: float-ambient 6s ease-in-out infinite;
 }
 
 .thought-icon {

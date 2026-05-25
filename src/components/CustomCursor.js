@@ -38,9 +38,11 @@ const CustomCursor = () => {
       const isMagnetic = !!el.closest('.magnetic-btn');
       const isHover = !!el.closest('a, button, [data-cursor="hover"], input, textarea, select, label, [role="button"]');
       const isGrab = !!el.closest('.neural-map-container, model-viewer');
+      const isChat = !!el.closest('.ma-dock, .ma-window, .ma-msg');
 
       let next = 'default';
-      if (isGrab) next = 'grab';
+      if (isChat) next = 'chat';
+      else if (isGrab) next = 'grab';
       else if (isMagnetic) next = 'magnetic';
       else if (isHover) next = 'hover';
       else if (isText) next = 'text';

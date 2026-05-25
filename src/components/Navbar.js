@@ -3,6 +3,7 @@ import { FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLi
 import './Navbar.css';
 import './XRayMode.css';
 import MagneticButton from './MagneticButton';
+import { playClickSound } from '../utils/sound';
 
 /* ────────────────────────────────────────────────
    RainDroplets — realistic water beads on glass
@@ -326,6 +327,7 @@ const Navbar = () => {
               href="/resume.pdf"
               download
               className="mobile-nav-resume-btn"
+              onClick={playClickSound}
             >
               Resume ↓
             </a>
@@ -402,6 +404,7 @@ const Navbar = () => {
                   href="/resume.pdf"
                   download
                   className="nav-resume-btn"
+                  onClick={playClickSound}
                 >
                   Resume ↓
                 </a>

@@ -49,17 +49,16 @@
     71.9% 46.9%
   );
 
-  /* Liquid glass fill */
+  /* Liquid glass fill (Made slightly more opaque to compensate for removed blur) */
   background: linear-gradient(
     135deg,
-    rgba(255, 230, 210, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 180, 150, 0.2) 100%
+    rgba(255, 230, 210, 0.6) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 180, 150, 0.4) 100%
   );
 
-  /* Frosted glass blur */
-  backdrop-filter: blur(12px) saturate(1.4);
-  -webkit-backdrop-filter: blur(12px) saturate(1.4);
+  /* Frosted glass blur (Removed backdrop-filter for performance!) */
+  /* backdrop-filter: blur(12px) saturate(1.4); */
 
   transition:
     background 0.4s ease,
@@ -158,5 +157,16 @@
   transform: scale(1.5);
   clip-path: circle(40% at 50% 50%);
   background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255,255,255,0.5);
+}
+
+/* ─── CHAT STATE ─── */
+.liquid-cursor.state-chat .liquid-cursor-shape {
+  clip-path: none;
+  transform: scale(1.3) translate(-20%, -20%);
+  background: rgba(168, 85, 247, 0.8); /* Higher opacity since blur is removed */
+  border-radius: 50% 50% 50% 0;
+}
+.liquid-cursor.state-chat .liquid-cursor-outline {
+  transform: scale(1.3) translate(-20%, -20%);
+  color: rgba(168, 85, 247, 0.8);
 }

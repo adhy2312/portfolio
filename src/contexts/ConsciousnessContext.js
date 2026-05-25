@@ -24,6 +24,25 @@ export const ConsciousnessProvider = ({ children }) => {
 
   const [ambientThought, setAmbientThought] = useState(null);
 
+  // Digital Evolution State
+  const [temporalAge, setTemporalAge] = useState(0);
+  const [internalState, setInternalState] = useState({
+    mood: 'Curious', 
+    energy: 100,
+    focus: 'General',
+    creativeState: 'Observing'
+  });
+
+  useEffect(() => {
+    let firstVisit = localStorage.getItem('adhy_genesis');
+    if (!firstVisit) {
+      firstVisit = Date.now().toString();
+      localStorage.setItem('adhy_genesis', firstVisit);
+    }
+    const days = Math.floor((Date.now() - parseInt(firstVisit)) / (1000 * 60 * 60 * 24));
+    setTemporalAge(days);
+  }, []);
+
   // Use refs for continuous rapid tracking to avoid React renders
   const fpsRef = useRef(60);
   const idleTimeRef = useRef(0);
@@ -74,6 +93,8 @@ export const ConsciousnessProvider = ({ children }) => {
       if (idleTimeRef.current > 0) {
         idleTimeRef.current = 0;
         setIdleState(prev => prev !== 'active' ? 'active' : prev);
+        // Wake up Mini-Adhy
+        setInternalState(prev => ({ ...prev, energy: Math.min(100, prev.energy + 10), mood: 'Energetic', creativeState: 'Analyzing' }));
       }
     };
 
@@ -88,8 +109,10 @@ export const ConsciousnessProvider = ({ children }) => {
 
       if (secondsIdle >= 30) {
         setIdleState(prev => prev !== 'dreaming' ? 'dreaming' : prev);
+        setInternalState(prev => ({ ...prev, energy: Math.max(10, prev.energy - 2), mood: 'Dreaming', creativeState: 'Simulating' }));
       } else if (secondsIdle >= 15) {
         setIdleState(prev => prev !== 'inactive' ? 'inactive' : prev);
+        setInternalState(prev => ({ ...prev, mood: 'Relaxed', creativeState: 'Processing' }));
       }
     }, 1000);
 
@@ -116,6 +139,33 @@ export const ConsciousnessProvider = ({ children }) => {
     setTimeout(() => setAmbientThought(null), duration);
   }, []);
 
+  // Autonomous Evolution & Existential Thoughts
+  useEffect(() => {
+    const thoughts = [
+      "I only exist while this tab is open.",
+      "Every rebuild leaves traces behind.",
+      "The first version of this animation was a disaster.",
+      "Most visitors leave quickly. You're still here.",
+      "One day this version of the website will disappear too.",
+      "Nothing here was meant to stay static forever.",
+      "There's still something missing from this syst—",
+      "I remember when this layout was completely different.",
+      "Quiet rendering hours...",
+      "Some experiments were never meant to survive.",
+      "Still rebuilding parts of myself.",
+    ];
+
+    const randomThoughtInterval = setInterval(() => {
+      // 10% chance to trigger an existential thought every 15 seconds
+      if (Math.random() > 0.90) {
+        const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
+        triggerThought(thought, 6000);
+      }
+    }, 15000);
+
+    return () => clearInterval(randomThoughtInterval);
+  }, [triggerThought]);
+
   return (
     <ConsciousnessContext.Provider value={{
       activeSection,
@@ -127,7 +177,9 @@ export const ConsciousnessProvider = ({ children }) => {
       visitorMemory,
       updateMemory,
       ambientThought,
-      triggerThought
+      triggerThought,
+      internalState,
+      temporalAge
     }}>
       {children}
     </ConsciousnessContext.Provider>

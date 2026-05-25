@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import DecryptedText from './DecryptedText';
 
 const projects = [
   {
@@ -111,10 +112,10 @@ const TiltCard = ({ children, project, index }) => {
   if (isTouchDevice) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.5, delay: index * 0.06 }}
+        transition={{ duration: 0.8, delay: 0.1 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
         className="work-card-wrapper"
         style={{ '--card-accent': project.accent }}
       >
@@ -128,9 +129,9 @@ const TiltCard = ({ children, project, index }) => {
       ref={ref}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      initial={{ opacity: 1, y: 50 }}
+      initial={{ opacity: 0, y: 50 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      transition={{ duration: 0.8, delay: 0.1 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
       style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: "1000px", '--card-accent': project.accent }}
       className={`work-card-wrapper ${showMemory ? 'memory-active' : ''}`}
     >
@@ -223,7 +224,7 @@ const MyWorks = () => {
           <span className="section-label">{"// what I've built"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Masterpieces">
-              <span className="section-title-inner">Featured <span>Projects</span></span>
+              <span className="section-title-inner"><DecryptedText text="Featured" /> <span><DecryptedText text="Projects" speed={50} /></span></span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('projects')} aria-label="Read story behind this section">

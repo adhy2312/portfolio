@@ -2,10 +2,12 @@ import React from 'react';
 import './CallToAction.css';
 import { motion } from 'framer-motion';
 import MagneticButton from './MagneticButton';
+import { playClickSound } from '../utils/sound';
 
 const CallToAction = () => {
   const handleClick = (e) => {
     e.preventDefault();
+    playClickSound();
     document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -47,7 +49,7 @@ const CallToAction = () => {
               </motion.a>
             </MagneticButton>
             <MagneticButton>
-              <a href="/resume.pdf" download className="btn-outline cta-btn">
+              <a href="/resume.pdf" download className="btn-outline cta-btn" onClick={playClickSound}>
                 Download Resume
               </a>
             </MagneticButton>

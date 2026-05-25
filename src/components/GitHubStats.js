@@ -59,18 +59,18 @@ const GitHubStats = () => {
     <section className="github-stats-section" id="github">
       <div className="container">
         <div className="github-section-header" style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <span className="section-label" style={{ color: '#ffffff', background: 'rgba(255,255,255,0.08)', borderColor: 'rgba(255,255,255,0.15)' }}>
+          <span className="section-label">
             {"// open source"}
           </span>
           <div className="section-title-wrapper" style={{ justifyContent: 'center' }}>
-            <h2 className="section-title" data-hover="Repositories" style={{ color: '#ffffff' }}>
+            <h2 className="section-title" data-hover="Repositories">
               <span className="section-title-inner">
                 <FiGithub size={38} style={{ verticalAlign: 'middle', marginRight: '14px', paddingBottom: '6px' }} />
-                GitHub <span style={{ background: 'linear-gradient(135deg, #ffffff 0%, #a0a0b0 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Stats</span>
+                GitHub <span className="text-gradient">Stats</span>
               </span>
             </h2>
           </div>
-          <div className="section-divider" style={{ background: '#ffffff' }} />
+          <div className="section-divider" />
           
           <a href={`https://github.com/${USERNAME}`} target="_blank" rel="noopener noreferrer" className="gh-profile-link" style={{ marginBottom: '2.5rem', marginTop: '-1rem' }}>
             @{USERNAME} ↗
@@ -92,7 +92,7 @@ const GitHubStats = () => {
                 { icon: <FiGitCommit />, value: stats.followers, label: 'Followers' },
                 { icon: <FiStar />, value: repos.reduce((a, r) => a + (r.stargazers_count || 0), 0) + '+', label: 'Stars Earned' },
               ].map((s, i) => (
-                <div key={i} className="gh-stat-card glass-card">
+                <div key={i} className="gh-stat-card">
                   <span className="gh-stat-icon">{s.icon}</span>
                   <span className="gh-stat-val">{s.value}</span>
                   <span className="gh-stat-label">{s.label}</span>
@@ -115,7 +115,7 @@ const GitHubStats = () => {
                     href={repo.html_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="gh-repo-card glass-card"
+                    className="gh-repo-card"
                   >
                     <div className="gh-repo-top">
                       <span className="gh-repo-name">{repo.name}</span>

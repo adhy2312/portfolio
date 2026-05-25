@@ -160,7 +160,14 @@ const Skills = () => {
         {/* Skill category cards */}
         <div className="skills-grid" ref={gridRef}>
           {displayCategories.map((cat, catIdx) => (
-            <div key={catIdx} className="skill-card glass-card">
+            <motion.div 
+              key={catIdx} 
+              className="skill-card glass-card"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7, delay: 0.1 + (catIdx * 0.15), ease: [0.16, 1, 0.3, 1] }}
+            >
               <div className="skill-card-header">
                 <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
                 <h3 className="skill-card-title" style={{ color: cat.color || 'var(--accent-primary)' }}>
@@ -188,7 +195,7 @@ const Skills = () => {
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

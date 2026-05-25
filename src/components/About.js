@@ -5,6 +5,7 @@ import dp from '../assets/dp.jpg';
 import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import DecryptedText from './DecryptedText';
 
 
 
@@ -74,9 +75,9 @@ const About = () => {
       <div className="container">
         <motion.div
           className="about-grid"
-          initial={{ opacity: 1, y: 60 }}
+          initial={{ opacity: 0, y: 60 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
           viewport={{ once: true }}
         >
           {/* Image side */}
@@ -109,7 +110,7 @@ const About = () => {
             <span className="section-label">{"// who I am"}</span>
             <div className="section-title-wrapper">
               <h2 className="section-title about-title" data-hover="Adhithya Mohan">
-                <span className="section-title-inner">About <span>Me</span></span>
+                <span className="section-title-inner"><DecryptedText text="About" /> <span><DecryptedText text="Me" speed={50} /></span></span>
               </h2>
               {hasStory && (
                 <button className="story-btn" onClick={() => openStory('about')} aria-label="Read story behind this section">
@@ -136,7 +137,7 @@ const About = () => {
                   className="about-stat"
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 + i * 0.1, duration: 0.5 }}
+                  transition={{ delay: 0.2 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                   viewport={{ once: true }}
                 >
                   <span className="stat-value">{s.value}</span>

@@ -10,6 +10,7 @@ import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
 import AmbientThoughts from './components/AmbientThoughts';
 import { useSolarLighting } from './hooks/useSolarLighting';
+import DigitalSoul from './components/DigitalSoul';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -21,7 +22,7 @@ const Skills      = lazy(() => import('./components/Skills'));
 const Experience  = lazy(() => import('./components/Experience'));
 const NeuralMap   = lazy(() => import('./components/NeuralMap'));
 const Timeline    = lazy(() => import('./components/Timeline'));
-const GitHubStats = lazy(() => import('./components/GitHubStats'));
+const DigitalScars= lazy(() => import('./components/DigitalScars'));
 const Photography = lazy(() => import('./components/Photography'));
 const MyWorks     = lazy(() => import('./components/MyWorks'));
 const Achievements = lazy(() => import('./components/Achievements'));
@@ -83,6 +84,10 @@ function App() {
   const [loading, setLoading]     = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
+  
+  // Late Night Loneliness Mode
+  const hour = new Date().getHours();
+  const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
     // Lenis Smooth Scrolling
@@ -221,9 +226,10 @@ function App() {
   return (
     <ConsciousnessProvider>
       <StoryProvider>
-        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''}`}>
+        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''}`}>
 
         <AmbientThoughts />
+        <DigitalSoul />
 
         <Suspense fallback={null}>
         <CustomCursor />
@@ -234,6 +240,7 @@ function App() {
       {/* Ambient background blobs — desktop only */}
       <div className="ambient-blob ambient-blob-1" />
       <div className="ambient-blob ambient-blob-2" />
+      <div className="digital-breathing-overlay" />
 
       {/* Ultra-lightweight digital textures (noise, scanlines, chromatic aberration) */}
       <DigitalTextures />
@@ -246,13 +253,13 @@ function App() {
       <LazySection name="Skills"><Skills /></LazySection>
       <LazySection name="NeuralMap"><NeuralMap /></LazySection>
       <LazySection name="Experience"><Experience /></LazySection>
-      <LazySection name="Timeline"><Timeline /></LazySection>
-      <LazySection name="GitHubStats"><GitHubStats /></LazySection>
-      <LazySection name="TrustedBy"><TrustedBy /></LazySection>
       <LazySection name="MyWorks"><MyWorks /></LazySection>
+      <LazySection name="Timeline"><Timeline /></LazySection>
       <LazySection name="Photography"><Photography /></LazySection>
       <LazySection name="Achievements"><Achievements /></LazySection>
+      <LazySection name="TrustedBy"><TrustedBy /></LazySection>
       <LazySection name="Testimonials"><Testimonials /></LazySection>
+      <LazySection name="DigitalScars"><DigitalScars /></LazySection>
       <LazySection name="CallToAction"><CallToAction /></LazySection>
       <LazySection name="Contact"><Contact /></LazySection>
       <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>

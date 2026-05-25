@@ -29,13 +29,13 @@ const Hero = () => {
 
   const hour = new Date().getHours();
   let timeGreeting = "Hey there!";
-  if (hour < 5 || hour >= 23) timeGreeting = "Late night hacking? ☕";
-  else if (hour < 12) timeGreeting = "Good morning! 🌅";
+  if (hour < 5 || hour >= 23) timeGreeting = "Late night coding? ☕";
+  else if (hour < 12) timeGreeting = "Good morning, let's build. 🌅";
   else if (hour < 18) timeGreeting = "Good afternoon! ☀️";
   else timeGreeting = "Good evening! 🌙";
 
   const displayData = {
-    greeting: heroData?.greeting && heroData.greeting !== 'Hey there!' ? heroData.greeting : timeGreeting,
+    greeting: timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
     role: heroData?.role || "Electronics Engineer | Web Developer | Photographer",
@@ -107,6 +107,15 @@ const Hero = () => {
       )}
 
       <div className="hero-minimal-content optimize-gpu">
+        <motion.div
+          className="hero-greeting"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          style={{ color: 'var(--accent-cyan)', fontSize: '1rem', marginBottom: '1rem', letterSpacing: '3px', fontWeight: '600', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}
+        >
+          {displayData.greeting}
+        </motion.div>
         <h1 className="hero-name-giant metallic-reveal">
           {(() => {
             const nameStr = displayData.name;

@@ -1,0 +1,188 @@
+/* ═══════════════════════════════════════
+   DIGITAL SCARS SECTION
+═══════════════════════════════════════ */
+.digital-scars-section {
+  padding: var(--section-padding);
+  position: relative;
+  overflow: hidden;
+}
+
+.scars-header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 4rem;
+}
+
+.scars-subtitle {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 600px;
+  margin-top: 1rem;
+  line-height: 1.6;
+}
+
+.scars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  transition: opacity 2s ease, filter 2s ease;
+}
+
+.scars-dreaming {
+  opacity: 0.6;
+  filter: blur(2px) grayscale(50%);
+}
+
+.scar-card {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  position: relative;
+  overflow: hidden;
+  /* Imperfect shattered look */
+  border: 1px solid rgba(255, 50, 50, 0.1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), inset 0 0 20px rgba(255, 50, 50, 0.02);
+}
+
+/* Glitch hover effect */
+.scar-card:hover {
+  border-color: rgba(255, 50, 50, 0.3);
+  box-shadow: 0 15px 40px rgba(255, 50, 50, 0.08);
+  transform: translateY(-4px) scale(1.02);
+}
+
+.scar-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed var(--border-subtle);
+  padding-bottom: 1rem;
+}
+
+.scar-icon {
+  color: var(--text-muted);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.scar-card:hover .scar-icon {
+  color: #ff4d4d;
+  opacity: 1;
+}
+
+.scar-id {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  color: #ff4d4d;
+  opacity: 0.6;
+}
+
+.scar-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.scar-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  flex-grow: 1;
+}
+
+.scar-footer {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.scar-status {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.status-archived {
+  background: rgba(160, 160, 176, 0.1);
+  color: var(--text-muted);
+  border: 1px solid rgba(160, 160, 176, 0.2);
+}
+
+.status-fading {
+  background: rgba(108, 99, 255, 0.1);
+  color: #8c82fc;
+  border: 1px solid rgba(108, 99, 255, 0.2);
+  animation: pulse-fading 4s infinite alternate;
+}
+
+.status-contained {
+  background: rgba(255, 50, 50, 0.1);
+  color: #ff4d4d;
+  border: 1px solid rgba(255, 50, 50, 0.2);
+}
+
+@keyframes pulse-fading {
+  0% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+/* ── Scarred Text Effect ── */
+.scarred-text {
+  position: relative;
+  color: transparent;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.scarred-text::before,
+.scarred-text::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+/* Top half of the sliced text */
+.scarred-text::before {
+  left: -2px;
+  top: 1px;
+  clip-path: polygon(0 0, 100% 0, 100% 48%, 0 38%);
+  text-shadow: 1px 1px 0px rgba(255, 50, 50, 0.6);
+}
+
+/* Bottom half of the sliced text */
+.scarred-text::after {
+  left: 1px;
+  top: -1px;
+  clip-path: polygon(0 38%, 100% 48%, 100% 100%, 0 100%);
+  text-shadow: -1px -1px 0px rgba(255, 50, 50, 0.6);
+}
+
+.scarred-text:hover::before {
+  left: -4px;
+  top: 2px;
+  text-shadow: 2px 2px 2px rgba(255, 50, 50, 0.8);
+}
+
+.scarred-text:hover::after {
+  left: 3px;
+  top: -2px;
+  text-shadow: -2px -2px 2px rgba(255, 50, 50, 0.8);
+}
+
+@media (max-width: 768px) {
+  .scars-grid {
+    grid-template-columns: 1fr;
+  }
+}
