@@ -114,7 +114,7 @@ body.mode-recruiter .metallic-char, body.mode-recruiter .section-title span, bod
   -webkit-text-fill-color: #0f172a !important;
   text-shadow: none !important;
 }
-body.mode-recruiter .ambient-blob, body.mode-recruiter canvas {
+body.mode-recruiter .ambient-blob {
   display: none !important; /* Remove distractions */
 }
 

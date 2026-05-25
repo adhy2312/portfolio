@@ -83,15 +83,7 @@ export function SiteModeProvider({ children }) {
 
   // Section visibility based on mode
   const isSectionVisible = useCallback((sectionName) => {
-    if (mode === MODES.RECRUITER) {
-      // Recruiters only see what matters
-      const recruiterSections = [
-        'Hero', 'About', 'Skills', 'Experience', 'MyWorks', 
-        'Achievements', 'TrustedBy', 'Testimonials', 'Contact', 'Footer', 'StackVisualizer'
-      ];
-      return recruiterSections.includes(sectionName);
-    }
-    // Expert and Experimental show everything
+    // All sections remain visible across modes; the aesthetic is handled via global CSS overrides.
     return true;
   }, [mode]);
 
