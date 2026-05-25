@@ -195,6 +195,10 @@ const MiniAdhy = () => {
   const [input,        setInput]        = useState('');
   const [showAR,       setShowAR]       = useState(false);
   const [arSpeech,     setArSpeech]     = useState('Hello there! 👋');
+  const [arInput,      setArInput]      = useState('');
+  const [isArAnswering, setIsArAnswering] = useState(false);
+  const isArAnsweringRef = useRef(false);
+  useEffect(() => { isArAnsweringRef.current = isArAnswering; }, [isArAnswering]);
   const [loading,      setLoading]      = useState(false);
   const [noKey,        setNoKey]        = useState(false); // Can be removed later, keeping for now so state works
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
@@ -205,19 +209,49 @@ const MiniAdhy = () => {
 
   const consciousness = useConsciousness();
 
-  // AR Chat behavior
+  // AR Chat behavior (AI-Generated Dialogues)
   useEffect(() => {
     if (!showAR) return;
-    const phrases = [
-      "Hi!", "Who are you?", "Are you a recruiter?", 
-      "Check out this desk!", "Pretty cool tech, huh?", 
-      "Namakk sett aakam!", "I live in the browser."
+    
+    let isMounted = true;
+    let phrases = [
+      "Scanning environment... 👀", 
+      "Hello! I am Adhithya's digital extension.", 
+      "Namakk sett aakam! 🟢"
     ];
+    
+    const fetchAIPhrases = async () => {
+      try {
+        const prompt = "Generate 4 short, punchy phrases (under 7 words each) that a tiny AI hologram standing on someone's desk might say. Be playful, curious, and clever. Separate each phrase with exactly a pipe character (|) and nothing else. No formatting.";
+        const reply = await sendToGemini([{ role: 'user', parts: [{ text: prompt }] }], systemPrompt, 0, 100);
+        if (isMounted && reply && reply.includes('|')) {
+          const aiPhrases = reply.split('|').map(p => p.trim().replace(/["']/g, '')).filter(p => p.length > 2);
+          if (aiPhrases.length > 0) {
+            phrases = [...phrases, ...aiPhrases];
+            // Instantly show the first AI phrase
+            setArSpeech(aiPhrases[0]);
+          }
+        }
+      } catch (e) {
+        console.warn('AR AI speech fetch failed, falling back to defaults:', e);
+      }
+    };
+    
+    fetchAIPhrases();
+
+    fetchAIPhrases();
+
     const interval = setInterval(() => {
-      setArSpeech(phrases[Math.floor(Math.random() * phrases.length)]);
-    }, 4500);
-    return () => clearInterval(interval);
-  }, [showAR]);
+      if (!isArAnsweringRef.current) {
+        setArSpeech(phrases[Math.floor(Math.random() * phrases.length)]);
+      }
+    }, 5000);
+    
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [showAR, systemPrompt]);
   
   // Update visitor memory visits on mount
   useEffect(() => {
@@ -536,12 +570,12 @@ const MiniAdhy = () => {
             shadow-intensity="1"
             style={{ width: '100%', height: '80vh', position: 'relative' }}
           >
-            {/* AR Speech Bubble */}
-            <div style={{
-              position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+            {/* AR Speech Bubble attached to the 3D Model's Head via Hotspot */}
+            <div slot="hotspot-speech" data-position="0 2.2 0" data-normal="0 1 0" style={{
               background: '#fff', color: '#000', padding: '10px 16px', borderRadius: '20px',
               fontWeight: 'bold', fontSize: '14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-              pointerEvents: 'none', animation: 'float 3s ease-in-out infinite'
+              pointerEvents: 'none', animation: 'float 3s ease-in-out infinite',
+              transform: 'translate(-50%, -100%)', maxWidth: '250px', textAlign: 'center'
             }}>
               {arSpeech}
               {/* Little speech tail */}
@@ -557,6 +591,45 @@ const MiniAdhy = () => {
               👋 Launch AR on Desk
             </button>
           </model-viewer>
+          
+          {/* AR Questions Input */}
+          <form 
+            onSubmit={async (e) => {
+              e.preventDefault();
+              if (!arInput.trim() || isArAnswering) return;
+              const q = arInput.trim();
+              setArInput('');
+              setIsArAnswering(true);
+              setArSpeech("Thinking... 🤔");
+              try {
+                const activePrompt = buildActivePrompt(systemPrompt, ownerState, consciousness || {});
+                const reply = await sendToGemini([{ role: 'user', parts: [{ text: "Keep this extremely brief (under 15 words) because it's going into an AR speech bubble. Answer playfully: " + q }] }], activePrompt, 0, 100);
+                setArSpeech(reply);
+                setTimeout(() => setIsArAnswering(false), 8000); // Hold answer for 8 seconds
+              } catch(err) {
+                setArSpeech("My brain disconnected! 🤯");
+                setTimeout(() => setIsArAnswering(false), 3000);
+              }
+            }} 
+            style={{
+              position: 'absolute', bottom: '80px', zIndex: 9999999, width: '90%', maxWidth: '400px',
+              display: 'flex', gap: '8px'
+            }}
+          >
+            <input 
+              value={arInput} onChange={e => setArInput(e.target.value)}
+              placeholder="Ask the hologram something..."
+              style={{
+                flex: 1, padding: '12px 20px', borderRadius: '30px', border: 'none', 
+                background: 'rgba(255,255,255,0.9)', color: '#000', fontSize: '16px',
+                boxShadow: '0 4px 15px rgba(0,0,0,0.5)', outline: 'none'
+              }}
+            />
+            <button type="submit" disabled={isArAnswering} style={{
+              padding: '12px 24px', borderRadius: '30px', border: 'none',
+              background: isArAnswering ? '#999' : '#a855f7', color: '#fff', fontWeight: 'bold', cursor: 'pointer'
+            }}>Ask</button>
+          </form>
           <p style={{ color: '#fff', marginTop: '1rem', textAlign: 'center', opacity: 0.7, maxWidth: '300px' }}>
             Tap the button above on a compatible mobile device to place this placeholder model on your real desk!
           </p>

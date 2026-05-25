@@ -306,7 +306,7 @@ export default function NeuralMap3D() {
           {isInteractive ? 'Lock 3D View' : 'Unlock 3D Rotation'}
         </button>
 
-        <Canvas camera={{ position: [0, 0, 12], fov: 60 }} dpr={[1, 1.5]}>
+        <Canvas camera={{ position: [0, 0, 12], fov: 60 }} dpr={1}>
           <ambientLight intensity={0.2} />
           <pointLight position={[10, 10, 10]} intensity={1} />
           
