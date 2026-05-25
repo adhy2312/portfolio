@@ -232,4 +232,15 @@
   .lt-topbar {
     padding: 8px 12px;
   }
+  .lt-dots {
+    gap: 4px;
+  }
+  .lt-dot {
+    width: 8px;
+    height: 8px;
+  }
+  .lt-lang-dot {
+    width: 6px;
+    height: 6px;
+  }
 }

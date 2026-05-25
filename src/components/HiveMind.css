@@ -241,3 +241,48 @@
 .hm-god-clear:hover {
   color: #ff0050;
 }
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .hive-mind-header {
+    padding: 15px 20px;
+  }
+  .hm-title {
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+  }
+  .hm-close {
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+  .hm-hud-left {
+    top: 65px;
+    left: 20px;
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+  .hm-status {
+    bottom: 20px;
+    width: 90vw;
+    padding: 10px 15px;
+  }
+  .hm-status-thought {
+    font-size: 0.85rem;
+  }
+  .hm-god-mode {
+    bottom: 95px; /* sit above the status */
+    right: 50%;
+    transform: translateX(50%);
+    width: 90vw;
+    padding: 12px;
+  }
+  .hm-god-title {
+    font-size: 0.6rem;
+  }
+  .hm-god-desc {
+    font-size: 0.7rem;
+  }
+  .hm-god-input {
+    font-size: 0.75rem;
+  }
+}
