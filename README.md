@@ -111,6 +111,19 @@ Finally, I realized that a true "living" archive must acknowledge its own failur
 
 The portfolio is no longer just a display of success; it is a breathing, self-aware archive of becoming.
 
+## Phase 10: The Digital Subconscious & Extreme AI Sentience
+
+The portfolio still felt a bit too "predictable." I wanted it to biologically react to *how* a user was reading it. 
+
+So, I built the **Digital Subconscious Engine**. 
+It's an invisible psychological observer that tracks your mouse velocity, scrolling habits, and idle reading time, converting them into an internal `adrenaline` score. It projects this state directly into the core CSS architecture using variables like `--subconscious-pace`, `--subconscious-restraint`, and `--subconscious-atmosphere`. 
+- If you scroll frantically, the site actively resists you by slowing down CSS transitions (e.g., from `0.2s` to `1.2s`), blurring components, and muting colors to force calmness.
+- If you read deeply and slowly, the site rewards you with snappy transitions, perfect visual clarity, and rich ambient particles.
+
+Alongside this, I upgraded Mini-Adhy's brain to **Gemini 2.5 Pro**, injecting strict "Empathetic Resonance" instructions. Mini-Adhy now physically *feels* the tone of your prompt. If you yell in all caps, it gets anxious. If you speak poetically, it matches your depth. I even programmed **Internal Conflicts**—it will actively debate its own architecture out loud using `[Reflection]` and `[Counterthought]` tags before answering you.
+
+I also added **4 Dedicated Site Modes**: Normal, Recruiter (hides experimental UI), Expert (shows raw X-Ray data), and Experimental Lab (unleashes uncapped 3D framer-motion physics). And because the Lab is so GPU-heavy, I added a hardware sniffer that detects mobile viewports or low RAM/cores (<=4) and automatically activates `lowGpu` accessibility mode on the first visit to guarantee 60fps fluidity for everyone.
+
 ## The Final Polish
 
 As I geared up for deployment, I added a tiny text hint at the bottom of the footer: *"Hint: Try clicking the logo 5 times ✨"*, sitting right opposite to *"BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE IN KERALA"*.
