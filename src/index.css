@@ -1131,8 +1131,9 @@ html:not(.dream-state) .App {
 .mode-normal .digital-texture-overlay::after {
   display: none !important; /* Kills the 3px repeating scanline gradient (GPU killer) */
 }
-.mode-normal .performance-breathing-overlay {
-  display: none !important; /* Kills the inset box-shadow breathing composite */
+.mode-normal .performance-breathing-overlay,
+.mode-normal .App::after {
+  display: none !important; /* Kills the inset box-shadow breathing composite and floating particles */
 }
 
 /* ═══════════════════════════════════════════
