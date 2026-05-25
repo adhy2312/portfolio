@@ -17,28 +17,28 @@ import RainDroplets from './components/RainDroplets';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
-const MiniAdhy   = lazy(() => import('./components/MiniAdhy'));
+const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 
 // Lazy load below-the-fold components
-const About       = lazy(() => import('./components/About'));
-const Skills      = lazy(() => import('./components/Skills'));
-const Experience  = lazy(() => import('./components/Experience'));
-const NeuralMap   = lazy(() => import('./components/NeuralMap'));
-const Timeline    = lazy(() => import('./components/Timeline'));
-const DigitalScars= lazy(() => import('./components/DigitalScars'));
+const About = lazy(() => import('./components/About'));
+const Skills = lazy(() => import('./components/Skills'));
+const Experience = lazy(() => import('./components/Experience'));
+const NeuralMap = lazy(() => import('./components/NeuralMap'));
+const Timeline = lazy(() => import('./components/Timeline'));
+const DigitalScars = lazy(() => import('./components/DigitalScars'));
 const Photography = lazy(() => import('./components/Photography'));
-const MyWorks     = lazy(() => import('./components/MyWorks'));
+const MyWorks = lazy(() => import('./components/MyWorks'));
 const Achievements = lazy(() => import('./components/Achievements'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
-const TrustedBy   = lazy(() => import('./components/TrustedBy'));
-const Contact     = lazy(() => import('./components/Contact'));
-const Footer      = lazy(() => import('./components/Footer'));
+const TrustedBy = lazy(() => import('./components/TrustedBy'));
+const Contact = lazy(() => import('./components/Contact'));
+const Footer = lazy(() => import('./components/Footer'));
 const CallToAction = lazy(() => import('./components/CallToAction'));
 const QuoteCanvas = lazy(() => import('./components/QuoteCanvas'));
 const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
-const ZipGame       = lazy(() => import('./components/ZipGame'));
-const TicTacToe   = lazy(() => import('./components/TicTacToe'));
+const ZipGame = lazy(() => import('./components/ZipGame'));
+const TicTacToe = lazy(() => import('./components/TicTacToe'));
 const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
 
 function LazySection({ name, children }) {
@@ -69,7 +69,7 @@ function LazySection({ name, children }) {
           preloader.disconnect();
         }
       },
-      { rootMargin: '600px' } 
+      { rootMargin: '600px' }
     );
     if (ref.current) preloader.observe(ref.current);
     return () => preloader.disconnect();
@@ -89,10 +89,10 @@ function LazySection({ name, children }) {
 function AppContent() {
   useSolarLighting();
   const { weatherData } = useConsciousness();
-  const [showGame, setShowGame]   = useState(false);
-  const [loading, setLoading]     = useState(true);
+  const [showGame, setShowGame] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
-  const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
   const [tranceMode, setTranceMode] = useState(false);
 
@@ -113,7 +113,7 @@ function AppContent() {
       touchMultiplier: 2,
       infinite: false,
     });
-    
+
     let rafId;
     function raf(time) {
       lenis.raf(time);
@@ -129,7 +129,7 @@ function AppContent() {
     window.addEventListener('launch-ttt', handleLaunch);
 
     // Konami code → barrel roll
-    const konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
+    const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let ki = 0;
     const keydownHandler = (e) => {
       if (e.key === konami[ki]) {
@@ -145,7 +145,7 @@ function AppContent() {
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
       const name = e.detail?.name ?? e.detail;
-      const duration = e.detail?.duration ?? (name === 'matrix' ? 8000 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
+      const duration = e.detail?.duration ?? (name === 'matrix' ? 8001 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
       triggerEgg(name, duration);
     };
     window.addEventListener('trigger-egg', eggHandler);
@@ -166,10 +166,10 @@ function AppContent() {
           const el = entry.target;
           if (el.dataset.decoded) return;
           el.dataset.decoded = "true";
-          
+
           const originalText = el.innerText || el.dataset.value;
           if (!el.dataset.value) el.dataset.value = originalText;
-          
+
           let iteration = 0;
           const interval = setInterval(() => {
             el.innerText = originalText.split("").map((letter, index) => {
@@ -185,7 +185,7 @@ function AppContent() {
         }
       });
     }, { threshold: 0.1 });
-    
+
     hackerTexts.forEach(txt => decodeObserver.observe(txt));
 
     // 3. Console Easter Egg
@@ -227,17 +227,17 @@ function AppContent() {
   return (
     <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
 
-        {tranceMode && (
-          <div className="trance-overlay-container">
-            <div className="trance-channel trance-red" />
-            <div className="trance-channel trance-cyan" />
-          </div>
-        )}
+      {tranceMode && (
+        <div className="trance-overlay-container">
+          <div className="trance-channel trance-red" />
+          <div className="trance-channel trance-cyan" />
+        </div>
+      )}
 
-        <AmbientThoughts />
-        <DigitalSoul />
+      <AmbientThoughts />
+      <DigitalSoul />
 
-        <Suspense fallback={null}>
+      <Suspense fallback={null}>
         <CustomCursor />
         <ScrollProgress />
       </Suspense>
@@ -291,7 +291,7 @@ function AppContent() {
         )
       )}
 
-      </div>
+    </div>
   );
 }
 
