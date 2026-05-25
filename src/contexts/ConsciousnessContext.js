@@ -166,6 +166,25 @@ export const ConsciousnessProvider = ({ children }) => {
     return () => clearInterval(randomThoughtInterval);
   }, [triggerThought]);
 
+  // Tab consciousness (Emotional object permanence)
+  useEffect(() => {
+    let originalTitle = document.title;
+    
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        document.title = "Adhithya is waiting... 🖤";
+      } else {
+        document.title = "Adhithya | Welcome back.";
+        setTimeout(() => {
+          document.title = originalTitle;
+        }, 3000);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, []);
+
   return (
     <ConsciousnessContext.Provider value={{
       activeSection,

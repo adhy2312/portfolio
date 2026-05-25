@@ -65,9 +65,4 @@
   100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0.8; }
 }
 
-/* Hide entirely on touch devices since cursor tracking is meaningless */
-@media (hover: none) and (pointer: coarse) {
-  .digital-soul {
-    display: none;
-  }
-}
+/* Adaptive behavior for mobile is handled via JS (autonomous floating) */

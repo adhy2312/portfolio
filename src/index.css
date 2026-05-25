@@ -372,16 +372,21 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 40%, rgba(108, 99, 255, 0.04) 100%);
-  animation: digitalBreathing 8s ease-in-out infinite alternate;
+  background: radial-gradient(circle at center, transparent 40%, rgba(108, 99, 255, 0.08) 120%);
+  animation: digitalBreathing 10s ease-in-out infinite alternate;
   z-index: 0;
-  mix-blend-mode: multiply;
-  will-change: opacity;
+  will-change: opacity, transform;
 }
 
 @keyframes digitalBreathing {
-  0% { opacity: 0.1; }
-  100% { opacity: 1; }
+  0% { 
+    opacity: 0.3; 
+    transform: scale(1);
+  }
+  100% { 
+    opacity: 0.9; 
+    transform: scale(1.02); /* Organic lung expansion */
+  }
 }
 
 /* --- Late Night Loneliness Mode --- */
@@ -393,8 +398,8 @@ body {
 }
 
 .late-night-mode .digital-breathing-overlay {
-  animation-duration: 14s; /* Deeper, slower breathing at night */
-  background: radial-gradient(circle at center, transparent 30%, rgba(50, 40, 100, 0.08) 100%);
+  animation-duration: 16s; /* Deeper, slower breathing at night */
+  background: radial-gradient(circle at center, transparent 30%, rgba(80, 70, 150, 0.1) 120%);
 }
 .late-night-mode .section-title {
   letter-spacing: 1px; /* Subtly relaxed typography at night */

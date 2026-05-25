@@ -112,7 +112,15 @@ const Hero = () => {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}
-          style={{ color: 'var(--accent-cyan)', fontSize: '1rem', marginBottom: '1rem', letterSpacing: '3px', fontWeight: '600', textTransform: 'uppercase', fontFamily: 'var(--font-mono)' }}
+          style={{ 
+            color: 'var(--text-muted)', 
+            fontSize: '1.25rem', 
+            marginBottom: '1rem', 
+            letterSpacing: '2px', 
+            fontWeight: '400', 
+            fontStyle: 'italic',
+            fontFamily: "'Bodoni Moda', 'Playfair Display', serif" 
+          }}
         >
           {displayData.greeting}
         </motion.div>
