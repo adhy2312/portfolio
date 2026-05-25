@@ -194,6 +194,7 @@ const MiniAdhy = () => {
   ]);
   const [input,        setInput]        = useState('');
   const [showAR,       setShowAR]       = useState(false);
+  const [arSpeech,     setArSpeech]     = useState('Hello there! 👋');
   const [loading,      setLoading]      = useState(false);
   const [noKey,        setNoKey]        = useState(false); // Can be removed later, keeping for now so state works
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
@@ -203,6 +204,20 @@ const MiniAdhy = () => {
   });
 
   const consciousness = useConsciousness();
+
+  // AR Chat behavior
+  useEffect(() => {
+    if (!showAR) return;
+    const phrases = [
+      "Hi!", "Who are you?", "Are you a recruiter?", 
+      "Check out this desk!", "Pretty cool tech, huh?", 
+      "Namakk sett aakam!", "I live in the browser."
+    ];
+    const interval = setInterval(() => {
+      setArSpeech(phrases[Math.floor(Math.random() * phrases.length)]);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [showAR]);
   
   // Update visitor memory visits on mount
   useEffect(() => {
@@ -517,9 +532,25 @@ const MiniAdhy = () => {
             ar-modes="webxr scene-viewer quick-look"
             camera-controls="true"
             auto-rotate="true"
+            autoplay="true"
             shadow-intensity="1"
-            style={{ width: '100%', height: '80vh' }}
+            style={{ width: '100%', height: '80vh', position: 'relative' }}
           >
+            {/* AR Speech Bubble */}
+            <div style={{
+              position: 'absolute', top: '15%', left: '50%', transform: 'translateX(-50%)',
+              background: '#fff', color: '#000', padding: '10px 16px', borderRadius: '20px',
+              fontWeight: 'bold', fontSize: '14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+              pointerEvents: 'none', animation: 'float 3s ease-in-out infinite'
+            }}>
+              {arSpeech}
+              {/* Little speech tail */}
+              <div style={{
+                position: 'absolute', bottom: '-8px', left: '50%', transform: 'translateX(-50%)',
+                width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent',
+                borderTop: '10px solid #fff'
+              }} />
+            </div>
             <button slot="ar-button" style={{
               backgroundColor: '#fff', borderRadius: '24px', border: 'none', position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', padding: '12px 24px', fontWeight: 'bold'
             }}>
