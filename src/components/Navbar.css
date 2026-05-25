@@ -623,3 +623,13 @@
     margin-left: 10px;
   }
 }
+
+/* ── Magnetic Pill ── */
+.nav-pill-bg {
+  position: absolute;
+  inset: -6px -12px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  z-index: 0;
+  pointer-events: none;
+}

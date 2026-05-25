@@ -200,6 +200,9 @@ const Footer = () => {
               BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE
             </div>
           </div>
+          <div className="build-watermark">
+            v0.1.0 · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · Framer Motion 12 · Three.js · Sanity CMS
+          </div>
         </div>
       </div>
     </motion.footer>

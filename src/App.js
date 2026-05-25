@@ -8,9 +8,12 @@ import EasterEggOverlay from './components/EasterEggOverlay';
 import DigitalTextures from './components/DigitalTextures';
 import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
+import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
 import AmbientThoughts from './components/AmbientThoughts';
 import { useSolarLighting } from './hooks/useSolarLighting';
 import DigitalSoul from './components/DigitalSoul';
+import SiteModeSwitcher from './components/SiteModeSwitcher';
+import RainDroplets from './components/RainDroplets';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -36,11 +39,13 @@ const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame       = lazy(() => import('./components/ZipGame'));
 const TicTacToe   = lazy(() => import('./components/TicTacToe'));
+const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
 
 function LazySection({ name, children }) {
   const [inView, setInView] = useState(false);
   const ref = React.useRef();
   const { setActiveSection } = useConsciousness();
+  const { isSectionVisible } = useSiteMode();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -50,13 +55,12 @@ function LazySection({ name, children }) {
           setActiveSection(name);
         }
       },
-      { rootMargin: '-10% 0px -50% 0px' } // triggers when section is decently in view
+      { rootMargin: '-10% 0px -50% 0px' }
     );
     if (ref.current) observer.observe(ref.current);
     return () => observer.disconnect();
   }, [name, setActiveSection]);
 
-  // Keep original preloader observer for actual mounting
   useEffect(() => {
     const preloader = new IntersectionObserver(
       ([entry]) => {
@@ -71,6 +75,9 @@ function LazySection({ name, children }) {
     return () => preloader.disconnect();
   }, []);
 
+  // Mode-aware: hide sections not relevant to current mode
+  if (!isSectionVisible(name)) return null;
+
   return (
     <div ref={ref} className="lazy-section-container" style={{ minHeight: inView ? 'auto' : '100vh' }} data-xray="[SYSTEM: LAZY_LOADER]&#10;Strategy: IntersectionObserver&#10;RootMargin: 600px&#10;Fallback: Skeleton UI">
       {inView && <Suspense fallback={<div className="lazy-loading-skeleton" />}>{children}</Suspense>}
@@ -78,24 +85,26 @@ function LazySection({ name, children }) {
   );
 }
 
-function App() {
-  useSolarLighting(); // Active global lighting calculations
+// AppContent needs to be wrapped in Context providers so it can use hooks
+function AppContent() {
+  useSolarLighting();
+  const { weatherData } = useConsciousness();
   const [showGame, setShowGame]   = useState(false);
   const [loading, setLoading]     = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
   const [tranceMode, setTranceMode] = useState(false);
-  
+
   // Late Night Loneliness Mode
   const hour = new Date().getHours();
   const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
-    // Lenis Smooth Scrolling
+    // Lenis Premium Smooth Scrolling
     const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.08,           // Premium buttery interpolation
+      wheelMultiplier: 0.8, // Slightly resistant wheel for luxurious feel
       direction: 'vertical',
       gestureDirection: 'vertical',
       smooth: true,
@@ -147,25 +156,6 @@ function App() {
     };
     window.addEventListener('trigger-trance', tranceHandler);
 
-    // 1. Magnetic Buttons Physics
-    const magneticBtns = document.querySelectorAll('.magnetic-btn');
-    const handleMouseMove = (e) => {
-      const btn = e.currentTarget;
-      const rect = btn.getBoundingClientRect();
-      const x = (e.clientX - rect.left - rect.width / 2) * 0.3;
-      const y = (e.clientY - rect.top - rect.height / 2) * 0.3;
-      btn.style.transform = `translate(${x}px, ${y}px)`;
-    };
-    const handleMouseLeave = (e) => {
-      const btn = e.currentTarget;
-      btn.style.transform = `translate(0px, 0px)`;
-    };
-    magneticBtns.forEach(btn => {
-      btn.addEventListener('mousemove', handleMouseMove);
-      btn.addEventListener('mouseleave', handleMouseLeave);
-      // Ensure smooth return transition but snappy follow
-      btn.style.transition = 'transform 0.1s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.3s ease, color 0.3s ease';
-    });
 
     // 2. Hacker Decode Reveal
     const hackerTexts = document.querySelectorAll('.section-title span, .section-label, .hacker-decode');
@@ -225,10 +215,6 @@ function App() {
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-trance', tranceHandler);
-      magneticBtns.forEach(btn => {
-        btn.removeEventListener('mousemove', handleMouseMove);
-        btn.removeEventListener('mouseleave', handleMouseLeave);
-      });
       decodeObserver.disconnect();
     };
   }, []);
@@ -239,9 +225,7 @@ function App() {
   };
 
   return (
-    <ConsciousnessProvider>
-      <StoryProvider>
-        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+    <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
 
         {tranceMode && (
           <div className="trance-overlay-container">
@@ -257,12 +241,11 @@ function App() {
         <CustomCursor />
         <ScrollProgress />
       </Suspense>
+      <SiteModeSwitcher />
       {loading && <PageLoader onDone={() => setLoading(false)} />}
 
-      {/* Ambient background blobs — desktop only */}
-      <div className="ambient-blob ambient-blob-1" />
-      <div className="ambient-blob ambient-blob-2" />
-      <div className="digital-breathing-overlay" />
+      {/* High-Performance Breathing Overlay (Opacity-only, sits above glass to prevent re-blurring lag) */}
+      <div className="performance-breathing-overlay" />
 
       {/* Ultra-lightweight digital textures (noise, scanlines, chromatic aberration) */}
       <DigitalTextures />
@@ -285,6 +268,7 @@ function App() {
       <LazySection name="CallToAction"><CallToAction /></LazySection>
       <LazySection name="Contact"><Contact /></LazySection>
       <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>
+      <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
       <LazySection name="Footer"><Footer /></LazySection>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
@@ -308,8 +292,18 @@ function App() {
       )}
 
       </div>
-      </StoryProvider>
-    </ConsciousnessProvider>
+  );
+}
+
+function App() {
+  return (
+    <SiteModeProvider>
+      <ConsciousnessProvider>
+        <StoryProvider>
+          <AppContent />
+        </StoryProvider>
+      </ConsciousnessProvider>
+    </SiteModeProvider>
   );
 }
 

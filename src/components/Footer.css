@@ -281,6 +281,18 @@
   color: #ff3131;
 }
 
+/* ── Build Watermark ── */
+.build-watermark {
+  text-align: center;
+  margin-top: 24px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 1.5px;
+  color: rgba(255, 255, 255, 0.12);
+  padding: 8px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .footer-main-row {

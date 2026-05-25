@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo, Suspense } from 'react';
+import React, { useState, useRef, useMemo, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Html, Stars, Line, Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -230,18 +230,33 @@ function NodeGroup({ nodeKey, data, activeNode, setActiveNode }) {
 }
 
 function BrainSystem({ activeNode, setActiveNode, brainData }) {
-  const systemRef = useRef();
+  const groupRef = useRef();
+  
+  // Cache the document height so we don't force a browser reflow 60 times a second
+  const docHeightRef = useRef(1);
+  useEffect(() => {
+    const updateHeight = () => {
+      docHeightRef.current = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, []);
 
-  useFrame((state) => {
-    // Only slowly auto-rotate the entire brain if no node is active
-    if (!activeNode) {
-      const t = state.clock.getElapsedTime();
-      systemRef.current.position.y = Math.sin(t * 1.5) * 0.15; // Subtle floating
+  // Narrative Scroll-Scrubbing: Spin the brain physically connected to scroll wheel
+  useFrame(() => {
+    if (groupRef.current) {
+      // Read scroll synchronously (cheap) but use cached height (avoids forced layout reflow)
+      const scrollPercent = window.scrollY / docHeightRef.current;
+      
+      // Interpolate the rotation smoothly
+      const targetRotation = scrollPercent * Math.PI * 6; // Spin 3 full times over the page
+      groupRef.current.rotation.y += (targetRotation - groupRef.current.rotation.y) * 0.1; // Spring damping
     }
   });
 
   return (
-    <group ref={systemRef}>
+    <group ref={groupRef} position={[0, 0, 0]}>
       <BrainPoints />
       <NeuralConnections activeNode={activeNode} brainData={brainData} />
       {Object.entries(brainData).map(([key, data]) => (

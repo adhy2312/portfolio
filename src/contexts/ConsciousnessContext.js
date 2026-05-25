@@ -23,6 +23,27 @@ export const ConsciousnessProvider = ({ children }) => {
   });
 
   const [ambientThought, setAmbientThought] = useState(null);
+  
+  // Weather Integration for Environmental Symbiosis
+  const [weatherData, setWeatherData] = useState(null);
+
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
+        const data = await res.json();
+        if (data.cod === 200 && data.weather && data.weather.length > 0) {
+          setWeatherData({ condition: data.weather[0].main, temp: Math.round(data.main.temp), isDay: data.dt > data.sys.sunrise && data.dt < data.sys.sunset });
+        } else {
+          setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+        }
+      } catch (error) {
+        setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+      }
+    };
+    fetchWeather();
+  }, []);
 
   // Digital Evolution State
   const [temporalAge, setTemporalAge] = useState(0);
@@ -47,6 +68,8 @@ export const ConsciousnessProvider = ({ children }) => {
   const fpsRef = useRef(60);
   const idleTimeRef = useRef(0);
   const lastActive = useRef(Date.now());
+  const adrenalineRef = useRef(0);
+  const lastMousePos = useRef({ x: 0, y: 0 });
 
   // Track FPS & Set Degraded State
   useEffect(() => {
@@ -86,14 +109,29 @@ export const ConsciousnessProvider = ({ children }) => {
     };
   }, []);
 
-  // Track Idle Time & Set States
+  // Track Idle Time, Adrenaline & Set States
   useEffect(() => {
-    const resetIdle = () => {
+    const resetIdle = (e) => {
       lastActive.current = Date.now();
+      
+      // Calculate Adrenaline based on movement velocity (DOM update deferred to prevent CPU thrashing)
+      if (e) {
+        let speed = 0;
+        if (e.type === 'mousemove') {
+          const dx = e.clientX - lastMousePos.current.x;
+          const dy = e.clientY - lastMousePos.current.y;
+          speed = Math.sqrt(dx * dx + dy * dy);
+          lastMousePos.current = { x: e.clientX, y: e.clientY };
+        } else if (e.type === 'scroll') {
+          speed = 60; 
+        }
+        adrenalineRef.current = Math.min(100, adrenalineRef.current + speed * 0.15);
+      }
+
       if (idleTimeRef.current > 0) {
         idleTimeRef.current = 0;
         setIdleState(prev => prev !== 'active' ? 'active' : prev);
-        // Wake up Mini-Adhy
+        document.documentElement.classList.remove('dream-state');
         setInternalState(prev => ({ ...prev, energy: Math.min(100, prev.energy + 10), mood: 'Energetic', creativeState: 'Analyzing' }));
       }
     };
@@ -103,12 +141,62 @@ export const ConsciousnessProvider = ({ children }) => {
     window.addEventListener('scroll', resetIdle, { passive: true });
     window.addEventListener('touchstart', resetIdle, { passive: true });
 
+    let lastAdrenalineStr = null;
+    const decayTimer = setInterval(() => {
+      if (adrenalineRef.current > 0) {
+        adrenalineRef.current = Math.max(0, adrenalineRef.current - 2);
+      }
+      
+      const newStr = (adrenalineRef.current / 100).toFixed(2);
+      if (newStr !== lastAdrenalineStr) {
+        // Biological Heartbeat calculation
+        const heartDuration = 0.8 - (adrenalineRef.current / 100) * 0.55;
+        document.documentElement.style.setProperty('--adrenaline', newStr);
+        document.documentElement.style.setProperty('--heartbeat-duration', `${heartDuration.toFixed(2)}s`);
+        
+        // ─── DIGITAL SUBCONSCIOUS ENGINE ───
+        // Watches interaction rhythm and alters the psychological weight of the UI
+        const adr = adrenalineRef.current;
+        let pace = 0.4;
+        let restraint = 0.0;
+        let atmosphere = 0.5;
+
+        if (adr > 70) {
+          // Frantic User: Force the UI to slow down and mute itself to calm them
+          pace = 1.2; // Resist frantic movement with heavy latency
+          restraint = 0.8; // High restraint (muted colors, blurred edges)
+          atmosphere = 0.1; // Hide distractions
+          if (adr > 90) setInternalState(prev => ({ ...prev, mood: 'Overwhelmed' }));
+        } else if (adr < 20) {
+          // Calm / Deep Focus User: Reward with snappy UI and deep atmosphere
+          pace = 0.2; // Snappy
+          restraint = 0.0; // Zero restraint, vibrant
+          atmosphere = 0.9; // Deep, rich particle breathing
+          if (adr < 5) setInternalState(prev => ({ ...prev, mood: 'Deep Focus' }));
+        } else {
+          // Normal rhythm
+          pace = 0.5 + (adr / 100) * 0.4;
+          restraint = (adr / 100) * 0.5;
+          atmosphere = 0.8 - (adr / 100) * 0.4;
+        }
+
+        document.documentElement.style.setProperty('--subconscious-pace', `${pace.toFixed(2)}s`);
+        document.documentElement.style.setProperty('--subconscious-restraint', restraint.toFixed(2));
+        document.documentElement.style.setProperty('--subconscious-atmosphere', atmosphere.toFixed(2));
+        // ───────────────────────────────────
+
+        lastAdrenalineStr = newStr;
+      }
+    }, 100);
+
     const idleTimer = setInterval(() => {
       const secondsIdle = Math.floor((Date.now() - lastActive.current) / 1000);
       idleTimeRef.current = secondsIdle;
 
-      if (secondsIdle >= 30) {
+      if (secondsIdle >= 60) {
+        // Entering REM Sleep / Cellular Degeneration
         setIdleState(prev => prev !== 'dreaming' ? 'dreaming' : prev);
+        document.documentElement.classList.add('dream-state');
         setInternalState(prev => ({ ...prev, energy: Math.max(10, prev.energy - 2), mood: 'Dreaming', creativeState: 'Simulating' }));
       } else if (secondsIdle >= 15) {
         setIdleState(prev => prev !== 'inactive' ? 'inactive' : prev);
@@ -122,6 +210,7 @@ export const ConsciousnessProvider = ({ children }) => {
       window.removeEventListener('scroll', resetIdle);
       window.removeEventListener('touchstart', resetIdle);
       clearInterval(idleTimer);
+      clearInterval(decayTimer);
     };
   }, []);
 
@@ -199,7 +288,8 @@ export const ConsciousnessProvider = ({ children }) => {
       ambientThought,
       triggerThought,
       internalState,
-      temporalAge
+      temporalAge,
+      weatherData
     }}>
       {children}
     </ConsciousnessContext.Provider>

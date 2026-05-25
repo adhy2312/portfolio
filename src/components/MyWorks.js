@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll, useVelocity } from 'framer-motion';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
@@ -100,6 +100,29 @@ const TiltCard = ({ children, project, index }) => {
   const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["12.5deg", "-12.5deg"]);
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12.5deg", "12.5deg"]);
 
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["0 1.1", "0.6 1"] // Trigger from bottom of viewport entering to 60% up
+  });
+
+  // Global scroll velocity for Kinetic Skew
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
+  const velocitySkew = useTransform(smoothVelocity, [-1000, 0, 1000], [5, 0, -5]);
+
+  // 1. Narrative Scroll Scrubbing (Tied exactly to scroll wheel via spring dampening)
+  const scrollOpacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
+  const scrollYTransform = useTransform(scrollYProgress, [0, 1], [150, 0]);
+  const scrollRotateX = useTransform(scrollYProgress, [0, 1], ["25deg", "0deg"]);
+  const scrollScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
+
+  // 2. High-end Spring Physics (Replacing standard CSS ease)
+  const springConfig = { stiffness: 120, damping: 20, mass: 1 };
+  const ySpring = useSpring(scrollYTransform, springConfig);
+  const rotXSpring = useSpring(scrollRotateX, springConfig);
+  const scaleSpring = useSpring(scrollScale, springConfig);
+
   const handleMouseMove = (e) => {
     if (!ref.current) return;
     const rect = ref.current.getBoundingClientRect();
@@ -108,16 +131,13 @@ const TiltCard = ({ children, project, index }) => {
   };
   const handleMouseLeave = () => { x.set(0); y.set(0); };
 
-  // Touch/mobile: skip 3D physics layers, use simple fade-in
+  // Touch/mobile: Use scroll scrubbing but skip intense 3D hover math
   if (isTouchDevice) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.8, delay: 0.1 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+        ref={ref}
+        style={{ opacity: scrollOpacity, y: ySpring, scale: scaleSpring }}
         className="work-card-wrapper"
-        style={{ '--card-accent': project.accent }}
       >
         <div className="work-card glass-card">{children}</div>
       </motion.div>
@@ -127,14 +147,22 @@ const TiltCard = ({ children, project, index }) => {
   return (
     <motion.div
       ref={ref}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      initial={{ opacity: 0, y: 50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, delay: 0.1 + index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-      style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: "1000px", '--card-accent': project.accent }}
-      className={`work-card-wrapper ${showMemory ? 'memory-active' : ''}`}
+      style={{ 
+        opacity: scrollOpacity, 
+        y: ySpring, 
+        scale: scaleSpring,
+        rotateX: rotXSpring, 
+        skewY: velocitySkew,
+        perspective: "1200px" 
+      }}
+      className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''}`}
     >
+      <motion.div
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{ rotateX, rotateY, transformStyle: "preserve-3d", '--card-accent': project.accent }}
+        className="work-card-wrapper"
+      >
       <div className="work-card glass-card" style={{ transform: "translateZ(50px)" }}>
         {showMemory ? (
           <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
@@ -184,6 +212,7 @@ const TiltCard = ({ children, project, index }) => {
           </>
         )}
       </div>
+      </motion.div>
     </motion.div>
   );
 };

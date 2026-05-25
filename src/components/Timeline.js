@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { client } from '../sanity';
+import DecryptedText from './DecryptedText';
 import './Timeline.css';
 
 const timelineData = [
@@ -33,8 +34,11 @@ const Timeline = () => {
   // Use scroll progress to draw the active line
   const scaleX = useTransform(scrollXProgress, [0, 1], [0, 1]);
 
+  // Emotional background shift: Time passing from crisp morning to golden hour
+  const backgroundColor = useTransform(scrollXProgress, [0, 1], ["#ffffff", "#fff0e5"]);
+
   return (
-    <section className="timeline-section" id="timeline">
+    <motion.section className="timeline-section" id="timeline" style={{ backgroundColor }}>
       <div className="container">
         <motion.div
           className="timeline-header"
@@ -76,12 +80,14 @@ const Timeline = () => {
                   viewport={{ root: containerRef, margin: '0px 100px 0px 0px', once: true }}
                 >
                   <div className="timeline-content glass-card">
-                    <span className="timeline-year">{item.year}</span>
+                    <span className="timeline-year">
+                      <DecryptedText text={item.year} speed={60} />
+                    </span>
                     <h3 className="timeline-title">{item.title}</h3>
                     <p className="timeline-desc">{item.description}</p>
                   </div>
                   <div className="timeline-point">
-                    <div className="timeline-point-inner" />
+                    <div className="timeline-point-inner heartbeat-pulse" />
                   </div>
                 </motion.div>
               );
@@ -89,7 +95,7 @@ const Timeline = () => {
           </div>
         </div>
       </div>
-    </section>
+    </motion.section>
   );
 };
 

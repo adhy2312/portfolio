@@ -1,0 +1,217 @@
+/* ═══════════════════════════════════════════
+   SITE MODE SWITCHER — Floating Panel
+   Premium glass-morphism mode controls
+═══════════════════════════════════════════ */
+
+.site-mode-fab {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 10000;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(15, 15, 25, 0.85);
+  backdrop-filter: blur(12px);
+  color: rgba(255, 255, 255, 0.8);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+  transition: border-color 0.3s ease;
+}
+
+.site-mode-fab:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ─── Panel ─── */
+.site-mode-panel {
+  position: fixed;
+  bottom: 84px;
+  left: 24px;
+  z-index: 10000;
+  width: 280px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: rgba(12, 12, 20, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255,255,255,0.04);
+  scrollbar-width: none;
+}
+
+.site-mode-panel::-webkit-scrollbar { display: none; }
+
+.smp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.smp-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 2px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+}
+
+.smp-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.55rem;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.2);
+  color: var(--accent-primary);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+}
+
+/* ─── Mode Buttons ─── */
+.smp-modes {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.smp-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+}
+
+.smp-mode-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.smp-mode-btn.smp-active {
+  background: rgba(124, 58, 237, 0.12);
+  border-color: rgba(124, 58, 237, 0.4);
+  color: #fff;
+}
+
+.smp-mode-btn.smp-active .smp-mode-icon {
+  color: var(--accent-primary);
+}
+
+.smp-mode-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  color: rgba(255, 255, 255, 0.4);
+  transition: color 0.25s ease;
+}
+
+.smp-mode-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.smp-mode-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+}
+
+.smp-mode-desc {
+  font-size: 0.6rem;
+  opacity: 0.5;
+  font-family: 'Fira Code', monospace;
+}
+
+/* ─── Divider ─── */
+.smp-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 12px 0;
+}
+
+/* ─── Accessibility Toggles ─── */
+.smp-a11y {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.smp-a11y-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.2s ease;
+}
+
+.smp-a11y-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
+}
+
+.smp-a11y-btn.smp-a11y-active {
+  color: var(--accent-cyan);
+}
+
+.smp-toggle-dot {
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  transition: all 0.25s ease;
+}
+
+.smp-a11y-active .smp-toggle-dot {
+  background: var(--accent-cyan);
+  box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+}
+
+/* ─── Mobile ─── */
+/* ─── Inline Mode ─── */
+.smp-inline {
+  background: transparent;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  width: 100%;
+}
+
+.mobile-menu-settings {
+  padding: 24px;
+  background: rgba(255,255,255,0.02);
+  border-top: 1px solid rgba(255,255,255,0.05);
+  margin-top: auto;
+}
+
+/* ─── Mobile ─── */
+@media (max-width: 768px) {
+  /* Hide the FAB and floating panel entirely on mobile, we use the inline version in the hamburger menu */
+  .site-mode-fab,
+  .site-mode-panel {
+    display: none !important;
+  }
+}

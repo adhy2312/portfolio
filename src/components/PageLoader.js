@@ -28,31 +28,32 @@ function useGlitchCycle(names, intervalMs = 700) {
   const [display, setDisplay] = useState(names[0].text);
   const [langLabel, setLangLabel] = useState(names[0].lang);
   const [isGlitching, setIsGlitching] = useState(false);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const idxRef = useRef(0);
   const rafRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
 
-    const glitchTransition = (targetText, targetLang, onDone) => {
+    const glitchTransition = (targetText, targetLang, targetIndex, onDone) => {
       setIsGlitching(true);
       let frame = 0;
-      const totalFrames = 10;
+      const totalFrames = 4; // ultra-fast glitch (60ms total)
 
       const tick = () => {
         if (cancelled) return;
         frame++;
         if (frame < totalFrames) {
-          // Scramble: random mix of glitch chars
           const scrambled = Array.from(
             { length: Math.max(targetText.length, 4) },
             () => GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
           ).join('');
           setDisplay(scrambled);
-          rafRef.current = setTimeout(tick, 20);
+          rafRef.current = setTimeout(tick, 15);
         } else {
           setDisplay(targetText);
           setLangLabel(targetLang);
+          setCurrentIndex(targetIndex);
           setIsGlitching(false);
           onDone();
         }
@@ -62,10 +63,14 @@ function useGlitchCycle(names, intervalMs = 700) {
 
     const advance = () => {
       if (cancelled) return;
-      idxRef.current = (idxRef.current + 1) % names.length;
+      if (idxRef.current >= names.length - 1) return; // Stop exactly on the last item
+      
+      idxRef.current = idxRef.current + 1;
       const next = names[idxRef.current];
-      glitchTransition(next.text, next.lang, () => {
-        if (!cancelled) rafRef.current = setTimeout(advance, intervalMs);
+      glitchTransition(next.text, next.lang, idxRef.current, () => {
+        if (!cancelled && idxRef.current < names.length - 1) {
+          rafRef.current = setTimeout(advance, intervalMs);
+        }
       });
     };
 
@@ -77,17 +82,19 @@ function useGlitchCycle(names, intervalMs = 700) {
     };
   }, [names, intervalMs]);
 
-  return { display, langLabel, isGlitching };
+  return { display, langLabel, isGlitching, currentIndex };
 }
 
 const PageLoader = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [phrase, setPhrase] = useState(PHRASES[0]);
   const [exiting, setExiting] = useState(false);
-  const { display, langLabel, isGlitching } = useGlitchCycle(LANG_NAMES, 340);
+  
+  // High-speed sequence: ~120ms wait + 60ms glitch = 180ms per language. Total time: ~1.6s.
+  const { display, langLabel, isGlitching, currentIndex } = useGlitchCycle(LANG_NAMES, 120);
 
   useEffect(() => {
-    // Performance optimization: Instantly finish loader for Lighthouse / Bots to avoid tanking TTI & LCP scores
+    // Performance optimization: Instantly finish loader for Lighthouse
     if (/Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent)) {
       setProgress(100);
       setExiting(true);
@@ -95,22 +102,21 @@ const PageLoader = ({ onDone }) => {
       return;
     }
 
-    let p = 0;
-    const interval = setInterval(() => {
-      // ~2.5–4% per 120ms → ~3.5 seconds total
-      p += Math.random() * 2 + 2;
-      if (p >= 100) { p = 100; clearInterval(interval); }
-      setProgress(Math.min(p, 100));
-      setPhrase(PHRASES[Math.floor((p / 100) * (PHRASES.length - 1))]);
-      if (p >= 100) {
-        setTimeout(() => {
-          setExiting(true);
-          setTimeout(onDone, 600);
-        }, 400);
-      }
-    }, 120);
-    return () => clearInterval(interval);
-  }, [onDone]);
+    // Map progress definitively to the language index
+    const calcProgress = Math.min(100, Math.floor((currentIndex / (LANG_NAMES.length - 1)) * 100));
+    setProgress(calcProgress);
+    
+    // Map phrases 0-3
+    const phraseIdx = Math.min(PHRASES.length - 1, Math.floor((calcProgress / 100) * PHRASES.length));
+    setPhrase(PHRASES[phraseIdx]);
+
+    if (currentIndex >= LANG_NAMES.length - 1 && !isGlitching) {
+      setTimeout(() => {
+        setExiting(true);
+        setTimeout(onDone, 500); // 500ms fade out animation
+      }, 150); // Pause on the final English ADHY for a split second
+    }
+  }, [currentIndex, isGlitching, onDone]);
 
   return (
     <div className={`page-loader ${exiting ? 'page-loader-exit' : ''}`}>

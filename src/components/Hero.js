@@ -1,7 +1,8 @@
 // src/components/Hero.js
 import React, { useCallback, useEffect, useState } from 'react';
 import './Hero.css';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import Particles from "react-tsparticles";
 import { loadBasic } from "tsparticles-basic";
 import { client, urlFor } from '../sanity';
@@ -12,6 +13,27 @@ const Hero = () => {
   const [typedCharsCount, setTypedCharsCount] = useState(0);
   const [typingComplete, setTypingComplete] = useState(false);
   const [showParticles, setShowParticles] = useState(false);
+
+  const { isExperimental } = useSiteMode();
+
+  // Kinetic Mouse Spotlight State (Bypasses React Render Loop for Performance)
+  const mouseX = useMotionValue(-1000);
+  const mouseY = useMotionValue(-1000);
+  const smoothMouseX = useSpring(mouseX, { stiffness: 50, damping: 20, mass: 0.5 });
+  const smoothMouseY = useSpring(mouseY, { stiffness: 50, damping: 20, mass: 0.5 });
+
+  // Experimental 3D Tilt Mapping
+  const rotateX = useTransform(smoothMouseY, [-400, 600], ["5deg", "-5deg"]);
+  const rotateY = useTransform(smoothMouseX, [-400, 1500], ["-5deg", "5deg"]);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX - 400); // Center the 800px orb
+      mouseY.set(e.clientY - 400);
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, [mouseX, mouseY]);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
@@ -71,7 +93,32 @@ const Hero = () => {
   }, []);
 
   return (
-    <section id="hero" className="hero-minimal" data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: framer-motion springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount">
+    <section 
+      id="hero" 
+      className="hero-minimal" 
+      data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: framer-motion springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount"
+      style={isExperimental ? { perspective: "1500px" } : {}}
+    >
+      
+      {/* Kinetic Ambient Spotlight */}
+      <motion.div 
+        className="hero-kinetic-spotlight"
+        style={{
+          x: smoothMouseX,
+          y: smoothMouseY,
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: '800px',
+          height: '800px',
+          background: 'radial-gradient(circle, rgba(108, 99, 255, 0.08) 0%, transparent 70%)',
+          borderRadius: '50%',
+          pointerEvents: 'none',
+          zIndex: 0,
+          willChange: 'transform'
+        }}
+      />
+
       {showParticles && (
         <Particles
           id="tsparticles"
@@ -106,7 +153,10 @@ const Hero = () => {
         />
       )}
 
-      <div className="hero-minimal-content optimize-gpu">
+      <motion.div 
+        className="hero-minimal-content optimize-gpu"
+        style={isExperimental ? { rotateX, rotateY, transformStyle: "preserve-3d" } : {}}
+      >
         <motion.div
           className="hero-greeting"
           initial={{ opacity: 0, y: -20 }}
@@ -179,7 +229,7 @@ const Hero = () => {
         >
           {displayData.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER"}
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 };

@@ -1,4 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import './CustomCursor.css';
 
 const hasFinePointer = () => window.matchMedia('(pointer: fine)').matches;
@@ -8,6 +10,13 @@ const CustomCursor = () => {
   const stateRef = useRef('default');
   const [cursorState, setCursorState] = useState('default');
   const [visible, setVisible] = useState(false);
+  const { isExperimental } = useSiteMode();
+
+  // Framer Motion Springs for Experimental Mode
+  const fX = useMotionValue(-300);
+  const fY = useMotionValue(-300);
+  const smoothX = useSpring(fX, { damping: 20, stiffness: 150, mass: 0.5 });
+  const smoothY = useSpring(fY, { damping: 20, stiffness: 150, mass: 0.5 });
 
   useEffect(() => {
     if (!hasFinePointer()) return;
@@ -20,11 +29,15 @@ const CustomCursor = () => {
       mx = e.clientX;
       my = e.clientY;
       dirty = true;
+      if (isExperimental) {
+        fX.set(e.clientX);
+        fY.set(e.clientY);
+      }
       if (!visible) setVisible(true);
     };
 
     const tick = () => {
-      if (dirty && cursorRef.current) {
+      if (dirty && cursorRef.current && !isExperimental) {
         cursorRef.current.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
         dirty = false;
       }
@@ -77,6 +90,33 @@ const CustomCursor = () => {
   }, []); // eslint-disable-line
 
   if (!hasFinePointer()) return null;
+
+  if (isExperimental) {
+    return (
+      <div className={`liquid-cursor state-${cursorState} ${visible ? 'cursor-visible' : 'cursor-hidden'}`}>
+        <motion.div 
+          className="liquid-cursor-shape" 
+          style={{ x: smoothX, y: smoothY, position: 'fixed', top: 0, left: 0, pointerEvents: 'none', width: 32, height: 32 }}
+        />
+        <motion.svg
+          className="liquid-cursor-outline"
+          width="32"
+          height="32"
+          viewBox="0 0 32 32"
+          xmlns="http://www.w3.org/2000/svg"
+          style={{ x: fX, y: fY, position: 'fixed', top: 0, left: 0, pointerEvents: 'none' }}
+        >
+          <polygon
+            points="0,0 0,26 8,18.5 13.5,27.5 18,25 12.5,16 23,15"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinejoin="round"
+          />
+        </motion.svg>
+      </div>
+    );
+  }
 
   return (
     <div
