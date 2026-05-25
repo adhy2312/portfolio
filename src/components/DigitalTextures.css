@@ -13,16 +13,14 @@
   will-change: transform;
 }
 
-/* 1. Sensor Grain / Analog Noise (Removed heavy SVG, using cheap CSS) */
+/* 1. Sensor Grain / Analog Noise (Removed heavy repeating gradient for massive scroll performance boost) */
 .digital-texture-overlay::before {
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.02;
-  background-image: repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000), 
-                    repeating-linear-gradient(45deg, #000 25%, transparent 25%, transparent 75%, #000 75%, #000);
-  background-size: 2px 2px;
-  background-position: 0 0, 1px 1px;
+  opacity: 0.03;
+  /* Use a much cheaper CSS noise fallback or leave it transparent, repeating-linear-gradient of 2px size is a GPU killer */
+  background: transparent;
 }
 
 /* 2. Scanlines + Chromatic Aberration + Paper Texture Vignette */

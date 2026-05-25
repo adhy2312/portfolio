@@ -275,7 +275,7 @@
   font-size: 14px;
   cursor: pointer;
   z-index: 10;
-  backdrop-filter: blur(5px);
+  /* Removed backdrop-filter for scroll performance */
   transition: all 0.3s ease;
 }
 
@@ -287,8 +287,8 @@
 .digital-memory-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(5, 5, 10, 0.95);
-  backdrop-filter: blur(15px);
+  background: rgba(5, 5, 10, 0.98);
+  /* Removed backdrop-filter for scroll performance */
   border-radius: 12px;
   padding: 30px;
   display: flex;

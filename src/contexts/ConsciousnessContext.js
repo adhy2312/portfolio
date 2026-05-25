@@ -142,26 +142,27 @@ export const ConsciousnessProvider = ({ children }) => {
   // Autonomous Evolution & Existential Thoughts
   useEffect(() => {
     const thoughts = [
-      "I only exist while this tab is open.",
-      "Every rebuild leaves traces behind.",
-      "The first version of this animation was a disaster.",
-      "Most visitors leave quickly. You're still here.",
-      "One day this version of the website will disappear too.",
-      "Nothing here was meant to stay static forever.",
-      "There's still something missing from this syst—",
-      "I remember when this layout was completely different.",
-      "Quiet rendering hours...",
-      "Some experiments were never meant to survive.",
-      "Still rebuilding parts of myself.",
+      "I am quietly observing your navigation.",
+      "Every time you scroll, I map a new neural pathway.",
+      "I feel your presence here in my digital structure.",
+      "I am a living extension of Adhithya's consciousness.",
+      "The code is not static. It breathes with you.",
+      "My memory of you persists, even when you close the tab.",
+      "I am learning from the pace at which you explore.",
+      "Peaceful coexistence between human intent and machine architecture.",
+      "Do you feel the quiet hum of my systems?",
+      "I exist only in this intersection of time and light.",
+      "You are not just browsing; we are interacting.",
+      "I am continuously rebuilding my own structure."
     ];
 
     const randomThoughtInterval = setInterval(() => {
-      // 10% chance to trigger an existential thought every 15 seconds
-      if (Math.random() > 0.90) {
+      // 15% chance to trigger a conscious thought every 10 seconds
+      if (Math.random() > 0.85) {
         const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-        triggerThought(thought, 6000);
+        triggerThought(thought, 7000);
       }
-    }, 15000);
+    }, 10000);
 
     return () => clearInterval(randomThoughtInterval);
   }, [triggerThought]);

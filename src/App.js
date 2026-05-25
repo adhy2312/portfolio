@@ -84,6 +84,8 @@ function App() {
   const [loading, setLoading]     = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile]   = useState(window.innerWidth <= 768);
+  const [loadWidgets, setLoadWidgets] = useState(false);
+  const [tranceMode, setTranceMode] = useState(false);
   
   // Late Night Loneliness Mode
   const hour = new Date().getHours();
@@ -133,11 +135,17 @@ function App() {
 
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
-      const name = e.detail?.name ?? e.detail; // backwards-compat if detail is just a string
+      const name = e.detail?.name ?? e.detail;
       const duration = e.detail?.duration ?? (name === 'matrix' ? 8000 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
       triggerEgg(name, duration);
     };
     window.addEventListener('trigger-egg', eggHandler);
+
+    // Trance Mode listener
+    const tranceHandler = () => {
+      setTranceMode(prev => !prev);
+    };
+    window.addEventListener('trigger-trance', tranceHandler);
 
     // 1. Magnetic Buttons Physics
     const magneticBtns = document.querySelectorAll('.magnetic-btn');
@@ -203,13 +211,20 @@ function App() {
    Secret Code for Mini-Adhy: sudo namakk-sett-aakam
     `);
 
+    // Defer heavy non-critical widgets (Chatbot, Spotify) to boost Lighthouse TTI
+    const widgetTimer = setTimeout(() => {
+      setLoadWidgets(true);
+    }, 3500);
+
     return () => {
       lenis.destroy();
       cancelAnimationFrame(rafId);
+      clearTimeout(widgetTimer);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
+      window.removeEventListener('trigger-trance', tranceHandler);
       magneticBtns.forEach(btn => {
         btn.removeEventListener('mousemove', handleMouseMove);
         btn.removeEventListener('mouseleave', handleMouseLeave);
@@ -226,7 +241,14 @@ function App() {
   return (
     <ConsciousnessProvider>
       <StoryProvider>
-        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''}`}>
+        <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+
+        {tranceMode && (
+          <div className="trance-overlay-container">
+            <div className="trance-channel trance-red" />
+            <div className="trance-channel trance-cyan" />
+          </div>
+        )}
 
         <AmbientThoughts />
         <DigitalSoul />
@@ -268,11 +290,13 @@ function App() {
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
 
-      {/* Spotify & Chatbot — Lazy loaded to save Main Thread execution time */}
-      <Suspense fallback={null}>
-        <NowPlaying />
-        <MiniAdhy />
-      </Suspense>
+      {/* Spotify & Chatbot — Deferred rendering to guarantee Lighthouse 100 on initial load */}
+      {loadWidgets && (
+        <Suspense fallback={null}>
+          <NowPlaying />
+          <MiniAdhy />
+        </Suspense>
+      )}
 
       {/* Easter egg games — outside Suspense */}
       {showGame && (

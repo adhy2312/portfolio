@@ -170,9 +170,32 @@ const Footer = () => {
         <div className="footer-simple-bottom">
           <div className="bottom-divider" />
           <div className="bottom-flex">
-            <p className="retro-copy" style={{ opacity: 0.6, fontSize: '0.65rem' }}>
-              <span className="retro-text-muted">HINT:</span> TRY CLICKING THE LOGO 5 TIMES ✨
-            </p>
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+              <p className="retro-copy" style={{ opacity: 0.6, fontSize: '0.65rem', margin: 0 }}>
+                <span className="retro-text-muted">HINT:</span> TRY CLICKING THE LOGO 5 TIMES ✨
+              </p>
+              <button 
+                onClick={() => window.dispatchEvent(new CustomEvent('trigger-trance'))}
+                className="trance-mode-btn"
+                style={{
+                  background: 'none',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  fontSize: '0.55rem',
+                  letterSpacing: '1px',
+                  padding: '3px 8px',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  fontFamily: 'Fira Code, monospace',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--accent-primary)'; e.currentTarget.style.borderColor = 'var(--accent-primary)'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)'; e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)'; }}
+                title="Initiate Mental Trance"
+              >
+                TRANCE_MODE
+              </button>
+            </div>
             <div className="retro-made">
               BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE
             </div>

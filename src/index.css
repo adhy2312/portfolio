@@ -372,22 +372,20 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 10%, rgba(108, 99, 255, 0.25) 120%);
+  background: radial-gradient(circle at center, transparent 10%, rgba(108, 99, 255, 0.35) 120%);
   animation: digitalBreathing 8s ease-in-out infinite alternate;
   z-index: 900; /* Sit above content but below navbar/modals to act as a visible vignette */
-  will-change: opacity, transform, box-shadow;
+  will-change: opacity, transform;
 }
 
 @keyframes digitalBreathing {
   0% { 
-    opacity: 0.5; 
+    opacity: 0.3; 
     transform: scale(1);
-    box-shadow: inset 0 0 20px rgba(108, 99, 255, 0.05);
   }
   100% { 
     opacity: 1; 
-    transform: scale(1.03); /* Stronger organic lung expansion */
-    box-shadow: inset 0 0 120px rgba(108, 99, 255, 0.2);
+    transform: scale(1.05); /* Stronger organic lung expansion */
   }
 }
 
@@ -511,7 +509,7 @@ body {
 /* Grid overlay — absolute avoids scroll repaint */
 .App::before {
   content: '';
-  position: absolute;
+  position: fixed; /* Fixed instead of absolute saves massive VRAM and fixes scroll lag */
   inset: 0;
   background-image:
     linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
@@ -969,4 +967,53 @@ body {
     transition-duration: 0.01ms !important;
   }
   .ambient-blob { display: none; }
+}
+
+/* ═══════════════════════════════════════════
+   MENTAL TRANCE MODE (Hidden Footer Easter Egg)
+═══════════════════════════════════════════ */
+.trance-mode {
+  animation: trance-hue 12s infinite linear;
+}
+
+.trance-overlay-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998; /* Below cursor, above UI */
+}
+
+.trance-channel {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.trance-red {
+  background: rgba(255, 0, 80, 0.15);
+  mix-blend-mode: screen;
+  animation: trance-split-red 1.8s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 0 150px rgba(255, 0, 80, 0.2);
+}
+
+.trance-cyan {
+  background: rgba(0, 255, 255, 0.15);
+  mix-blend-mode: exclusion;
+  animation: trance-split-cyan 2.4s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 0 150px rgba(0, 255, 255, 0.2);
+}
+
+@keyframes trance-hue {
+  0% { filter: hue-rotate(0deg) contrast(1.1) saturate(1.4); }
+  100% { filter: hue-rotate(360deg) contrast(1.1) saturate(1.4); }
+}
+
+@keyframes trance-split-red {
+  0% { transform: translateX(-4px) scale(1.01); opacity: 0.4; }
+  100% { transform: translateX(8px) scale(1.04); opacity: 0.8; }
+}
+
+@keyframes trance-split-cyan {
+  0% { transform: translateX(4px) scale(1.01); opacity: 0.4; }
+  100% { transform: translateX(-8px) scale(1.03); opacity: 0.8; }
 }

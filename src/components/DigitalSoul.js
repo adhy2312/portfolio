@@ -3,9 +3,13 @@ import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './DigitalSoul.css';
 
 const DigitalSoul = () => {
-  const { idleState, mood } = useConsciousness();
-  const [position, setPosition] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  const [target, setTarget] = useState({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const { idleState } = useConsciousness();
+  const soulRef = useRef(null);
+  
+  // Use refs for positions to avoid re-renders
+  const posRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  const targetRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+  
   const requestRef = useRef();
   const mouseRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
   const isMoving = useRef(false);
@@ -42,65 +46,62 @@ const DigitalSoul = () => {
 
   useEffect(() => {
     const animate = () => {
-      setTarget(prevTarget => {
-        let newX = prevTarget.x;
-        let newY = prevTarget.y;
+      // Calculate new target
+      let newTargetX = targetRef.current.x;
+      let newTargetY = targetRef.current.y;
 
-        if (isMobileRef.current) {
-          // Autonomous slow drift for mobile
-          newX = position.x + (mobileTargetRef.current.x - position.x) * 0.005;
-          newY = position.y + (mobileTargetRef.current.y - position.y) * 0.005;
-        } else if (isMoving.current) {
-          // Desktop: If user is moving, soul shyly keeps its distance
-          const dx = mouseRef.current.x - position.x;
-          const dy = mouseRef.current.y - position.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          
-          if (dist < 200) {
-            newX = position.x - (dx * 0.05);
-            newY = position.y - (dy * 0.05);
-          } else {
-            newX += (Math.random() - 0.5) * 2;
-            newY += (Math.random() - 0.5) * 2;
-          }
+      if (isMobileRef.current) {
+        newTargetX = posRef.current.x + (mobileTargetRef.current.x - posRef.current.x) * 0.005;
+        newTargetY = posRef.current.y + (mobileTargetRef.current.y - posRef.current.y) * 0.005;
+      } else if (isMoving.current) {
+        const dx = mouseRef.current.x - posRef.current.x;
+        const dy = mouseRef.current.y - posRef.current.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < 200) {
+          newTargetX = posRef.current.x - (dx * 0.05);
+          newTargetY = posRef.current.y - (dy * 0.05);
         } else {
-          // Desktop: If user is still, soul curiously approaches the cursor
-          const time = Date.now() * 0.001;
-          const orbitX = Math.cos(time) * 40;
-          const orbitY = Math.sin(time * 1.5) * 40;
-          
-          newX = mouseRef.current.x + orbitX;
-          newY = mouseRef.current.y + orbitY;
+          newTargetX += (Math.random() - 0.5) * 2;
+          newTargetY += (Math.random() - 0.5) * 2;
         }
+      } else {
+        const time = Date.now() * 0.001;
+        const orbitX = Math.cos(time) * 40;
+        const orbitY = Math.sin(time * 1.5) * 40;
+        
+        newTargetX = mouseRef.current.x + orbitX;
+        newTargetY = mouseRef.current.y + orbitY;
+      }
 
-        // Keep within bounds
-        newX = Math.max(20, Math.min(window.innerWidth - 20, newX));
-        newY = Math.max(20, Math.min(window.innerHeight - 20, newY));
+      newTargetX = Math.max(20, Math.min(window.innerWidth - 20, newTargetX));
+      newTargetY = Math.max(20, Math.min(window.innerHeight - 20, newTargetY));
 
-        return { x: newX, y: newY };
-      });
+      targetRef.current = { x: newTargetX, y: newTargetY };
 
-      setPosition(prev => {
-        // Easing interpolation for smooth, organic floating
-        const ease = isMoving.current ? 0.02 : 0.04;
-        return {
-          x: prev.x + (target.x - prev.x) * ease,
-          y: prev.y + (target.y - prev.y) * ease
-        };
-      });
+      // Interpolate position
+      const ease = isMoving.current ? 0.02 : 0.04;
+      posRef.current.x += (targetRef.current.x - posRef.current.x) * ease;
+      posRef.current.y += (targetRef.current.y - posRef.current.y) * ease;
+
+      // Apply directly to DOM
+      if (soulRef.current) {
+        soulRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0)`;
+      }
 
       requestRef.current = requestAnimationFrame(animate);
     };
 
     requestRef.current = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(requestRef.current);
-  }, [target.x, target.y, position.x, position.y]);
+  }, []);
 
   return (
     <div 
+      ref={soulRef}
       className={`digital-soul ${idleState === 'dreaming' ? 'soul-dreaming' : ''}`}
       style={{
-        transform: `translate(${position.x}px, ${position.y}px)`
+        transform: `translate3d(${window.innerWidth / 2}px, ${window.innerHeight / 2}px, 0)`
       }}
     >
       <div className="soul-core" />
