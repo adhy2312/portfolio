@@ -489,10 +489,26 @@ const MiniAdhy = () => {
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
         }}>
           <button 
-            onClick={() => setShowAR(false)}
-            style={{ position: 'absolute', top: 20, right: 20, padding: '10px 20px', background: '#333', color: '#fff', border: 'none', borderRadius: '20px', cursor: 'pointer' }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowAR(false);
+            }}
+            style={{ 
+              position: 'absolute', 
+              top: '40px', 
+              right: '20px', 
+              zIndex: 9999999, 
+              padding: '12px 24px', 
+              background: '#ffffff', 
+              color: '#000000', 
+              border: 'none', 
+              borderRadius: '30px', 
+              cursor: 'pointer',
+              fontWeight: 'bold',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
+            }}
           >
-            Close AR
+            Close AR ✕
           </button>
           <model-viewer
             src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
