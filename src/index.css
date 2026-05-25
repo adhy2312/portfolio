@@ -372,21 +372,18 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(circle at center, transparent 10%, rgba(108, 99, 255, 0.35) 120%);
-  animation: digitalBreathing 8s ease-in-out infinite alternate;
-  z-index: 900; /* Sit above content but below navbar/modals to act as a visible vignette */
-  will-change: opacity, transform;
+  /* Artistic edge glow that leaves the center completely clear */
+  box-shadow: 
+    inset 0 0 150px rgba(108, 99, 255, 0.15),
+    inset 0 0 40px rgba(108, 99, 255, 0.1);
+  animation: edgeBreathing 8s ease-in-out infinite alternate;
+  z-index: 900;
+  will-change: opacity;
 }
 
-@keyframes digitalBreathing {
-  0% { 
-    opacity: 0.3; 
-    transform: scale(1);
-  }
-  100% { 
-    opacity: 1; 
-    transform: scale(1.05); /* Stronger organic lung expansion */
-  }
+@keyframes edgeBreathing {
+  0% { opacity: 0.3; }
+  100% { opacity: 0.9; }
 }
 
 /* --- Late Night Loneliness Mode --- */
@@ -399,7 +396,9 @@ body {
 
 .late-night-mode .digital-breathing-overlay {
   animation-duration: 16s; /* Deeper, slower breathing at night */
-  background: radial-gradient(circle at center, transparent 15%, rgba(80, 70, 150, 0.2) 120%);
+  box-shadow: 
+    inset 0 0 150px rgba(80, 70, 150, 0.1),
+    inset 0 0 40px rgba(80, 70, 150, 0.05);
 }
 .late-night-mode .section-title {
   letter-spacing: 1px; /* Subtly relaxed typography at night */
