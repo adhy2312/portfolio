@@ -34,27 +34,37 @@ export const ConsciousnessProvider = ({ children }) => {
     let frameCount = 0;
     let lastTime = performance.now();
     let animFrame;
+    let isMeasuring = true;
 
     const measureFPS = () => {
+      if (!isMeasuring) return;
       const now = performance.now();
       frameCount++;
       if (now - lastTime >= 1000) {
         fpsRef.current = frameCount;
         
-        // Only trigger React state if threshold crossed
         if (frameCount < 40) {
           setPerformanceState(prev => prev !== 'degraded' ? 'degraded' : prev);
         } else if (frameCount >= 50) {
           setPerformanceState(prev => prev !== 'optimal' ? 'optimal' : prev);
         }
         
-        frameCount = 0;
-        lastTime = now;
+        isMeasuring = false;
+        setTimeout(() => {
+          isMeasuring = true;
+          lastTime = performance.now();
+          frameCount = 0;
+          animFrame = requestAnimationFrame(measureFPS);
+        }, 5000);
+        return;
       }
       animFrame = requestAnimationFrame(measureFPS);
     };
     animFrame = requestAnimationFrame(measureFPS);
-    return () => cancelAnimationFrame(animFrame);
+    return () => {
+      isMeasuring = false;
+      cancelAnimationFrame(animFrame);
+    };
   }, []);
 
   // Track Idle Time & Set States
