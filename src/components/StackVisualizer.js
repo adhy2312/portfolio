@@ -17,6 +17,8 @@ const ARCHITECTURE = [
   { layer: 'Presence Engine', tech: 'PresenceEngine.js',     icon: <FiLayers />,   color: '#34D399', desc: 'Zero-latency shared state proxy — direct RAF memory reads' },
   { layer: 'Event Bus',       tech: 'NeuralEventBus.js',     icon: <FiZap />,      color: '#FB7185', desc: 'Lightweight event router — shim delegating to NervousSystem' },
   { layer: 'Digital Soul',    tech: 'DigitalSoul.js',        icon: <FiActivity />, color: '#818CF8', desc: 'Emotionally-reactive cursor entity with 8 behavioral states' },
+  { layer: 'Haptic Engine',   tech: 'HapticEngine.js',       icon: <FiZap />,      color: '#F43F5E', desc: 'Battery-aware tactile vibration API for physical feedback' },
+  { layer: 'Immersive Engine',tech: 'ImmersiveEngine.js',    icon: <FiGlobe />,    color: '#3B82F6', desc: 'Translates biological stats to real-time atmospheric CSS variables' },
 ];
 
 const RENDER_STRATEGIES = [
