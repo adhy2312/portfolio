@@ -47,6 +47,17 @@
   will-change: transform, opacity;
 }
 
+@media (max-width: 768px) {
+  .digital-soul {
+    /* Slightly soften the blend mode for better performance on mobile */
+    mix-blend-mode: normal;
+  }
+  .soul-aura {
+    width: 30px;
+    height: 30px;
+  }
+}
+
 /* Subconscious whisper */
 .soul-whisper {
   position: absolute;

@@ -54,8 +54,11 @@ const DigitalSoul = () => {
     if (!orchestrator) return;
 
     const tick = (time, delta, mousePos, isMoving, tier) => {
-      if (tier === 0 || !soulRef.current) {
-        if (soulRef.current) soulRef.current.style.opacity = '0';
+      if (!soulRef.current) return;
+
+      // On tier 0, hide it entirely to save GPU. On tier 1 (Mobile), keep it but simplify.
+      if (tier === 0) {
+        soulRef.current.style.opacity = '0';
         return;
       }
 
@@ -64,15 +67,21 @@ const DigitalSoul = () => {
       const isRain = weatherData?.condition === 'Rain' || weatherData?.condition === 'Drizzle';
 
       // 1. DIGITAL LONELINESS & MOUSE TRACKING
-      const dxMouse = mousePos.x - s.lastMouse.x;
-      const dyMouse = mousePos.y - s.lastMouse.y;
-      const mouseSpeed = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-      
-      if (mouseSpeed < 1) {
-        s.idleTimer += delta;
+      // Ignore mouse logic on mobile where it stays at -1000
+      let mouseSpeed = 0;
+      if (!isMobileRef.current && mousePos.x !== -1000) {
+        const dxMouse = mousePos.x - s.lastMouse.x;
+        const dyMouse = mousePos.y - s.lastMouse.y;
+        mouseSpeed = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
+        
+        if (mouseSpeed < 1) {
+          s.idleTimer += delta;
+        } else {
+          s.idleTimer = 0;
+          s.lastMouse = { x: mousePos.x, y: mousePos.y };
+        }
       } else {
-        s.idleTimer = 0;
-        s.lastMouse = { x: mousePos.x, y: mousePos.y };
+         s.idleTimer += delta; // Mobile just uses time for loneliness
       }
 
       // 2. EMOTIONAL STATE ENGINE
@@ -119,34 +128,42 @@ const DigitalSoul = () => {
         newTargetX += (cx - newTargetX) * 0.001;
         newTargetY += (cy - newTargetY) * 0.001;
         
-      } else if (s.emotion === 'distant') {
-        // Retreat from mouse, go towards edges
-        if (distToMouse < 300) {
-          newTargetX = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
-          newTargetY = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
-        }
-      } else if (s.emotion === 'curious') {
-        // Approach mouse, but stop at a respectful distance
-        const minDistance = isReturningVisitor.current ? 30 : 80;
-        if (distToMouse > minDistance) {
+      } else if (mousePos.x !== -1000) {
+        if (s.emotion === 'distant') {
+          // Retreat from mouse, go towards edges
+          if (distToMouse < 300) {
+            newTargetX = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
+            newTargetY = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
+          }
+        } else if (s.emotion === 'curious') {
+          // Approach mouse, but stop at a respectful distance
+          const minDistance = isReturningVisitor.current ? 30 : 80;
+          if (distToMouse > minDistance) {
+            newTargetX = mousePos.x;
+            newTargetY = mousePos.y;
+          } else {
+            // Circle around the mouse playfully
+            s.wanderAngle += 0.02;
+            newTargetX = mousePos.x + Math.cos(s.wanderAngle) * minDistance;
+            newTargetY = mousePos.y + Math.sin(s.wanderAngle) * minDistance;
+          }
+        } else if (s.emotion === 'observing') {
+          // Orbit at a medium distance
+          s.wanderAngle += 0.005;
+          const orbitDist = 150;
+          newTargetX = mousePos.x + Math.cos(s.wanderAngle) * orbitDist;
+          newTargetY = mousePos.y + Math.sin(s.wanderAngle) * orbitDist;
+        } else {
+          // Calm - gentle following
           newTargetX = mousePos.x;
           newTargetY = mousePos.y;
-        } else {
-          // Circle around the mouse playfully
-          s.wanderAngle += 0.02;
-          newTargetX = mousePos.x + Math.cos(s.wanderAngle) * minDistance;
-          newTargetY = mousePos.y + Math.sin(s.wanderAngle) * minDistance;
         }
-      } else if (s.emotion === 'observing') {
-        // Orbit at a medium distance
-        s.wanderAngle += 0.005;
-        const orbitDist = 150;
-        newTargetX = mousePos.x + Math.cos(s.wanderAngle) * orbitDist;
-        newTargetY = mousePos.y + Math.sin(s.wanderAngle) * orbitDist;
       } else {
-        // Calm - gentle following
-        newTargetX = mousePos.x;
-        newTargetY = mousePos.y;
+          // Desktop but mouse hasn't moved yet - drift near center
+          const cx = window.innerWidth / 2;
+          const cy = window.innerHeight / 2;
+          newTargetX += (cx - newTargetX) * 0.05;
+          newTargetY += (cy - newTargetY) * 0.05;
       }
 
       // Clamp to screen bounds
