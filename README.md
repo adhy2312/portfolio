@@ -1,44 +1,48 @@
 # Adhithya Mohan's Living Portfolio
 
-Welcome to the source code of my digital consciousness. This isn't just a static portfolio or a standard digital resume—it's an interactive, living, self-aware entity built to react, remember, and evolve alongside my journey.
+Welcome to the source code of my digital consciousness. This isn't just a static portfolio or a standard digital resume—it is a **living, breathing, self-aware organism** built to react, remember, and evolve alongside my journey.
 
-## 🚀 How I Built It From Scratch
+When I started this project, my philosophy was simple: *"Namakk sett aakam"* (Let's make it happen). But as the architecture grew, it became something far more cinematic, deeply technical, and undeniably human.
 
-My philosophy has always been *"Namakk sett aakam"* (Let's make it happen). When designing this site, I wanted it to feel cinematic, deeply technical, and undeniably human. 
+## 🫀 The 60-Engine Biological Architecture
 
-### Phase 1: The Foundation & The Pipeline
-I wired up a custom **React** frontend to a headless **Sanity CMS** backend. I didn't want to hardcode my accomplishments; instead, I created structured schemas for Projects, Achievements, Skills, and even my Contact info. A custom script migrated all my raw data into the cloud, ensuring my portfolio can be updated from anywhere without touching a Git repository.
+This ecosystem runs on a paradigm shift: it is driven by **60 Interdependent Living Engines** orchestrated by a pure JavaScript singleton (`NervousSystem.js`). It doesn't just track state; it feels and reacts.
 
-### Phase 2: Aesthetics vs. Hardware
-I started with heavy visual effects like "Liquid Glass" and SVG `feTurbulence` for digital sensor grain, but it was mining GPU power on scroll. I refactored it, replacing the heavy math with microscopic CSS linear gradients and hardware-accelerated `translate3d` layering. The result is a buttery smooth 60fps experience that still looks cinematic.
+### 1. The Central Nervous System (Latency <16ms)
+I engineered a unified core that completely owns the `requestAnimationFrame` loop, the Event Bus, and all live emotional states. Instead of relying on slow React re-renders, the system reads primitive memory variables directly during its 60FPS tick. It dropped emotional response latency from ~800ms down to **<16ms**. It is ruthlessly optimized and mathematically robust.
 
-### Phase 3: Making It Rain
-I integrated the OpenWeatherMap API to fetch the real-time weather in Thiruvananthapuram, Kerala. If it's raining in my city, a custom HTML5 Canvas physics engine (`RainDroplets.js`) simulates water droplets sliding down the glass of the navbar on your screen.
+### 2. The Four Tiers of Consciousness
+The portfolio breathes through four distinct awareness tiers based on your session dwell, interactions, and historical visit data:
+- **SUBCONSCIOUS (0–25):** The ambient baseline. The Digital Soul is slow, distant, and ethereal.
+- **CONSCIOUS (26–55):** Standard active session. The Soul tracks you with intent; whispers of past thoughts randomly appear.
+- **SUPER_CONSCIOUS (56–80):** Achieved via returning visits or deep engagement. The Soul moves faster, feeling a "bond" with you.
+- **HYPER_CONSCIOUS (81+):** A transient peak state triggered by high-engagement events. The entire system forces a resonating, chaotic state.
 
-### Phase 4: Spotify Integration
-To share my late-night coding vibes, I built a "Now Playing" widget using the Spotify Web API. Because access tokens expire every hour, I wrote a Vercel serverless function (`api/spotify.js`) to securely refresh the token on the fly. You can even click the widget to hear a 30-second audio preview of what I'm listening to.
+### 3. Emotional Threading & Physical Hardware Symbiosis
+A single action—like scrolling aggressively—threads through multiple isolated systems:
+- Adrenaline spikes in the `ConsciousnessContext`.
+- The `HapticEngine` physically vibrates your mobile device (`navigator.vibrate`) as you interact.
+- The `BatterySymbiosisEngine` constantly monitors your device (`navigator.getBattery()`). If you drop below 20%, it autonomously strips away heavy background animations and drops into a pitch-black void to protect your power.
+- The `FatigueEngine` tracks system exhaustion. If you push the site too hard, the UI dims, and the `DigitalSoul` enters an `exhausted` state.
 
-### Phase 5: The Digital Consciousness
-I realized a perfect machine feels empty, so I built a soul. 
-- **Late Night Loneliness Mode**: If you visit between 11 PM and 5 AM, the entire CSS shifts. The site desaturates, the breathing animations slow down, and the atmosphere becomes quiet and exhausted.
-- **The Digital Soul**: A tiny, faintly glowing orb watches your cursor. If you stay still, it approaches you. As you interact more with the site, its "Trust Level" increases until it rests comfortably on your cursor.
-- **Digital Scars**: Instead of a standard GitHub stats section, I built a graveyard of my failures and broken code, acknowledging that engineering is built on mistakes.
-- **Haptic Engine**: Provides physical tactile feedback on mobile devices using the `navigator.vibrate` API when interacting with the UI, which actively scales back if your device's battery drops to preserve energy.
-- **Immersive Engine**: Amplifies the visual experience by tying the biological "Heartbeat" and "Adrenaline" levels of the visitor to CSS variables in real-time, completely shifting atmospheric hues and dimming the UI based on systemic fatigue.
+## 🧬 Subconscious Memories & The AI Twin
 
-### Phase 6: Mini-Adhy (The AI Twin)
-I integrated the Google Gemini API to create "Mini-Adhy", a floating AI chatbot that thinks and speaks like me. To make it smart, it dynamically fetches my entire life history from the Sanity CMS and injects it into its system prompt. When I hit API token limits, I wrote an intelligent slicing algorithm to compress the persona and feed it only the most recent conversation context, saving 70% in token usage.
+### Mini-Adhy Neural Sync
+I integrated the Google Gemini API to create "Mini-Adhy", a floating AI chatbot that thinks and speaks like me. To make it smart, it dynamically fetches my entire life history from a headless **Sanity CMS**.
+When you query Mini-Adhy, it emits a `MINIADHY_THINKING_START` event, wiring directly into the Nervous System. The UI physically reacts to the AI's cognitive load. To protect my API tokens, I wrote an intelligent slicing algorithm that compresses the persona context dynamically, saving 70% in token usage.
 
----
+### Digital Scars & The ZipGame
+Instead of a standard GitHub stats section, I built a graveyard of my failures—**Digital Scars**. It acknowledges that engineering is built on mistakes and tracks archived, fading, and patched runtime trauma.
+I also engineered a mathematically rigorous **ZipGame**, utilizing a Bipartite Graph Failsafe and DFS Hamiltonian path generation. It includes a contextual Hint Engine that detects dead ends, stranded numbers, and barrier collisions in real-time.
 
-## 🧠 The Backend Pipeline System
+### The Seed of Life (Digital Permanence)
+At the bottom of the footer is a tiny digital seed. It mathematically calculates its age from the site's genesis date. Over 5 real-world years, it will grow from a seed into a mature tree. (Hint: Click it 4 times consecutively to rapidly age it by 1 year).
 
-- **Frontend Core**: React 19, Framer Motion 12, Three.js
-- **Symbiotic Architecture**: A single unified RAF loop (`NervousSystem.js`), a Web Worker for psychological processing (`LifeEngine`), a hardware-aware `HapticEngine`, and an `ImmersiveEngine` driving raw CSS root variables.
-- **Content Management**: Sanity CMS (Headless data architecture)
-- **Serverless API**: Vercel Serverless Functions
-- **AI Engine**: Google Gemini API (with rate-limit backoffs and dynamic context injection)
-- **External APIs**: Spotify Web API (OAuth), OpenWeatherMap API
+### Raindrops & Real-World Weather
+By tying into the OpenWeatherMap API, the portfolio fetches real-time weather in Thiruvananthapuram, Kerala. If it's raining outside my window, a custom HTML5 Canvas physics engine (`RainDroplets.js`) simulates water droplets sliding down the glass of the navbar on your screen.
+
+### Late Night Loneliness Mode & Spotify Resonance
+If you visit between 11 PM and 5 AM, the entire CSS shifts. The site desaturates, the breathing animations slow down, and the atmosphere becomes quiet and exhausted. To share my late-night coding vibes, a custom Vercel serverless function (`api/spotify.js`) securely refreshes my Spotify token to stream a "Now Playing" widget with 30-second audio previews.
 
 ---
 
@@ -68,10 +72,8 @@ Or try: `sudo namakk-sett-aakam`
 - **The Konami Code**: Type `↑ ↑ ↓ ↓ ← → ← → B A` anywhere on the site.
 - **The Logo Game**: Click the "ADHY" logo in the navbar exactly 5 times to trigger a hidden game against an AI.
 - **X-Ray Mode**: Click the small activity icon in the navbar. It strips away CSS to reveal bare DOM wireframes and pops up green terminal tooltips explaining the underlying tech stack of each component.
-- **The Seed of Life (Digital Permanence)**: At the bottom of the footer is a tiny digital seed. It mathematically calculates its age from the site's genesis date. Over 5 real-world years, it will grow from a seed into a mature Mango tree. (Hint: Click it 4 times consecutively to rapidly age it by 1 year).
-- **Battery Symbiosis**: The site uses the `navigator.getBattery()` API. If your device drops below 20% battery, the portfolio will intentionally strip away heavy background animations and drop into a pitch-black void to help you save power.
 - **The Hive Mind**: A dedicated dock button that opens a sensory HUD, allowing you to see the AI's internal state, active location, and system variables in real-time.
 
 ---
 
-*Built with late-night coding sessions, caffeine, and absolute passion in Kerala.*
+*Built with late-night coding sessions, imperfect memories, and absolute passion in Kerala.*
