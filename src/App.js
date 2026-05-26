@@ -145,7 +145,7 @@ function AppContent() {
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
       const name = e.detail?.name ?? e.detail;
-      const duration = e.detail?.duration ?? (name === 'matrix' ? 8001 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
+      const duration = e.detail?.duration ?? (name === 'matrix' ? 8000 : name === 'party' ? 6000 : name === 'barrelroll' ? 1800 : name === 'thanos' ? 15000 : 4000);
       triggerEgg(name, duration);
     };
     window.addEventListener('trigger-egg', eggHandler);
