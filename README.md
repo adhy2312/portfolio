@@ -59,10 +59,7 @@ Open the terminal widget and type any of these commands:
 - `glitch`, `rickroll`, `konami`, `adhy`
 - `tictactoe` / `game` (Launches the hidden Tic-Tac-Toe / Zip Game)
 
-**Owner Mode:**
-Type `adhy::root` to activate God Mode and gain root access to the AI.
-Available commands: `/remember`, `/forget`, `/context`, `/instruct`, `/tone`, `/tokens`, `/reset`, `/status`, `/lock`, `/help`
-Or try: `sudo namakk-sett-aakam`
+
 
 ### Easter Eggs
 - **The Konami Code**: Type `↑ ↑ ↓ ↓ ← → ← → B A` anywhere on the site.
