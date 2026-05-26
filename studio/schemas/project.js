@@ -70,5 +70,16 @@ export default {
       description: 'e.g., "This animation nearly destroyed performance."',
       type: 'text',
     },
+    {
+      name: 'digitalMemory',
+      title: 'Digital Memory (Lore)',
+      type: 'object',
+      description: 'Hidden memory traces embedded in this project for the Subconscious Engine to reference.',
+      fields: [
+        { name: 'emotionalImprint', title: 'Emotional Imprint', type: 'string', description: 'e.g. "Heavy frustration, followed by profound relief."' },
+        { name: 'architectureNote', title: 'Architecture Note', type: 'text', description: 'e.g. "The DOM node structure here is brittle. I remember the layout thrashing."' },
+        { name: 'legacyStatus', title: 'Legacy Status', type: 'string', options: { list: ['Active', 'Deprecated', 'Fragmented', 'Abandoned'] } }
+      ]
+    },
   ],
 }

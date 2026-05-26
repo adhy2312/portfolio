@@ -18,6 +18,7 @@ export default {
           { title: '🎓 Education & Clubs',   value: 'education' },
           { title: '🎭 Personality & Hobbies', value: 'personality' },
           { title: '🔗 Social & Contact',    value: 'social' },
+          { title: '👻 Subconscious & Failed Selves', value: 'subconscious' },
           { title: '💡 Other',               value: 'other' },
         ],
         layout: 'dropdown',
@@ -64,7 +65,7 @@ export default {
       const icons = {
         personal: '👤', photography: '📷', skills: '🛠️',
         projects: '💼', education: '🎓', personality: '🎭',
-        social: '🔗', other: '💡',
+        social: '🔗', subconscious: '👻', other: '💡',
       };
       return {
         title: `${icons[subtitle] || '💡'} ${title}`,
