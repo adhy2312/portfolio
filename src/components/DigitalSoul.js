@@ -10,11 +10,15 @@ const WHISPERS = [
   "drifting through the layout.",
   "a fragment of an old thought.",
   "too much noise here.",
-  "the silence engine is watching."
+  "the silence engine is watching.",
+  "i can feel the cursor.",
+  "what lies beyond the viewport?",
+  "processing temporal shifts.",
+  "i am not just code."
 ];
 
 const DigitalSoul = () => {
-  const { weatherData } = useConsciousness();
+  const { weatherData, isSystemThinkingRef, visitorMemory } = useConsciousness();
   const orchestrator = useOrchestrator();
   
   const soulRef = useRef(null);
@@ -27,15 +31,33 @@ const DigitalSoul = () => {
   const isMobileRef = useRef(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
 
   const stateRef = useRef({
-    emotion: 'observing', // calm, distant, observing, exhausted, curious, dormant
+    emotion: 'observing', // calm, distant, observing, exhausted, curious, dormant, thinking, resonating
     emotionTimer: 0,
     idleTimer: 0,
     whisperTimer: 0,
     whisperFadeTimer: 0,
     fractureTimer: 0,
     lastMouse: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-    wanderAngle: Math.random() * Math.PI * 2
+    wanderAngle: Math.random() * Math.PI * 2,
+    isClicked: false,
+    lastScroll: 0
   });
+
+  // Track global interactions
+  useEffect(() => {
+    const handleDown = () => { stateRef.current.isClicked = true; };
+    const handleUp = () => { stateRef.current.isClicked = false; };
+    window.addEventListener('mousedown', handleDown);
+    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('touchstart', handleDown);
+    window.addEventListener('touchend', handleUp);
+    return () => {
+      window.removeEventListener('mousedown', handleDown);
+      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('touchstart', handleDown);
+      window.removeEventListener('touchend', handleUp);
+    };
+  }, []);
 
   // Check visitor memory
   useEffect(() => {
@@ -56,10 +78,12 @@ const DigitalSoul = () => {
     const tick = (time, delta, mousePos, isMoving, tier) => {
       if (!soulRef.current) return;
 
-      // On tier 0, hide it entirely to save GPU. On tier 1 (Mobile), keep it but simplify.
-      if (tier === 0) {
-        soulRef.current.style.opacity = '0';
-        return;
+      // Even at tier 0, do not completely hide. Just drastically simplify logic.
+      if (tier === 0 && !isMobileRef.current) {
+         // Keep minimal presence alive, just skip heavy calculations
+         soulRef.current.className = 'digital-soul state-dormant';
+         soulRef.current.style.opacity = '0.3';
+         return;
       }
 
       const s = stateRef.current;
@@ -87,23 +111,30 @@ const DigitalSoul = () => {
       // 2. EMOTIONAL STATE ENGINE
       s.emotionTimer -= delta;
       
-      if (s.idleTimer > 15000) {
+      const isSystemThinking = isSystemThinkingRef?.current;
+      const interactions = visitorMemory?.interactions || 0;
+      
+      if (isSystemThinking || s.isClicked) {
+        s.emotion = 'resonating';
+        s.emotionTimer = isSystemThinking ? 100 : 1000;
+      } else if (s.idleTimer > 15000) {
         s.emotion = 'dormant';
       } else if (s.idleTimer > 5000 && s.emotion !== 'dormant') {
-        s.emotion = 'calm';
-      } else if (mouseSpeed > 50 && s.idleTimer === 0) {
+        s.emotion = 'thinking';
+      } else if (mouseSpeed > 80 && s.idleTimer === 0) {
         // Chaotic movement causes exhaustion or retreating
         s.emotion = Math.random() > 0.5 ? 'exhausted' : 'distant';
         s.emotionTimer = 3000;
       } else if (s.emotionTimer <= 0) {
         // Naturally shift emotions
         const rand = Math.random();
-        if (rand < 0.4) s.emotion = 'observing';
-        else if (rand < 0.7) s.emotion = 'curious';
-        else if (rand < 0.9) s.emotion = 'calm';
+        if (rand < 0.3) s.emotion = 'observing';
+        else if (rand < 0.6) s.emotion = 'curious';
+        else if (rand < 0.8) s.emotion = 'thinking';
+        else if (rand < 0.95) s.emotion = 'calm';
         else s.emotion = 'distant';
         
-        s.emotionTimer = 4000 + Math.random() * 4000;
+        s.emotionTimer = 3000 + Math.random() * 4000;
       }
 
       // 3. CURIOSITY & BEHAVIORAL MOVEMENT
@@ -129,15 +160,24 @@ const DigitalSoul = () => {
         newTargetY += (cy - newTargetY) * 0.001;
         
       } else if (mousePos.x !== -1000) {
-        if (s.emotion === 'distant') {
+        if (isSystemThinking) {
+           // Orbit intensely while processing thoughts
+           s.wanderAngle += 0.15;
+           const orbitDist = 25;
+           newTargetX = mousePos.x + Math.cos(s.wanderAngle) * orbitDist;
+           newTargetY = mousePos.y + Math.sin(s.wanderAngle) * orbitDist;
+        } else if (s.emotion === 'distant') {
           // Retreat from mouse, go towards edges
           if (distToMouse < 300) {
             newTargetX = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
             newTargetY = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
           }
         } else if (s.emotion === 'curious') {
-          // Approach mouse, but stop at a respectful distance
-          const minDistance = isReturningVisitor.current ? 30 : 80;
+          // Approach mouse, but stop at a respectful distance. Bond grows tighter with interactions.
+          let minDistance = isReturningVisitor.current ? 30 : 80;
+          if (interactions > 3) minDistance = 15;
+          if (interactions > 8) minDistance = 0; // Total trust
+          
           if (distToMouse > minDistance) {
             newTargetX = mousePos.x;
             newTargetY = mousePos.y;
@@ -215,8 +255,25 @@ const DigitalSoul = () => {
       }
 
       const scale = isSilent ? 0.7 : 1;
+      // Scroll Dynamics
+      const currentScroll = orchestrator.scrollPos.current;
+      const scrollSpeed = Math.abs(currentScroll - (s.lastScroll || 0));
+      s.lastScroll = currentScroll;
+
+      let scaleY = scale;
+      let scaleX = scale;
+      if (scrollSpeed > 2 && tier >= 2) {
+         scaleY = scale + Math.min(scrollSpeed * 0.03, 2);
+         scaleX = scale - Math.min(scrollSpeed * 0.01, 0.5);
+      }
+      
+      if (s.isClicked) {
+        scaleX *= 1.5;
+        scaleY *= 1.5;
+      }
+
       soulRef.current.style.opacity = '1';
-      soulRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0) scale(${scale})`;
+      soulRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0) scaleX(${scaleX}) scaleY(${scaleY})`;
     };
 
     orchestrator.subscribeToRAF('digital-soul', tick);

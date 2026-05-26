@@ -717,6 +717,13 @@ const MiniAdhy = () => {
     setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
+    if (consciousness?.isSystemThinkingRef) {
+      consciousness.isSystemThinkingRef.current = true;
+    }
+    
+    // Deepen the bond
+    const currentInteractions = consciousness?.visitorMemory?.interactions || 0;
+    consciousness?.updateMemory({ interactions: currentInteractions + 1 });
 
     let newHistory = [
       ...historyRef.current,
@@ -757,6 +764,9 @@ const MiniAdhy = () => {
       setMessages(prev => [...prev, { role: 'bot', text: errorText }]);
     } finally {
       setLoading(false);
+      if (consciousness?.isSystemThinkingRef) {
+        consciousness.isSystemThinkingRef.current = false;
+      }
     }
   };
 

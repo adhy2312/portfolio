@@ -87,8 +87,9 @@ export const SystemOrchestratorProvider = ({ children }) => {
       if (time - lastFpsTime >= 1000) {
         if (frameCount < 30) { // Severe drop
           performanceTier.current = Math.max(0, performanceTier.current - 1);
-        } else if (frameCount >= 55 && !isMobile) { // Stable 60fps
-          performanceTier.current = Math.min(3, performanceTier.current + 1);
+        } else if (frameCount >= 55) { // Stable 60fps
+          const maxTier = isMobile ? 1 : 3;
+          performanceTier.current = Math.min(maxTier, performanceTier.current + 1);
         }
         frameCount = 0;
         lastFpsTime = time;

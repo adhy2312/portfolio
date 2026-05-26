@@ -1,0 +1,98 @@
+.digital-seed-wrapper {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  background: linear-gradient(to top, rgba(6, 9, 24, 0.8), transparent);
+  overflow: hidden;
+  font-family: 'Space Grotesk', sans-serif;
+  margin-top: 50px;
+  padding-bottom: 20px;
+}
+
+.life-consciousness {
+  position: absolute;
+  top: 40px;
+  text-align: center;
+  opacity: 0.6;
+  transition: opacity 0.5s ease;
+  z-index: 10;
+}
+
+.digital-seed-wrapper:hover .life-consciousness {
+  opacity: 1;
+}
+
+.life-thought {
+  font-size: 0.9rem;
+  color: #F0F4FF;
+  margin-bottom: 12px;
+  letter-spacing: 1px;
+  text-shadow: 0 0 10px rgba(255,255,255,0.2);
+}
+
+.life-age {
+  font-size: 0.7rem;
+  color: #a3ffdc;
+  font-family: 'Fira Code', monospace;
+  letter-spacing: 2px;
+}
+
+.digital-lifeform {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  z-index: 2;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+}
+
+.life-svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 8px rgba(163, 255, 220, 0.3));
+  transition: all 1s ease-in-out;
+}
+
+.stage-3 .life-svg { filter: drop-shadow(0 0 12px rgba(108, 99, 255, 0.4)); }
+.stage-4 .life-svg { filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.5)); }
+
+.glow-pulse {
+  animation: seedPulse 2s infinite alternate;
+  transform-origin: center;
+}
+
+.mango-glow {
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
+  animation: mangoBreathe 3s infinite alternate;
+  transform-origin: center;
+}
+
+.digital-soil {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+}
+
+.soil-surface {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+}
+
+@keyframes seedPulse {
+  0% { opacity: 0.6; transform: scale(0.9); }
+  100% { opacity: 1; transform: scale(1.3); }
+}
+
+@keyframes mangoBreathe {
+  0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
+  100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)); }
+}

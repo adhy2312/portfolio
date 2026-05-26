@@ -129,6 +129,32 @@
   opacity: 0.3;
 }
 
+/* Thinking: Pulsating slow white/purple, medium aura */
+.state-thinking .soul-core {
+  background: #e0b0ff;
+  box-shadow: 0 0 6px 2px rgba(224, 176, 255, 0.6);
+  animation-duration: 4s;
+}
+.state-thinking .soul-aura {
+  width: 45px;
+  height: 45px;
+  background: radial-gradient(circle, rgba(224, 176, 255, 0.15) 0%, transparent 70%);
+  animation-duration: 6s;
+}
+
+/* Resonating: Bright flash on interaction */
+.state-resonating .soul-core {
+  background: #ffffff;
+  box-shadow: 0 0 15px 5px rgba(255, 255, 255, 1);
+  animation-duration: 0.5s;
+}
+.state-resonating .soul-aura {
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  animation-duration: 0.5s;
+}
+
 /* Fractured: Instability */
 .state-fractured .soul-core {
   animation: soul-glitch 0.2s steps(2) infinite;

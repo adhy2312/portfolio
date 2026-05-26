@@ -82,6 +82,7 @@ export const ConsciousnessProvider = ({ children }) => {
   const lastActive = useRef(Date.now());
   const adrenalineRef = useRef(0);
   const lastMousePos = useRef({ x: 0, y: 0 });
+  const isSystemThinkingRef = useRef(false); // Used by MiniAdhy to signal DigitalSoul
 
   // Removed old FPS tracker - SystemOrchestrator now handles performanceTier globally.
 
@@ -263,6 +264,7 @@ export const ConsciousnessProvider = ({ children }) => {
       idleState,
       idleTimeRef, // expose ref directly for MiniAdhy exact checking without re-renders
       fpsRef, // expose ref directly for MiniAdhy exact checking
+      isSystemThinkingRef, // Shared neural state
       visitorMemory,
       updateMemory,
       ambientThought,

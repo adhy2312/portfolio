@@ -41,6 +41,7 @@ const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame = lazy(() => import('./components/ZipGame'));
 const TicTacToe = lazy(() => import('./components/TicTacToe'));
 const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
+const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
 
 function LazySection({ name, children }) {
   const [inView, setInView] = useState(false);
@@ -271,6 +272,11 @@ function AppContent() {
       <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>
       <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
       <LazySection name="Footer"><Footer /></LazySection>
+      
+      {/* The Seed of Life - Redefining digital permanence */}
+      <Suspense fallback={null}>
+        <DigitalSeed />
+      </Suspense>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
