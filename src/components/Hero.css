@@ -72,17 +72,21 @@
 
 .metallic-char {
   display: inline-block;
-  background: linear-gradient(
-    180deg,
-    #ffffff 0%,
-    #fdf7e3 40%,
-    #d4af37 80%,
-    #ffffff 100%
-  );
+  background-image: 
+    url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.4"/></svg>'),
+    linear-gradient(
+      180deg,
+      #ffffff 0%,
+      #fdf7e3 40%,
+      #d4af37 80%,
+      #ffffff 100%
+    );
+  background-blend-mode: soft-light, normal;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   padding: 0;
+  padding-bottom: 0.15em; /* Protect descenders like 'y' */
   position: relative;
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
   filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.3));
@@ -170,7 +174,7 @@
 @media (max-width: 768px) {
   .hero-name-giant {
     font-size: clamp(3rem, 14vw, 4.5rem);
-    line-height: 1.1;
+    line-height: 1.25; /* Increased from 1.1 to give 'y' room to breathe */
     flex-direction: column;
     align-items: center;
     gap: 0px;
@@ -179,7 +183,8 @@
     margin: 0; /* use flex gap instead */
   }
   .metallic-char {
-    padding: 0 1px; /* Remove massive padding that causes overflow */
+    padding: 0 4px; /* Give side room */
+    padding-bottom: 0.2em; /* explicitly protect descenders like 'y' on mobile */
     filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.5));
     -webkit-text-stroke: 0px;
     transform: none !important;

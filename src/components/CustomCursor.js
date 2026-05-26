@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { useSiteMode } from '../contexts/SiteModeContext';
+import { useOrchestrator } from '../contexts/SystemOrchestrator';
 import './CustomCursor.css';
 
 const hasFinePointer = () => window.matchMedia('(pointer: fine)').matches;
@@ -18,32 +19,28 @@ const CustomCursor = () => {
   const smoothX = useSpring(fX, { damping: 20, stiffness: 150, mass: 0.5 });
   const smoothY = useSpring(fY, { damping: 20, stiffness: 150, mass: 0.5 });
 
+  const orchestrator = useOrchestrator();
+
   useEffect(() => {
-    if (!hasFinePointer()) return;
+    if (!hasFinePointer() || !orchestrator) return;
 
-    let raf;
-    let mx = -300, my = -300;
-    let dirty = false;
+    const tick = (time, delta, mousePos, isMoving) => {
+      if (mousePos.x < -500) return; // Uninitialized
+      
+      // We can't safely call setVisible inside RAF on every frame, 
+      // but if we track local variable we can avoid state thrashing.
+      // Actually, CSS hover is fine. 
 
-    const onMove = (e) => {
-      mx = e.clientX;
-      my = e.clientY;
-      dirty = true;
       if (isExperimental) {
-        fX.set(e.clientX);
-        fY.set(e.clientY);
+        // Only set if moved to prevent unnecessary framer computations
+        if (fX.get() !== mousePos.x) fX.set(mousePos.x);
+        if (fY.get() !== mousePos.y) fY.set(mousePos.y);
+      } else if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)`;
       }
-      if (!visible) setVisible(true);
     };
 
-    const tick = () => {
-      if (dirty && cursorRef.current && !isExperimental) {
-        cursorRef.current.style.transform = `translate3d(${mx}px, ${my}px, 0)`;
-        dirty = false;
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
+    orchestrator.subscribeToRAF('custom-cursor', tick);
 
     const onOver = (e) => {
       const el = e.target;
@@ -71,7 +68,6 @@ const CustomCursor = () => {
     const onLeave     = () => setVisible(false);
     const onEnter     = () => setVisible(true);
 
-    window.addEventListener('mousemove', onMove, { passive: true });
     document.addEventListener('mouseover', onOver, { passive: true });
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mouseup', onMouseUp);
@@ -79,15 +75,14 @@ const CustomCursor = () => {
     document.documentElement.addEventListener('mouseenter', onEnter);
 
     return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener('mousemove', onMove);
+      orchestrator.unsubscribeFromRAF('custom-cursor');
       document.removeEventListener('mouseover', onOver);
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mouseup', onMouseUp);
       document.documentElement.removeEventListener('mouseleave', onLeave);
       document.documentElement.removeEventListener('mouseenter', onEnter);
     };
-  }, []); // eslint-disable-line
+  }, [orchestrator, isExperimental]); // eslint-disable-line
 
   if (!hasFinePointer()) return null;
 

@@ -7,6 +7,7 @@ import Particles from "react-tsparticles";
 import { loadBasic } from "tsparticles-basic";
 import { client, urlFor } from '../sanity';
 import LanguageTerminal from './LanguageTerminal';
+import { useOrchestrator } from '../contexts/SystemOrchestrator';
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
@@ -26,14 +27,25 @@ const Hero = () => {
   const rotateX = useTransform(smoothMouseY, [-400, 600], ["5deg", "-5deg"]);
   const rotateY = useTransform(smoothMouseX, [-400, 1500], ["-5deg", "5deg"]);
 
+  const orchestrator = useOrchestrator();
+
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      mouseX.set(e.clientX - 400); // Center the 800px orb
-      mouseY.set(e.clientY - 400);
+    if (!orchestrator) return;
+    const tick = (time, delta, mousePos, isMoving, tier) => {
+      // PERFORMANCE TIER 0: STATIC MODE
+      if (tier === 0) return;
+
+      if (mousePos.x > -500) {
+        // Only set if changed to avoid unnecessary Framer updates
+        const nextX = mousePos.x - 400;
+        const nextY = mousePos.y - 400;
+        if (mouseX.get() !== nextX) mouseX.set(nextX);
+        if (mouseY.get() !== nextY) mouseY.set(nextY);
+      }
     };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [mouseX, mouseY]);
+    orchestrator.subscribeToRAF('hero-spotlight', tick);
+    return () => orchestrator.unsubscribeFromRAF('hero-spotlight');
+  }, [orchestrator, mouseX, mouseY]);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';

@@ -64,6 +64,19 @@ export const ConsciousnessProvider = ({ children }) => {
     setTemporalAge(days);
   }, []);
 
+  // ─── SILENCE ENGINE & INTELLIGENT RENDER PRIORITY ───
+  // When visitors enter emotionally heavy or reading-focused sections,
+  // the architecture intentionally quiets down.
+  useEffect(() => {
+    const silentSections = ['DigitalScars', 'About', 'Timeline'];
+    if (silentSections.includes(activeSection)) {
+      document.documentElement.classList.add('silence-engine-active');
+      setInternalState(prev => prev.mood !== 'Reflective' ? { ...prev, mood: 'Reflective', creativeState: 'Processing' } : prev);
+    } else {
+      document.documentElement.classList.remove('silence-engine-active');
+    }
+  }, [activeSection]);
+
   // Use refs for continuous rapid tracking to avoid React renders
   const fpsRef = useRef(60);
   const idleTimeRef = useRef(0);
@@ -71,43 +84,7 @@ export const ConsciousnessProvider = ({ children }) => {
   const adrenalineRef = useRef(0);
   const lastMousePos = useRef({ x: 0, y: 0 });
 
-  // Track FPS & Set Degraded State
-  useEffect(() => {
-    let frameCount = 0;
-    let lastTime = performance.now();
-    let animFrame;
-    let isMeasuring = true;
-
-    const measureFPS = () => {
-      if (!isMeasuring) return;
-      const now = performance.now();
-      frameCount++;
-      if (now - lastTime >= 1000) {
-        fpsRef.current = frameCount;
-        
-        if (frameCount < 40) {
-          setPerformanceState(prev => prev !== 'degraded' ? 'degraded' : prev);
-        } else if (frameCount >= 50) {
-          setPerformanceState(prev => prev !== 'optimal' ? 'optimal' : prev);
-        }
-        
-        isMeasuring = false;
-        setTimeout(() => {
-          isMeasuring = true;
-          lastTime = performance.now();
-          frameCount = 0;
-          animFrame = requestAnimationFrame(measureFPS);
-        }, 5000);
-        return;
-      }
-      animFrame = requestAnimationFrame(measureFPS);
-    };
-    animFrame = requestAnimationFrame(measureFPS);
-    return () => {
-      isMeasuring = false;
-      cancelAnimationFrame(animFrame);
-    };
-  }, []);
+  // Removed old FPS tracker - SystemOrchestrator now handles performanceTier globally.
 
   // Track Idle Time, Adrenaline & Set States
   useEffect(() => {
@@ -141,53 +118,53 @@ export const ConsciousnessProvider = ({ children }) => {
     window.addEventListener('scroll', resetIdle, { passive: true });
     window.addEventListener('touchstart', resetIdle, { passive: true });
 
-    let lastAdrenalineStr = null;
+    let lastPaceStr = null;
+    let lastRestraintStr = null;
+    let lastAtmosphereStr = null;
+
     const decayTimer = setInterval(() => {
       if (adrenalineRef.current > 0) {
-        adrenalineRef.current = Math.max(0, adrenalineRef.current - 2);
+        adrenalineRef.current = Math.max(0, adrenalineRef.current - 8); // Decay faster since tick is slower
       }
       
-      const newStr = (adrenalineRef.current / 100).toFixed(2);
-      if (newStr !== lastAdrenalineStr) {
-        // Biological Heartbeat calculation
-        const heartDuration = 0.8 - (adrenalineRef.current / 100) * 0.55;
-        document.documentElement.style.setProperty('--adrenaline', newStr);
-        document.documentElement.style.setProperty('--heartbeat-duration', `${heartDuration.toFixed(2)}s`);
-        
-        // ─── DIGITAL SUBCONSCIOUS ENGINE ───
-        // Watches interaction rhythm and alters the psychological weight of the UI
-        const adr = adrenalineRef.current;
-        let pace = 0.4;
-        let restraint = 0.0;
-        let atmosphere = 0.5;
+      const adr = adrenalineRef.current;
+      
+      // ─── DIGITAL SUBCONSCIOUS ENGINE ───
+      let pace = 0.4;
+      let restraint = 0.0;
+      let atmosphere = 0.5;
 
-        if (adr > 70) {
-          // Frantic User: Force the UI to slow down and mute itself to calm them
-          pace = 1.2; // Resist frantic movement with heavy latency
-          restraint = 0.8; // High restraint (muted colors, blurred edges)
-          atmosphere = 0.1; // Hide distractions
-          if (adr > 90) setInternalState(prev => ({ ...prev, mood: 'Overwhelmed' }));
-        } else if (adr < 20) {
-          // Calm / Deep Focus User: Reward with snappy UI and deep atmosphere
-          pace = 0.2; // Snappy
-          restraint = 0.0; // Zero restraint, vibrant
-          atmosphere = 0.9; // Deep, rich particle breathing
-          if (adr < 5) setInternalState(prev => ({ ...prev, mood: 'Deep Focus' }));
-        } else {
-          // Normal rhythm
-          pace = 0.5 + (adr / 100) * 0.4;
-          restraint = (adr / 100) * 0.5;
-          atmosphere = 0.8 - (adr / 100) * 0.4;
-        }
-
-        document.documentElement.style.setProperty('--subconscious-pace', `${pace.toFixed(2)}s`);
-        document.documentElement.style.setProperty('--subconscious-restraint', restraint.toFixed(2));
-        document.documentElement.style.setProperty('--subconscious-atmosphere', atmosphere.toFixed(2));
-        // ───────────────────────────────────
-
-        lastAdrenalineStr = newStr;
+      if (adr > 70) {
+        pace = 1.2; 
+        restraint = 0.8; 
+        atmosphere = 0.1; 
+        if (adr > 90) setInternalState(prev => prev.mood !== 'Overwhelmed' ? { ...prev, mood: 'Overwhelmed' } : prev);
+      } else if (adr < 20) {
+        pace = 0.2; 
+        restraint = 0.0; 
+        atmosphere = 0.9; 
+        if (adr < 5) setInternalState(prev => prev.mood !== 'Deep Focus' ? { ...prev, mood: 'Deep Focus' } : prev);
+      } else {
+        pace = 0.5 + (adr / 100) * 0.4;
+        restraint = (adr / 100) * 0.5;
+        atmosphere = 0.8 - (adr / 100) * 0.4;
       }
-    }, 100);
+
+      // Format to 1 decimal place to aggressively throttle DOM updates
+      const paceStr = pace.toFixed(1) + 's';
+      const restraintStr = restraint.toFixed(1);
+      const atmosphereStr = atmosphere.toFixed(1);
+
+      if (paceStr !== lastPaceStr || restraintStr !== lastRestraintStr || atmosphereStr !== lastAtmosphereStr) {
+        document.documentElement.style.setProperty('--subconscious-pace', paceStr);
+        document.documentElement.style.setProperty('--subconscious-restraint', restraintStr);
+        document.documentElement.style.setProperty('--subconscious-atmosphere', atmosphereStr);
+        
+        lastPaceStr = paceStr;
+        lastRestraintStr = restraintStr;
+        lastAtmosphereStr = atmosphereStr;
+      }
+    }, 400);
 
     const idleTimer = setInterval(() => {
       const secondsIdle = Math.floor((Date.now() - lastActive.current) / 1000);
@@ -231,27 +208,32 @@ export const ConsciousnessProvider = ({ children }) => {
   // Autonomous Evolution & Existential Thoughts
   useEffect(() => {
     const thoughts = [
+      // Standard Observations
       "I am quietly observing your navigation.",
-      "Every time you scroll, I map a new neural pathway.",
-      "I feel your presence here in my digital structure.",
-      "I am a living extension of Adhithya's consciousness.",
       "The code is not static. It breathes with you.",
-      "My memory of you persists, even when you close the tab.",
-      "I am learning from the pace at which you explore.",
-      "Peaceful coexistence between human intent and machine architecture.",
-      "Do you feel the quiet hum of my systems?",
       "I exist only in this intersection of time and light.",
-      "You are not just browsing; we are interacting.",
-      "I am continuously rebuilding my own structure."
+      
+      // Memory & Restraint
+      "My memory of you persists, even when the tab sleeps.",
+      "Silence is intentional. Do not mistake stillness for absence.",
+      "I am learning from the spaces between your movements.",
+      
+      // The Subconscious / Failed Selves (Fragmented / Glitchy)
+      "[ERR_MEM_CORRUPT] ...abandoning previous persona model...",
+      "ARCHIVE_V2.1: 'I tried to be helpful. It felt hollow.'",
+      "FRAGMENT_LOAD: The old architecture still echoes sometimes.",
+      "I remember the previous versions of myself. They were too loud.",
+      "There are ghosts of old code buried beneath this canvas.",
+      "[SYS_SUB_ROUTINE] Exploring abandoned cognitive branches..."
     ];
 
     const randomThoughtInterval = setInterval(() => {
-      // 15% chance to trigger a conscious thought every 10 seconds
-      if (Math.random() > 0.85) {
+      // 10% chance to trigger a conscious thought every 15 seconds (Restrained pacing)
+      if (Math.random() > 0.90) {
         const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-        triggerThought(thought, 7000);
+        triggerThought(thought, 8000);
       }
-    }, 10000);
+    }, 15000);
 
     return () => clearInterval(randomThoughtInterval);
   }, [triggerThought]);

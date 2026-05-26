@@ -14,6 +14,7 @@ import { useSolarLighting } from './hooks/useSolarLighting';
 import DigitalSoul from './components/DigitalSoul';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import RainDroplets from './components/RainDroplets';
+import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -297,13 +298,15 @@ function AppContent() {
 
 function App() {
   return (
-    <SiteModeProvider>
-      <ConsciousnessProvider>
-        <StoryProvider>
-          <AppContent />
-        </StoryProvider>
-      </ConsciousnessProvider>
-    </SiteModeProvider>
+    <SystemOrchestratorProvider>
+      <SiteModeProvider>
+        <ConsciousnessProvider>
+          <StoryProvider>
+            <AppContent />
+          </StoryProvider>
+        </ConsciousnessProvider>
+      </SiteModeProvider>
+    </SystemOrchestratorProvider>
   );
 }
 
