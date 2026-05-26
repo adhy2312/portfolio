@@ -381,6 +381,7 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
    Suggested starter questions
 ──────────────────────────────────────────────── */
 const STARTERS = [
+  "What is the seed at the bottom?",
   "What makes this portfolio different?",
   "Walk me through the animation system",
   "Tell me about the photography workflow",
