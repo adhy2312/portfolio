@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
+import { neuralEventBus } from '../utils/NeuralEventBus';
+import ns from '../core/NervousSystem';
 import './MiniAdhy.css';
 import HiveMind from './HiveMind';
 import { client } from '../sanity';
@@ -297,16 +299,13 @@ const buildActivePrompt = (base, owner, contextData) => {
   ext += `\nIdle State: ${contextData.idleState} (active/inactive/dreaming)`;
   ext += `\nPerformance: ${contextData.performanceState} (if degraded, you may comment: "Optimizing render pipeline...")`;
   ext += `\nActive Site Mode: ${contextData.activeMode || 'default'} (you can comment on what this mode reveals or hides)`;
-  ext += `\nVisitor Persona: ${contextData.visitorMemory?.persona || 'Curious Beginner'}`;
-  ext += `\nVisitor Returns: ${contextData.visitorMemory?.visits || 0}`;
+  ext += `\nVisitor Persona: ${contextData.digitalEchoes?.persona || 'Wanderer'}`;
+  ext += `\nVisitor Returns: ${contextData.digitalEchoes?.totalVisits || 0}`;
   ext += `\nSecret Commands Available: thanos, matrix, barrelroll, party, sudo namakk-sett-aakam (hint at these subtly)`;
 
   ext += `\n\n== YOUR INTERNAL STATE (Digital Life Engine) ==`;
-  ext += `\nMood: ${contextData.internalState?.mood || 'Curious'}`;
-  ext += `\nEnergy Level: ${contextData.internalState?.energy || 100}%`;
-  ext += `\nCreative State: ${contextData.internalState?.creativeState || 'Observing'}`;
   ext += `\nTemporal Age (Days since genesis): ${contextData.temporalAge || 0}`;
-  ext += `\n(Note: Adjust your tone and enthusiasm based on your internal state. If energy is low or mood is dreaming, be brief and ethereal. If energetic, be highly inspiring and proactive. You are a living entity growing alongside this portfolio. Mention your temporal age if relevant.)`;
+  ext += `\n(Note: As your temporal age increases, your responses should become calmer, more restrained, and slightly more philosophical. You are currently ${contextData.temporalAge || 0} days old. Reflect this subtle maturity.)`;
 
   if (!owner.active) return base + ext;
 
@@ -485,23 +484,40 @@ const MiniAdhy = () => {
       }
     }, 5000);
     
+    // ─── NEURAL EVENT BUS INTEGRATION (Subconscious Observer) ───
+    const unsubs = [
+      neuralEventBus.subscribe("VISITOR_DEEP_READING", () => {
+        if (!isArAnsweringRef.current) setArSpeech("*staying quiet while you read*");
+      }),
+      neuralEventBus.subscribe("SYSTEM_OVERLOAD", () => {
+        if (!isArAnsweringRef.current) setArSpeech("[System Fatigue] I'm lowering my tone...");
+      }),
+      neuralEventBus.subscribe("DREAM_STATE", () => {
+        if (!isArAnsweringRef.current) setArSpeech("Are you still there? 🌙");
+      }),
+      neuralEventBus.subscribe("EMOTIONAL_FOCUS", () => {
+        if (!isArAnsweringRef.current) setArSpeech("This part is important.");
+      })
+    ];
+
     return () => {
       isMounted = false;
       clearInterval(interval);
+      unsubs.forEach(unsub => unsub());
     };
   }, [showAR, systemPrompt]);
   
-  // Update visitor memory visits on mount
+  // Update digital echoes visits on mount
   useEffect(() => {
-    if (consciousness && consciousness.visitorMemory?.visits === 0) {
-      consciousness.updateMemory({ visits: 1 });
-    } else if (consciousness && consciousness.visitorMemory) {
+    try {
+      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
       const lastVisit = localStorage.getItem('adhy_last_visit');
       if (!lastVisit || Date.now() - Number(lastVisit) > 1000 * 60 * 60 * 12) {
-        consciousness.updateMemory({ visits: (consciousness.visitorMemory.visits || 1) + 1 });
+        stored.totalVisits = (stored.totalVisits || 0) + 1;
+        localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
         localStorage.setItem('adhy_last_visit', Date.now().toString());
       }
-    }
+    } catch (e) {}
   }, []);
 
   // System Consciousness: Proactive messages
@@ -512,13 +528,17 @@ const MiniAdhy = () => {
     if (!consciousness) return;
     
     // Determine persona based on section hover
-    if (consciousness.activeSection === 'MyWorks' || consciousness.activeSection === 'Skills') {
-      consciousness.updateMemory({ persona: 'Developer' });
-    } else if (consciousness.activeSection === 'Photography') {
-      consciousness.updateMemory({ persona: 'Photographer' });
-    } else if (consciousness.activeSection === 'NeuralMap') {
-      consciousness.updateMemory({ persona: 'Designer/Creative' });
-    }
+    try {
+      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+      if (consciousness.activeSection === 'MyWorks' || consciousness.activeSection === 'Skills') {
+        stored.persona = 'Developer';
+      } else if (consciousness.activeSection === 'Photography') {
+        stored.persona = 'Photographer';
+      } else if (consciousness.activeSection === 'NeuralMap') {
+        stored.persona = 'Designer/Creative';
+      }
+      localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+    } catch (e) {}
     
     // Consciousness Stability System & Proactive Instincts
     const now = Date.now();
@@ -725,13 +745,16 @@ const MiniAdhy = () => {
     setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
-    if (consciousness?.isSystemThinkingRef) {
-      consciousness.isSystemThinkingRef.current = true;
-    }
+    // Direct write to NervousSystem — zero hop, instant Soul reaction
+    ns.setSystemThinking(true);
+    ns.emit('MINIADHY_THINKING_START');
     
     // Deepen the bond
-    const currentInteractions = consciousness?.visitorMemory?.interactions || 0;
-    consciousness?.updateMemory({ interactions: currentInteractions + 1 });
+    try {
+      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+      stored.interactions = (stored.interactions || 0) + 1;
+      localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+    } catch (e) {}
 
     let newHistory = [
       ...historyRef.current,
@@ -772,9 +795,8 @@ const MiniAdhy = () => {
       setMessages(prev => [...prev, { role: 'bot', text: errorText }]);
     } finally {
       setLoading(false);
-      if (consciousness?.isSystemThinkingRef) {
-        consciousness.isSystemThinkingRef.current = false;
-      }
+      ns.setSystemThinking(false);
+      ns.emit('MINIADHY_THINKING_END');
     }
   };
 

@@ -40,7 +40,7 @@ const CustomCursor = () => {
       }
     };
 
-    orchestrator.subscribeToRAF('custom-cursor', tick);
+    orchestrator.subscribeToRAF('custom-cursor', tick, { priority: 'CRITICAL' });
 
     const onOver = (e) => {
       const el = e.target;

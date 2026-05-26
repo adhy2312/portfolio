@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './ZipGame.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiX, FiRefreshCw, FiCheckCircle, FiInfo } from 'react-icons/fi';
+import { FiX, FiRefreshCw, FiCheckCircle, FiInfo, FiHelpCircle } from 'react-icons/fi';
 
 /**
  * Generate a Zip level that matches LinkedIn's logic:
@@ -105,12 +105,87 @@ const generateZipLevel = (id, size) => {
   };
 };
 
+// ═══════════════════════════════════════════
+// HINT ENGINE
+// Analyses the current board state and returns
+// a contextual, non-spoiling hint string.
+// ═══════════════════════════════════════════
+const computeHint = (level, path) => {
+  if (!level || path.length === 0) return null;
+
+  const { size, numbers, barriers } = level;
+  const totalCells = size * size;
+  const last = path[path.length - 1];
+
+  // ─── Detect: Is the current head completely surrounded (dead-end)? ───
+  const dirs = [[0,1],[1,0],[0,-1],[-1,0]];
+  const validMoves = dirs.filter(([dr, dc]) => {
+    const nr = last.r + dr, nc = last.c + dc;
+    if (nr < 0 || nr >= size || nc < 0 || nc >= size) return false;
+    if (path.some(p => p.r === nr && p.c === nc)) return false;
+    const blocked = barriers.some(b =>
+      (b.r1 === last.r && b.c1 === last.c && b.r2 === nr && b.c2 === nc) ||
+      (b.r1 === nr && b.c1 === nc && b.r2 === last.r && b.c2 === last.c)
+    );
+    return !blocked;
+  });
+
+  if (validMoves.length === 0 && path.length < totalCells) {
+    return "Dead end! Swipe back to undo the last few moves and try a different route.";
+  }
+
+  // ─── Detect: About to skip the next number ───
+  const visitedNums = numbers.filter(n => path.some(p => p.r === n.r && p.c === n.c));
+  const currentMaxVal = visitedNums.length > 0 ? Math.max(...visitedNums.map(n => n.val)) : 1;
+  const nextNum = numbers.find(n => n.val === currentMaxVal + 1);
+
+  if (nextNum) {
+    const distToNext = Math.abs(last.r - nextNum.r) + Math.abs(last.c - nextNum.c);
+    const cellsRemaining = totalCells - path.length;
+    if (distToNext > cellsRemaining) {
+      return `You need to reach number ${currentMaxVal + 1} but you're cutting yourself off. Try a wider route.`;
+    }
+    if (distToNext === 1) {
+      return `Number ${currentMaxVal + 1} is right next to you — move there next!`;
+    }
+  }
+
+  // ─── Detect: Large island of unvisited cells still accessible ───
+  const filled = path.length / totalCells;
+  if (filled > 0.5 && validMoves.length === 1) {
+    return "Only one way forward — make sure it leads somewhere before committing.";
+  }
+
+  // ─── Detect: Early stage stuck ───
+  if (path.length <= 3 && validMoves.length <= 1) {
+    return "Start by moving toward the middle of the grid to keep options open.";
+  }
+
+  // ─── Barrier awareness ───
+  if (barriers.length > 0 && path.length < 4) {
+    return "The thick lines are barriers — you cannot cross them. Plan around them.";
+  }
+
+  // ─── Generic contextual tips ───
+  const tips = [
+    "Try to visit corners early — they're hardest to reach later.",
+    "Don't trap yourself. Check that your path leaves enough room to fill the grid.",
+    "Walls between cells block movement — look carefully before swiping.",
+    `You need to fill all ${totalCells} cells. Think of it like drawing without lifting your finger.`,
+    "If stuck, reset and try starting in the opposite direction.",
+  ];
+  return tips[Math.floor(Math.random() * tips.length)];
+};
+
 const ZipGame = ({ onClose }) => {
-  const [level, setLevel] = useState(null);
+  const [level, setLevel]         = useState(null);
   const [levelCount, setLevelCount] = useState(1);
-  const [path, setPath] = useState([]);
+  const [path, setPath]           = useState([]);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [won, setWon] = useState(false);
+  const [won, setWon]             = useState(false);
+  const [hint, setHint]           = useState(null);
+  const [hintCount, setHintCount] = useState(0);
+  const hintTimer                 = useRef(null);
   
   const gridRef = useRef(null);
 
@@ -206,7 +281,17 @@ const ZipGame = ({ onClose }) => {
     const startNum = level.numbers.find(n => n.val === 1);
     setPath([{ r: startNum.r, c: startNum.c }]);
     setWon(false);
+    setHint(null);
   };
+
+  const showHint = useCallback(() => {
+    clearTimeout(hintTimer.current);
+    const h = computeHint(level, path);
+    setHint(h);
+    setHintCount(c => c + 1);
+    // Auto-dismiss after 6s
+    hintTimer.current = setTimeout(() => setHint(null), 6000);
+  }, [level, path]);
 
   const nextLevel = () => {
     if (levelCount < 10) {
@@ -311,10 +396,31 @@ const ZipGame = ({ onClose }) => {
             <button className="zip-btn-icon" onClick={resetLevel}>
               <FiRefreshCw /> Reset
             </button>
+            <button className="zip-btn-icon zip-hint-btn" onClick={showHint}>
+              <FiHelpCircle /> Hint
+              {hintCount > 0 && <span className="hint-count-badge">{hintCount}</span>}
+            </button>
             <div className="zip-hint">
               <FiInfo /> Fill every cell in order.
             </div>
           </div>
+
+          {/* Hint Engine Overlay */}
+          <AnimatePresence>
+            {hint && (
+              <motion.div
+                className="zip-hint-overlay"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                transition={{ duration: 0.25 }}
+              >
+                <FiHelpCircle className="hint-overlay-icon" />
+                <span>{hint}</span>
+                <button className="hint-dismiss" onClick={() => setHint(null)}>✕</button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <AnimatePresence>

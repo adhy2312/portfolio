@@ -263,3 +263,62 @@
     font-size: 1rem;
   }
 }
+
+/* --- Hint Engine --- */
+.zip-hint-btn {
+  position: relative;
+  background: rgba(99, 102, 241, 0.12) !important;
+  border-color: rgba(99, 102, 241, 0.3) !important;
+  color: #A78BFA !important;
+}
+.zip-hint-btn:hover {
+  background: rgba(99, 102, 241, 0.22) !important;
+}
+.hint-count-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #6366F1;
+  color: #fff;
+  font-size: 0.55rem;
+  font-family: 'Fira Code', monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.zip-hint-overlay {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-top: 10px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+  position: relative;
+}
+.hint-overlay-icon {
+  color: #A78BFA;
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.hint-dismiss {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  font-size: 0.75rem;
+  padding: 0 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.hint-dismiss:hover { color: rgba(255, 255, 255, 0.7); }

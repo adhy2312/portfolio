@@ -14,6 +14,8 @@ import sectionStory from './sectionStory'
 import quoteCanvas from './quoteCanvas'
 import milestone from './milestone'
 import neuralMap from './neuralMap'
+import digitalScar from './digitalScar'
+import architecture from './architecture'
 
 export const schemaTypes = [
   hero,
@@ -31,5 +33,7 @@ export const schemaTypes = [
   sectionStory,
   quoteCanvas,
   milestone,
-  neuralMap
+  neuralMap,
+  digitalScar,
+  architecture
 ]

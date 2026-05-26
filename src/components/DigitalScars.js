@@ -1,7 +1,7 @@
 import React from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './DigitalScars.css';
-import { FiActivity, FiTerminal, FiAlertCircle, FiDatabase } from 'react-icons/fi';
+import { FiActivity, FiTerminal, FiAlertCircle, FiDatabase, FiLayers, FiRepeat, FiCpu } from 'react-icons/fi';
 
 const SCARS = [
   {
@@ -24,6 +24,27 @@ const SCARS = [
     description: "A beautiful but chaotic state management system that slowly consumed all available memory until the UI froze into silence.",
     icon: <FiDatabase size={24} />,
     status: "Contained"
+  },
+  {
+    id: "RND-11",
+    title: "The Infinite Cascade",
+    description: "A single missing useEffect dependency that triggered an infinite render loop, crashing the entire layout engine before it even painted.",
+    icon: <FiRepeat size={24} />,
+    status: "Resolved"
+  },
+  {
+    id: "STY-22",
+    title: "Z-Index Warfare",
+    description: "A brutal conflict of absolute positioned elements competing for dominance, ultimately resulting in a mobile navigation that swallowed the whole screen.",
+    icon: <FiLayers size={24} />,
+    status: "Patched"
+  },
+  {
+    id: "CON-42",
+    title: "Race Condition Roulette",
+    description: "Asynchronous state updates firing out of order. For three days, the application lived in a superposition of multiple UI states simultaneously.",
+    icon: <FiCpu size={24} />,
+    status: "Isolated"
   }
 ];
 

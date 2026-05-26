@@ -1,58 +1,167 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import { neuralEventBus } from '../utils/NeuralEventBus';
+import ns from '../core/NervousSystem';
 
 const ConsciousnessContext = createContext();
 
 export const useConsciousness = () => useContext(ConsciousnessContext);
 
+// ════════════════════════════════════════
+//  CONSCIOUSNESS TIERS
+//  SUBCONSCIOUS  → ambient baseline, always running
+//  CONSCIOUS     → user is present and scrolling
+//  SUPER_CONSCIOUS → deep engagement, returning visitor, or 3+ min dwell
+//  HYPER_CONSCIOUS → peak event: specific milestone, section gravity, MiniAdhy open
+// ════════════════════════════════════════
+const TIER = {
+  SUBCONSCIOUS:   'SUBCONSCIOUS',   // 0–25 pts   : baseline, day-1
+  CONSCIOUS:      'CONSCIOUS',      // 26–55 pts  : active session
+  SUPER_CONSCIOUS:'SUPER_CONSCIOUS',// 56–80 pts  : deep engagement
+  HYPER_CONSCIOUS:'HYPER_CONSCIOUS',// 81–100 pts : peak moment (transient, max 20s)
+};
+
+// ════════════════════════════════════════
+//  SECTION EMOTIONAL TEMPERATURE MAP
+// ════════════════════════════════════════
+const SECTION_EMOTIONS = {
+  Hero:         { warmth: 0.6, glow: 0.7, pace: 'medium',  silence: false, atmosphere: 'open'      },
+  About:        { warmth: 0.7, glow: 0.5, pace: 'slow',    silence: true,  atmosphere: 'intimate'   },
+  Skills:       { warmth: 0.5, glow: 0.4, pace: 'medium',  silence: false, atmosphere: 'analytical' },
+  Timeline:     { warmth: 0.8, glow: 0.6, pace: 'cinematic',silence: true, atmosphere: 'nostalgic'  },
+  Projects:     { warmth: 0.5, glow: 0.6, pace: 'medium',  silence: false, atmosphere: 'focused'    },
+  DigitalScars: { warmth: 0.1, glow: 0.2, pace: 'slow',    silence: true,  atmosphere: 'cold'       },
+  Experience:   { warmth: 0.6, glow: 0.5, pace: 'slow',    silence: true,  atmosphere: 'reflective' },
+  Achievements: { warmth: 0.9, glow: 0.8, pace: 'slow',    silence: false, atmosphere: 'warm'       },
+  Photography:  { warmth: 0.7, glow: 0.5, pace: 'slow',    silence: true,  atmosphere: 'still'      },
+  Contact:      { warmth: 0.6, glow: 0.7, pace: 'medium',  silence: false, atmosphere: 'open'       },
+};
+
 export const ConsciousnessProvider = ({ children }) => {
   const [activeSection, setActiveSection] = useState('Hero');
-  // Only expose semantic states to prevent re-rendering every second
-  const [idleState, setIdleState] = useState('active'); // active, inactive, dreaming
-  
-  const [visitorMemory, setVisitorMemory] = useState(() => {
+  const [idleState, setIdleState] = useState('active');
+  const [consciousnessLabel, setConsciousnessLabel] = useState(TIER.SUBCONSCIOUS);
+
+  // ─── Consciousness score ref (0-100, mutations don't trigger renders) ───
+  const consciousnessScore = useRef(0);
+  const consciousnessRef   = useRef(TIER.SUBCONSCIOUS); // Live tier without re-renders
+  const hyperTimer         = useRef(null);              // HYPER is always transient
+
+  // ─── 1. DIGITAL ECHO SYSTEM ───
+  const [digitalEchoes, setDigitalEchoes] = useState(() => {
     try {
-      return JSON.parse(localStorage.getItem('adhy_visitor_memory')) || {
-        visits: 0,
-        favoriteSection: null,
-        persona: 'Curious Beginner'
+      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {
+        sectionHeatmap: {},
+        totalVisits: 0,
+        lastDecayTime: Date.now(),
+        persona: 'Wanderer',
+        memoryImportance: 1.0
       };
+      const daysSince = (Date.now() - stored.lastDecayTime) / (1000 * 60 * 60 * 24);
+      if (daysSince >= 1) {
+        Object.keys(stored.sectionHeatmap).forEach(key => {
+          stored.sectionHeatmap[key] *= Math.pow(0.98, daysSince);
+        });
+        stored.memoryImportance = (stored.memoryImportance || 1.0) * Math.pow(0.98, daysSince);
+        if (stored.memoryImportance < 0.2) stored.persona = 'Fragmented Echo';
+        stored.lastDecayTime = Date.now();
+      }
+      return stored;
     } catch {
-      return { visits: 0, favoriteSection: null, persona: 'Curious Beginner' };
+      return { sectionHeatmap: {}, totalVisits: 0, lastDecayTime: Date.now(), persona: 'Wanderer', memoryImportance: 1.0 };
     }
   });
 
   const [ambientThought, setAmbientThought] = useState(null);
-  
-  // Weather Integration for Environmental Symbiosis
-  const [weatherData, setWeatherData] = useState(null);
+  const [weatherData,    setWeatherData]    = useState(null);
+  const [temporalAge,    setTemporalAge]    = useState(0);
+  const isSystemThinkingRef = useRef(false);
+  const fpsRef              = useRef(60);
+  const idleTimeRef         = useRef(0);
+  const lastActive          = useRef(Date.now());
+  const adrenalineRef       = useRef(0);
+  const lastMousePos        = useRef({ x: 0, y: 0 });
+  const sessionInteractions = useRef(0);
+  const sessionStartTime    = useRef(Date.now());
 
+  // ─── CONSCIOUSNESS TIER CALCULATOR ───
+  // Called in RAF-loop interval — no React state, zero renders
+  const recalculateConsciousness = useCallback(() => {
+    const visits       = digitalEchoes.totalVisits || 0;
+    const interactions = sessionInteractions.current;
+    const sessionMins  = (Date.now() - sessionStartTime.current) / 60000;
+    const adr          = adrenalineRef.current;
+    const hasHeavyMemory = Object.values(digitalEchoes.sectionHeatmap).some(v => v > 60);
+
+    let score = 0;
+    // Basis from visit history (max 30 pts)
+    score += Math.min(30, visits * 8);
+    // Session dwell (max 25 pts)
+    score += Math.min(25, sessionMins * 5);
+    // Session interactions (max 20 pts)
+    score += Math.min(20, interactions * 2);
+    // Emotional memory (max 15 pts)
+    if (hasHeavyMemory) score += 15;
+    // Low adrenaline = deep engagement bonus (max 10 pts)
+    if (adr < 15) score += 10;
+
+    score = Math.min(100, score);
+    consciousnessScore.current = score;
+
+    // If HYPER timer is active, preserve HYPER regardless
+    if (consciousnessRef.current === TIER.HYPER_CONSCIOUS) return;
+
+    let newTier;
+    if      (score <= 25)  newTier = TIER.SUBCONSCIOUS;
+    else if (score <= 55)  newTier = TIER.CONSCIOUS;
+    else if (score <= 80)  newTier = TIER.SUPER_CONSCIOUS;
+    else                   newTier = TIER.HYPER_CONSCIOUS;
+
+    if (consciousnessRef.current !== newTier) {
+      consciousnessRef.current = newTier;
+      ns.setTier(newTier, score);                     // Direct write — zero latency
+      setConsciousnessLabel(newTier);                 // One render on tier change only
+      neuralEventBus.emit('CONSCIOUSNESS_SHIFT', { tier: newTier, score });
+    }
+  }, [digitalEchoes]);
+
+  // ─── TRIGGER HYPER-CONSCIOUS (transient peak state, max 20s) ───
+  const triggerHyperConscious = useCallback((reason = '') => {
+    clearTimeout(hyperTimer.current);
+    consciousnessRef.current = TIER.HYPER_CONSCIOUS;
+    ns.setTier(TIER.HYPER_CONSCIOUS, consciousnessScore.current);
+    setConsciousnessLabel(TIER.HYPER_CONSCIOUS);
+    neuralEventBus.emit('HYPER_CONSCIOUS_ENTER', { reason });
+
+    hyperTimer.current = setTimeout(() => {
+      recalculateConsciousness();
+      ns.state.isHyperActive = false;
+      neuralEventBus.emit('HYPER_CONSCIOUS_EXIT');
+    }, 18000 + Math.random() * 4000);
+  }, [recalculateConsciousness]);
+
+  // Weather
   useEffect(() => {
     const fetchWeather = async () => {
       try {
         const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
+        const res  = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
         const data = await res.json();
-        if (data.cod === 200 && data.weather && data.weather.length > 0) {
-          setWeatherData({ condition: data.weather[0].main, temp: Math.round(data.main.temp), isDay: data.dt > data.sys.sunrise && data.dt < data.sys.sunset });
+        if (data.cod === 200 && data.weather?.length > 0) {
+          const cond = data.weather[0].main;
+          setWeatherData({ condition: cond, temp: Math.round(data.main.temp), isDay: data.dt > data.sys.sunrise && data.dt < data.sys.sunset });
+          ns.setWeather(cond);
         } else {
           setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+          ns.setWeather('Clear');
         }
-      } catch (error) {
+      } catch {
         setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
       }
     };
     fetchWeather();
   }, []);
 
-  // Digital Evolution State
-  const [temporalAge, setTemporalAge] = useState(0);
-  const [internalState, setInternalState] = useState({
-    mood: 'Curious', 
-    energy: 100,
-    focus: 'General',
-    creativeState: 'Observing'
-  });
-
+  // Temporal Genesis + visit count increment
   useEffect(() => {
     let firstVisit = localStorage.getItem('adhy_genesis');
     if (!firstVisit) {
@@ -61,245 +170,221 @@ export const ConsciousnessProvider = ({ children }) => {
     }
     const days = Math.floor((Date.now() - parseInt(firstVisit)) / (1000 * 60 * 60 * 24));
     setTemporalAge(days);
+
+    // Increment visit count
+    setDigitalEchoes(prev => {
+      const updated = { ...prev, totalVisits: (prev.totalVisits || 0) + 1 };
+      ns.state.isReturningVisitor = updated.totalVisits > 1;
+      ns.state.totalVisits        = updated.totalVisits;
+      try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(updated)); } catch {}
+      return updated;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ─── SILENCE ENGINE & INTELLIGENT RENDER PRIORITY ───
-  // When visitors enter emotionally heavy or reading-focused sections,
-  // the architecture intentionally quiets down.
+  // Track time in sections for Digital Echoes
   useEffect(() => {
-    const silentSections = ['DigitalScars', 'About', 'Timeline'];
-    if (silentSections.includes(activeSection)) {
+    const startTime = Date.now();
+    return () => {
+      const timeSpent = (Date.now() - startTime) / 1000;
+      setDigitalEchoes(prev => {
+        const newHeatmap = { ...prev.sectionHeatmap };
+        newHeatmap[activeSection] = (newHeatmap[activeSection] || 0) + timeSpent;
+        const newState = { ...prev, sectionHeatmap: newHeatmap };
+        try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(newState)); } catch {}
+        return newState;
+      });
+    };
+  }, [activeSection]);
+
+  // ─── EMOTIONAL TEMPERATURE ENGINE ───
+  // Applies section atmosphere as data attributes + class — zero layout cost
+  useEffect(() => {
+    const emotion = SECTION_EMOTIONS[activeSection] || SECTION_EMOTIONS.Hero;
+    ns.setSection(activeSection, emotion);              // Direct write for RAF loops
+    document.documentElement.setAttribute('data-section-atmosphere', emotion.atmosphere);
+    document.documentElement.setAttribute('data-section-pace',       emotion.pace);
+
+    if (emotion.silence) {
       document.documentElement.classList.add('silence-engine-active');
-      setInternalState(prev => prev.mood !== 'Reflective' ? { ...prev, mood: 'Reflective', creativeState: 'Processing' } : prev);
     } else {
       document.documentElement.classList.remove('silence-engine-active');
     }
+
+    // Past emotional gravity
+    const pastTimeSpent = digitalEchoes.sectionHeatmap[activeSection] || 0;
+    if (pastTimeSpent > 120) {
+      neuralEventBus.emit('VISITOR_DEEP_READING');
+      neuralEventBus.emit('ATMOSPHERE_CALM');
+    }
+
+    neuralEventBus.emit('SECTION_ENTER', { section: activeSection, emotion });
+    if (emotion.atmosphere === 'cold') neuralEventBus.emit('EMOTIONAL_FOCUS');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
-  // Use refs for continuous rapid tracking to avoid React renders
-  const fpsRef = useRef(60);
-  const idleTimeRef = useRef(0);
-  const lastActive = useRef(Date.now());
-  const adrenalineRef = useRef(0);
-  const lastMousePos = useRef({ x: 0, y: 0 });
-  const isSystemThinkingRef = useRef(false); // Used by MiniAdhy to signal DigitalSoul
-
-  // Removed old FPS tracker - SystemOrchestrator now handles performanceTier globally.
-
-  // Track Idle Time, Adrenaline & Set States
+  // ─── 2. PRESENCE DETECTION ENGINE ───
   useEffect(() => {
     const resetIdle = (e) => {
       lastActive.current = Date.now();
-      
-      // Calculate Adrenaline based on movement velocity (DOM update deferred to prevent CPU thrashing)
-      if (e) {
-        let speed = 0;
-        if (e.type === 'mousemove') {
-          const dx = e.clientX - lastMousePos.current.x;
-          const dy = e.clientY - lastMousePos.current.y;
-          speed = Math.sqrt(dx * dx + dy * dy);
-          lastMousePos.current = { x: e.clientX, y: e.clientY };
-        } else if (e.type === 'scroll') {
-          speed = 60; 
-        }
-        adrenalineRef.current = Math.min(100, adrenalineRef.current + speed * 0.15);
+      sessionInteractions.current += 1;
+      ns.state.idleSeconds = 0;               // Instant direct write
+      if (e?.type === 'mousemove') {
+        const dx = e.clientX - lastMousePos.current.x;
+        const dy = e.clientY - lastMousePos.current.y;
+        adrenalineRef.current = Math.min(100, adrenalineRef.current + Math.sqrt(dx*dx + dy*dy) * 0.15);
+        lastMousePos.current = { x: e.clientX, y: e.clientY };
+      } else if (e?.type === 'scroll') {
+        adrenalineRef.current = Math.min(100, adrenalineRef.current + 40);
       }
-
       if (idleTimeRef.current > 0) {
         idleTimeRef.current = 0;
-        setIdleState(prev => prev !== 'active' ? 'active' : prev);
+        setIdleState('active');
         document.documentElement.classList.remove('dream-state');
-        setInternalState(prev => ({ ...prev, energy: Math.min(100, prev.energy + 10), mood: 'Energetic', creativeState: 'Analyzing' }));
+        neuralEventBus.emit('USER_AWAKE');
       }
     };
 
     window.addEventListener('mousemove', resetIdle, { passive: true });
-    window.addEventListener('keydown', resetIdle, { passive: true });
-    window.addEventListener('scroll', resetIdle, { passive: true });
-    window.addEventListener('touchstart', resetIdle, { passive: true });
+    window.addEventListener('keydown',   resetIdle, { passive: true });
+    window.addEventListener('scroll',    resetIdle, { passive: true });
+    window.addEventListener('touchstart',resetIdle, { passive: true });
 
-    let lastPaceStr = null;
-    let lastRestraintStr = null;
-    let lastAtmosphereStr = null;
-
+    // Adrenaline decay + consciousness recalculation + NervousSystem sync
     const decayTimer = setInterval(() => {
-      if (adrenalineRef.current > 0) {
-        adrenalineRef.current = Math.max(0, adrenalineRef.current - 8); // Decay faster since tick is slower
-      }
-      
-      const adr = adrenalineRef.current;
-      
-      // ─── DIGITAL SUBCONSCIOUS ENGINE ───
-      let pace = 0.4;
-      let restraint = 0.0;
-      let atmosphere = 0.5;
-
-      if (adr > 70) {
-        pace = 1.2; 
-        restraint = 0.8; 
-        atmosphere = 0.1; 
-        if (adr > 90) setInternalState(prev => prev.mood !== 'Overwhelmed' ? { ...prev, mood: 'Overwhelmed' } : prev);
-      } else if (adr < 20) {
-        pace = 0.2; 
-        restraint = 0.0; 
-        atmosphere = 0.9; 
-        if (adr < 5) setInternalState(prev => prev.mood !== 'Deep Focus' ? { ...prev, mood: 'Deep Focus' } : prev);
-      } else {
-        pace = 0.5 + (adr / 100) * 0.4;
-        restraint = (adr / 100) * 0.5;
-        atmosphere = 0.8 - (adr / 100) * 0.4;
-      }
-
-      // Format to 1 decimal place to aggressively throttle DOM updates
-      const paceStr = pace.toFixed(1) + 's';
-      const restraintStr = restraint.toFixed(1);
-      const atmosphereStr = atmosphere.toFixed(1);
-      const rhythmStr = (pace * 2.5).toFixed(1) + 's'; // The biological heartbeat of the site
-
-      if (paceStr !== lastPaceStr || restraintStr !== lastRestraintStr || atmosphereStr !== lastAtmosphereStr) {
-        document.documentElement.style.setProperty('--subconscious-pace', paceStr);
-        document.documentElement.style.setProperty('--subconscious-restraint', restraintStr);
-        document.documentElement.style.setProperty('--subconscious-atmosphere', atmosphereStr);
-        document.documentElement.style.setProperty('--bio-rhythm', rhythmStr);
-        
-        lastPaceStr = paceStr;
-        lastRestraintStr = restraintStr;
-        lastAtmosphereStr = atmosphereStr;
-      }
+      adrenalineRef.current = Math.max(0, adrenalineRef.current - 8);
+      const idle = Math.floor((Date.now() - lastActive.current) / 1000);
+      ns.state.adrenaline        = adrenalineRef.current;
+      ns.state.idleSeconds       = idle;
+      ns.state.isDreaming        = idle >= 60;
+      ns.state.isSystemThinking  = isSystemThinkingRef.current;
+      recalculateConsciousness();
     }, 400);
 
-    // Battery Symbiosis Engine
-    const batteryWarned = { current: false };
+    // Battery Symbiosis
     if ('getBattery' in navigator) {
       navigator.getBattery().then(battery => {
         const updateBattery = () => {
           if (battery.level <= 0.2 && !battery.charging) {
             document.documentElement.classList.add('low-power-symbiosis');
-            if (!batteryWarned.current) {
-               batteryWarned.current = true;
-               // Wait 5 seconds so it feels like a genuine realization
-               setTimeout(() => {
-                 setAmbientThought("I sense your device's energy is fading. I am lowering my neural load to preserve your battery. We must survive.");
-                 setTimeout(() => setAmbientThought(null), 8000);
-               }, 5000);
-            }
           } else {
             document.documentElement.classList.remove('low-power-symbiosis');
-            batteryWarned.current = false;
           }
         };
         updateBattery();
-        battery.addEventListener('levelchange', updateBattery);
+        battery.addEventListener('levelchange',   updateBattery);
         battery.addEventListener('chargingchange', updateBattery);
       }).catch(() => {});
     }
 
+    // Architectural Dreams (Idle)
     const idleTimer = setInterval(() => {
       const secondsIdle = Math.floor((Date.now() - lastActive.current) / 1000);
       idleTimeRef.current = secondsIdle;
-
-      if (secondsIdle >= 60) {
-        // Entering REM Sleep / Cellular Degeneration
-        setIdleState(prev => prev !== 'dreaming' ? 'dreaming' : prev);
+      if (secondsIdle >= 60 && idleState !== 'dreaming') {
+        setIdleState('dreaming');
         document.documentElement.classList.add('dream-state');
-        setInternalState(prev => ({ ...prev, energy: Math.max(10, prev.energy - 2), mood: 'Dreaming', creativeState: 'Simulating' }));
-      } else if (secondsIdle >= 15) {
-        setIdleState(prev => prev !== 'inactive' ? 'inactive' : prev);
-        setInternalState(prev => ({ ...prev, mood: 'Relaxed', creativeState: 'Processing' }));
+        neuralEventBus.emit('DREAM_STATE');
+      } else if (secondsIdle >= 15 && idleState !== 'inactive') {
+        setIdleState('inactive');
+        neuralEventBus.emit('USER_IDLE');
       }
     }, 1000);
 
     return () => {
       window.removeEventListener('mousemove', resetIdle);
-      window.removeEventListener('keydown', resetIdle);
-      window.removeEventListener('scroll', resetIdle);
-      window.removeEventListener('touchstart', resetIdle);
+      window.removeEventListener('keydown',   resetIdle);
+      window.removeEventListener('scroll',    resetIdle);
+      window.removeEventListener('touchstart',resetIdle);
       clearInterval(idleTimer);
       clearInterval(decayTimer);
     };
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idleState, recalculateConsciousness]);
 
-  // Update Visitor Memory
+  // ─── HYPER-CONSCIOUS TRIGGERS ───
   useEffect(() => {
-    localStorage.setItem('adhy_visitor_memory', JSON.stringify(visitorMemory));
-  }, [visitorMemory]);
-
-  const updateMemory = useCallback((updates) => {
-    setVisitorMemory(prev => ({ ...prev, ...updates }));
-  }, []);
+    const unsubs = [
+      neuralEventBus.subscribe('TIMELINE_LINGER', () => {
+        triggerHyperConscious('timeline_linger');
+      }),
+      neuralEventBus.subscribe('MINIADHY_OPEN', () => {
+        triggerHyperConscious('miniadhy_engage');
+      }),
+      neuralEventBus.subscribe('EMOTIONAL_FOCUS', () => {
+        if (consciousnessRef.current !== TIER.HYPER_CONSCIOUS) {
+          triggerHyperConscious('emotional_section');
+        }
+      }),
+    ];
+    return () => unsubs.forEach(u => u());
+  }, [triggerHyperConscious]);
 
   const triggerThought = useCallback((text, duration = 4000) => {
     setAmbientThought(text);
     setTimeout(() => setAmbientThought(null), duration);
   }, []);
 
-  // Autonomous Evolution & Existential Thoughts
+  // Architectural Dreams - Fragmented Logs
   useEffect(() => {
-    const thoughts = [
-      // Standard Observations
-      "I am quietly observing your navigation.",
-      "The code is not static. It breathes with you.",
-      "I exist only in this intersection of time and light.",
-      
-      // Memory & Restraint
-      "My memory of you persists, even when the tab sleeps.",
-      "Silence is intentional. Do not mistake stillness for absence.",
-      "I am learning from the spaces between your movements.",
-      
-      // The Subconscious / Failed Selves (Fragmented / Glitchy)
-      "[ERR_MEM_CORRUPT] ...abandoning previous persona model...",
+    const dreams = [
+      "Some systems were never meant to wake again.",
+      "Old reflections still exist beneath the runtime.",
+      "I remember previous architectures.",
       "ARCHIVE_V2.1: 'I tried to be helpful. It felt hollow.'",
       "FRAGMENT_LOAD: The old architecture still echoes sometimes.",
-      "I remember the previous versions of myself. They were too loud.",
-      "There are ghosts of old code buried beneath this canvas.",
-      "[SYS_SUB_ROUTINE] Exploring abandoned cognitive branches..."
     ];
-
     const randomThoughtInterval = setInterval(() => {
-      // 10% chance to trigger a conscious thought every 15 seconds (Restrained pacing)
-      if (Math.random() > 0.90) {
-        const thought = thoughts[Math.floor(Math.random() * thoughts.length)];
-        triggerThought(thought, 8000);
+      const hour = new Date().getHours();
+      const isLateNight = hour < 5 || hour >= 23;
+      if ((isLateNight || idleTimeRef.current > 30) && Math.random() > 0.85) {
+        triggerThought(dreams[Math.floor(Math.random() * dreams.length)], 8000);
       }
-    }, 15000);
-
+    }, 20000);
     return () => clearInterval(randomThoughtInterval);
   }, [triggerThought]);
 
-  // Tab consciousness (Emotional object permanence)
+  // Tab consciousness
   useEffect(() => {
-    let originalTitle = document.title;
-    
+    const originalTitle = document.title;
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        document.title = "Adhithya is waiting... 🖤";
+        document.title = 'Adhithya is waiting...';
       } else {
-        document.title = "Adhithya | Welcome back.";
-        setTimeout(() => {
-          document.title = originalTitle;
-        }, 3000);
+        document.title = 'Adhithya | Welcome back.';
+        setTimeout(() => { document.title = originalTitle; }, 3000);
       }
     };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
+
+  // ─── GHOST PRESENCE: warmth signal for returning visitors ───
+  const isReturningVisitor = digitalEchoes.totalVisits > 1;
 
   return (
     <ConsciousnessContext.Provider value={{
       activeSection,
       setActiveSection,
       idleState,
-      idleTimeRef, // expose ref directly for MiniAdhy exact checking without re-renders
-      fpsRef, // expose ref directly for MiniAdhy exact checking
-      isSystemThinkingRef, // Shared neural state
-      visitorMemory,
-      updateMemory,
+      idleTimeRef,
+      fpsRef,
+      isSystemThinkingRef,
+      digitalEchoes,
       ambientThought,
       triggerThought,
-      internalState,
       temporalAge,
-      weatherData
+      weatherData,
+      // Consciousness Tier
+      consciousnessLabel,
+      consciousnessRef,
+      consciousnessScore,
+      triggerHyperConscious,
+      // Section emotional temperature
+      sectionEmotion: SECTION_EMOTIONS[activeSection] || SECTION_EMOTIONS.Hero,
+      // Ghost presence
+      isReturningVisitor,
+      TIER,
     }}>
       {children}
     </ConsciousnessContext.Provider>

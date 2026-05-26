@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Living Architecture - Cinematic Blueprint</title>
+    <style>
+        body {
+            background-color: #030712;
+            color: #e2e8f0;
+            font-family: 'Fira Code', 'Inter', monospace;
+            margin: 0;
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(75, 0, 130, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 10% 90%, rgba(56, 189, 248, 0.1) 0%, transparent 40%);
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 40px rgba(167, 139, 250, 0.05);
+        }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #38bdf8, #a78bfa);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(167, 139, 250, 0.3);
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+            /* Cinematic SVG overrides */
+        }
+        
+        /* Force SVG styling for cinematic effect */
+        .mermaid svg {
+            max-width: 100%;
+            height: auto;
+            filter: drop-shadow(0 0 20px rgba(167, 139, 250, 0.1));
+        }
+
+        /* Glowing Nodes */
+        .node rect, .node circle, .node polygon, .node path {
+            transition: all 0.4s ease !important;
+            filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.4)) !important;
+        }
+        
+        .node:hover rect, .node:hover circle, .node:hover polygon, .node:hover path {
+            filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.9)) drop-shadow(0 0 40px rgba(167, 139, 250, 0.8)) !important;
+            transform: scale(1.05);
+        }
+
+        /* Core brain nodes get purple glow */
+        .node.core rect {
+            filter: drop-shadow(0 0 15px rgba(167, 139, 250, 0.6)) !important;
+            stroke-width: 3px !important;
+        }
+
+        /* Animated Data Streams (Edges) */
+        .edgePath path {
+            stroke: rgba(167, 139, 250, 0.6) !important;
+            stroke-width: 2.5px !important;
+            stroke-dasharray: 8;
+            animation: flow 20s linear infinite;
+            filter: drop-shadow(0 0 5px rgba(167, 139, 250, 0.8));
+        }
+
+        @keyframes flow {
+            from { stroke-dashoffset: 400; }
+            to { stroke-dashoffset: 0; }
+        }
+
+        /* Subgraph (Cluster) Styling */
+        .cluster rect {
+            fill: rgba(15, 23, 42, 0.4) !important;
+            stroke: rgba(56, 189, 248, 0.2) !important;
+            stroke-width: 2px !important;
+            rx: 16px !important;
+            ry: 16px !important;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Subgraph Text */
+        .cluster-label text {
+            fill: #38bdf8 !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Node Text */
+        .node .label {
+            font-family: 'Inter', sans-serif !important;
+            font-weight: 600 !important;
+            color: #fff !important;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+
+        /* Edge Text Labels */
+        .edgeLabel {
+            background-color: rgba(3, 7, 18, 0.8) !important;
+            color: #a78bfa !important;
+            font-family: 'Fira Code', monospace !important;
+            font-size: 11px !important;
+            padding: 4px 8px !important;
+            border-radius: 4px !important;
+            border: 1px solid rgba(167, 139, 250, 0.3) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Living Neural Architecture</h1>
+        <div class="mermaid">
+            graph TD
+                %% Theme Setup
+                classDef core fill:#4b0082,stroke:#A78BFA,stroke-width:2px,color:#fff;
+                classDef context fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff;
+                classDef ui fill:#1e293b,stroke:#94a3b8,stroke-width:1px,color:#cbd5e1;
+                classDef cms fill:#7f1d1d,stroke:#fca5a5,stroke-width:1px,color:#fff;
+
+                subgraph "The Brain (60FPS RAF Engine)"
+                    NS[NervousSystem.js]:::core
+                    PE[PresenceEngine Proxy]:::core
+                    NEB[NeuralEventBus]:::core
+                    
+                    NS <--> PE
+                    NS <--> NEB
+                end
+
+                subgraph "Consciousness Engine"
+                    CC[ConsciousnessContext]:::context
+                    SO[SystemOrchestrator]:::context
+                    
+                    CC -- "Calculates Tiers" --> PE
+                    SO -- "Manages Fatigue" --> NS
+                end
+
+                subgraph "Living Entities & Observers"
+                    DS((Digital Soul)):::ui
+                    MA((MiniAdhy AI)):::ui
+                    TL[Timeline Memory]:::ui
+                    SC[Digital Scars]:::ui
+                    
+                    DS -- "Zero-Latency Read" --> PE
+                    MA -- "Emits Thinking State" --> NEB
+                end
+
+                subgraph "Sensory Inputs"
+                    Mouse(Cursor Speed):::ui
+                    Time(Dwell Time):::ui
+                    Weather(Atmosphere):::ui
+                end
+
+                Sanity[(Sanity CMS)]:::cms
+
+                Mouse --> CC
+                Time --> CC
+                Weather --> CC
+
+                Sanity -.-> TL
+                Sanity -.-> SC
+
+                NS ==>|"Emotional Reactions"| DS
+                NEB ==>|"Transient Shocks"| CC
+        </div>
+    </div>
+
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            themeVariables: {
+                primaryColor: '#0f172a',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#38bdf8',
+                lineColor: '#64748b',
+                fontFamily: 'Fira Code'
+            },
+            flowchart: {
+                curve: 'basis',
+                nodeSpacing: 70,
+                rankSpacing: 90
+            }
+        });
+    </script>
+</body>
+</html>

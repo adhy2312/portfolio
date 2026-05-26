@@ -144,6 +144,48 @@
   margin: 12px 0;
 }
 
+/* ─── Color Theme Swatches ─── */
+.smp-color-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 2px 0 6px;
+}
+
+.smp-color-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--swatch-color, #000);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.smp-color-swatch:hover {
+  transform: scale(1.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.smp-color-swatch.smp-color-active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--swatch-color, #000), 0 0 12px rgba(255,255,255,0.2);
+  transform: scale(1.1);
+}
+
+/* Default black swatch gets a special cross-hatch to indicate "no color" */
+.smp-color-swatch:first-child {
+  background: linear-gradient(135deg, #111 50%, #444 50%);
+}
+
+.smp-swatch-dot {
+  display: none; /* Visual is handled by the button background */
+}
+
 /* ─── Accessibility Toggles ─── */
 .smp-a11y {
   display: flex;

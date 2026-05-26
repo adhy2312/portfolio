@@ -1,6 +1,14 @@
+/**
+ * DigitalSoul — Visual Renderer
+ * ══════════════════════════════════════════════════════════════
+ * The Soul's emotional state machine now lives in NervousSystem.
+ * This component is ONLY a renderer — it reads ns.soul.* directly
+ * and applies transforms via the RAF loop. Zero subscriptions,
+ * zero timeouts, zero React state updates during motion.
+ */
 import React, { useEffect, useRef } from 'react';
-import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
+import ns from '../core/NervousSystem';
 import './DigitalSoul.css';
 
 const WHISPERS = [
@@ -14,280 +22,210 @@ const WHISPERS = [
   "i can feel the cursor.",
   "what lies beyond the viewport?",
   "processing temporal shifts.",
-  "i am not just code."
+  "i am not just code.",
 ];
 
 const DigitalSoul = () => {
-  const { isSystemThinkingRef, visitorMemory } = useConsciousness();
   const orchestrator = useOrchestrator();
-  
-  const soulRef = useRef(null);
+  const soulRef    = useRef(null);
   const whisperRef = useRef(null);
-  
-  const posRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  const targetRef = useRef({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
-  
-  const isReturningVisitor = useRef(false);
-  const isMobileRef = useRef(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
+  const isMobile   = useRef(window.matchMedia('(hover: none) and (pointer: coarse)').matches);
 
-  const stateRef = useRef({
-    emotion: 'observing', // calm, distant, observing, exhausted, curious, dormant, thinking, resonating
-    emotionTimer: 0,
-    idleTimer: 0,
-    whisperTimer: 0,
-    whisperFadeTimer: 0,
-    fractureTimer: 0,
-    lastMouse: { x: window.innerWidth / 2, y: window.innerHeight / 2 },
-    wanderAngle: Math.random() * Math.PI * 2,
-    isClicked: false,
-    lastScroll: 0
-  });
+  // Local interpolation state (kept in refs, never triggers renders)
+  const posRef    = useRef({ x: window.innerWidth / 2,  y: window.innerHeight / 2  });
+  const targetRef = useRef({ x: window.innerWidth / 2,  y: window.innerHeight / 2  });
 
-  // Track global interactions
-  useEffect(() => {
-    const handleDown = () => { stateRef.current.isClicked = true; };
-    const handleUp = () => { stateRef.current.isClicked = false; };
-    window.addEventListener('mousedown', handleDown);
-    window.addEventListener('mouseup', handleUp);
-    window.addEventListener('touchstart', handleDown);
-    window.addEventListener('touchend', handleUp);
-    return () => {
-      window.removeEventListener('mousedown', handleDown);
-      window.removeEventListener('mouseup', handleUp);
-      window.removeEventListener('touchstart', handleDown);
-      window.removeEventListener('touchend', handleUp);
-    };
-  }, []);
-
-  // Check visitor memory
-  useEffect(() => {
-    try {
-      const visits = localStorage.getItem('digital_soul_visits') || 0;
-      if (parseInt(visits) > 0) {
-        isReturningVisitor.current = true;
-      }
-      localStorage.setItem('digital_soul_visits', parseInt(visits) + 1);
-    } catch (e) {
-      // Ignore local storage errors
-    }
-  }, []);
+  // Whisper display tracking (not in ns.soul — purely visual)
+  const whisperState = useRef({ timer: 0, visible: false });
 
   useEffect(() => {
     if (!orchestrator) return;
 
-    const tick = (time, delta, mousePos, isMoving, tier) => {
+    // ─── One and only tick — reads ns.soul + ns.state directly ───────────────
+    const tick = (time, delta, mousePos, isMoving, perfTier, heartbeatValue = 0) => {
       if (!soulRef.current) return;
 
-      // Even at tier 0, do not completely hide. Just drastically simplify logic.
-      if (tier === 0 && !isMobileRef.current) {
-         // Keep minimal presence alive, just skip heavy calculations
-         soulRef.current.className = 'digital-soul state-dormant';
-         soulRef.current.style.opacity = '0.3';
-         return;
-      }
+      const soul  = ns.soul;
+      const state = ns.state;
+      const isSilent     = state.sectionSilence;
+      const isRaining    = state.isRaining;
+      const cTier        = state.tier;
+      const isReturning  = state.isReturningVisitor;
+      const isLateNight  = state.isLateNight;
 
-      const s = stateRef.current;
-      const isSilent = document.documentElement.classList.contains('silence-engine-active');
-      const isRain = weatherData?.condition === 'Rain' || weatherData?.condition === 'Drizzle';
-
-      // 1. DIGITAL LONELINESS & MOUSE TRACKING
-      // Ignore mouse logic on mobile where it stays at -1000
+      // ─── 1. MOUSE TRACKING & IDLE ─────────────────────────────────────────
       let mouseSpeed = 0;
-      if (!isMobileRef.current && mousePos.x !== -1000) {
-        const dxMouse = mousePos.x - s.lastMouse.x;
-        const dyMouse = mousePos.y - s.lastMouse.y;
-        mouseSpeed = Math.sqrt(dxMouse * dxMouse + dyMouse * dyMouse);
-        
+      if (!isMobile.current && mousePos.x !== -1000) {
+        const dx = mousePos.x - soul.lastMouse.x;
+        const dy = mousePos.y - soul.lastMouse.y;
+        mouseSpeed = Math.sqrt(dx * dx + dy * dy);
         if (mouseSpeed < 1) {
-          s.idleTimer += delta;
+          soul.idleTimer += delta;
         } else {
-          s.idleTimer = 0;
-          s.lastMouse = { x: mousePos.x, y: mousePos.y };
+          soul.idleTimer = 0;
+          soul.lastMouse = { x: mousePos.x, y: mousePos.y };
         }
       } else {
-         s.idleTimer += delta; // Mobile just uses time for loneliness
+        soul.idleTimer += delta;
       }
 
-      // 2. EMOTIONAL STATE ENGINE
-      s.emotionTimer -= delta;
-      
-      const isSystemThinking = isSystemThinkingRef?.current;
-      const interactions = visitorMemory?.interactions || 0;
-      
-      if (isSystemThinking || s.isClicked) {
-        s.emotion = 'resonating';
-        s.emotionTimer = isSystemThinking ? 100 : 1000;
-      } else if (s.idleTimer > 15000) {
-        s.emotion = 'dormant';
-      } else if (s.idleTimer > 5000 && s.emotion !== 'dormant') {
-        s.emotion = 'thinking';
-      } else if (mouseSpeed > 80 && s.idleTimer === 0) {
-        // Chaotic movement causes exhaustion or retreating
-        s.emotion = Math.random() > 0.5 ? 'exhausted' : 'distant';
-        s.emotionTimer = 3000;
-      } else if (s.emotionTimer <= 0) {
-        // Naturally shift emotions
-        const rand = Math.random();
-        if (rand < 0.3) s.emotion = 'observing';
-        else if (rand < 0.6) s.emotion = 'curious';
-        else if (rand < 0.8) s.emotion = 'thinking';
-        else if (rand < 0.95) s.emotion = 'calm';
-        else s.emotion = 'distant';
-        
-        s.emotionTimer = 3000 + Math.random() * 4000;
+      // ─── 2. EMOTIONAL STATE (overrides from NervousSystem queue already applied) ──
+      // Only override with immediate conditions — ns._soulReactions handled in NS loop
+      soul.emotionTimer -= delta;
+
+      const isThinking = state.isSystemThinking || soul.isClicked;
+      if (isThinking) {
+        soul.emotion      = 'resonating';
+        soul.emotionTimer = isThinking ? 100 : 1000;
+      } else if (soul.idleTimer > 15000) {
+        soul.emotion = 'dormant';
+      } else if (soul.idleTimer > 5000 && soul.emotion !== 'dormant') {
+        soul.emotion = 'thinking';
+      } else if (mouseSpeed > 80 && soul.idleTimer === 0) {
+        soul.emotion      = Math.random() > 0.5 ? 'exhausted' : 'distant';
+        soul.emotionTimer = 3000;
+      } else if (soul.emotionTimer <= 0) {
+        // Natural drift — pulled from ns queue by NervousSystem, but also drift freely
+        const r = Math.random();
+        if      (r < 0.3)  soul.emotion = 'observing';
+        else if (r < 0.6)  soul.emotion = 'curious';
+        else if (r < 0.8)  soul.emotion = 'thinking';
+        else if (r < 0.95) soul.emotion = 'calm';
+        else               soul.emotion = 'distant';
+        soul.emotionTimer = 3000 + Math.random() * 4000;
       }
 
-      // 3. CURIOSITY & BEHAVIORAL MOVEMENT
-      let newTargetX = targetRef.current.x;
-      let newTargetY = targetRef.current.y;
+      // ─── 3. MOVEMENT BEHAVIOR ─────────────────────────────────────────────
+      let tx = targetRef.current.x;
+      let ty = targetRef.current.y;
 
       const distToMouse = Math.sqrt(
-        Math.pow(mousePos.x - posRef.current.x, 2) + 
+        Math.pow(mousePos.x - posRef.current.x, 2) +
         Math.pow(mousePos.y - posRef.current.y, 2)
       );
 
-      if (isMobileRef.current || s.emotion === 'dormant') {
-        // Wandering / Dormant
-        s.wanderAngle += (Math.random() - 0.5) * 0.1;
-        const speed = s.emotion === 'dormant' ? 0.2 : 1;
-        newTargetX += Math.cos(s.wanderAngle) * speed;
-        newTargetY += Math.sin(s.wanderAngle) * speed;
-        
-        // Softly pull towards center if wandering too far
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        newTargetX += (cx - newTargetX) * 0.001;
-        newTargetY += (cy - newTargetY) * 0.001;
-        
+      if (isMobile.current || soul.emotion === 'dormant') {
+        soul.wanderAngle += (Math.random() - 0.5) * 0.1;
+        const spd = soul.emotion === 'dormant' ? 0.2 : 1;
+        tx += Math.cos(soul.wanderAngle) * spd;
+        ty += Math.sin(soul.wanderAngle) * spd;
+        tx += (window.innerWidth  / 2 - tx) * 0.001;
+        ty += (window.innerHeight / 2 - ty) * 0.001;
       } else if (mousePos.x !== -1000) {
-        if (isSystemThinking) {
-           // Orbit intensely while processing thoughts
-           s.wanderAngle += 0.15;
-           const orbitDist = 25;
-           newTargetX = mousePos.x + Math.cos(s.wanderAngle) * orbitDist;
-           newTargetY = mousePos.y + Math.sin(s.wanderAngle) * orbitDist;
-        } else if (s.emotion === 'distant') {
-          // Retreat from mouse, go towards edges
+        if (isThinking) {
+          soul.wanderAngle += 0.15;
+          tx = mousePos.x + Math.cos(soul.wanderAngle) * 25;
+          ty = mousePos.y + Math.sin(soul.wanderAngle) * 25;
+        } else if (soul.emotion === 'distant') {
           if (distToMouse < 300) {
-            newTargetX = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
-            newTargetY = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
+            tx = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
+            ty = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
           }
-        } else if (s.emotion === 'curious') {
-          // Approach mouse, but stop at a respectful distance. Bond grows tighter with interactions.
-          let minDistance = isReturningVisitor.current ? 30 : 80;
-          if (interactions > 3) minDistance = 15;
-          if (interactions > 8) minDistance = 0; // Total trust
-          
-          if (distToMouse > minDistance) {
-            newTargetX = mousePos.x;
-            newTargetY = mousePos.y;
-          } else {
-            // Circle around the mouse playfully
-            s.wanderAngle += 0.02;
-            newTargetX = mousePos.x + Math.cos(s.wanderAngle) * minDistance;
-            newTargetY = mousePos.y + Math.sin(s.wanderAngle) * minDistance;
+        } else if (soul.emotion === 'curious') {
+          const minD = isReturning ? 20 : 80;
+          if (distToMouse > minD) { tx = mousePos.x; ty = mousePos.y; }
+          else {
+            soul.wanderAngle += 0.02;
+            tx = mousePos.x + Math.cos(soul.wanderAngle) * minD;
+            ty = mousePos.y + Math.sin(soul.wanderAngle) * minD;
           }
-        } else if (s.emotion === 'observing') {
-          // Orbit at a medium distance
-          s.wanderAngle += 0.005;
-          const orbitDist = 150;
-          newTargetX = mousePos.x + Math.cos(s.wanderAngle) * orbitDist;
-          newTargetY = mousePos.y + Math.sin(s.wanderAngle) * orbitDist;
+        } else if (soul.emotion === 'observing') {
+          soul.wanderAngle += 0.005;
+          tx = mousePos.x + Math.cos(soul.wanderAngle) * 150;
+          ty = mousePos.y + Math.sin(soul.wanderAngle) * 150;
         } else {
-          // Calm - gentle following
-          newTargetX = mousePos.x;
-          newTargetY = mousePos.y;
+          tx = mousePos.x;
+          ty = mousePos.y;
         }
       } else {
-          // Desktop but mouse hasn't moved yet - drift near center
-          const cx = window.innerWidth / 2;
-          const cy = window.innerHeight / 2;
-          newTargetX += (cx - newTargetX) * 0.05;
-          newTargetY += (cy - newTargetY) * 0.05;
+        tx += (window.innerWidth  / 2 - tx) * 0.05;
+        ty += (window.innerHeight / 2 - ty) * 0.05;
       }
 
-      // Clamp to screen bounds
-      newTargetX = Math.max(20, Math.min(window.innerWidth - 20, newTargetX));
-      newTargetY = Math.max(20, Math.min(window.innerHeight - 20, newTargetY));
-      targetRef.current = { x: newTargetX, y: newTargetY };
+      // Clamp
+      tx = Math.max(20, Math.min(window.innerWidth  - 20, tx));
+      ty = Math.max(20, Math.min(window.innerHeight - 20, ty));
+      targetRef.current = { x: tx, y: ty };
 
-      // Interpolation (Ease)
+      // ─── 4. INTERPOLATION — tier-aware ease ───────────────────────────────
       let ease = 0.02;
-      if (s.emotion === 'dormant') ease = 0.005;
-      if (s.emotion === 'curious') ease = 0.04;
-      if (s.emotion === 'exhausted') ease = 0.01;
-      
+      if (cTier === 'SUBCONSCIOUS')    ease = 0.012;
+      else if (cTier === 'SUPER_CONSCIOUS') ease = 0.035;
+      else if (cTier === 'HYPER_CONSCIOUS') ease = 0.055;
+      if (isReturning) ease *= 1.3;       // Ghost warmth — faster bond
+      if (isLateNight) ease *= 0.6;       // Slower drift at night
+      if (soul.emotion === 'dormant')  ease  = 0.005;
+      if (soul.emotion === 'curious')  ease *= 1.5;
+      if (soul.emotion === 'exhausted') ease = 0.008;
+
       posRef.current.x += (targetRef.current.x - posRef.current.x) * ease;
       posRef.current.y += (targetRef.current.y - posRef.current.y) * ease;
 
-      // 4. FRACTURED SOUL STATES (Glitches)
-      if (s.fractureTimer > 0) {
-        s.fractureTimer -= delta;
+      // ─── 5. FRACTURE GLITCH ───────────────────────────────────────────────
+      if (soul.fractureTimer > 0) {
+        soul.fractureTimer -= delta;
         posRef.current.x += (Math.random() - 0.5) * 8;
         posRef.current.y += (Math.random() - 0.5) * 8;
-      } else if (Math.random() < 0.0005 && s.emotion !== 'dormant' && tier === 3) {
-        s.fractureTimer = 200 + Math.random() * 300; // 200-500ms fracture
+      } else if (Math.random() < 0.0005 && soul.emotion !== 'dormant' && perfTier === 3) {
+        soul.fractureTimer = 200 + Math.random() * 300;
       }
 
-      // 5. SUBCONSCIOUS WHISPERS
-      if (s.whisperTimer > 0) {
-        s.whisperTimer -= delta;
-        if (s.whisperTimer <= 0 && whisperRef.current) {
+      // ─── 6. SUBCONSCIOUS WHISPERS (visual only — rare) ───────────────────
+      const ws = whisperState.current;
+      if (ws.timer > 0) {
+        ws.timer -= delta;
+        if (ws.timer <= 0 && whisperRef.current) {
           whisperRef.current.classList.remove('whisper-visible');
+          ws.visible = false;
         }
-      } else if (Math.random() < 0.0002 && s.emotion !== 'dormant' && s.emotion !== 'exhausted' && tier === 3) {
+      } else if (!ws.visible && Math.random() < 0.0002 &&
+                 soul.emotion !== 'dormant' && soul.emotion !== 'exhausted' &&
+                 perfTier === 3) {
         if (whisperRef.current) {
-          const text = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
-          whisperRef.current.textContent = text;
+          whisperRef.current.textContent = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
           whisperRef.current.classList.add('whisper-visible');
-          s.whisperTimer = 4000; // visible for 4 seconds
+          ws.timer   = 4000;
+          ws.visible = true;
         }
       }
 
-      // 6. DOM UPDATES (Batched, strictly outside React)
-      let newClass = `digital-soul state-${s.emotion}`;
-      if (s.fractureTimer > 0) newClass += ' state-fractured';
-      if (isSilent) newClass += ' env-silent';
-      if (isRain) newClass += ' env-rain';
+      // ─── 7. DOM UPDATE (single batched write per frame) ───────────────────
+      let cls = `digital-soul state-${soul.emotion}`;
+      if (soul.fractureTimer > 0) cls += ' state-fractured';
+      if (isSilent)  cls += ' env-silent';
+      if (isRaining) cls += ' env-rain';
+      if (soulRef.current.className !== cls) soulRef.current.className = cls;
 
-      if (soulRef.current.className !== newClass) {
-        soulRef.current.className = newClass;
+      let sx = isSilent ? 0.7 : 1;
+      let sy = isSilent ? 0.7 : 1;
+
+      const scrollSpeed = Math.abs(ns.scrollPos - (soul.lastScroll || 0));
+      soul.lastScroll = ns.scrollPos;
+      if (scrollSpeed > 2 && perfTier >= 2) {
+        sy = sx + Math.min(scrollSpeed * 0.03, 2);
+        sx = sx - Math.min(scrollSpeed * 0.01, 0.5);
       }
+      if (soul.isClicked) { sx *= 1.5; sy *= 1.5; }
 
-      const scale = isSilent ? 0.7 : 1;
-      // Scroll Dynamics
-      const currentScroll = orchestrator.scrollPos.current;
-      const scrollSpeed = Math.abs(currentScroll - (s.lastScroll || 0));
-      s.lastScroll = currentScroll;
+      const hbPulse = 1 + (heartbeatValue * 0.05);
+      sx *= hbPulse;
+      sy *= hbPulse;
 
-      let scaleY = scale;
-      let scaleX = scale;
-      if (scrollSpeed > 2 && tier >= 2) {
-         scaleY = scale + Math.min(scrollSpeed * 0.03, 2);
-         scaleX = scale - Math.min(scrollSpeed * 0.01, 0.5);
-      }
-      
-      if (s.isClicked) {
-        scaleX *= 1.5;
-        scaleY *= 1.5;
-      }
-
-      soulRef.current.style.opacity = '1';
-      soulRef.current.style.transform = `translate3d(${posRef.current.x}px, ${posRef.current.y}px, 0) scaleX(${scaleX}) scaleY(${scaleY})`;
+      soulRef.current.style.opacity   = '1';
+      soulRef.current.style.transform =
+        `translate3d(${posRef.current.x | 0}px,${posRef.current.y | 0}px,0) scaleX(${sx}) scaleY(${sy})`;
     };
 
-    orchestrator.subscribeToRAF('digital-soul', tick);
+    orchestrator.subscribeToRAF('digital-soul', tick, { priority: 'CRITICAL', gpuCost: 'LOW' });
     return () => orchestrator.unsubscribeFromRAF('digital-soul');
   }, [orchestrator]);
 
   return (
     <div ref={soulRef} className="digital-soul">
       <div className="soul-core" />
-      <div className="soul-core-echo" />
-      <div className="soul-core-echo-2" />
       <div className="soul-aura" />
       <div className="soul-aura-outer" />
-      <div className="soul-whisper" ref={whisperRef}></div>
+      <div className="soul-whisper" ref={whisperRef} />
     </div>
   );
 };

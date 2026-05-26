@@ -1,98 +1,190 @@
-.digital-seed-wrapper {
+.digital-seed-bedrock {
   position: relative;
   width: 100%;
-  height: 350px;
+  height: 500px;
+  background: linear-gradient(to bottom, #060918, #0a0806, #050403);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  background: linear-gradient(to top, rgba(6, 9, 24, 0.8), transparent);
   overflow: hidden;
-  font-family: 'Space Grotesk', sans-serif;
-  margin-top: 50px;
-  padding-bottom: 20px;
+  margin-top: 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  z-index: 1;
 }
 
-.life-consciousness {
+.ambient-fog {
   position: absolute;
-  top: 40px;
-  text-align: center;
-  opacity: 0.6;
-  transition: opacity 0.5s ease;
-  z-index: 10;
-}
-
-.digital-seed-wrapper:hover .life-consciousness {
-  opacity: 1;
-}
-
-.life-thought {
-  font-size: 0.9rem;
-  color: #F0F4FF;
-  margin-bottom: 12px;
-  letter-spacing: 1px;
-  text-shadow: 0 0 10px rgba(255,255,255,0.2);
-}
-
-.life-age {
-  font-size: 0.7rem;
-  color: #a3ffdc;
-  font-family: 'Fira Code', monospace;
-  letter-spacing: 2px;
-}
-
-.digital-lifeform {
-  position: relative;
-  width: 200px;
-  height: 200px;
-  z-index: 2;
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-}
-
-.life-svg {
+  top: -50px;
   width: 100%;
-  height: 100%;
-  overflow: visible;
-  filter: drop-shadow(0 0 8px rgba(163, 255, 220, 0.3));
-  transition: all 1s ease-in-out;
+  height: 300px;
+  background: radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.03) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 2;
 }
 
-.stage-3 .life-svg { filter: drop-shadow(0 0 12px rgba(108, 99, 255, 0.4)); }
-.stage-4 .life-svg { filter: drop-shadow(0 0 15px rgba(168, 85, 247, 0.5)); }
-
-.glow-pulse {
-  animation: seedPulse 2s infinite alternate;
-  transform-origin: center;
-}
-
-.mango-glow {
-  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.8));
-  animation: mangoBreathe 3s infinite alternate;
-  transform-origin: center;
-}
-
-.digital-soil {
+.soil-surface-layer {
   position: absolute;
   bottom: 0;
   width: 100%;
-  height: 1px;
+  height: 250px;
+  background: linear-gradient(to bottom, transparent, #0a0806 30%, #050403);
+  z-index: 3;
 }
 
-.soil-surface {
+.soil-texture {
+  position: absolute;
   width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+  height: 100%;
+  background-image: radial-gradient(circle at center, transparent, #050403), repeating-linear-gradient(45deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 2px, transparent 2px, transparent 10px);
+  opacity: 0.5;
 }
 
-@keyframes seedPulse {
-  0% { opacity: 0.6; transform: scale(0.9); }
-  100% { opacity: 1; transform: scale(1.3); }
+.subconscious-depths {
+  position: absolute;
+  bottom: -20px;
+  width: 300px;
+  height: 200px;
+  z-index: 4;
 }
 
-@keyframes mangoBreathe {
-  0% { filter: drop-shadow(0 0 5px rgba(255, 215, 0, 0.5)); }
-  100% { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 1)); }
+.root-system {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  transition: opacity 1s ease;
+}
+
+.root {
+  position: absolute;
+  background: linear-gradient(to bottom, #14100c, #0a0806, transparent);
+  border-radius: 5px;
+}
+
+.root-main { width: 12px; height: 120px; left: 50%; transform: translateX(-50%); }
+.root-left { width: 8px; height: 90px; left: 40%; top: 10px; transform: rotate(35deg); border-radius: 50% 10% 10% 50%; }
+.root-right { width: 6px; height: 110px; left: 55%; top: 15px; transform: rotate(-25deg); border-radius: 10% 50% 50% 10%; }
+.root-deep-1 { width: 4px; height: 80px; left: 35%; top: 80px; transform: rotate(15deg); }
+.root-deep-2 { width: 4px; height: 70px; left: 60%; top: 90px; transform: rotate(-10deg); }
+
+.root-neural-pathway {
+  position: absolute;
+  width: 2px;
+  height: 150px;
+  left: 50%;
+  background: linear-gradient(to bottom, transparent, rgba(163, 255, 220, 0.1), transparent);
+  opacity: 0.3;
+}
+
+.tree-organism {
+  position: absolute;
+  bottom: 220px;
+  width: 60px;
+  height: 200px;
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  transform-origin: bottom center;
+}
+
+.tree-trunk {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 0%;
+  background: linear-gradient(to right, #120e0a, #2a241e, #0c0a07);
+  border-radius: 4px 4px 0 0;
+  transition: height 2s ease-out, width 2s ease-out;
+}
+
+.bark-texture {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: repeating-linear-gradient(to right, rgba(0,0,0,0.2) 0px, transparent 1px, rgba(0,0,0,0.1) 2px);
+  border-radius: inherit;
+}
+
+.branch {
+  position: absolute;
+  background: linear-gradient(to top right, #1c1814, #2a241e);
+  border-radius: 2px;
+}
+
+.branch-1 { width: 4px; height: 40px; top: 40%; left: 90%; transform-origin: bottom left; transform: rotate(45deg); }
+.branch-2 { width: 3px; height: 35px; top: 20%; right: 90%; transform-origin: bottom right; transform: rotate(-55deg); }
+.branch-3 { width: 3px; height: 30px; top: 5%; left: 90%; transform-origin: bottom left; transform: rotate(35deg); }
+.branch-4 { width: 2px; height: 25px; top: 0; right: 80%; transform-origin: bottom right; transform: rotate(-25deg); }
+
+.leaf-canopy {
+  position: absolute;
+  top: -20px;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.leaf-cluster {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+}
+
+.cluster-1 { top: 35%; left: 25px; }
+.cluster-2 { top: 15%; right: 20px; }
+.cluster-3 { top: -5%; left: 15px; }
+.cluster-4 { top: -15%; right: 5px; }
+
+.leaf {
+  position: absolute;
+  width: 12px;
+  height: 6px;
+  background: linear-gradient(135deg, #24381e, #1a2616);
+  border-radius: 0 100% 0 100%;
+  transform-origin: left center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.leaf-b { transform: rotate(45deg) scale(0.8); top: -2px; left: 2px; }
+.leaf-c { transform: rotate(-30deg) scale(0.9); top: 3px; left: -2px; }
+
+/* STAGE SYSTEM */
+.stage-0 .tree-trunk { height: 5px; }
+.stage-1 .tree-trunk { height: 30px; }
+.stage-2 .tree-trunk { height: 80px; width: 10px; }
+.stage-3 .tree-trunk { height: 140px; width: 14px; }
+.stage-4 .tree-trunk { height: 200px; width: 18px; }
+
+/* WEATHER: Rain */
+.weather-moist {
+  background: linear-gradient(to bottom, #04060d, #060504, #020101);
+}
+.weather-moist .soil-surface-layer {
+  background: linear-gradient(to bottom, transparent, #050403 30%, #020101);
+}
+.weather-moist .bark-texture {
+  background-image: linear-gradient(to right, rgba(255,255,255,0.05), transparent), repeating-linear-gradient(to right, rgba(0,0,0,0.4) 0px, transparent 1px, rgba(0,0,0,0.2) 2px);
+}
+.weather-moist .leaf {
+  background: linear-gradient(135deg, #2d4526, #162112);
+}
+
+/* LATE NIGHT LONELINESS */
+.late-night-loneliness {
+  filter: saturate(0.4) brightness(0.7) contrast(1.1);
+}
+
+.timeline-whisper {
+  position: absolute;
+  bottom: 20px;
+  font-family: 'Space Grotesk', monospace;
+  font-size: 0.65rem;
+  color: rgba(255,255,255,0.2);
+  letter-spacing: 2px;
+  z-index: 10;
+  text-transform: uppercase;
+  pointer-events: none;
 }

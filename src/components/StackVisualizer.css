@@ -223,4 +223,129 @@
   .render-header { display: none; }
   .render-strategy-badge { font-size: 0.65rem; }
   .render-reason { font-size: 0.7rem; }
+  .consciousness-tier-grid { grid-template-columns: 1fr 1fr; }
+  .nervous-system-callout { flex-direction: column; gap: 12px; }
+}
+
+/* ─── Consciousness Tier Section ─── */
+.stack-consciousness-section {
+  margin-top: 50px;
+}
+
+.stack-consciousness-desc {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.7;
+  max-width: 680px;
+  margin-bottom: 28px;
+}
+
+.consciousness-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.consciousness-tier-card {
+  padding: 20px 18px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  background: rgba(255, 255, 255, 0.02);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.consciousness-tier-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top left, var(--tier-color, #fff), transparent 70%);
+  opacity: 0.04;
+  pointer-events: none;
+}
+
+.consciousness-tier-card:hover {
+  border-color: var(--tier-color, rgba(255,255,255,0.2));
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.tier-name {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.tier-range {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.tier-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+  margin: 0 0 14px;
+}
+
+.tier-bar {
+  height: 2px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tier-bar-fill {
+  height: 100%;
+  width: 100%;
+  opacity: 0.6;
+  border-radius: 2px;
+}
+
+/* ─── NervousSystem Callout ─── */
+.nervous-system-callout {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 20px 24px;
+  border-radius: 14px;
+  background: rgba(167, 139, 250, 0.05);
+  border: 1px solid rgba(167, 139, 250, 0.2);
+  margin-top: 8px;
+}
+
+.ns-callout-icon {
+  font-size: 1.3rem;
+  color: #A78BFA;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.ns-callout-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #A78BFA;
+  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+}
+
+.ns-callout-desc {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.6;
 }

@@ -62,11 +62,11 @@ const Hero = () => {
   }, []);
 
   const hour = new Date().getHours();
-  let timeGreeting = "Hey there!";
-  if (hour < 5 || hour >= 23) timeGreeting = "Late night coding? ☕";
-  else if (hour < 12) timeGreeting = "Good morning, let's build. 🌅";
-  else if (hour < 18) timeGreeting = "Good afternoon! ☀️";
-  else timeGreeting = "Good evening! 🌙";
+  let timeGreeting = "Welcome.";
+  if (hour < 5 || hour >= 23)  timeGreeting = "Still here at this hour.";
+  else if (hour < 12)          timeGreeting = "The morning is early yet.";
+  else if (hour < 18)          timeGreeting = "Afternoon — a good time to explore.";
+  else                         timeGreeting = "The day is winding down.";
 
   const displayData = {
     greeting: timeGreeting,
@@ -171,18 +171,9 @@ const Hero = () => {
       >
         <motion.div
           className="hero-greeting"
-          initial={{ opacity: 0, y: -20 }}
+          initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          style={{ 
-            color: 'var(--text-muted)', 
-            fontSize: '1.25rem', 
-            marginBottom: '1rem', 
-            letterSpacing: '2px', 
-            fontWeight: '400', 
-            fontStyle: 'italic',
-            fontFamily: "'Bodoni Moda', 'Playfair Display', serif" 
-          }}
+          transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           {displayData.greeting}
         </motion.div>

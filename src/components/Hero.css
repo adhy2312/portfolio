@@ -50,6 +50,38 @@
   text-align: center;
 }
 
+/* Time-aware greeting — premium, restrained typographic treatment */
+.hero-greeting {
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+  margin-bottom: 2rem;
+  position: relative;
+  display: inline-block;
+}
+
+/* Flanking ruled lines — a premium typographic device */
+.hero-greeting::before,
+.hero-greeting::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 40px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.hero-greeting::before { right: calc(100% + 14px); }
+.hero-greeting::after  { left:  calc(100% + 14px); }
+
+@media (max-width: 768px) {
+  .hero-greeting::before,
+  .hero-greeting::after { width: 20px; }
+}
+
 .hero-name-giant {
   font-family: 'Bodoni Moda', 'Playfair Display', 'Cormorant Garamond', serif;
   font-size: clamp(4rem, 15vw, 11rem);

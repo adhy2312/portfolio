@@ -4,23 +4,38 @@ import { FiCpu, FiLayers, FiZap, FiGlobe, FiPackage, FiClock, FiActivity } from 
 import './StackVisualizer.css';
 
 const ARCHITECTURE = [
-  { layer: 'Frontend', tech: 'React 19', icon: <FiLayers />, color: '#61DAFB', desc: 'Component-based UI with Suspense + Lazy loading' },
-  { layer: 'Animation', tech: 'Framer Motion 12', icon: <FiZap />, color: '#FF6B9D', desc: 'Spring physics, scroll-scrubbing, layout animations' },
-  { layer: 'Scrolling', tech: 'Lenis', icon: <FiActivity />, color: '#00FF87', desc: 'Lerp-based smooth scrolling at 60fps' },
-  { layer: '3D Engine', tech: 'Three.js + R3F', icon: <FiCpu />, color: '#FFD93D', desc: 'WebGL Neural Map with real-time scroll-bound rotation' },
-  { layer: 'CMS', tech: 'Sanity.io', icon: <FiGlobe />, color: '#F36458', desc: 'Headless CMS for dynamic content management' },
-  { layer: 'Styling', tech: 'Vanilla CSS', icon: <FiPackage />, color: '#C084FC', desc: 'Custom design system with CSS variables & glass-morphism' },
-  { layer: 'AI', tech: 'Gemini API', icon: <FiCpu />, color: '#4ECDC4', desc: 'Powers Mini-Adhy chatbot intelligence' },
-  { layer: 'Hosting', tech: 'Vercel', icon: <FiGlobe />, color: '#fff', desc: 'Edge network with automatic CI/CD' },
+  { layer: 'Frontend',        tech: 'React 19',              icon: <FiLayers />,   color: '#61DAFB', desc: 'Component-based UI with Suspense + Lazy loading' },
+  { layer: 'Animation',       tech: 'Framer Motion 12',      icon: <FiZap />,      color: '#FF6B9D', desc: 'Spring physics, scroll-scrubbing, layout animations' },
+  { layer: 'Scrolling',       tech: 'Lenis',                 icon: <FiActivity />, color: '#00FF87', desc: 'Lerp-based smooth scrolling at 60fps' },
+  { layer: '3D Engine',       tech: 'Three.js + R3F',        icon: <FiCpu />,      color: '#FFD93D', desc: 'WebGL Neural Map with real-time scroll-bound rotation' },
+  { layer: 'CMS',             tech: 'Sanity.io',             icon: <FiGlobe />,    color: '#F36458', desc: 'Headless CMS for dynamic content management' },
+  { layer: 'Styling',         tech: 'Vanilla CSS',           icon: <FiPackage />,  color: '#C084FC', desc: 'Custom design system with CSS variables & glass-morphism' },
+  { layer: 'AI',              tech: 'Gemini 2.5 Flash',      icon: <FiCpu />,      color: '#4ECDC4', desc: 'Powers Mini-Adhy with personality, memory & emotional context' },
+  { layer: 'Hosting',         tech: 'Vercel',                icon: <FiGlobe />,    color: '#fff',    desc: 'Edge network with automatic CI/CD' },
+  { layer: 'Nervous System',  tech: 'NervousSystem.js',      icon: <FiCpu />,      color: '#A78BFA', desc: 'Unified brain singleton — owns RAF loop, event bus & live state' },
+  { layer: 'Consciousness',   tech: 'ConsciousnessContext',  icon: <FiActivity />, color: '#F59E0B', desc: '4-tier system: SUBCONSCIOUS → CONSCIOUS → SUPER → HYPER' },
+  { layer: 'Presence Engine', tech: 'PresenceEngine.js',     icon: <FiLayers />,   color: '#34D399', desc: 'Zero-latency shared state proxy — direct RAF memory reads' },
+  { layer: 'Event Bus',       tech: 'NeuralEventBus.js',     icon: <FiZap />,      color: '#FB7185', desc: 'Lightweight event router — shim delegating to NervousSystem' },
+  { layer: 'Digital Soul',    tech: 'DigitalSoul.js',        icon: <FiActivity />, color: '#818CF8', desc: 'Emotionally-reactive cursor entity with 8 behavioral states' },
 ];
 
 const RENDER_STRATEGIES = [
-  { name: 'Hero', strategy: 'Eager', reason: 'LCP critical — rendered immediately' },
-  { name: 'Navbar', strategy: 'Eager', reason: 'Above the fold — always visible' },
-  { name: 'Below-fold Sections', strategy: 'Lazy + IntersectionObserver', reason: 'Loaded 600px before entering viewport' },
-  { name: 'NeuralMap (3D)', strategy: 'Lazy + Visibility Gate', reason: 'WebGL paused when off-screen' },
-  { name: 'Spotify / Chatbot', strategy: 'Deferred (3.5s)', reason: 'Non-critical widgets loaded after TTI' },
-  { name: 'Particles', strategy: 'Deferred (2s)', reason: 'Decorative — delayed to protect FCP' },
+  { name: 'Hero',                  strategy: 'Eager',                   reason: 'LCP critical — rendered immediately' },
+  { name: 'Navbar',                strategy: 'Eager',                   reason: 'Above the fold — always visible' },
+  { name: 'Below-fold Sections',   strategy: 'Lazy + IntersectionObserver', reason: 'Loaded 600px before entering viewport' },
+  { name: 'NeuralMap (3D)',         strategy: 'Lazy + Visibility Gate',  reason: 'WebGL paused when off-screen' },
+  { name: 'Spotify / Chatbot',     strategy: 'Deferred (3.5s)',         reason: 'Non-critical widgets loaded after TTI' },
+  { name: 'Particles',             strategy: 'Deferred (2s)',           reason: 'Decorative — delayed to protect FCP' },
+  { name: 'DigitalSoul',           strategy: 'CRITICAL RAF Priority',   reason: 'Always runs — emotional engine must never sleep' },
+  { name: 'Timeline Memory',       strategy: 'Cinematic Physics RAF',   reason: 'Virtual scroll with lerped momentum, no layout reads' },
+  { name: 'Consciousness Tiers',   strategy: 'Interval @ 400ms',        reason: 'Score recalculated without React state, zero re-renders' },
+];
+
+const CONSCIOUSNESS_TIERS = [
+  { tier: 'SUBCONSCIOUS',    range: '0–25',  color: '#6366F1', desc: 'Ambient baseline. Soul barely visible. Day-1 visitor.' },
+  { tier: 'CONSCIOUS',       range: '26–55', color: '#10B981', desc: 'Active session. Standard Soul tracking. Whispers enabled.' },
+  { tier: 'SUPER_CONSCIOUS', range: '56–80', color: '#F59E0B', desc: 'Returning visitor or 3+ min dwell. Soul becomes more present.' },
+  { tier: 'HYPER_CONSCIOUS', range: '81+',   color: '#EF4444', desc: 'Peak event (Timeline linger, MiniAdhy open). Transient 18–22s.' },
 ];
 
 const StackVisualizer = () => {
@@ -149,6 +164,58 @@ const StackVisualizer = () => {
                 <span className="render-reason">{r.reason}</span>
               </motion.div>
             ))}
+          </div>
+        </motion.div>
+
+        {/* Consciousness Tier System */}
+        <motion.div
+          className="stack-consciousness-section"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+        >
+          <h3 className="stack-sub-title">
+            <FiCpu /> Living Architecture — Consciousness Tiers
+          </h3>
+          <p className="stack-consciousness-desc">
+            The website self-regulates into 4 awareness states based on visit history,
+            session dwell, interaction density, and adrenaline score. All state lives in
+            a single RAF-driven singleton — zero React re-renders for emotional transitions.
+          </p>
+          <div className="consciousness-tier-grid">
+            {CONSCIOUSNESS_TIERS.map((t, i) => (
+              <motion.div
+                key={t.tier}
+                className="consciousness-tier-card"
+                initial={{ opacity: 0, scale: 0.95 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.35, delay: i * 0.1 }}
+                viewport={{ once: true }}
+                style={{ '--tier-color': t.color }}
+              >
+                <div className="tier-header">
+                  <span className="tier-name" style={{ color: t.color }}>{t.tier}</span>
+                  <span className="tier-range">{t.range} pts</span>
+                </div>
+                <p className="tier-desc">{t.desc}</p>
+                <div className="tier-bar">
+                  <div className="tier-bar-fill" style={{ background: t.color }} />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          <div className="nervous-system-callout">
+            <div className="ns-callout-icon"><FiCpu /></div>
+            <div>
+              <div className="ns-callout-title">NervousSystem.js — Unified Brain</div>
+              <div className="ns-callout-desc">
+                Single singleton owns the RAF loop, event bus, shared state, and Digital Soul
+                emotional queue. NeuralEventBus, PresenceEngine, and SystemOrchestrator are
+                backward-compatible shims. Emotional latency reduced from ~800ms to &lt;16ms.
+              </div>
+            </div>
           </div>
         </motion.div>
       </div>

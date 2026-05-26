@@ -1,8 +1,9 @@
 .timeline-section {
   padding: 100px 0;
   position: relative;
-  background: #ffffff;
+  background-color: #ffffff;
   overflow: hidden;
+  transition: background-color 0.1s linear;
 }
 
 .timeline-header {
@@ -29,12 +30,10 @@
 
 .timeline-scroll-wrapper {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden; /* Changed from auto for custom virtual scroll */
   padding: 60px 0 80px 0;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none; /* Firefox */
   cursor: grab;
+  touch-action: pan-y; /* Allow native vertical scroll on page, but capture horizontal */
 }
 
 .timeline-scroll-wrapper:active {
@@ -117,7 +116,14 @@
 }
 
 .heartbeat-pulse {
-  animation: emotionalHeartbeat 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+  /* No animation when idle — saves GPU on all 10+ nodes */
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.timeline-node-wrapper:hover .heartbeat-pulse {
+  opacity: 1;
+  animation: emotionalHeartbeat 1.5s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 @keyframes emotionalHeartbeat {
@@ -130,10 +136,7 @@
   transform: translateX(-50%) scale(1.2);
   box-shadow: 0 0 15px rgba(0, 240, 255, 0.5);
 }
-
-.timeline-node-wrapper:hover .timeline-point-inner {
-  opacity: 1;
-}
+/* Remove redundant duplicate rule below */
 
 .node-top {
   justify-content: flex-end;
@@ -239,4 +242,91 @@
   .timeline-content {
     padding: 16px;
   }
+}
+
+/* ─── TEMPORAL WHISPERS ─── */
+.temporal-whisper {
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  transform: translate(-50%, 10px) scale(0.95);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.85rem;
+  color: rgba(0, 0, 0, 0.4);
+  letter-spacing: 2px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1.5s ease-in-out, transform 2s ease-out;
+  z-index: 10;
+  text-align: center;
+  font-style: italic;
+}
+.temporal-whisper.whisper-active {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+.mode-expert .temporal-whisper { color: #00ff41; }
+.mode-experimental .temporal-whisper { color: #e0d5e6; }
+
+/* ─── AUDIO RESONANCE ILLUSION ─── */
+.audio-resonance {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  height: 15px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.timeline-node-wrapper:hover .audio-resonance {
+  opacity: 1;
+}
+.audio-resonance span {
+  display: block;
+  width: 2px;
+  background: var(--accent-primary);
+  border-radius: 2px;
+  animation: visual-resonance 1s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: bottom;
+}
+.audio-resonance span:nth-child(1) { height: 6px; animation-delay: 0s; }
+.audio-resonance span:nth-child(2) { height: 12px; animation-delay: 0.2s; }
+.audio-resonance span:nth-child(3) { height: 8px; animation-delay: 0.4s; }
+
+@keyframes visual-resonance {
+  0% { transform: scaleY(0.3); opacity: 0.3; }
+  100% { transform: scaleY(1); opacity: 0.8; }
+}
+
+/* ─── UNRESOLVED FUTURE SYSTEM ─── */
+.unresolved-future-node .fractured-memory {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px dashed rgba(0, 0, 0, 0.2);
+  box-shadow: none;
+  opacity: 0.6;
+  animation: memory-flicker 4s infinite;
+}
+.unresolved-future-node .corrupted-text {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+.unresolved-future-node .glitch-point {
+  background: transparent;
+  border-style: dashed;
+  animation: glitch-spin 8s linear infinite;
+}
+.glitch-resonance span {
+  background: rgba(0, 0, 0, 0.4) !important;
+  animation-duration: 0.2s !important;
+}
+
+@keyframes memory-flicker {
+  0%, 98% { opacity: 0.6; transform: skew(0deg); }
+  99% { opacity: 0.2; transform: skew(2deg); filter: blur(2px); }
+  100% { opacity: 0.7; transform: skew(-2deg); filter: blur(0px); }
+}
+@keyframes glitch-spin {
+  100% { transform: translateX(-50%) rotate(360deg); }
 }
