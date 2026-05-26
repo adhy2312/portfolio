@@ -10,6 +10,8 @@
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import ns from '../core/NervousSystem';
 import { lifeEngine } from '../core/LifeEngine';
+import { hapticEngine } from '../core/HapticEngine';
+import { immersiveEngine } from '../core/ImmersiveEngine';
 
 const OrchestratorContext = createContext();
 
@@ -20,7 +22,13 @@ export const SystemOrchestratorProvider = ({ children }) => {
   useEffect(() => {
     ns.start();
     lifeEngine.init();
-    return () => ns.stop();
+    hapticEngine.init(ns);
+    immersiveEngine.init(ns);
+    return () => {
+      ns.stop();
+      hapticEngine.stop();
+      immersiveEngine.stop();
+    };
   }, []);
 
   // Stable API object — same shape as the old orchestrator so all
