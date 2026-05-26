@@ -31,7 +31,13 @@ export default async function handler(req, res) {
       headers: { Authorization: `Bearer ${access_token}` },
     });
 
-    if (nowPlayingRes.status === 204 || nowPlayingRes.status > 400) {
+    let data = null;
+    if (nowPlayingRes.status !== 204 && nowPlayingRes.status < 400) {
+      data = await nowPlayingRes.json();
+    }
+
+    // If nothing is actively playing, fetch the true last played track from history
+    if (!data || !data.is_playing || !data.item) {
       const lastRes = await fetch(LAST_PLAYED_ENDPOINT, {
         headers: { Authorization: `Bearer ${access_token}` },
       });
@@ -54,9 +60,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const data = await nowPlayingRes.json();
-    const item = data?.item;
-    if (!item) return res.status(200).json({ isPlaying: false });
+    const item = data.item;
 
     return res.status(200).json({
       isPlaying: data.is_playing,

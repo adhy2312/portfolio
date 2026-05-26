@@ -2,7 +2,6 @@
 import React from 'react';
 import { loadBasic } from 'tsparticles-basic';
 import Particles from 'react-tsparticles';
-import { Engine } from 'tsparticles-engine';
 
 const ParticlesBackground = () => {
   const particlesInit = async (engine) => {

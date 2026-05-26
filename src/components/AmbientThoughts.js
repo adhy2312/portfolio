@@ -3,7 +3,7 @@ import { useConsciousness } from '../contexts/ConsciousnessContext';
 import './AmbientThoughts.css';
 
 const AmbientThoughts = () => {
-  const { ambientThought, idleState, performanceState } = useConsciousness();
+  const { ambientThought, idleState } = useConsciousness();
 
   if (!ambientThought && idleState !== 'dreaming') return null;
 

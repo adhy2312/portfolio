@@ -1,6 +1,6 @@
 import React, { useState, useRef, useMemo, useEffect, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Stars, Line, Points, PointMaterial } from '@react-three/drei';
+import { OrbitControls, Html, Stars, Line } from '@react-three/drei';
 import * as THREE from 'three';
 import { FiMonitor, FiWind, FiCamera, FiBox, FiRadio, FiBookOpen } from 'react-icons/fi';
 import { client } from '../sanity';

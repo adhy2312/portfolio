@@ -8,9 +8,6 @@ const ScrollProgress = () => {
   useEffect(() => {
     const bar = barRef.current;
     if (!bar) return;
-    const root = document.documentElement;
-    let lastScrollY = window.scrollY;
-    let lastTime = performance.now();
 
     const onScroll = () => {
       const el = document.documentElement;

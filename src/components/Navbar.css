@@ -626,14 +626,15 @@
     letter-spacing: 2px;
   }
   .weather-indicator {
-    padding: 4px;
-    font-size: 1.1rem; /* size of icon */
-    margin: 0 !important;
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    margin: 0 auto 0 10px !important;
     background: transparent;
     border: none;
+    gap: 4px;
   }
   .weather-indicator span {
-    display: none;
+    display: inline-block;
   }
   .xray-toggle-btn {
     margin: 0 !important;

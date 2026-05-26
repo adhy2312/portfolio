@@ -8,7 +8,6 @@ export const ConsciousnessProvider = ({ children }) => {
   const [activeSection, setActiveSection] = useState('Hero');
   // Only expose semantic states to prevent re-rendering every second
   const [idleState, setIdleState] = useState('active'); // active, inactive, dreaming
-  const [performanceState, setPerformanceState] = useState('optimal'); // optimal, degraded
   
   const [visitorMemory, setVisitorMemory] = useState(() => {
     try {
@@ -262,7 +261,6 @@ export const ConsciousnessProvider = ({ children }) => {
       activeSection,
       setActiveSection,
       idleState,
-      performanceState,
       idleTimeRef, // expose ref directly for MiniAdhy exact checking without re-renders
       fpsRef, // expose ref directly for MiniAdhy exact checking
       visitorMemory,
