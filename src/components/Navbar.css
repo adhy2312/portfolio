@@ -626,15 +626,20 @@
     letter-spacing: 2px;
   }
   .weather-indicator {
-    padding: 4px 6px;
+    padding: 2px 6px;
     font-size: 0.8rem;
-    margin: 0 auto 0 10px !important;
+    margin: 0 8px 0 auto !important;
     background: transparent;
     border: none;
     gap: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
   }
   .weather-indicator span {
-    display: inline-block;
+    display: inline-block !important;
+    white-space: nowrap;
   }
   .xray-toggle-btn {
     margin: 0 !important;
