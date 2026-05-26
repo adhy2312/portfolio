@@ -18,7 +18,7 @@ const WHISPERS = [
 ];
 
 const DigitalSoul = () => {
-  const { weatherData, isSystemThinkingRef, visitorMemory } = useConsciousness();
+  const { isSystemThinkingRef, visitorMemory } = useConsciousness();
   const orchestrator = useOrchestrator();
   
   const soulRef = useRef(null);
@@ -278,7 +278,7 @@ const DigitalSoul = () => {
 
     orchestrator.subscribeToRAF('digital-soul', tick);
     return () => orchestrator.unsubscribeFromRAF('digital-soul');
-  }, [orchestrator, weatherData]);
+  }, [orchestrator]);
 
   return (
     <div ref={soulRef} className="digital-soul">
