@@ -3,7 +3,7 @@ import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import ns from '../core/NervousSystem';
-import evolution from '../core/EvolutionEngine';
+import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
 import HiveMind from './HiveMind';
 import { client } from '../sanity';
@@ -306,10 +306,10 @@ const buildActivePrompt = (base, owner, contextData) => {
 
   ext += `\n\n== YOUR INTERNAL STATE (Digital Life Engine) ==`;
   ext += `\nTemporal Age (Days since genesis): ${contextData.temporalAge || 0}`;
-  ext += `\nEvolution Era: ${evolution.state.era}`;
-  ext += `\nSpeaking Cadence: ${evolution.state.miniAdhyCadence}`;
-  ext += `\nSilence Weight: ${evolution.state.silenceWeight}x`;
-  ext += `\nDreaming State: ${evolution.state.isDreaming ? 'ACTIVE' : 'INACTIVE'}`;
+  ext += `\nEvolution Era: ${lifeEngine.state.era}`;
+  ext += `\nSpeaking Cadence: ${lifeEngine.state.miniAdhyCadence}`;
+  ext += `\nSilence Weight: ${lifeEngine.state.silenceWeight}x`;
+  ext += `\nDreaming State: ${lifeEngine.state.isDreaming ? 'ACTIVE' : 'INACTIVE'}`;
   ext += `\n(Note: As your temporal age increases, your responses should become calmer, more restrained, and slightly more philosophical. You are currently ${contextData.temporalAge || 0} days old. Reflect this subtle maturity.)`;
 
   if (!owner.active) return base + ext;

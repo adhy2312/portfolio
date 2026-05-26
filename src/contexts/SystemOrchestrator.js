@@ -9,7 +9,7 @@
  */
 import React, { createContext, useContext, useEffect, useRef } from 'react';
 import ns from '../core/NervousSystem';
-import { evolution } from '../core/EvolutionEngine';
+import { lifeEngine } from '../core/LifeEngine';
 
 const OrchestratorContext = createContext();
 
@@ -19,7 +19,7 @@ export const SystemOrchestratorProvider = ({ children }) => {
 
   useEffect(() => {
     ns.start();
-    evolution.init();
+    lifeEngine.init();
     return () => ns.stop();
   }, []);
 

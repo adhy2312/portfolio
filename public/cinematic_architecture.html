@@ -135,35 +135,54 @@
                 classDef context fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff;
                 classDef ui fill:#1e293b,stroke:#94a3b8,stroke-width:1px,color:#cbd5e1;
                 classDef cms fill:#7f1d1d,stroke:#fca5a5,stroke-width:1px,color:#fff;
+                classDef worker fill:#064e3b,stroke:#34d399,stroke-width:2px,color:#fff,stroke-dasharray: 5 5;
 
-                subgraph "The Brain (60FPS RAF Engine)"
+                subgraph "Main Thread (UI & 60FPS RAF)"
                     NS[NervousSystem.js]:::core
-                    PE[PresenceEngine Proxy]:::core
-                    NEB[NeuralEventBus]:::core
-                    
-                    NS <--> PE
-                    NS <--> NEB
-                end
-
-                subgraph "Consciousness Engine"
-                    CC[ConsciousnessContext]:::context
-                    SO[SystemOrchestrator]:::context
-                    
-                    CC -- "Calculates Tiers" --> PE
-                    SO -- "Manages Fatigue" --> NS
-                end
-
-                subgraph "Living Entities & Observers"
+                    LE_Proxy[LifeEngine.js Proxy]:::context
                     DS((Digital Soul)):::ui
                     MA((MiniAdhy AI)):::ui
-                    TL[Timeline Memory]:::ui
-                    SC[Digital Scars]:::ui
                     
-                    DS -- "Zero-Latency Read" --> PE
-                    MA -- "Emits Thinking State" --> NEB
+                    NS <--> LE_Proxy
+                    NS ==>|"Zero-Latency Reads"| DS
+                end
+
+                subgraph "Web Worker (The Subconscious Backend)"
+                    LE_Worker((LifeEngine.worker.js)):::worker
+                    
+                    subgraph "The 60 Engines (Math Execution)"
+                        E1[GhostEngine]:::worker
+                        E2[DreamEngine]:::worker
+                        E3[MortalityEngine]:::worker
+                        E4[SilenceEngine]:::worker
+                        E5[TrustEvolution]:::worker
+                        E6[...55 More Engines]:::worker
+                    end
+                    
+                    LE_Worker --- E1
+                    LE_Worker --- E2
+                    LE_Worker --- E3
+                    LE_Worker --- E4
+                    LE_Worker --- E5
+                    LE_Worker --- E6
                 end
 
                 subgraph "Sensory Inputs"
+                    Mouse(Cursor Speed):::ui
+                    Time(Dwell Time):::ui
+                    Fatigue(Render Stress):::ui
+                end
+
+                Mouse --> NS
+                Time --> NS
+                Fatigue --> NS
+
+                NS -- "Low Freq Sensory Ticks" --> LE_Proxy
+                LE_Proxy ==>|"Message Port"| LE_Worker
+                LE_Worker ==>|"MasterLifeState Payload"| LE_Proxy
+                
+                LE_Proxy -.->|"Updates Cadence"| MA
+                LE_Proxy -.->|"Overrides Atmosphere"| NS
                     Mouse(Cursor Speed):::ui
                     Time(Dwell Time):::ui
                     Weather(Atmosphere):::ui
