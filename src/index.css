@@ -59,6 +59,11 @@
   --subconscious-pace: 0.4s;
   --subconscious-restraint: 0;
   --subconscious-atmosphere: 0.8;
+  --bio-rhythm: 1s; /* Dynamic heartbeat */
+  
+  /* Soul coordinates */
+  --soul-x: 50vw;
+  --soul-y: 50vh;
   
   /* Transitions - Tied directly to the Subconscious Engine's pacing */
   --transition-fast: calc(var(--subconscious-pace) * 0.4) cubic-bezier(0.16, 1, 0.3, 1);
@@ -246,6 +251,48 @@ body.mode-experimental p, body.mode-experimental span, body.mode-experimental a 
 
 body.mode-experimental img {
   filter: sepia(0.5) hue-rotate(320deg) saturate(1.5) !important;
+}
+
+/* ═══════════════════════════════════════════
+   LOW-POWER SYMBIOSIS MODE
+   (Triggers if user laptop battery < 20%)
+═══════════════════════════════════════════ */
+html.low-power-symbiosis body {
+  background-color: #020202 !important;
+  color: #666 !important;
+}
+html.low-power-symbiosis * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+html.low-power-symbiosis .ambient-blob,
+html.low-power-symbiosis .performance-breathing-overlay,
+html.low-power-symbiosis .soul-aura-outer,
+html.low-power-symbiosis .particle-network {
+  display: none !important;
+}
+html.low-power-symbiosis img {
+  filter: brightness(0.6) grayscale(100%) !important;
+}
+html.low-power-symbiosis .glass-card {
+  background: rgba(10, 10, 10, 0.95) !important;
+  border-color: #111 !important;
+}
+
+/* ═══════════════════════════════════════════
+   GLOBAL SOUL ILLUMINATION
+   (Casts a subtle light across the entire site following the Digital Soul)
+═══════════════════════════════════════════ */
+.App::before {
+  content: '';
+  position: fixed; 
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+  z-index: 0;
 }
 
 

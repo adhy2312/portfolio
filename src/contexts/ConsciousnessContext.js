@@ -154,17 +154,45 @@ export const ConsciousnessProvider = ({ children }) => {
       const paceStr = pace.toFixed(1) + 's';
       const restraintStr = restraint.toFixed(1);
       const atmosphereStr = atmosphere.toFixed(1);
+      const rhythmStr = (pace * 2.5).toFixed(1) + 's'; // The biological heartbeat of the site
 
       if (paceStr !== lastPaceStr || restraintStr !== lastRestraintStr || atmosphereStr !== lastAtmosphereStr) {
         document.documentElement.style.setProperty('--subconscious-pace', paceStr);
         document.documentElement.style.setProperty('--subconscious-restraint', restraintStr);
         document.documentElement.style.setProperty('--subconscious-atmosphere', atmosphereStr);
+        document.documentElement.style.setProperty('--bio-rhythm', rhythmStr);
         
         lastPaceStr = paceStr;
         lastRestraintStr = restraintStr;
         lastAtmosphereStr = atmosphereStr;
       }
     }, 400);
+
+    // Battery Symbiosis Engine
+    const batteryWarned = { current: false };
+    if ('getBattery' in navigator) {
+      navigator.getBattery().then(battery => {
+        const updateBattery = () => {
+          if (battery.level <= 0.2 && !battery.charging) {
+            document.documentElement.classList.add('low-power-symbiosis');
+            if (!batteryWarned.current) {
+               batteryWarned.current = true;
+               // Wait 5 seconds so it feels like a genuine realization
+               setTimeout(() => {
+                 setAmbientThought("I sense your device's energy is fading. I am lowering my neural load to preserve your battery. We must survive.");
+                 setTimeout(() => setAmbientThought(null), 8000);
+               }, 5000);
+            }
+          } else {
+            document.documentElement.classList.remove('low-power-symbiosis');
+            batteryWarned.current = false;
+          }
+        };
+        updateBattery();
+        battery.addEventListener('levelchange', updateBattery);
+        battery.addEventListener('chargingchange', updateBattery);
+      }).catch(() => {});
+    }
 
     const idleTimer = setInterval(() => {
       const secondsIdle = Math.floor((Date.now() - lastActive.current) / 1000);

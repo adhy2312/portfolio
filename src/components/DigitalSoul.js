@@ -283,7 +283,10 @@ const DigitalSoul = () => {
   return (
     <div ref={soulRef} className="digital-soul">
       <div className="soul-core" />
+      <div className="soul-core-echo" />
+      <div className="soul-core-echo-2" />
       <div className="soul-aura" />
+      <div className="soul-aura-outer" />
       <div className="soul-whisper" ref={whisperRef}></div>
     </div>
   );
