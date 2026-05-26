@@ -201,7 +201,7 @@ const Footer = () => {
             </div>
           </div>
           <div className="build-watermark">
-            v8.5 · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · Framer Motion 12 · Three.js · Sanity CMS
+            {footerData?.buildVersion || "v8.5.6"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · Framer Motion 12 · Three.js · Sanity CMS
           </div>
         </div>
       </div>
