@@ -1,9 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Achievements.css';
-import { motion } from 'framer-motion';
 import { FiAward, FiZap, FiPenTool, FiCamera, FiGlobe, FiBookOpen } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const iconMap = {
   FiAward: <FiAward />,
@@ -25,6 +28,9 @@ const defaultAchievements = [
 
 const Achievements = () => {
   const [fetchedAchievements, setFetchedAchievements] = useState([]);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const gridRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('achievements');
@@ -36,18 +42,51 @@ const Achievements = () => {
     }).catch(console.error);
   }, []);
 
+  // GSAP Scroll Animations
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Header
+      if (headerRef.current) {
+        const headerEls = headerRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .section-desc');
+        gsap.fromTo(headerEls,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+
+      // Achievement cards: diagonal cascade
+      if (gridRef.current) {
+        const cards = gridRef.current.querySelectorAll('.ach-card');
+        gsap.fromTo(cards,
+          { y: 50, opacity: 0, scale: 0.9, rotateZ: -2 },
+          {
+            y: 0, opacity: 1, scale: 1, rotateZ: 0,
+            duration: 0.8,
+            stagger: { each: 0.08, grid: 'auto', from: 'start' },
+            ease: 'power4.out',
+            scrollTrigger: { trigger: gridRef.current, start: 'top 80%', once: true }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [fetchedAchievements]);
+
   const displayAchievements = fetchedAchievements.length > 0 ? fetchedAchievements : defaultAchievements;
 
   return (
-    <section className="achievements" id="achievements">
+    <section className="achievements" id="achievements" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="ach-header"
-          initial={{ opacity: 1, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="ach-header" ref={headerRef}>
           <span className="section-label">// highlights</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Milestones">
@@ -63,17 +102,13 @@ const Achievements = () => {
           <p className="section-desc">
             A diverse toolkit spanning software, hardware, design, and creative arts — I don't just write code, I create experiences.
           </p>
-        </motion.div>
+        </div>
 
-        <div className="ach-grid">
+        <div className="ach-grid" ref={gridRef}>
           {displayAchievements.map((item, i) => (
-            <motion.div
+            <div
               key={i}
               className="ach-card glass-card"
-              initial={{ opacity: 1, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              viewport={{ once: true }}
               style={{ '--ach-accent': item.accent }}
             >
               <div className="ach-icon-wrap">
@@ -84,7 +119,7 @@ const Achievements = () => {
               </div>
               <h3 className="ach-title">{item.title}</h3>
               <p className="ach-desc">{item.desc}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

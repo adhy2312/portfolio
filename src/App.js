@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Lenis from 'lenis';
+import { initGSAPScrollProxy, ScrollTrigger } from './hooks/useGSAPAnimations';
 import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -41,6 +42,7 @@ const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame = lazy(() => import('./components/ZipGame'));
 const TicTacToe = lazy(() => import('./components/TicTacToe'));
 const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
+const GravityWell = lazy(() => import('./components/GravityWell'));
 const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
 
 function LazySection({ name, children }) {
@@ -115,6 +117,9 @@ function AppContent() {
       touchMultiplier: 2,
       infinite: false,
     });
+
+    // GSAP + Lenis Synchronization (butter-smooth scroll-triggered animations)
+    initGSAPScrollProxy(lenis);
 
     let rafId;
     function raf(time) {
@@ -218,6 +223,7 @@ function AppContent() {
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-trance', tranceHandler);
       decodeObserver.disconnect();
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
@@ -272,6 +278,9 @@ function AppContent() {
       <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>
       <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
       <LazySection name="Footer"><Footer /></LazySection>
+
+      {/* Gravity Well — Scroll Terminus (particles converge + signal decay) */}
+      <LazySection name="GravityWell"><GravityWell /></LazySection>
       
       {/* The Seed of Life - Redefining digital permanence */}
       <Suspense fallback={null}>

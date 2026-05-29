@@ -2,10 +2,13 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './Contact.css';
 import emailjs from 'emailjs-com';
-import { motion } from 'framer-motion';
 import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle, FiCheck, FiCopy } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // ── Click-to-copy email component ──────────────────
 const CopyEmail = ({ email }) => {
@@ -59,6 +62,10 @@ const defaultContactInfo = [
 const Contact = () => {
   const form = useRef();
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const infoRef = useRef(null);
+  const formWrapRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('contact');
@@ -69,6 +76,57 @@ const Contact = () => {
     client.fetch(query).then((data) => {
       if (data) setContactData(data);
     }).catch(console.error);
+  }, []);
+
+  // GSAP Scroll Animations
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Header
+      if (headerRef.current) {
+        const headerEls = headerRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .section-desc');
+        gsap.fromTo(headerEls,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+
+      // Info panel: slide from left
+      if (infoRef.current) {
+        gsap.fromTo(infoRef.current,
+          { x: -60, opacity: 0 },
+          {
+            x: 0, opacity: 1,
+            duration: 1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: infoRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+
+      // Form: slide from right
+      if (formWrapRef.current) {
+        gsap.fromTo(formWrapRef.current,
+          { x: 60, opacity: 0 },
+          {
+            x: 0, opacity: 1,
+            duration: 1,
+            delay: 0.15,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: formWrapRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   const sendEmail = (e) => {
@@ -98,15 +156,9 @@ const Contact = () => {
   };
 
   return (
-    <section id="contact" className="contact">
+    <section id="contact" className="contact" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="contact-header"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="contact-header" ref={headerRef}>
           <span className="section-label">// say hello</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Get in Touch">
@@ -123,17 +175,11 @@ const Contact = () => {
             Whether you have a project in mind, a collaboration idea, or just want to say hi —
             my inbox is always open.
           </p>
-        </motion.div>
+        </div>
 
         <div className="contact-grid">
           {/* Info panel */}
-          <motion.div
-            className="contact-info"
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            viewport={{ once: true }}
-          >
+          <div className="contact-info" ref={infoRef}>
             <div className="contact-info-card glass-card">
               <h3 className="contact-info-title">Get in touch</h3>
               <p className="contact-info-text">
@@ -166,16 +212,10 @@ const Contact = () => {
                 <span>Available for opportunities</span>
               </div>
             </div>
-          </motion.div>
+          </div>
 
           {/* Form */}
-          <motion.div
-            className="contact-form-wrap"
-            initial={{ opacity: 0, x: 40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
+          <div className="contact-form-wrap" ref={formWrapRef}>
             <form ref={form} onSubmit={sendEmail} className="contact-form glass-card">
               <div className="form-row">
                 <div className="form-group">
@@ -243,7 +283,7 @@ const Contact = () => {
                 )}
               </button>
             </form>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

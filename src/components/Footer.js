@@ -1,8 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Footer.css';
-import { motion } from 'framer-motion';
 import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiHeart, FiMessageCircle } from 'react-icons/fi';
 import { client } from '../sanity';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const iconMap = {
   FiLinkedin: <FiLinkedin size={18} />,
@@ -23,12 +26,82 @@ const links = [
 
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
+  const footerRef = useRef(null);
+  const popupRef = useRef(null);
+  const mainRowRef = useRef(null);
 
   useEffect(() => {
     const query = '*[_type == "footer"][0]';
     client.fetch(query).then((data) => {
       if (data) setFooterData(data);
     }).catch(console.error);
+  }, []);
+
+  // GSAP Footer Animations
+  useEffect(() => {
+    if (!footerRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Footer fade-in
+      gsap.fromTo(footerRef.current,
+        { opacity: 0 },
+        {
+          opacity: 1,
+          duration: 0.8,
+          scrollTrigger: { trigger: footerRef.current, start: 'top 90%', once: true }
+        }
+      );
+
+      // 3D Pop-up Card — cinematic spring entrance
+      if (popupRef.current) {
+        gsap.fromTo(popupRef.current,
+          { y: 100, opacity: 0, rotateX: 45, scale: 0.8 },
+          {
+            y: 0, opacity: 1, rotateX: 0, scale: 1,
+            duration: 1.2,
+            ease: 'back.out(1.4)',
+            scrollTrigger: { trigger: popupRef.current, start: 'top 85%', once: true }
+          }
+        );
+
+        // Hover 3D tilt
+        const isMobile = window.matchMedia('(max-width: 768px)').matches;
+        if (!isMobile) {
+          popupRef.current.addEventListener('mouseenter', () => {
+            gsap.to(popupRef.current, {
+              y: -15, rotateX: 10, rotateY: -5,
+              boxShadow: '0 30px 60px rgba(0,0,0,0.5)',
+              duration: 0.4,
+              ease: 'power2.out',
+            });
+          });
+          popupRef.current.addEventListener('mouseleave', () => {
+            gsap.to(popupRef.current, {
+              y: 0, rotateX: 0, rotateY: 0,
+              boxShadow: '0 15px 35px rgba(0,0,0,0.3)',
+              duration: 0.6,
+              ease: 'elastic.out(1, 0.5)',
+            });
+          });
+        }
+      }
+
+      // Main row slide up
+      if (mainRowRef.current) {
+        gsap.fromTo(mainRowRef.current,
+          { y: 50, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.8,
+            delay: 0.3,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: mainRowRef.current, start: 'top 90%', once: true }
+          }
+        );
+      }
+    }, footerRef);
+
+    return () => ctx.revert();
   }, []);
 
   const handleNavClick = (e, target) => {
@@ -59,35 +132,19 @@ const Footer = () => {
   };
 
   return (
-    <motion.footer
+    <footer
       className="footer-retro-simple"
-      initial={{ opacity: 0 }}
-      whileInView={{ opacity: 1 }}
-      transition={{ duration: 0.8 }}
-      viewport={{ once: true }}
+      ref={footerRef}
     >
       {/* Elegant Topographic Contours */}
       <div className="footer-contours" />
 
       <div className="container footer-simple-inner">
         {/* 3D Pop-up Card */}
-        <motion.div
+        <div
           className="footer-3d-popup"
-          initial={{ y: 100, opacity: 0, rotateX: 45, scale: 0.8 }}
-          whileInView={{ y: 0, opacity: 1, rotateX: 0, scale: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 100,
-            damping: 15,
-            delay: 0.3
-          }}
-          viewport={{ once: true }}
-          whileHover={{
-            translateY: -15,
-            rotateX: 10,
-            rotateY: -5,
-            boxShadow: "0 30px 60px rgba(0,0,0,0.5)"
-          }}
+          ref={popupRef}
+          style={{ perspective: '1000px', transformStyle: 'preserve-3d' }}
         >
           <div className="popup-3d-content">
             <div className="popup-tag">PROJECT_READY</div>
@@ -106,15 +163,9 @@ const Footer = () => {
             </a>
           </div>
           <div className="popup-3d-glow" />
-        </motion.div>
+        </div>
 
-        <motion.div
-          className="footer-main-row"
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          viewport={{ once: true }}
-        >
+        <div className="footer-main-row" ref={mainRowRef}>
           <div className="footer-brand-column">
             <div className="footer-logo-simple">
               ADHY<span>.</span>
@@ -165,7 +216,7 @@ const Footer = () => {
               </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
         <div className="footer-simple-bottom">
           <div className="bottom-divider" />
@@ -201,11 +252,11 @@ const Footer = () => {
             </div>
           </div>
           <div className="build-watermark">
-            {footerData?.buildVersion || "v8.5.6"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · Framer Motion 12 · Three.js · Sanity CMS
+            {footerData?.buildVersion || "v9.0.0"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · GSAP 3 · Three.js · Sanity CMS
           </div>
         </div>
       </div>
-    </motion.footer>
+    </footer>
   );
 };
 

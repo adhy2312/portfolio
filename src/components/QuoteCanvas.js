@@ -1,11 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
 import { client } from '../sanity';
 import './QuoteCanvas.css';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const QuoteCanvas = () => {
   const [quoteData, setQuoteData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const paperRef = useRef(null);
 
   useEffect(() => {
     const query = '*[_type == "quoteCanvas" && isActive == true][0]';
@@ -18,6 +22,25 @@ const QuoteCanvas = () => {
     });
   }, []);
 
+  // GSAP entrance animation
+  useEffect(() => {
+    if (!paperRef.current || isLoading) return;
+
+    gsap.fromTo(paperRef.current,
+      { opacity: 0, y: 40, rotate: -3 },
+      {
+        opacity: 1, y: 0, rotate: 0,
+        duration: 1.2,
+        ease: 'back.out(1.2)',
+        scrollTrigger: {
+          trigger: paperRef.current,
+          start: 'top 85%',
+          once: true,
+        }
+      }
+    );
+  }, [isLoading]);
+
   // If loading, don't render anything yet
   if (isLoading) return null;
 
@@ -27,13 +50,7 @@ const QuoteCanvas = () => {
   return (
     <section className="quote-canvas-section">
       <div className="quote-canvas-container">
-        <motion.div 
-          className="quote-paper"
-          initial={{ opacity: 0, y: 40, rotate: -3 }}
-          whileInView={{ opacity: 1, y: 0, rotate: 0 }}
-          transition={{ duration: 1, type: "spring", stiffness: 40 }}
-          viewport={{ once: true, amount: 0.5 }}
-        >
+        <div className="quote-paper" ref={paperRef}>
           <div className="quote-content">
             <h3 className="quote-text">"{displayData.quoteText}"</h3>
             {displayData.author && (
@@ -44,7 +61,7 @@ const QuoteCanvas = () => {
           {/* Aesthetic tape corners */}
           <div className="tape tape-top-left"></div>
           <div className="tape tape-bottom-right"></div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

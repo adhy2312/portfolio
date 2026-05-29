@@ -1,13 +1,13 @@
 // src/components/Hero.js
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import './Hero.css';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import Particles from "react-tsparticles";
 import { loadBasic } from "tsparticles-basic";
 import { client, urlFor } from '../sanity';
 import LanguageTerminal from './LanguageTerminal';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
+import gsap from 'gsap';
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
@@ -16,36 +16,99 @@ const Hero = () => {
   const [showParticles, setShowParticles] = useState(false);
 
   const { isExperimental } = useSiteMode();
-
-  // Kinetic Mouse Spotlight State (Bypasses React Render Loop for Performance)
-  const mouseX = useMotionValue(-1000);
-  const mouseY = useMotionValue(-1000);
-  const smoothMouseX = useSpring(mouseX, { stiffness: 50, damping: 20, mass: 0.5 });
-  const smoothMouseY = useSpring(mouseY, { stiffness: 50, damping: 20, mass: 0.5 });
-
-  // Experimental 3D Tilt Mapping
-  const rotateX = useTransform(smoothMouseY, [-400, 600], ["5deg", "-5deg"]);
-  const rotateY = useTransform(smoothMouseX, [-400, 1500], ["-5deg", "5deg"]);
+  const heroRef = useRef(null);
+  const contentRef = useRef(null);
+  const greetingRef = useRef(null);
+  const taglineRef = useRef(null);
+  const spotlightRef = useRef(null);
 
   const orchestrator = useOrchestrator();
 
+  // GSAP Kinetic Spotlight (replaces Framer useMotionValue)
   useEffect(() => {
-    if (!orchestrator) return;
+    if (!orchestrator || !spotlightRef.current) return;
     const tick = (time, delta, mousePos, isMoving, tier) => {
-      // PERFORMANCE TIER 0: STATIC MODE
       if (tier === 0) return;
-
-      if (mousePos.x > -500) {
-        // Only set if changed to avoid unnecessary Framer updates
-        const nextX = mousePos.x - 400;
-        const nextY = mousePos.y - 400;
-        if (mouseX.get() !== nextX) mouseX.set(nextX);
-        if (mouseY.get() !== nextY) mouseY.set(nextY);
+      if (mousePos.x > -500 && spotlightRef.current) {
+        gsap.to(spotlightRef.current, {
+          x: mousePos.x - 400,
+          y: mousePos.y - 400,
+          duration: 0.8,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
       }
     };
     orchestrator.subscribeToRAF('hero-spotlight', tick);
     return () => orchestrator.unsubscribeFromRAF('hero-spotlight');
-  }, [orchestrator, mouseX, mouseY]);
+  }, [orchestrator]);
+
+  // GSAP Hero Entrance Timeline
+  useEffect(() => {
+    if (!contentRef.current) return;
+
+    const tl = gsap.timeline({ delay: 0.3 });
+
+    // Greeting slide-in
+    if (greetingRef.current) {
+      gsap.set(greetingRef.current, { opacity: 0, y: -20 });
+      tl.to(greetingRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 1,
+        ease: 'power4.out',
+      }, 0.4);
+    }
+
+    // Tagline cinematic letter-spacing
+    if (taglineRef.current) {
+      gsap.set(taglineRef.current, { opacity: 0, letterSpacing: '20px' });
+      tl.to(taglineRef.current, {
+        opacity: 0.6,
+        letterSpacing: '8px',
+        duration: 2,
+        ease: 'power3.out',
+      }, 1.5);
+    }
+
+    // 3D tilt on experimental mode (GSAP-powered)
+    if (isExperimental && contentRef.current) {
+      const handleMouseMove = (e) => {
+        const rect = heroRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+        const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+
+        gsap.to(contentRef.current, {
+          rotateX: yPct * -10,
+          rotateY: xPct * 10,
+          duration: 0.8,
+          ease: 'power2.out',
+          overwrite: 'auto',
+        });
+      };
+
+      const handleMouseLeave = () => {
+        gsap.to(contentRef.current, {
+          rotateX: 0,
+          rotateY: 0,
+          duration: 1.2,
+          ease: 'elastic.out(1, 0.5)',
+        });
+      };
+
+      heroRef.current?.addEventListener('mousemove', handleMouseMove);
+      heroRef.current?.addEventListener('mouseleave', handleMouseLeave);
+
+      return () => {
+        heroRef.current?.removeEventListener('mousemove', handleMouseMove);
+        heroRef.current?.removeEventListener('mouseleave', handleMouseLeave);
+        tl.kill();
+      };
+    }
+
+    return () => tl.kill();
+  }, [isExperimental]);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
@@ -108,16 +171,16 @@ const Hero = () => {
     <section 
       id="hero" 
       className="hero-minimal" 
-      data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: framer-motion springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount"
+      ref={heroRef}
+      data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: GSAP ScrollTrigger + springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount"
       style={isExperimental ? { perspective: "1500px" } : {}}
     >
       
-      {/* Kinetic Ambient Spotlight */}
-      <motion.div 
+      {/* Kinetic Ambient Spotlight — GSAP driven */}
+      <div 
+        ref={spotlightRef}
         className="hero-kinetic-spotlight"
         style={{
-          x: smoothMouseX,
-          y: smoothMouseY,
           position: 'absolute',
           top: 0,
           left: 0,
@@ -127,7 +190,8 @@ const Hero = () => {
           borderRadius: '50%',
           pointerEvents: 'none',
           zIndex: 0,
-          willChange: 'transform'
+          willChange: 'transform',
+          transform: 'translate(-1000px, -1000px)',
         }}
       />
 
@@ -165,18 +229,17 @@ const Hero = () => {
         />
       )}
 
-      <motion.div 
+      <div 
+        ref={contentRef}
         className="hero-minimal-content optimize-gpu"
-        style={isExperimental ? { rotateX, rotateY, transformStyle: "preserve-3d" } : {}}
+        style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        <motion.div
+        <div
+          ref={greetingRef}
           className="hero-greeting"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
         >
           {displayData.greeting}
-        </motion.div>
+        </div>
         <h1 className="hero-name-giant metallic-reveal">
           {(() => {
             const nameStr = displayData.name;
@@ -224,15 +287,13 @@ const Hero = () => {
 
         <LanguageTerminal />
 
-        <motion.div
+        <div
+          ref={taglineRef}
           className="hero-tagline-premium"
-          initial={{ opacity: 0, letterSpacing: "20px" }}
-          animate={{ opacity: 0.6, letterSpacing: "8px" }}
-          transition={{ duration: 2, delay: 1.5 }}
         >
           {displayData.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER"}
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </section>
   );
 };

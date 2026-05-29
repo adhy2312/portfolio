@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
-import { motion, AnimatePresence, useMotionValue, useSpring, useTransform, useScroll, useVelocity } from 'framer-motion';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const projects = [
   {
     title: 'ISTE MBCET Portal',
     description:
       'A full-featured organizational portal for ISTE MBCET — built with Next.js and Sanity CMS. Features membership management, event listings, internship launchpad, and a premium glassmorphism UI.',
-    tags: ['Next.js', 'Sanity CMS', 'Supabase', 'Framer Motion'],
+    tags: ['Next.js', 'Sanity CMS', 'Supabase', 'GSAP'],
     category: 'fullstack',
     liveLink: null,
     githubLink: null,
@@ -33,7 +36,7 @@ const projects = [
     title: 'Portfolio Website',
     description:
       'This very portfolio — a premium, interactive full-stack app. Features an AI chatbot persona (Mini-Adhy) powered by Gemini, real-time Spotify "Now Playing" integration, infinite marquees, and dynamic content managed via Sanity CMS.',
-    tags: ['React.js', 'Sanity CMS', 'Gemini API', 'Spotify API', 'Framer Motion'],
+    tags: ['React.js', 'Sanity CMS', 'Gemini API', 'Spotify API', 'GSAP'],
     category: 'fullstack',
     liveLink: 'https://portfolio-adhym.vercel.app/',
     githubLink: 'https://github.com/adhy2312/portfolio',
@@ -91,135 +94,139 @@ const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover
 
 const TiltCard = ({ children, project, index }) => {
   const ref = useRef(null);
+  const cardRef = useRef(null);
   const [showMemory, setShowMemory] = useState(false);
 
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["12.5deg", "-12.5deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-12.5deg", "12.5deg"]);
-
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["0 1.1", "0.6 1"] // Trigger from bottom of viewport entering to 60% up
-  });
-
-  // Global scroll velocity for Kinetic Skew
-  const { scrollY } = useScroll();
-  const scrollVelocity = useVelocity(scrollY);
-  const smoothVelocity = useSpring(scrollVelocity, { damping: 50, stiffness: 400 });
-  const velocitySkew = useTransform(smoothVelocity, [-1000, 0, 1000], [5, 0, -5]);
-
-  // 1. Narrative Scroll Scrubbing (Tied exactly to scroll wheel via spring dampening)
-  const scrollOpacity = useTransform(scrollYProgress, [0, 1], [0, 1]);
-  const scrollYTransform = useTransform(scrollYProgress, [0, 1], [150, 0]);
-  const scrollRotateX = useTransform(scrollYProgress, [0, 1], ["25deg", "0deg"]);
-  const scrollScale = useTransform(scrollYProgress, [0, 1], [0.85, 1]);
-
-  // 2. High-end Spring Physics (Replacing standard CSS ease)
-  const springConfig = { stiffness: 120, damping: 20, mass: 1 };
-  const ySpring = useSpring(scrollYTransform, springConfig);
-  const rotXSpring = useSpring(scrollRotateX, springConfig);
-  const scaleSpring = useSpring(scrollScale, springConfig);
-
-  const handleMouseMove = (e) => {
+  // GSAP scroll-scrubbed entrance
+  useEffect(() => {
     if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    x.set((e.clientX - rect.left) / rect.width - 0.5);
-    y.set((e.clientY - rect.top) / rect.height - 0.5);
-  };
-  const handleMouseLeave = () => { x.set(0); y.set(0); };
 
-  // Touch/mobile: Use scroll scrubbing but skip intense 3D hover math
-  if (isTouchDevice) {
-    return (
-      <motion.div
-        ref={ref}
-        style={{ opacity: scrollOpacity, y: ySpring, scale: scaleSpring }}
-        className="work-card-wrapper"
-      >
-        <div className="work-card glass-card">{children}</div>
-      </motion.div>
-    );
-  }
+    const ctx = gsap.context(() => {
+      gsap.fromTo(ref.current,
+        { y: 80, opacity: 0, scale: 0.9, rotateX: 15 },
+        {
+          y: 0, opacity: 1, scale: 1, rotateX: 0,
+          duration: 1,
+          ease: 'power4.out',
+          scrollTrigger: {
+            trigger: ref.current,
+            start: 'top 90%',
+            end: 'top 50%',
+            toggleActions: 'play none none none',
+            once: true,
+          }
+        }
+      );
+    }, ref);
+
+    return () => ctx.revert();
+  }, []);
+
+  // GSAP 3D tilt on hover (desktop only)
+  useEffect(() => {
+    if (!cardRef.current || isTouchDevice) return;
+
+    const el = cardRef.current;
+
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+      const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+
+      gsap.to(el, {
+        rotateX: yPct * -20,
+        rotateY: xPct * 20,
+        duration: 0.4,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(el, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 0.8,
+        ease: 'elastic.out(1, 0.5)',
+      });
+    };
+
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
 
   return (
-    <motion.div
-      ref={ref}
-      style={{ 
-        opacity: scrollOpacity, 
-        y: ySpring, 
-        scale: scaleSpring,
-        rotateX: rotXSpring, 
-        skewY: velocitySkew,
-        perspective: "1200px" 
-      }}
-      className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''}`}
-    >
-      <motion.div
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-        style={{ rotateX, rotateY, transformStyle: "preserve-3d", '--card-accent': project.accent }}
+    <div ref={ref} className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''}`}>
+      <div
+        ref={cardRef}
         className="work-card-wrapper"
+        style={{ transformStyle: 'preserve-3d', '--card-accent': project.accent }}
       >
-      <div className="work-card glass-card" style={{ transform: "translateZ(50px)" }}>
-        {showMemory ? (
-          <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
-            <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>
-            <div className="memory-header">
-              <span className="memory-icon">🧠</span>
-              <h4>Digital Memory</h4>
+        <div className="work-card glass-card" style={{ transform: 'translateZ(50px)' }}>
+          {showMemory ? (
+            <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
+              <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>
+              <div className="memory-header">
+                <span className="memory-icon">🧠</span>
+                <h4>Digital Memory</h4>
+              </div>
+              
+              <div className="memory-content">
+                {project.buildTime && (
+                  <div className="memory-item">
+                    <span className="memory-label">TIMELINE</span>
+                    <p>{project.buildTime}</p>
+                  </div>
+                )}
+                {project.soundtrack && (
+                  <div className="memory-item">
+                    <span className="memory-label">SOUNDTRACK</span>
+                    <p>{project.soundtrack}</p>
+                  </div>
+                )}
+                {project.emotionalNote && (
+                  <div className="memory-item">
+                    <span className="memory-label">PROCESS NOTE</span>
+                    <p>{project.emotionalNote}</p>
+                  </div>
+                )}
+                {!project.buildTime && !project.soundtrack && !project.emotionalNote && (
+                  <p className="memory-empty">Memory fragment corrupted or not recorded for this project.</p>
+                )}
+              </div>
             </div>
-            
-            <div className="memory-content">
-              {project.buildTime && (
-                <div className="memory-item">
-                  <span className="memory-label">TIMELINE</span>
-                  <p>{project.buildTime}</p>
-                </div>
+          ) : (
+            <>
+              {children}
+              {(project.buildTime || project.soundtrack || project.emotionalNote) && (
+                <button 
+                  className="reveal-memory-btn" 
+                  onClick={(e) => { e.stopPropagation(); setShowMemory(true); }}
+                  style={{ transform: "translateZ(30px)" }}
+                  title="View Digital Memory"
+                >
+                  ✦
+                </button>
               )}
-              {project.soundtrack && (
-                <div className="memory-item">
-                  <span className="memory-label">SOUNDTRACK</span>
-                  <p>{project.soundtrack}</p>
-                </div>
-              )}
-              {project.emotionalNote && (
-                <div className="memory-item">
-                  <span className="memory-label">PROCESS NOTE</span>
-                  <p>{project.emotionalNote}</p>
-                </div>
-              )}
-              {!project.buildTime && !project.soundtrack && !project.emotionalNote && (
-                <p className="memory-empty">Memory fragment corrupted or not recorded for this project.</p>
-              )}
-            </div>
-          </div>
-        ) : (
-          <>
-            {children}
-            {(project.buildTime || project.soundtrack || project.emotionalNote) && (
-              <button 
-                className="reveal-memory-btn" 
-                onClick={(e) => { e.stopPropagation(); setShowMemory(true); }}
-                style={{ transform: "translateZ(30px)" }}
-                title="View Digital Memory"
-              >
-                ✦
-              </button>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
       </div>
-      </motion.div>
-    </motion.div>
+    </div>
   );
 };
 
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [fetchedProjects, setFetchedProjects] = useState([]);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const filtersRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('projects');
@@ -233,6 +240,41 @@ const MyWorks = () => {
     }).catch(console.error);
   }, []);
 
+  // GSAP header + filters animation
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        const headerEls = headerRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .section-desc');
+        gsap.fromTo(headerEls,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+
+      if (filtersRef.current) {
+        gsap.fromTo(filtersRef.current,
+          { y: 20, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.6,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: filtersRef.current, start: 'top 90%', once: true }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const currentProjects = fetchedProjects.length > 0 ? fetchedProjects : projects;
 
   const filtered =
@@ -241,15 +283,9 @@ const MyWorks = () => {
       : currentProjects.filter((p) => p.category === activeFilter);
 
   return (
-    <section className="myworks" id="works" data-xray="[SECTION: PROJECTS]&#10;Data Source: Sanity.io CMS&#10;Cards: 3D Tilt via Framer Motion useSpring&#10;Images: @sanity/image-url (Optimized CDN)&#10;Performance: AnimatePresence for filter transitions">
+    <section className="myworks" id="works" ref={sectionRef} data-xray="[SECTION: PROJECTS]&#10;Data Source: Sanity.io CMS&#10;Cards: 3D Tilt via GSAP&#10;Images: @sanity/image-url (Optimized CDN)&#10;Performance: GSAP ScrollTrigger for entrance">
       <div className="container">
-        <motion.div
-          className="works-header"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="works-header" ref={headerRef}>
           <span className="section-label">{"// what I've built"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Masterpieces">
@@ -265,16 +301,10 @@ const MyWorks = () => {
           <p className="section-desc">
             A selection of projects spanning web development, hardware prototypes, UI design, and creative photography.
           </p>
-        </motion.div>
+        </div>
 
         {/* Filter tabs */}
-        <motion.div
-          className="works-filters"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          viewport={{ once: true }}
-        >
+        <div className="works-filters" ref={filtersRef}>
           {filters.map((f) => (
             <button
               key={f.value}
@@ -284,62 +314,53 @@ const MyWorks = () => {
               {f.label}
             </button>
           ))}
-        </motion.div>
+        </div>
 
         {/* Project cards */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            className="works-grid"
-            key={activeFilter}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            {filtered.map((project, index) => (
-              <TiltCard key={project.title} project={project} index={index}>
-                <div className="work-card-top" style={{ transform: "translateZ(30px)" }}>
-                  <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
-                  <div className="work-card-links">
-                    {(project.githubLink || project.github) && (
-                      <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub">
-                        <FiGithub size={16} />
-                      </a>
-                    )}
-                    {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' && (
-                      <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="Live">
-                        <FiExternalLink size={16} />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                <h3 className="work-title" style={{ transform: "translateZ(40px)" }}>{project.title}</h3>
-                <p className="work-desc" style={{ transform: "translateZ(20px)" }}>{project.description}</p>
-
-                <div className="work-tags" style={{ transform: "translateZ(25px)" }}>
-                  {project.tags.map((tag) => (
-                    <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="work-card-footer" style={{ transform: "translateZ(35px)" }}>
-                  {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
-                    <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
-                      View Project <FiArrowRight size={14} />
+        <div className="works-grid" key={activeFilter}>
+          {filtered.map((project, index) => (
+            <TiltCard key={project.title} project={project} index={index}>
+              <div className="work-card-top" style={{ transform: "translateZ(30px)" }}>
+                <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
+                <div className="work-card-links">
+                  {(project.githubLink || project.github) && (
+                    <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub">
+                      <FiGithub size={16} />
                     </a>
-                  ) : (
-                    <span className="work-view-link work-view-link-disabled">
-                      Coming Soon
-                    </span>
+                  )}
+                  {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' && (
+                    <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="Live">
+                      <FiExternalLink size={16} />
+                    </a>
                   )}
                 </div>
-              </TiltCard>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+              </div>
+
+              <h3 className="work-title" style={{ transform: "translateZ(40px)" }}>{project.title}</h3>
+              <p className="work-desc" style={{ transform: "translateZ(20px)" }}>{project.description}</p>
+
+              <div className="work-tags" style={{ transform: "translateZ(25px)" }}>
+                {project.tags.map((tag) => (
+                  <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              <div className="work-card-footer" style={{ transform: "translateZ(35px)" }}>
+                {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
+                  <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
+                    View Project <FiArrowRight size={14} />
+                  </a>
+                ) : (
+                  <span className="work-view-link work-view-link-disabled">
+                    Coming Soon
+                  </span>
+                )}
+              </div>
+            </TiltCard>
+          ))}
+        </div>
       </div>
     </section>
   );

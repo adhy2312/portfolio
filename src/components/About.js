@@ -1,13 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './About.css';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import dp from '../assets/dp.jpg';
 import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-
+gsap.registerPlugin(ScrollTrigger);
 
 const defaultStats = [
   { value: '3+',  label: 'Years Learning',               iconName: 'FiCalendar' },
@@ -20,6 +21,11 @@ const About = () => {
   const [aboutData, setAboutData] = useState(null);
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('about');
+
+  const sectionRef = useRef(null);
+  const imageWrapperRef = useRef(null);
+  const textColRef = useRef(null);
+  const statsRef = useRef(null);
 
   useEffect(() => {
     const query = '*[_type == "about"][0]';
@@ -41,56 +47,126 @@ const About = () => {
   };
 
   if (!displayData.profileImage && !dp) {
-    // Fallback if both Sanity and local import fail (shouldn't happen)
     displayData.profileImage = "https://via.placeholder.com/400";
   }
 
-  // 3D Tilt Effect State
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 30 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 30 });
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
+  // GSAP Scroll Animations
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      // Image: scale-in with parallax
+      if (imageWrapperRef.current) {
+        gsap.fromTo(imageWrapperRef.current,
+          { scale: 0.85, opacity: 0, rotateY: -15 },
+          {
+            scale: 1, opacity: 1, rotateY: 0,
+            duration: 1.4,
+            ease: 'power4.out',
+            scrollTrigger: {
+              trigger: sectionRef.current,
+              start: 'top 80%',
+              toggleActions: 'play none none none',
+              once: true,
+            }
+          }
+        );
+      }
 
-  const handleMouseMove = (e) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
-    y.set(yPct);
-  };
+      // Text column: stagger paragraphs
+      if (textColRef.current) {
+        const elements = textColRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .about-location, .about-p, .about-cta');
+        gsap.fromTo(elements,
+          { y: 40, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.08,
+            ease: 'power4.out',
+            scrollTrigger: {
+              trigger: textColRef.current,
+              start: 'top 85%',
+              toggleActions: 'play none none none',
+              once: true,
+            }
+          }
+        );
+      }
 
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
+      // Stats: stagger with scale bounce
+      if (statsRef.current) {
+        const statCards = statsRef.current.querySelectorAll('.about-stat');
+        gsap.fromTo(statCards,
+          { y: 30, opacity: 0, scale: 0.9 },
+          {
+            y: 0, opacity: 1, scale: 1,
+            duration: 0.8,
+            stagger: 0.1,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+              trigger: statsRef.current,
+              start: 'top 90%',
+              toggleActions: 'play none none none',
+              once: true,
+            }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, [aboutData]);
+
+  // GSAP 3D Tilt on Image (replaces Framer Motion springs)
+  useEffect(() => {
+    if (!imageWrapperRef.current) return;
+    const el = imageWrapperRef.current;
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    if (isMobile) return;
+
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+      const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+
+      gsap.to(el, {
+        rotateX: yPct * -15,
+        rotateY: xPct * 15,
+        duration: 0.5,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(el, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 1,
+        ease: 'elastic.out(1, 0.5)',
+      });
+    };
+
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
 
   return (
-    <section className="about" id="about">
+    <section className="about" id="about" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="about-grid"
-          initial={{ opacity: 0, y: 60 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          viewport={{ once: true }}
-        >
+        <div className="about-grid">
           {/* Image side */}
           <div className="about-image-col">
-            <motion.div 
+            <div
+              ref={imageWrapperRef}
               className="about-img-wrapper"
-              onMouseMove={handleMouseMove}
-              onMouseLeave={handleMouseLeave}
-              style={{ 
-                rotateX, 
-                rotateY, 
+              style={{
                 transformStyle: "preserve-3d",
-                perspective: 1000 
+                perspective: 1000
               }}
             >
               <img 
@@ -102,11 +178,11 @@ const About = () => {
                 decoding="async"
               />
               <div className="about-img-glow" />
-            </motion.div>
+            </div>
           </div>
 
           {/* Text side */}
-          <div className="about-text-col">
+          <div className="about-text-col" ref={textColRef}>
             <span className="section-label">{"// who I am"}</span>
             <div className="section-title-wrapper">
               <h2 className="section-title about-title" data-hover="Adhithya Mohan">
@@ -130,19 +206,12 @@ const About = () => {
             ))}
 
             {/* Stats */}
-            <div className="about-stats">
+            <div className="about-stats" ref={statsRef}>
               {displayData.stats.map((s, i) => (
-                <motion.div
-                  key={i}
-                  className="about-stat"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 + i * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  viewport={{ once: true }}
-                >
+                <div key={i} className="about-stat">
                   <span className="stat-value">{s.value}</span>
                   <span className="stat-label">{s.label}</span>
-                </motion.div>
+                </div>
               ))}
             </div>
 
@@ -151,7 +220,7 @@ const About = () => {
               Download Resume
             </a>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

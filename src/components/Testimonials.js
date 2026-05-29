@@ -1,9 +1,12 @@
-import React, { useEffect, useState, useMemo, memo } from 'react';
+import React, { useEffect, useState, useMemo, memo, useRef } from 'react';
 import './Testimonials.css';
-import { motion } from 'framer-motion';
 import { client, urlFor } from '../sanity';
 import { FiMessageCircle } from 'react-icons/fi';
 import { useStory } from '../contexts/StoryContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 /* ── Helpers (module-level — never recreated) ── */
 const getInitials = (name = '') =>
@@ -49,6 +52,8 @@ const defaultQuotes = [
 
 const Testimonials = () => {
   const [quotes, setQuotes] = useState([]);
+  const headerRef = useRef(null);
+  const sectionRef = useRef(null);
 
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('testimonials');
@@ -58,6 +63,29 @@ const Testimonials = () => {
       .fetch('*[_type == "testimonial"] | order(order asc)')
       .then((data) => { if (data?.length) setQuotes(data); })
       .catch(console.error);
+  }, []);
+
+  // GSAP header animation
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        const els = headerRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider');
+        gsap.fromTo(els,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.1,
+            ease: 'power4.out',
+            scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, []);
 
   /* Pre-compute image URLs once — not inside JSX on every render */
@@ -73,15 +101,9 @@ const Testimonials = () => {
   const loop = useMemo(() => [...enriched, ...enriched], [enriched]);
 
   return (
-    <section className="testimonials" id="testimonials">
+    <section className="testimonials" id="testimonials" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="testimonials-header"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="testimonials-header" ref={headerRef}>
           <span className="section-label">{"// recommendations"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Endorsements">
@@ -94,7 +116,7 @@ const Testimonials = () => {
             )}
           </div>
           <div className="section-divider" />
-        </motion.div>
+        </div>
       </div>
 
       {/* Full-width marquee outside the container so it can bleed edge-to-edge */}

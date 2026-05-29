@@ -1,9 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Skills.css';
-import { motion } from 'framer-motion';
 import { FiMonitor, FiSettings, FiPenTool, FiZap } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const iconMap = {
   FiMonitor: <FiMonitor />,
@@ -22,7 +25,7 @@ const skillCategories = [
       { name: 'HTML5 & CSS3', level: 80 },
       { name: 'JavaScript (ES6+)', level: 70 },
       { name: 'Responsive Design', level: 70 },
-      { name: 'Framer Motion', level: 75 },
+      { name: 'GSAP', level: 75 },
     ],
   },
   {
@@ -81,6 +84,7 @@ const toolMeta = {
   'Express.js': { group: 'backend', snippet: 'Web Framework', emoji: '🚂' },
   'APIs': { group: 'backend', snippet: 'API Design', emoji: '🔗' },
   'Python': { group: 'tools', snippet: 'Programming Language', emoji: '🐍' },
+  'GSAP': { group: 'frontend', snippet: 'Animation Engine', emoji: '🧈' },
 };
 
 const groupColors = {
@@ -94,12 +98,15 @@ const groupColors = {
 const tools = [
   'React', 'Node.js', 'Figma', '8051 MC', 'ESP32', 'MongoDB',
   'Git', 'Firebase', 'Photoshop', 'Lightroom', 'JavaScript', 'CSS',
-  'HTML', 'Express.js', 'APIs', 'Python',
+  'HTML', 'Express.js', 'APIs', 'Python', 'GSAP',
 ];
 
 const Skills = () => {
   const [fetchedCategories, setFetchedCategories] = useState([]);
   const gridRef = useRef(null);
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const toolsRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('skills');
@@ -111,34 +118,83 @@ const Skills = () => {
     }).catch(console.error);
   }, []);
 
-  // Trigger CSS skill-bar animations when cards enter viewport
+  // GSAP Scroll Animations
   useEffect(() => {
-    const bars = gridRef.current?.querySelectorAll('.skill-bar-fill-css');
-    if (!bars || !window.IntersectionObserver) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach(e => {
-        if (e.isIntersecting) {
-          e.target.classList.add('animate');
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: 0.2 });
-    bars.forEach(b => obs.observe(b));
-    return () => obs.disconnect();
+    if (!sectionRef.current) return;
+
+    const ctx = gsap.context(() => {
+      // Header orchestrated reveal
+      if (headerRef.current) {
+        const headerEls = headerRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .section-desc');
+        gsap.fromTo(headerEls,
+          { y: 30, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 0.9,
+            stagger: 0.1,
+            ease: 'power4.out',
+            scrollTrigger: {
+              trigger: headerRef.current,
+              start: 'top 85%',
+              once: true,
+            }
+          }
+        );
+      }
+
+      // Skill cards: stagger grid with 3D rotation
+      if (gridRef.current) {
+        const cards = gridRef.current.querySelectorAll('.skill-card');
+        gsap.fromTo(cards,
+          { y: 60, opacity: 0, rotateX: 15, scale: 0.95 },
+          {
+            y: 0, opacity: 1, rotateX: 0, scale: 1,
+            duration: 0.9,
+            stagger: 0.12,
+            ease: 'power4.out',
+            scrollTrigger: {
+              trigger: gridRef.current,
+              start: 'top 80%',
+              once: true,
+            },
+            onComplete: () => {
+              // Animate skill bars after cards appear
+              const bars = gridRef.current?.querySelectorAll('.skill-bar-fill-css');
+              if (bars) bars.forEach(b => b.classList.add('animate'));
+            }
+          }
+        );
+      }
+
+      // Tools cloud: wave stagger
+      if (toolsRef.current) {
+        const chips = toolsRef.current.querySelectorAll('.tech-tag');
+        gsap.fromTo(chips,
+          { y: 20, opacity: 0, scale: 0.8 },
+          {
+            y: 0, opacity: 1, scale: 1,
+            duration: 0.6,
+            stagger: { each: 0.04, from: 'center' },
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+              trigger: toolsRef.current,
+              start: 'top 85%',
+              once: true,
+            }
+          }
+        );
+      }
+    }, sectionRef);
+
+    return () => ctx.revert();
   }, [fetchedCategories]);
 
   const displayCategories = fetchedCategories.length > 0 ? fetchedCategories : skillCategories;
 
   return (
-    <section className="skills" id="skills">
+    <section className="skills" id="skills" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="skills-header"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="skills-header" ref={headerRef}>
           <span className="section-label">{"// what I know"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="My Arsenal">
@@ -155,18 +211,14 @@ const Skills = () => {
             From building full-stack web applications and crafting pixel-perfect designs in Figma,
             to programming microcontrollers — I thrive across the full technology spectrum.
           </p>
-        </motion.div>
+        </div>
 
         {/* Skill category cards */}
         <div className="skills-grid" ref={gridRef}>
           {displayCategories.map((cat, catIdx) => (
-            <motion.div 
+            <div 
               key={catIdx} 
               className="skill-card glass-card"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.7, delay: 0.1 + (catIdx * 0.15), ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="skill-card-header">
                 <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
@@ -195,18 +247,12 @@ const Skills = () => {
                   </div>
                 ))}
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Tools & Technologies cloud */}
-        <motion.div
-          className="tools-section"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
-          viewport={{ once: true }}
-        >
+        <div className="tools-section" ref={toolsRef}>
           <h3 className="tools-title">Tools & Technologies</h3>
           <div className="tools-cloud">
             {tools.map((tool, i) => {
@@ -231,7 +277,7 @@ const Skills = () => {
               );
             })}
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

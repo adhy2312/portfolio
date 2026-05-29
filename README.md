@@ -4,6 +4,24 @@ Welcome to the source code of my digital consciousness. This isn't just a static
 
 When I started this project, my philosophy was simple: *"Namakk sett aakam"* (Let's make it happen). But as the architecture grew, it became something far more cinematic, deeply technical, and undeniably human.
 
+## 🧈 Animation Architecture — GSAP 3 + ScrollTrigger
+
+The portfolio's motion system is built on **GSAP 3** with **ScrollTrigger**, synchronized with **Lenis** smooth scrolling via `gsap.ticker` proxy. Every animation is GPU-accelerated (`translate3d`, `scale`, `opacity` only — zero layout triggers).
+
+### Motion Design Principles
+- **Buttery-smooth scroll-triggered entrances** — Elements reveal via `ScrollTrigger` with `power4.out` easing as they enter the viewport
+- **Editorial stagger cascades** — Section headers, cards, and grids animate in orchestrated sequences with precisely timed delays
+- **3D tilt micro-interactions** — Cards respond to mouse movement with GSAP-driven `rotateX`/`rotateY` and snap back with `elastic.out(1, 0.5)` easing
+- **Parallax depth layers** — Background orbs and decorative elements scrub against scroll position
+- **Mobile-aware** — Reduced animation complexity on touch devices, `prefers-reduced-motion` respected globally
+
+### Centralized Hook Library (`useGSAPAnimations.js`)
+A unified animation engine providing 10+ reusable primitives:
+`useFadeUp` · `useReveal` · `useStaggerGrid` · `useParallax` · `useMagneticHover` · `useTextSplitReveal` · `useSectionHeader` · `useCountUp` · `useScaleIn` · `useSlideIn`
+
+### Gravity Well — Scroll Terminus
+A cinematic mashup of **particle convergence** and **morse-code signal decay** placed above the DigitalSeed. 26 scattered particles pulse in morse-code rhythms while alive, then converge to a central gravity point as their signals slow and fade into silence. Mouse interaction creates magnetic repulsion. The final state: a single quiet ember glow — all energy collapsed, all noise gone.
+
 ## 🫀 The 60-Engine Biological Architecture
 
 This ecosystem runs on a paradigm shift: it is driven by **60 Interdependent Living Engines** orchestrated by a pure JavaScript singleton (`NervousSystem.js`). It doesn't just track state; it feels and reacts.
@@ -24,6 +42,19 @@ A single action—like scrolling aggressively—threads through multiple isolate
 - The `HapticEngine` physically vibrates your mobile device (`navigator.vibrate`) as you interact.
 - The `BatterySymbiosisEngine` constantly monitors your device (`navigator.getBattery()`). If you drop below 20%, it autonomously strips away heavy background animations and drops into a pitch-black void to protect your power.
 - The `FatigueEngine` tracks system exhaustion. If you push the site too hard, the UI dims, and the `DigitalSoul` enters an `exhausted` state.
+
+## 🛠 Tech Stack
+
+| Layer | Technology | Role |
+|-------|-----------|------|
+| Frontend | React 19 | Component-based UI with Suspense + Lazy loading |
+| Animation | GSAP 3 + ScrollTrigger | GPU-accelerated scroll-triggered animations |
+| Scrolling | Lenis | Lerp-based smooth scrolling synced with GSAP ticker |
+| 3D Engine | Three.js + R3F | WebGL Neural Map |
+| CMS | Sanity.io | Headless CMS for dynamic content |
+| Styling | Vanilla CSS | Custom design system with CSS variables |
+| AI | Gemini 2.5 Flash | Powers Mini-Adhy chatbot |
+| Hosting | Vercel | Edge network with CI/CD |
 
 ## 🧬 Subconscious Memories & The AI Twin
 
@@ -73,4 +104,4 @@ Open the terminal widget and type any of these commands:
 
 ---
 
-*Built with late-night coding sessions, imperfect memories, and absolute passion in Kerala.*
+*Built with GSAP-powered butter, late-night coding sessions, imperfect memories, and absolute passion in Kerala.*
