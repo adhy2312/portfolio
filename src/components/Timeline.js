@@ -105,17 +105,12 @@ const Timeline = () => {
               {
                 y: 0, opacity: 1, scale: 1, rotateX: 0,
                 duration: 1,
-                delay: 0.1,
+                delay: 0.1 + i * 0.1, // manual stagger across nodes
                 ease: 'power4.out',
                 scrollTrigger: {
-                  trigger: node,
-                  start: 'left 85%',
-                  end: 'left 20%',
-                  toggleActions: 'play none none none',
+                  trigger: sectionRef.current,
+                  start: 'top 75%',
                   once: true,
-                  horizontal: true,
-                  scroller: containerRef.current,
-                  // Fallback: if horizontal scroller doesn't work, use section
                 }
               }
             );
@@ -128,15 +123,12 @@ const Timeline = () => {
               {
                 scale: 1, opacity: 1,
                 duration: 0.6,
-                delay: 0.2,
+                delay: 0.2 + i * 0.1,
                 ease: 'back.out(2)',
                 scrollTrigger: {
-                  trigger: node,
-                  start: 'left 85%',
-                  toggleActions: 'play none none none',
+                  trigger: sectionRef.current,
+                  start: 'top 75%',
                   once: true,
-                  horizontal: true,
-                  scroller: containerRef.current,
                 }
               }
             );
