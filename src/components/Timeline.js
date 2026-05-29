@@ -64,12 +64,13 @@ const Timeline = () => {
     }).catch(console.error);
   }, []);
 
-  // ═══ GSAP Timeline Header + Node Entrance Animation ═══
+  // ═══ GSAP Horizontal Pin + Dynamic Node Animations ═══
   useEffect(() => {
-    if (!sectionRef.current) return;
+    if (!sectionRef.current || !trackRef.current || !nodesContainerRef.current) return;
 
+    // We wait briefly for fonts/images to layout before measuring horizontal width
     const ctx = gsap.context(() => {
-      // Header: orchestrated stagger reveal
+      // 1. Header Reveal
       if (headerRef.current) {
         const headerEls = headerRef.current.querySelectorAll('.section-label, .section-title, .section-divider, .section-desc');
         gsap.fromTo(headerEls,
@@ -84,248 +85,91 @@ const Timeline = () => {
         );
       }
 
-      // Timeline nodes: cinematic stagger with alternating direction
-      if (nodesContainerRef.current) {
+      // 2. Horizontal Scroll Tween (The Pin)
+      const trackWidth = trackRef.current.scrollWidth;
+      const windowWidth = window.innerWidth;
+      
+      // If content is wider than screen, activate pro-level horizontal pin
+      let scrollTween = null;
+      if (trackWidth > windowWidth) {
+        scrollTween = gsap.to(trackRef.current, {
+          x: () => -(trackWidth - windowWidth + 150), // Padding offset
+          ease: 'none',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            pin: true,
+            scrub: 1, // Smooth scrub
+            start: 'center center',
+            end: () => `+=${trackWidth}`,
+            onUpdate: (self) => {
+              // Dynamic Background Mode
+              if (bgRef.current) {
+                const r = 255 - (self.progress * 10) | 0;
+                const g = 255 - (self.progress * 14) | 0;
+                const b = 255 - (self.progress * 20) | 0;
+                bgRef.current.style.backgroundColor = `rgb(${r},${g},${b})`;
+              }
+              
+              // Active line growth
+              if (activeLineRef.current) {
+                activeLineRef.current.style.transform = `scaleX(${self.progress})`;
+                activeLineRef.current.style.transformOrigin = 'left center';
+              }
+              
+              // Neural Engine Velocity tracking
+              if (Math.abs(self.getVelocity()) > 800) {
+                neuralEventBus.emit("TIMELINE_FAST_SCROLL");
+              }
+            }
+          }
+        });
+
+        // 3. Dynamic Pro-Level Node Animations (triggered by horizontal scroll)
         const nodes = nodesContainerRef.current.querySelectorAll('.timeline-node-wrapper');
-        
         nodes.forEach((node, i) => {
-          const isTop = i % 2 === 0;
           const content = node.querySelector('.timeline-content');
           const point = node.querySelector('.timeline-point');
+          const isTop = i % 2 === 0;
           
           if (content) {
-            // Cards alternate: top cards drop down, bottom cards rise up
-            gsap.fromTo(content,
-              { 
-                y: isTop ? -60 : 60, 
-                opacity: 0, 
-                scale: 0.85,
-                rotateX: isTop ? 20 : -20,
-              },
+            gsap.fromTo(content, 
+              { y: isTop ? -80 : 80, opacity: 0, scale: 0.8, rotateY: 15 },
               {
-                y: 0, opacity: 1, scale: 1, rotateX: 0,
-                duration: 1,
-                delay: 0.1 + i * 0.1, // manual stagger across nodes
-                ease: 'power4.out',
+                y: 0, opacity: 1, scale: 1, rotateY: 0,
                 scrollTrigger: {
-                  trigger: sectionRef.current,
-                  start: 'top 75%',
-                  once: true,
+                  trigger: node,
+                  containerAnimation: scrollTween, // Magic: ties to horizontal scroll!
+                  start: 'left 95%',
+                  end: 'left 50%',
+                  scrub: 1,
                 }
               }
             );
           }
-
-          // Timeline point: scale in with pop
+          
           if (point) {
             gsap.fromTo(point,
               { scale: 0, opacity: 0 },
               {
                 scale: 1, opacity: 1,
-                duration: 0.6,
-                delay: 0.2 + i * 0.1,
-                ease: 'back.out(2)',
                 scrollTrigger: {
-                  trigger: sectionRef.current,
-                  start: 'top 75%',
-                  once: true,
+                  trigger: node,
+                  containerAnimation: scrollTween,
+                  start: 'left 95%',
+                  end: 'left 60%',
+                  scrub: 1,
                 }
               }
             );
           }
         });
-
-        // Active line: animate width on section enter
-        if (activeLineRef.current) {
-          gsap.fromTo(activeLineRef.current,
-            { scaleX: 0, transformOrigin: 'left center' },
-            {
-              scaleX: 0.05,
-              duration: 1.5,
-              ease: 'power2.out',
-              scrollTrigger: {
-                trigger: sectionRef.current,
-                start: 'top 70%',
-                once: true,
-              }
-            }
-          );
-        }
       }
     }, sectionRef);
 
     return () => ctx.revert();
   }, [milestones]);
 
-  // Master Physics Loop (RAF)
-  useEffect(() => {
-    if (!orchestrator) return;
-
-    // ─── GEOMETRY CACHE (updated only on resize, NOT every frame) ───
-    const geometryCache = { cw: 0, tw: 0 };
-    const updateGeometry = () => {
-      if (!containerRef.current || !trackRef.current) return;
-      geometryCache.cw = containerRef.current.offsetWidth;
-      geometryCache.tw = trackRef.current.scrollWidth;
-    };
-    const resizeObserver = new ResizeObserver(updateGeometry);
-    if (containerRef.current) resizeObserver.observe(containerRef.current);
-    if (trackRef.current) resizeObserver.observe(trackRef.current);
-    // Initial measure
-    updateGeometry();
-
-    // ─── THROTTLE REFS (prevents per-frame emissions) ───
-    let lastEmitTime = 0;
-    let lastBgProgress = -1;
-    let lastLineProgress = -1;
-
-    const tick = (time, delta) => {
-      if (!trackRef.current) return;
-      const state = scrollState.current;
-
-      // Use CACHED geometry — zero layout reads per frame
-      state.max = Math.max(0, geometryCache.tw - geometryCache.cw + 200);
-
-      // Clamp Target
-      state.target = Math.max(0, Math.min(state.max, state.target));
-
-      // Lerp (Momentum interpolation)
-      const diff = state.target - state.current;
-      state.current += diff * 0.08;
-      state.velocity = Math.abs(diff);
-
-      // Transform application (Zero React Renders)
-      trackRef.current.style.transform = `translate3d(${-state.current | 0}px, 0, 0)`;
-
-      // Active line — only update if progress changed by >0.5%
-      if (activeLineRef.current && state.max > 0) {
-        const progress = state.current / state.max;
-        if (Math.abs(progress - lastLineProgress) > 0.005) {
-          lastLineProgress = progress;
-          activeLineRef.current.style.transform = `scaleX(${progress})`;
-        }
-      }
-
-      // Background shift — throttled to max 4fps (every 250ms), only if visible
-      if (bgRef.current && state.max > 0 && (time - lastBgProgress > 250)) {
-        const progress = state.current / state.max;
-        lastBgProgress = time;
-        const r = 255 - (progress * 10) | 0;
-        const g = 255 - (progress * 14) | 0;
-        const b = 255 - (progress * 20) | 0;
-        bgRef.current.style.backgroundColor = `rgb(${r},${g},${b})`;
-      }
-
-      // Neural Event Emissions — throttled to max 1 per 500ms
-      if (time - lastEmitTime > 500) {
-        if (state.velocity > 30) {
-          neuralEventBus.emit("TIMELINE_FAST_SCROLL");
-          lastEmitTime = time;
-        } else if (state.velocity < 1 && state.hoveredNode) {
-          neuralEventBus.emit("TIMELINE_LINGER");
-          lastEmitTime = time;
-        }
-      }
-
-      // Temporal Whispers Engine (only runs when nearly still)
-      if (state.velocity < 1 && state.hoveredNode) {
-        state.hoverTime += delta;
-        if (state.hoverTime > 2000 && !state.whisperShown) {
-           state.whisperShown = true;
-           let text = "a fragment of time preserved.";
-           if (state.hoveredNode === 'PR & Media Head at ISTE') {
-             text = "A voice emerged from the runtime. This changed the rhythm of everything.";
-           } else if (state.hoveredNode === 'UNRESOLVED_FUTURE') {
-             text = "the architecture ends here, but the memory continues.";
-           } else if (state.hoveredNode.includes('Started')) {
-             text = "The foundation was poured in silence.";
-           } else if (state.hoveredNode.includes('Completed')) {
-             text = "One cycle closes, another begins.";
-           }
-           if (whisperRef.current) {
-             whisperRef.current.textContent = text;
-             whisperRef.current.classList.add('whisper-active');
-           }
-        }
-      } else {
-        state.hoverTime = 0;
-        if (state.whisperShown) {
-          state.whisperShown = false;
-          if (whisperRef.current) whisperRef.current.classList.remove('whisper-active');
-        }
-      }
-    };
-
-    orchestrator.subscribeToRAF('timeline-physics', tick, { priority: 'CRITICAL', gpuCost: 'LOW' });
-    return () => {
-      orchestrator.unsubscribeFromRAF('timeline-physics');
-      resizeObserver.disconnect();
-    };
-  }, [orchestrator, milestones]);
-
-  // Event Listeners for Virtual Scroll
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const onWheel = (e) => {
-      // Prevent default only if we have room to scroll to prevent getting stuck
-      const state = scrollState.current;
-      const isScrollable = state.max > 0;
-      
-      const delta = e.deltaX || e.deltaY;
-      
-      // If we are scrolling vertically and hit the edge, let page scroll normally
-      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-         if ((state.target <= 0 && e.deltaY < 0) || (state.target >= state.max && e.deltaY > 0)) {
-            return; // Let native vertical scroll happen
-         }
-      }
-      
-      if (isScrollable) e.preventDefault();
-      scrollState.current.target += delta * 1.5;
-    };
-
-    const onTouchStart = (e) => {
-      scrollState.current.isDragging = true;
-      scrollState.current.startX = e.touches ? e.touches[0].clientX : e.clientX;
-      scrollState.current.startScroll = scrollState.current.target;
-    };
-
-    const onTouchMove = (e) => {
-      if (!scrollState.current.isDragging) return;
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const dx = clientX - scrollState.current.startX;
-      scrollState.current.target = scrollState.current.startScroll - dx * 2;
-    };
-
-    const onTouchEnd = () => {
-      scrollState.current.isDragging = false;
-    };
-
-    // Use passive: false for wheel to prevent native scrolling interference
-    el.addEventListener('wheel', onWheel, { passive: false });
-    
-    // Touch
-    el.addEventListener('touchstart', onTouchStart, { passive: true });
-    el.addEventListener('touchmove', onTouchMove, { passive: true });
-    el.addEventListener('touchend', onTouchEnd, { passive: true });
-    
-    // Mouse Drag
-    el.addEventListener('mousedown', onTouchStart, { passive: true });
-    window.addEventListener('mousemove', onTouchMove, { passive: true });
-    window.addEventListener('mouseup', onTouchEnd, { passive: true });
-
-    return () => {
-      el.removeEventListener('wheel', onWheel);
-      el.removeEventListener('touchstart', onTouchStart);
-      el.removeEventListener('touchmove', onTouchMove);
-      el.removeEventListener('touchend', onTouchEnd);
-      el.removeEventListener('mousedown', onTouchStart);
-      window.removeEventListener('mousemove', onTouchMove);
-      window.removeEventListener('mouseup', onTouchEnd);
-    };
-  }, []);
+  // Note: Custom manual drag/touch scrolling removed in favor of native vertical scrolling scrubbing the GSAP horizontal pin.
 
   // GSAP hover effects on timeline nodes (micro-interactions)
   useEffect(() => {
