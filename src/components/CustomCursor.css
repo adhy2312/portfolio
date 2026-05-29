@@ -1,167 +1,208 @@
 /* ═══════════════════════════════════════════
-   LIQUID GLASS CURSOR  — PC only
-   Uses CSS backdrop-filter and clip-path
+   AI COMPANION CURSOR (CustomCursor.css)
 ═══════════════════════════════════════════ */
 
-/* Hide native cursor on real pointer devices only */
-@media (pointer: fine) {
-  * { cursor: none !important; }
-}
-
-/* Touch/mobile → always restore native cursor */
-@media (pointer: coarse), (hover: none) {
-  .liquid-cursor { display: none !important; }
-  * { cursor: auto !important; }
-}
-
-/* ─── Main Cursor Wrapper (for Drop Shadow) ─── */
-.liquid-cursor {
+.ai-cursor {
   position: fixed;
-  top: 0; left: 0;
-  width: 32px;
-  height: 32px;
-  /* The tip is at (0,0), no negative margin needed. */
-  margin: 0;
+  top: 0;
+  left: 0;
   pointer-events: none;
-  z-index: 999999;
+  z-index: 9999;
   will-change: transform;
-
-  /* Filter goes on wrapper so it isn't clipped by clip-path */
-  filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.2)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.1));
-
-  /* Smooth transitions for states */
-  transition: opacity 0.18s ease;
+  mix-blend-mode: difference;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Origin centered for GSAP x/y translation */
+  margin-top: -12px;
+  margin-left: -12px;
+  transition: opacity 0.3s ease;
 }
 
-/* ─── Glass Shape ─── */
-.liquid-cursor-shape {
-  width: 100%;
-  height: 100%;
-  
-  /* Cursor shape polygon pointing to 0,0 */
-  clip-path: polygon(
-    0% 0%, 
-    0% 81.25%, 
-    25% 57.8%, 
-    42.2% 86%, 
-    56.2% 78.1%, 
-    39% 50%, 
-    71.9% 46.9%
-  );
-
-  /* Liquid glass fill (Made slightly more opaque to compensate for removed blur) */
-  background: linear-gradient(
-    135deg,
-    rgba(255, 230, 210, 0.6) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 180, 150, 0.4) 100%
-  );
-
-  /* Frosted glass blur (Removed backdrop-filter for performance!) */
-  /* backdrop-filter: blur(12px) saturate(1.4); */
-
-  transition:
-    background 0.4s ease,
-    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  
-  /* Fix transform origin to the tip */
-  transform-origin: 0 0;
-}
-
-/* Add a subtle shine effect */
-.liquid-cursor-shape::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0;
-  width: 50%; height: 50%;
-  background: radial-gradient(circle at 10% 10%, rgba(255,255,255,0.8), transparent 70%);
-  opacity: 0.8;
-}
-
-/* ─── HOVER STATE — organic breathing ─── */
-.liquid-cursor.state-hover .liquid-cursor-shape {
-  transform: scale(1.2);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 180, 140, 0.4) 0%,
-    rgba(255, 255, 255, 0.1) 50%,
-    rgba(255, 120, 100, 0.2) 100%
-  );
-}
-
-/* ─── Warm Emotive Glow (High Performance) ─── */
-.liquid-cursor-outline {
-  position: absolute;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  pointer-events: none;
-  
-  color: rgba(255, 220, 180, 0.9);
-  
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), color 0.4s ease;
-  transform-origin: 0 0;
-}
-
-/* ─── CLICK STATE — soft press ─── */
-.liquid-cursor.cursor-click .liquid-cursor-shape {
-  transform: scale(0.7);
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.6) 0%,
-    rgba(255, 200, 180, 0.3) 100%
-  );
-}
-/* ─── Visibility ─── */
-.cursor-hidden { opacity: 0; }
-.cursor-visible { opacity: 1; }
-
-/* Sync animations */
-.liquid-cursor.state-hover .liquid-cursor-outline {
-  transform: scale(1.25);
-  color: rgba(255, 160, 100, 0.9);
-}
-
-.liquid-cursor.cursor-click .liquid-cursor-outline {
-  transform: scale(0.85);
-}
-
-/* ─── TEXT STATE (I-Beam) ─── */
-.liquid-cursor.state-text .liquid-cursor-shape {
-  clip-path: polygon(45% 0, 55% 0, 55% 100%, 45% 100%);
-  transform: scale(0.6, 1.5);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(200, 200, 255, 0.3) 100%);
-}
-.liquid-cursor.state-text .liquid-cursor-outline {
-  transform: scale(0.6, 1.5);
-  color: rgba(200, 200, 255, 0.5);
-}
-
-/* ─── MAGNETIC STATE ─── */
-.liquid-cursor.state-magnetic .liquid-cursor-shape {
-  transform: scale(0.3); /* Becomes a tiny dot when inside a button */
-  background: #fff;
-  border-radius: 50%;
-  clip-path: circle(50% at 50% 50%);
-}
-.liquid-cursor.state-magnetic .liquid-cursor-outline {
+.cursor-hidden {
   opacity: 0;
 }
 
-/* ─── GRAB STATE ─── */
-.liquid-cursor.state-grab .liquid-cursor-shape {
-  transform: scale(1.5);
-  clip-path: circle(40% at 50% 50%);
-  background: rgba(255, 255, 255, 0.1);
+.cursor-visible {
+  opacity: 1;
 }
 
-/* ─── CHAT STATE ─── */
-.liquid-cursor.state-chat .liquid-cursor-shape {
-  clip-path: none;
-  transform: scale(1.3) translate(-20%, -20%);
-  background: rgba(168, 85, 247, 0.8); /* Higher opacity since blur is removed */
-  border-radius: 50% 50% 50% 0;
+.ai-cursor-shape {
+  width: 24px;
+  height: 24px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: width, height, border-radius, background, transform;
 }
-.liquid-cursor.state-chat .liquid-cursor-outline {
-  transform: scale(1.3) translate(-20%, -20%);
-  color: rgba(168, 85, 247, 0.8);
+
+.ai-cursor-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease 0.1s;
+  color: #000;
+  overflow: hidden;
+}
+
+/* ─── Standard States ─── */
+.state-hover .ai-cursor-shape {
+  transform: scale(1.5);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid white;
+}
+
+.state-text .ai-cursor-shape {
+  width: 2px;
+  height: 30px;
+  border-radius: 2px;
+}
+
+.state-magnetic .ai-cursor-shape {
+  transform: scale(0.2);
+  opacity: 0;
+}
+
+.state-grab .ai-cursor-shape {
+  transform: scale(1.5);
+  background: transparent;
+  border: 2px dashed white;
+  animation: cursor-spin 4s linear infinite;
+}
+
+.state-chat .ai-cursor-shape {
+  transform: scale(1.2);
+  background: var(--accent-primary);
+  border-radius: 4px;
+}
+
+/* ─── AI Companion States (Experimental Mode) ─── */
+.is-experimental {
+  mix-blend-mode: normal; /* AI cursor has its own colors */
+}
+
+.is-experimental .ai-cursor-shape {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+.is-experimental.state-ai-idle .ai-cursor-shape {
+  transform: scale(0.8);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 15px rgba(108, 99, 255, 0.4);
+}
+
+.is-experimental.state-ai-idle .ai-cursor-content {
+  opacity: 1;
+}
+
+.ai-idle-thought {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 8px;
+  color: var(--accent-primary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: -35px; /* Floats above the orb */
+  white-space: nowrap;
+  animation: float-thought 2s ease-in-out infinite alternate;
+}
+
+@keyframes float-thought {
+  from { transform: translateY(0); opacity: 0.5; }
+  to { transform: translateY(-3px); opacity: 1; }
+}
+
+/* ─── AI Project Hover State ─── */
+.is-experimental.state-ai-project .ai-cursor-shape {
+  width: 280px;
+  height: 140px;
+  border-radius: 12px;
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid var(--accent-primary);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(108, 99, 255, 0.2);
+  transform: translate(20px, 20px); /* Offset from exact pointer */
+}
+
+.is-experimental.state-ai-project .ai-cursor-content {
+  opacity: 1;
+  transform: translate(-50%, -50%) translate(20px, 20px);
+}
+
+.ai-project-card {
+  padding: 16px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  color: white;
+}
+
+.ai-label {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 8px;
+  color: var(--accent-primary);
+  letter-spacing: 2px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ai-label::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  animation: pulse-dot 1s infinite alternate;
+}
+
+.ai-project-card h4 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 6px 0;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-project-card p {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ─── Click Feedback ─── */
+.cursor-click .ai-cursor-shape {
+  transform: scale(0.8) !important;
+  background: white !important;
+}
+
+@keyframes pulse-dot {
+  from { opacity: 0.3; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1.2); }
+}
+
+@keyframes cursor-spin {
+  100% { transform: scale(1.5) rotate(360deg); }
 }

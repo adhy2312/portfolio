@@ -166,6 +166,9 @@ const TiltCard = ({ children, project, index }) => {
         ref={cardRef}
         className="work-card-wrapper"
         style={{ transformStyle: 'preserve-3d', '--card-accent': project.accent }}
+        data-cursor-ai="true"
+        data-project-title={project.title}
+        data-project-desc={project.description}
       >
         <div className="work-card glass-card" style={{ transform: 'translateZ(50px)' }}>
           {showMemory ? (

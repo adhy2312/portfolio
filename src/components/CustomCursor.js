@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import gsap from 'gsap';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
 import './CustomCursor.css';
@@ -8,42 +8,88 @@ const hasFinePointer = () => window.matchMedia('(pointer: fine)').matches;
 
 const CustomCursor = () => {
   const cursorRef = useRef(null);
-  const stateRef = useRef('default');
-  const [cursorState, setCursorState] = useState('default');
+  const aiContentRef = useRef(null);
   const [visible, setVisible] = useState(false);
+  const [aiData, setAiData] = useState({ title: '', desc: '' });
+  const [cursorState, setCursorState] = useState('default');
+  
   const { isExperimental } = useSiteMode();
-
-  // Framer Motion Springs for Experimental Mode
-  const fX = useMotionValue(-300);
-  const fY = useMotionValue(-300);
-  const smoothX = useSpring(fX, { damping: 20, stiffness: 150, mass: 0.5 });
-  const smoothY = useSpring(fY, { damping: 20, stiffness: 150, mass: 0.5 });
-
   const orchestrator = useOrchestrator();
 
+  const mousePos = useRef({ x: -1000, y: -1000 });
+  const cursorPos = useRef({ x: -1000, y: -1000 });
+  
+  // Track last activity time for AI idle wandering
+  const lastActiveRef = useRef(Date.now());
+  const isIdleRef = useRef(false);
+
   useEffect(() => {
-    if (!hasFinePointer() || !orchestrator) return;
+    if (!hasFinePointer() || !orchestrator || !cursorRef.current) return;
 
-    const tick = (time, delta, mousePos, isMoving) => {
-      if (mousePos.x < -500) return; // Uninitialized
+    // Fast GSAP quickSetter for maximum performance
+    const setX = gsap.quickSetter(cursorRef.current, 'x', 'px');
+    const setY = gsap.quickSetter(cursorRef.current, 'y', 'px');
+
+    const tick = (time, delta) => {
+      // Lerp for smooth trailing (AI mode) or instant follow
+      const ease = isExperimental ? 0.2 : 0.8;
       
-      // We can't safely call setVisible inside RAF on every frame, 
-      // but if we track local variable we can avoid state thrashing.
-      // Actually, CSS hover is fine. 
+      // If idle (no mouse movement for 3s), AI slightly floats around its position
+      if (isExperimental && isIdleRef.current && visible) {
+        const t = time * 0.001;
+        const driftX = Math.sin(t) * 10;
+        const driftY = Math.cos(t * 1.3) * 10;
+        cursorPos.current.x += (mousePos.current.x + driftX - cursorPos.current.x) * ease;
+        cursorPos.current.y += (mousePos.current.y + driftY - cursorPos.current.y) * ease;
+      } else {
+        cursorPos.current.x += (mousePos.current.x - cursorPos.current.x) * ease;
+        cursorPos.current.y += (mousePos.current.y - cursorPos.current.y) * ease;
+      }
 
-      if (isExperimental) {
-        // Only set if moved to prevent unnecessary framer computations
-        if (fX.get() !== mousePos.x) fX.set(mousePos.x);
-        if (fY.get() !== mousePos.y) fY.set(mousePos.y);
-      } else if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${mousePos.x}px, ${mousePos.y}px, 0)`;
+      setX(cursorPos.current.x);
+      setY(cursorPos.current.y);
+
+      // Check idle state
+      if (Date.now() - lastActiveRef.current > 3000) {
+        if (!isIdleRef.current) {
+          isIdleRef.current = true;
+          if (isExperimental && cursorState === 'default') {
+            setCursorState('ai-idle');
+          }
+        }
+      } else {
+        if (isIdleRef.current) {
+          isIdleRef.current = false;
+          if (cursorState === 'ai-idle') {
+            setCursorState('default');
+          }
+        }
       }
     };
 
     orchestrator.subscribeToRAF('custom-cursor', tick, { priority: 'CRITICAL' });
 
+    const onMouseMove = (e) => {
+      mousePos.current.x = e.clientX;
+      mousePos.current.y = e.clientY;
+      lastActiveRef.current = Date.now();
+      
+      if (!visible) setVisible(true);
+    };
+
     const onOver = (e) => {
       const el = e.target;
+      
+      // Check for AI Project Hover
+      const aiProject = el.closest('[data-cursor-ai="true"]');
+      if (aiProject && isExperimental) {
+        const title = aiProject.getAttribute('data-project-title') || '';
+        const desc = aiProject.getAttribute('data-project-desc') || '';
+        setAiData({ title, desc });
+        setCursorState('ai-project');
+        return;
+      }
+
       const isText = !!el.closest('p, h1, h2, h3, h4, h5, h6, span:not(.ma-dock-label)');
       const isMagnetic = !!el.closest('.magnetic-btn');
       const isHover = !!el.closest('a, button, [data-cursor="hover"], input, textarea, select, label, [role="button"]');
@@ -57,17 +103,18 @@ const CustomCursor = () => {
       else if (isHover) next = 'hover';
       else if (isText) next = 'text';
 
-      if (next !== stateRef.current) {
-        stateRef.current = next;
-        setCursorState(next);
-      }
+      setCursorState(next);
     };
 
-    const onMouseDown = () => cursorRef.current?.classList.add('cursor-click');
-    const onMouseUp   = () => cursorRef.current?.classList.remove('cursor-click');
-    const onLeave     = () => setVisible(false);
-    const onEnter     = () => setVisible(true);
+    const onMouseDown = () => {
+      cursorRef.current.classList.add('cursor-click');
+      lastActiveRef.current = Date.now();
+    };
+    const onMouseUp = () => cursorRef.current.classList.remove('cursor-click');
+    const onLeave = () => setVisible(false);
+    const onEnter = () => setVisible(true);
 
+    document.addEventListener('mousemove', onMouseMove, { passive: true });
     document.addEventListener('mouseover', onOver, { passive: true });
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mouseup', onMouseUp);
@@ -76,64 +123,40 @@ const CustomCursor = () => {
 
     return () => {
       orchestrator.unsubscribeFromRAF('custom-cursor');
+      document.removeEventListener('mousemove', onMouseMove);
       document.removeEventListener('mouseover', onOver);
       document.removeEventListener('mousedown', onMouseDown);
       document.removeEventListener('mouseup', onMouseUp);
       document.documentElement.removeEventListener('mouseleave', onLeave);
       document.documentElement.removeEventListener('mouseenter', onEnter);
     };
-  }, [orchestrator, isExperimental]); // eslint-disable-line
+  }, [orchestrator, isExperimental, visible, cursorState]); // eslint-disable-line
 
   if (!hasFinePointer()) return null;
-
-  if (isExperimental) {
-    return (
-      <div className={`liquid-cursor state-${cursorState} ${visible ? 'cursor-visible' : 'cursor-hidden'}`}>
-        <motion.div 
-          className="liquid-cursor-shape" 
-          style={{ x: smoothX, y: smoothY, position: 'fixed', top: 0, left: 0, pointerEvents: 'none', width: 32, height: 32 }}
-        />
-        <motion.svg
-          className="liquid-cursor-outline"
-          width="32"
-          height="32"
-          viewBox="0 0 32 32"
-          xmlns="http://www.w3.org/2000/svg"
-          style={{ x: fX, y: fY, position: 'fixed', top: 0, left: 0, pointerEvents: 'none' }}
-        >
-          <polygon
-            points="0,0 0,26 8,18.5 13.5,27.5 18,25 12.5,16 23,15"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinejoin="round"
-          />
-        </motion.svg>
-      </div>
-    );
-  }
 
   return (
     <div
       ref={cursorRef}
-      className={`liquid-cursor state-${cursorState} ${visible ? 'cursor-visible' : 'cursor-hidden'}`}
+      className={`ai-cursor state-${cursorState} ${visible ? 'cursor-visible' : 'cursor-hidden'} ${isExperimental ? 'is-experimental' : ''}`}
     >
-      <div className="liquid-cursor-shape" />
-      <svg
-        className="liquid-cursor-outline"
-        width="32"
-        height="32"
-        viewBox="0 0 32 32"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <polygon
-          points="0,0 0,26 8,18.5 13.5,27.5 18,25 12.5,16 23,15"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <div className="ai-cursor-shape" />
+      
+      {isExperimental && (
+        <div className="ai-cursor-content" ref={aiContentRef}>
+          {cursorState === 'ai-project' && (
+            <div className="ai-project-card">
+              <span className="ai-label">MINI-ADHY NEURAL SYNC</span>
+              <h4>{aiData.title}</h4>
+              <p>{aiData.desc}</p>
+            </div>
+          )}
+          {cursorState === 'ai-idle' && (
+            <div className="ai-idle-thought">
+              <span>Thinking...</span>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
