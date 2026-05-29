@@ -128,6 +128,13 @@ function AppContent() {
     }
     rafId = requestAnimationFrame(raf);
 
+    // Spotlight Engine: Track mouse globally for premium dynamic lighting
+    const handleGlobalMouseMove = (e) => {
+      document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
+      document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
+    };
+    window.addEventListener('mousemove', handleGlobalMouseMove);
+
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
@@ -217,6 +224,7 @@ function AppContent() {
       lenis.destroy();
       cancelAnimationFrame(rafId);
       clearTimeout(widgetTimer);
+      window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
@@ -252,8 +260,7 @@ function AppContent() {
       <SiteModeSwitcher />
       {loading && <PageLoader onDone={() => setLoading(false)} />}
 
-      {/* High-Performance Breathing Overlay (Opacity-only, sits above glass to prevent re-blurring lag) */}
-      <div className="performance-breathing-overlay" />
+      {/* High-Performance Breathing Overlay Removed for Performance */}
 
       {/* Ultra-lightweight digital textures (noise, scanlines, chromatic aberration) */}
       <DigitalTextures />

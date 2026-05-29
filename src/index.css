@@ -586,24 +586,26 @@ body {
 }
 
 /* ═══════════════════════════════════════════
-   HIGH-PERFORMANCE BREATHING ENGINE
-   (Animates opacity of a static gradient, sitting above glass cards to prevent GPU blur-thrashing)
+   PREMIUM MOUSE SPOTLIGHT (Replaces Breathing Overlay)
+   (Follows global --mouse-x and --mouse-y for an elegant ambient glow)
 ═══════════════════════════════════════════ */
-.performance-breathing-overlay {
+.App::after {
+  content: '';
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 100; /* Above glass cards so they don't have to recalculate blur continuously */
-  box-shadow: 
-    inset 0 0 150px rgba(108, 99, 255, 0.15),
-    inset 0 0 60px rgba(255, 60, 100, 0.1);
-  animation: organicBreathe 8s ease-in-out infinite alternate;
-  will-change: opacity;
+  z-index: 100;
+  background: radial-gradient(
+    800px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
+    rgba(108, 99, 255, 0.05),
+    transparent 40%
+  );
+  transition: opacity var(--transition-smooth);
 }
 
-@keyframes organicBreathe {
-  0% { opacity: 0.15; }
-  100% { opacity: 1; }
+/* Fallback for performance breathing overlay removal */
+.performance-breathing-overlay {
+  display: none;
 }
 
 /* --- Late Night Loneliness Mode --- */
@@ -625,29 +627,32 @@ body {
 }
 
 .glass-card {
-  background: rgba(248, 248, 250, 0.9);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  position: relative;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 24px;
   box-shadow: 
-    0 4px 20px -2px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), background-color var(--transition-smooth), border-color var(--transition-smooth);
+    0 4px 20px -2px rgba(0, 0, 0, 0.02),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth), background-color var(--transition-smooth);
+  overflow: hidden;
 }
-
 
 @media (max-width: 768px) {
   .glass-card {
-    background: rgba(250, 250, 252, 0.95);
+    background: rgba(255, 255, 255, 0.6);
   }
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 1);
-  border-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 1);
   transform: translateY(-4px) scale(1.01);
   box-shadow: 
-    0 24px 48px -8px rgba(0, 0, 0, 0.08),
-    0 8px 16px -4px rgba(0, 0, 0, 0.04),
+    0 24px 48px -8px rgba(0, 0, 0, 0.06),
+    0 8px 16px -4px rgba(0, 0, 0, 0.03),
     inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 
@@ -659,17 +664,19 @@ body {
   align-items: center;
   gap: 8px;
   padding: 14px 32px;
-  background: var(--gradient-primary);
+  background: rgba(108, 99, 255, 0.9);
   color: #fff;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.95rem;
-  border: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 50px;
   text-decoration: none;
   cursor: pointer;
-  transition: var(--transition-smooth);
-  box-shadow: 0 8px 30px var(--glow-primary);
+  transition: all var(--transition-smooth);
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   position: relative;
   overflow: hidden;
 }
@@ -678,14 +685,15 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
   opacity: 0;
-  transition: var(--transition-fast);
+  transition: opacity var(--transition-fast);
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 40px var(--glow-primary);
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(108, 99, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .btn-primary:hover::before {
@@ -697,16 +705,18 @@ body {
   align-items: center;
   gap: 8px;
   padding: 13px 32px;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.1);
   color: var(--text-primary);
   font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 0.95rem;
-  border: 1.5px solid var(--border-accent);
+  border: 1px solid rgba(0, 0, 0, 0.15);
   border-radius: 50px;
   text-decoration: none;
   cursor: pointer;
-  transition: var(--transition-smooth);
+  transition: all var(--transition-smooth);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .App {
@@ -718,10 +728,10 @@ body {
 }
 
 .btn-outline:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 25px var(--glow-primary);
-  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px) scale(1.02);
 }
 
 /* ═══════════════════════════════════════════
