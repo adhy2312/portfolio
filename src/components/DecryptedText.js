@@ -1,13 +1,31 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useInView } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const chars = '!@#%&*+<>?$[]';
 
 const DecryptedText = ({ text, className, speed = 30 }) => {
   const [displayText, setDisplayText] = useState(text.replace(/[^\s]/g, () => chars[Math.floor(Math.random() * chars.length)]));
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, amount: 0.5 });
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    
+    const trigger = ScrollTrigger.create({
+      trigger: ref.current,
+      start: "top 95%",
+      onEnter: () => {
+        setIsInView(true);
+        trigger.kill(); // run once
+      }
+    });
+
+    return () => trigger.kill();
+  }, []);
 
   useEffect(() => {
     if (isInView && !hasAnimated) {

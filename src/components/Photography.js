@@ -1,13 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import './Photography.css';
 import { motion, AnimatePresence } from 'framer-motion';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun } from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';
 import photo3 from '../assets/photo3.jpg';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const FALLBACK_PHOTOS = [
   { src: photo1, alt: 'Urban Landscape', caption: 'City Geometry', category: 'Urban' },
@@ -142,6 +146,15 @@ const ExifPanel = ({ src }) => {
     return () => { cancelled = true; };
   }, [src]);
 
+  useEffect(() => {
+    if (exif) {
+      gsap.fromTo('.exif-panel', 
+        { opacity: 0, y: 12 }, 
+        { opacity: 1, y: 0, duration: 0.35, delay: 0.2, ease: 'power2.out' }
+      );
+    }
+  }, [exif]);
+
   if (exif === undefined) return <div className="exif-loading">Reading EXIF…</div>;
   if (!exif) return null;
 
@@ -158,12 +171,7 @@ const ExifPanel = ({ src }) => {
   if (rows.length === 0) return null;
 
   return (
-    <motion.div
-      className="exif-panel"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay: 0.2 }}
-    >
+    <div className="exif-panel">
       {rows.map(r => (
         <div key={r.label} className="exif-row">
           <span className="exif-icon">{r.icon}</span>
@@ -171,7 +179,7 @@ const ExifPanel = ({ src }) => {
           <span className="exif-value">{r.value}</span>
         </div>
       ))}
-    </motion.div>
+    </div>
   );
 };
 
@@ -179,8 +187,7 @@ const ExifPanel = ({ src }) => {
 const Photography = () => {
   const [lightbox,      setLightbox]      = useState(null);
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
-  const [loadingData,   setLoadingData]   = useState(true);
-  
+  const [loadingData, setLoadingData] = useState(true);
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('photography');
 
@@ -202,16 +209,33 @@ const Photography = () => {
 
   const all = fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
 
+  const sectionRef = useRef(null);
+  const headerRef = useRef(null);
+  const ctaRef = useRef(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const ctx = gsap.context(() => {
+      if (headerRef.current) {
+        gsap.fromTo(headerRef.current,
+          { opacity: 0, y: 40 },
+          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true } }
+        );
+      }
+      if (ctaRef.current) {
+        gsap.fromTo(ctaRef.current,
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.6, delay: 0.3, ease: 'power2.out', scrollTrigger: { trigger: ctaRef.current, start: 'top 90%', once: true } }
+        );
+      }
+    }, sectionRef);
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="photography" id="photography">
+    <section className="photography" id="photography" ref={sectionRef}>
       <div className="container">
-        <motion.div
-          className="photo-header"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          viewport={{ once: true }}
-        >
+        <div className="photo-header" ref={headerRef}>
           <span className="section-label">// through the lens</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Lens Work">
@@ -227,7 +251,7 @@ const Photography = () => {
           <p className="section-desc">
             Photography is how I slow down and see the world differently — one frame at a time.
           </p>
-        </motion.div>
+        </div>
       </div>
 
       {/* Full-bleed marquee strips */}
@@ -245,17 +269,11 @@ const Photography = () => {
       </div>
 
       <div className="container">
-        <motion.div
-          className="photo-ig-cta"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3, duration: 0.6 }}
-          viewport={{ once: true }}
-        >
+        <div className="photo-ig-cta" ref={ctaRef}>
           <a href="https://instagram.com/zoomout_frames" target="_blank" rel="noopener noreferrer" className="btn-outline">
             <FiInstagram style={{ marginRight: '6px' }} /> See More on Instagram
           </a>
-        </motion.div>
+        </div>
       </div>
 
       {/* Lightbox rendered in Portal to escape stacking context */}

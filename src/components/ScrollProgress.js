@@ -1,31 +1,40 @@
 import React, { useEffect, useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './ScrollProgress.css';
 
-// Direct DOM mutation — zero React re-renders on scroll
+gsap.registerPlugin(ScrollTrigger);
+
+// Driven by GSAP ScrollTrigger — zero React re-renders, GPU accelerated
 const ScrollProgress = () => {
   const barRef = useRef(null);
 
   useEffect(() => {
-    const bar = barRef.current;
-    if (!bar) return;
+    if (!barRef.current) return;
 
-    const onScroll = () => {
-      const el = document.documentElement;
-      const scrolled = el.scrollTop || document.body.scrollTop;
-      const total = el.scrollHeight - el.clientHeight;
-      const pct = total > 0 ? (scrolled / total) * 100 : 0;
-      bar.style.width = `${pct}%`;
-    };
+    const ctx = gsap.context(() => {
+      gsap.to(barRef.current, {
+        scaleX: 1,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: document.body,
+          start: 'top top',
+          end: 'bottom bottom',
+          scrub: 0.3 // slight smoothing
+        }
+      });
+    });
 
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-    };
+    return () => ctx.revert();
   }, []);
 
   return (
     <div className="scroll-progress-track">
-      <div ref={barRef} className="scroll-progress-bar" style={{ width: '0%' }} />
+      <div 
+        ref={barRef} 
+        className="scroll-progress-bar" 
+        style={{ transform: 'scaleX(0)', transformOrigin: 'left center', width: '100%' }} 
+      />
     </div>
   );
 };
