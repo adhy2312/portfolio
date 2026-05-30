@@ -90,17 +90,17 @@
 }
 
 .is-experimental .ai-cursor-shape {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
+  /* backdrop-filter REMOVED for strict 60fps performance */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  /* box-shadow removed to prevent layout thrashing */
 }
 
 .is-experimental.state-ai-idle .ai-cursor-shape {
   transform: scale(0.8);
   border-color: var(--accent-primary);
-  box-shadow: 0 0 15px rgba(108, 99, 255, 0.4);
+  /* Reduced glow for performance */
+  box-shadow: 0 0 10px rgba(108, 99, 255, 0.2);
 }
 
 .is-experimental.state-ai-idle .ai-cursor-content {
@@ -128,9 +128,10 @@
   width: 280px;
   height: 140px;
   border-radius: 12px;
-  background: rgba(10, 15, 30, 0.85);
+  background: rgba(10, 15, 30, 0.95); /* More opaque since blur is gone */
   border: 1px solid var(--accent-primary);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(108, 99, 255, 0.2);
+  /* Kept minimal shadow for design, but simpler */
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   transform: translate(20px, 20px); /* Offset from exact pointer */
 }
 
@@ -187,6 +188,7 @@
   line-height: 1.4;
   margin: 0;
   display: -webkit-box;
+  line-clamp: 3;
   -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
   overflow: hidden;

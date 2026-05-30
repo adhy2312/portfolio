@@ -1,6 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Lenis from 'lenis';
-import { initGSAPScrollProxy, ScrollTrigger } from './hooks/useGSAPAnimations';
+import { initGSAPScrollProxy, ScrollTrigger, applyGlobalEluteEffect } from './hooks/useGSAPAnimations';
 import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -14,7 +14,6 @@ import AmbientThoughts from './components/AmbientThoughts';
 import { useSolarLighting } from './hooks/useSolarLighting';
 import DigitalSoul from './components/DigitalSoul';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
-import RainDroplets from './components/RainDroplets';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 
 // Lazy load heavy components
@@ -89,10 +88,8 @@ function LazySection({ name, children }) {
   );
 }
 
-// AppContent needs to be wrapped in Context providers so it can use hooks
 function AppContent() {
   useSolarLighting();
-  const { weatherData } = useConsciousness();
   const [showGame, setShowGame] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
@@ -105,35 +102,20 @@ function AppContent() {
   const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
-    // Lenis Premium Smooth Scrolling
     const lenis = new Lenis({
       lerp: 0.08,           // Premium buttery interpolation
       wheelMultiplier: 0.8, // Slightly resistant wheel for luxurious feel
-      direction: 'vertical',
-      gestureDirection: 'vertical',
-      smooth: true,
-      mouseMultiplier: 1,
-      smoothTouch: false,
-      touchMultiplier: 2,
-      infinite: false,
     });
 
     // GSAP + Lenis Synchronization (butter-smooth scroll-triggered animations)
+    // The RAF loop is handled strictly by GSAP ticker internally to prevent double-firing lag
     initGSAPScrollProxy(lenis);
 
-    let rafId;
-    function raf(time) {
-      lenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
+    // Apply the requested strong GSAP Elute Effect globally across the website
+    const eluteEffectKiller = applyGlobalEluteEffect();
 
-    // Spotlight Engine: Track mouse globally for premium dynamic lighting
-    const handleGlobalMouseMove = (e) => {
-      document.body.style.setProperty('--mouse-x', `${e.clientX}px`);
-      document.body.style.setProperty('--mouse-y', `${e.clientY}px`);
-    };
-    window.addEventListener('mousemove', handleGlobalMouseMove);
+    // Spotlight Engine: Removed for performance. 
+    // Global document.body.style.setProperty triggers massive layout thrashing.
 
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
@@ -171,36 +153,7 @@ function AppContent() {
     window.addEventListener('trigger-trance', tranceHandler);
 
 
-    // 2. Hacker Decode Reveal
-    const hackerTexts = document.querySelectorAll('.section-title span, .section-label, .hacker-decode');
-    const chars = "!<>-_\\\\/[]{}—=+*^?#________";
-    const decodeObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          const el = entry.target;
-          if (el.dataset.decoded) return;
-          el.dataset.decoded = "true";
-
-          const originalText = el.innerText || el.dataset.value;
-          if (!el.dataset.value) el.dataset.value = originalText;
-
-          let iteration = 0;
-          const interval = setInterval(() => {
-            el.innerText = originalText.split("").map((letter, index) => {
-              if (index < iteration) return originalText[index];
-              return chars[Math.floor(Math.random() * 26)] || "_";
-            }).join("");
-            if (iteration >= originalText.length) {
-              clearInterval(interval);
-              el.innerText = originalText; // Ensure exact match
-            }
-            iteration += 1 / 3;
-          }, 30);
-        }
-      });
-    }, { threshold: 0.1 });
-
-    hackerTexts.forEach(txt => decodeObserver.observe(txt));
+    // 2. Hacker Decode Reveal (Removed: setInterval causing layout thrashing)
 
     // 3. Console Easter Egg
     console.log(`
@@ -222,15 +175,13 @@ function AppContent() {
 
     return () => {
       lenis.destroy();
-      cancelAnimationFrame(rafId);
       clearTimeout(widgetTimer);
-      window.removeEventListener('mousemove', handleGlobalMouseMove);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-trance', tranceHandler);
-      decodeObserver.disconnect();
+      eluteEffectKiller && eluteEffectKiller();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);

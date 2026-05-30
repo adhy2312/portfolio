@@ -10,7 +10,6 @@
   z-index: 9999;
   width: 2px;
   height: 2px;
-  mix-blend-mode: screen;
   will-change: transform;
 }
 

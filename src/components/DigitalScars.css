@@ -5,6 +5,7 @@
   padding: var(--section-padding);
   position: relative;
   overflow: hidden;
+  background: linear-gradient(180deg, #06080e 0%, #0a0c16 100%);
 }
 
 .scars-header {

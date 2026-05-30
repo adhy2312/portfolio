@@ -70,8 +70,8 @@ const SNIPPETS = [
   },
 ];
 
-const CHAR_DELAY = 28;   // ms per character
-const LINE_PAUSE = 180;  // ms between lines
+const CHAR_DELAY = 65;   // ms per character (increased to save CPU, was 28)
+const LINE_PAUSE = 250;  // ms between lines
 const CYCLE_PAUSE = 3200; // ms before next language
 
 function useTypewriter(lines, active) {

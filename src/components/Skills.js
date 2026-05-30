@@ -5,6 +5,7 @@ import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import MagneticButton from './MagneticButton';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,8 +18,8 @@ const iconMap = {
 
 const skillCategories = [
   {
-    category: 'Frontend Development',
-    icon: <FiMonitor />,
+    title: 'Frontend Development',
+    iconName: 'FiMonitor',
     color: 'var(--accent-primary)',
     skills: [
       { name: 'React.js', level: 85 },
@@ -29,8 +30,8 @@ const skillCategories = [
     ],
   },
   {
-    category: 'Backend & Databases',
-    icon: <FiSettings />,
+    title: 'Backend & Databases',
+    iconName: 'FiSettings',
     color: 'var(--accent-cyan)',
     skills: [
       { name: 'Node.js & Express', level: 50 },
@@ -41,8 +42,8 @@ const skillCategories = [
     ],
   },
   {
-    category: 'UI/UX & Design',
-    icon: <FiPenTool />,
+    title: 'UI/UX & Design',
+    iconName: 'FiPenTool',
     color: 'var(--accent-gold)',
     skills: [
       { name: 'Figma', level: 88 },
@@ -53,8 +54,8 @@ const skillCategories = [
     ],
   },
   {
-    category: 'Electronics & IoT',
-    icon: <FiZap />,
+    title: 'Electronics & IoT',
+    iconName: 'FiZap',
     color: 'var(--accent-green)',
     skills: [
       { name: 'Arduino', level: 50 },
@@ -101,8 +102,110 @@ const tools = [
   'HTML', 'Express.js', 'APIs', 'Python', 'GSAP',
 ];
 
+const SkillCard = ({ cat, iconMap }) => {
+  const cardRef = useRef(null);
+  const barsRef = useRef([]);
+
+  useEffect(() => {
+    if (!cardRef.current) return;
+
+    // Scroll-scrubbed progress bars
+    const ctx = gsap.context(() => {
+      barsRef.current.forEach((bar) => {
+        if (!bar) return;
+        const targetWidth = bar.dataset.targetWidth;
+        gsap.fromTo(bar, 
+          { width: '0%' },
+          {
+            width: targetWidth,
+            ease: 'none',
+            scrollTrigger: {
+              trigger: cardRef.current,
+              start: 'top 85%',
+              end: 'center center',
+              scrub: true
+            }
+          }
+        );
+      });
+    }, cardRef);
+
+    // 3D Mouse Tilt
+    const handleMouseMove = (e) => {
+      const rect = cardRef.current.getBoundingClientRect();
+      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+      const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+
+      gsap.to(cardRef.current, {
+        rotateX: yPct * -15,
+        rotateY: xPct * 15,
+        duration: 0.5,
+        ease: 'power2.out',
+        overwrite: 'auto',
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(cardRef.current, {
+        rotateX: 0,
+        rotateY: 0,
+        duration: 1,
+        ease: 'elastic.out(1, 0.5)',
+      });
+    };
+
+    const el = cardRef.current;
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      ctx.revert();
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, []);
+
+  return (
+    <div 
+      ref={cardRef} 
+      className="skill-card glass-card"
+      style={{ transformStyle: 'preserve-3d', perspective: '1000px', transformOrigin: 'center center' }}
+    >
+      <div className="skill-card-header" style={{ transform: 'translateZ(30px)' }}>
+        <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
+        <h3 className="skill-card-title" style={{ color: cat.color || 'var(--accent-primary)' }}>
+          {cat.title || cat.category}
+        </h3>
+      </div>
+
+      <div className="skill-bars" style={{ transform: 'translateZ(20px)' }}>
+        {(cat.skills || []).map((skill, skillIdx) => (
+          <div key={skillIdx} className="skill-bar-item">
+            <div className="skill-bar-label">
+              <span>{skill.name}</span>
+              <span className="skill-bar-percent">{skill.level}%</span>
+            </div>
+            <div className="skill-bar-track">
+              <div
+                ref={el => barsRef.current[skillIdx] = el}
+                className="skill-bar-fill"
+                data-target-width={`${skill.level}%`}
+                style={{
+                  '--bar-color': cat.color || 'var(--accent-primary)',
+                  width: '0%'
+                }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 const Skills = () => {
   const [fetchedCategories, setFetchedCategories] = useState([]);
+  const [fetchedTools, setFetchedTools] = useState([]);
   const gridRef = useRef(null);
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
@@ -115,6 +218,11 @@ const Skills = () => {
     const query = '*[_type == "skillCategory"]';
     client.fetch(query).then((data) => {
       if (data && data.length > 0) setFetchedCategories(data);
+    }).catch(console.error);
+
+    const toolsQuery = '*[_type == "toolChip"]';
+    client.fetch(toolsQuery).then((data) => {
+      if (data && data.length > 0) setFetchedTools(data);
     }).catch(console.error);
   }, []);
 
@@ -156,11 +264,6 @@ const Skills = () => {
               trigger: gridRef.current,
               start: 'top 80%',
               once: true,
-            },
-            onComplete: () => {
-              // Animate skill bars after cards appear
-              const bars = gridRef.current?.querySelectorAll('.skill-bar-fill-css');
-              if (bars) bars.forEach(b => b.classList.add('animate'));
             }
           }
         );
@@ -216,38 +319,7 @@ const Skills = () => {
         {/* Skill category cards */}
         <div className="skills-grid" ref={gridRef}>
           {displayCategories.map((cat, catIdx) => (
-            <div 
-              key={catIdx} 
-              className="skill-card glass-card"
-            >
-              <div className="skill-card-header">
-                <span className="skill-card-icon">{iconMap[cat.iconName] || <FiMonitor />}</span>
-                <h3 className="skill-card-title" style={{ color: cat.color || 'var(--accent-primary)' }}>
-                  {cat.title || cat.category}
-                </h3>
-              </div>
-
-              <div className="skill-bars">
-                {(cat.skills || []).map((skill, skillIdx) => (
-                  <div key={skillIdx} className="skill-bar-item">
-                    <div className="skill-bar-label">
-                      <span>{skill.name}</span>
-                      <span className="skill-bar-percent">{skill.level}%</span>
-                    </div>
-                    <div className="skill-bar-track">
-                      <div
-                        className="skill-bar-fill skill-bar-fill-css"
-                        style={{
-                          '--bar-color': cat.color || 'var(--accent-primary)',
-                          '--bar-width': `${skill.level}%`,
-                          transitionDelay: `${0.1 + skillIdx * 0.08}s`,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <SkillCard key={catIdx} cat={cat} iconMap={iconMap} />
           ))}
         </div>
 
@@ -255,25 +327,42 @@ const Skills = () => {
         <div className="tools-section" ref={toolsRef}>
           <h3 className="tools-title">Tools & Technologies</h3>
           <div className="tools-cloud">
-            {tools.map((tool, i) => {
-              const meta = toolMeta[tool] || { group: 'tools', snippet: tool, emoji: '🔧' };
+            {(fetchedTools.length > 0 ? fetchedTools : tools).map((tool, i) => {
+              let toolName = tool;
+              let meta = { group: 'tools', snippet: tool, emoji: '🔧' };
+              
+              if (typeof tool === 'object') {
+                // From Sanity schema
+                toolName = tool.name;
+                meta = {
+                  group: tool.group || 'tools',
+                  snippet: tool.snippet || tool.name,
+                  emoji: tool.emoji || '🔧'
+                };
+              } else {
+                // From fallback hardcoded array
+                meta = toolMeta[tool] || meta;
+              }
+
               const colors = groupColors[meta.group] || groupColors.tools;
               return (
-                <span
-                  key={i}
-                  className="tech-tag tools-chip tools-chip-interactive"
-                  style={{
-                    '--chip-border': colors.border,
-                    '--chip-glow': colors.glow,
-                  }}
-                >
-                  <span className="chip-emoji">{meta.emoji}</span>
-                  {tool}
-                  <span className="chip-tooltip">
-                    <span className="chip-tooltip-title">{meta.emoji} {tool}</span>
-                    <span className="chip-tooltip-desc">{meta.snippet}</span>
+                <MagneticButton key={i} strength={0.3} style={{ display: 'inline-block' }}>
+                  <span
+                    className="tech-tag tools-chip tools-chip-interactive"
+                    style={{
+                      '--chip-border': colors.border,
+                      '--chip-glow': colors.glow,
+                      margin: '4px' // Add tiny margin to account for MagneticButton wrapper
+                    }}
+                  >
+                    <span className="chip-emoji">{meta.emoji}</span>
+                    {toolName}
+                    <span className="chip-tooltip">
+                      <span className="chip-tooltip-title">{meta.emoji} {toolName}</span>
+                      <span className="chip-tooltip-desc">{meta.snippet}</span>
+                    </span>
                   </span>
-                </span>
+                </MagneticButton>
               );
             })}
           </div>

@@ -14,9 +14,11 @@ import { useStory } from '../contexts/StoryContext';
 gsap.registerPlugin(ScrollTrigger);
 
 const FALLBACK_PHOTOS = [
-  { src: photo1, alt: 'Urban Landscape', caption: 'City Geometry', category: 'Urban' },
-  { src: photo2, alt: 'Portrait Shot',   caption: 'Golden Portrait', category: 'Portrait' },
-  { src: photo3, alt: 'Nature Capture',  caption: 'Nature Silence', category: 'Nature' },
+  { src: photo1, alt: 'Urban Landscape', caption: 'City Geometry', category: 'Photography' },
+  { src: photo2, alt: 'Portrait Shot',   caption: 'Golden Portrait', category: 'Photography' },
+  { src: photo3, alt: 'Brand Identity',  caption: 'Minimalist Branding', category: 'Design' },
+  { src: photo1, alt: 'App UI',          caption: 'Fintech Dashboard', category: 'UI/UX' },
+  { src: photo2, alt: 'Web Design',      caption: 'E-commerce Redesign', category: 'Web Design' },
 ];
 
 /* Duration (seconds) for one full marquee loop */
@@ -236,10 +238,10 @@ const Photography = () => {
     <section className="photography" id="photography" ref={sectionRef}>
       <div className="container">
         <div className="photo-header" ref={headerRef}>
-          <span className="section-label">// through the lens</span>
+          <span className="section-label">{"// visual & creative"}</span>
           <div className="section-title-wrapper">
-            <h2 className="section-title" data-hover="Lens Work">
-              <span className="section-title-inner">Visual <span>Stories</span></span>
+            <h2 className="section-title" data-hover="Lens & Canvas">
+              <span className="section-title-inner">Photography & <span>Design</span></span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('photography')} aria-label="Read story behind this section">
@@ -249,7 +251,7 @@ const Photography = () => {
           </div>
           <div className="section-divider" />
           <p className="section-desc">
-            Photography is how I slow down and see the world differently — one frame at a time.
+            Capturing the world through my lens and crafting digital experiences through design.
           </p>
         </div>
       </div>

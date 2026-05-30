@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import ns from '../core/NervousSystem';
 
 const LocalRainCanvas = () => {
   const canvasRef = useRef(null);
@@ -114,7 +115,6 @@ const LocalRainCanvas = () => {
     io.observe(canvas);
 
     const animate = (time) => {
-      animId = requestAnimationFrame(animate);
       if (!isVisible) return; // KILL loop if offscreen! Zero GPU cost!
       if (time - lastTime < 40) return; // ~25fps throttle
       lastTime = time;
@@ -145,10 +145,11 @@ const LocalRainCanvas = () => {
       drops.forEach(d => { d.update(); d.draw(lx, ly); });
     };
     
-    animId = requestAnimationFrame(animate);
+    // Register with brain: LOW priority means drops frame cleanly during heavy fatigue
+    ns.register('rainDroplets', animate, { priority: 'LOW' });
 
     return () => {
-      cancelAnimationFrame(animId);
+      ns.unregister('rainDroplets');
       ro.disconnect();
       io.disconnect();
     };

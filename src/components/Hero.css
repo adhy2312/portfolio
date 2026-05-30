@@ -105,7 +105,6 @@
 .metallic-char {
   display: inline-block;
   background-image: 
-    url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noiseFilter)" opacity="0.4"/></svg>'),
     linear-gradient(
       180deg,
       #ffffff 0%,
@@ -113,21 +112,14 @@
       #d4af37 80%,
       #ffffff 100%
     );
-  background-blend-mode: soft-light, normal;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   padding: 0;
-  padding-bottom: 0.15em; /* Protect descenders like 'y' */
+  padding-bottom: 0.15em;
   position: relative;
   transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  filter: drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.3));
-  transform: translateY(0);
-}
-
-.metallic-char:hover {
-  transform: translateY(-4px) scale(1.02);
-  filter: drop-shadow(0px 8px 24px rgba(212, 175, 55, 0.25));
+  text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .metallic-reveal {
@@ -149,29 +141,26 @@
 
 /* Typewriter Cursors */
 .typewriter-cursor-active {
-  position: absolute;
-  right: -8px;
-  top: 48%;
-  transform: translateY(-50%);
-  color: rgba(0, 240, 255, 0.45); /* Semi-transparent cyan */
+  display: inline-block;
+  color: rgba(0, 240, 255, 0.8);
   font-weight: 200;
   animation: cursor-flicker 0.15s infinite alternate;
-  text-shadow: 0 0 5px rgba(0, 240, 255, 0.25);
+  text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2rem, 8vw, 6rem);
+  vertical-align: baseline;
   pointer-events: none;
+  margin-left: 4px;
 }
 
 .typewriter-cursor-complete {
   display: inline-block;
-  color: rgba(255, 255, 255, 0.35); /* Soft, semi-transparent white */
+  color: rgba(255, 255, 255, 0.35);
   font-weight: 100;
   animation: cursor-blink 1.2s step-end infinite;
   text-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(3rem, 12vw, 8rem);
-  vertical-align: middle;
-  margin-left: 8px;
+  vertical-align: baseline;
+  margin-left: 4px;
   pointer-events: none;
 }
 
@@ -230,4 +219,30 @@
     padding: 0 16px;
     line-height: 1.6;
   }
+}
+
+/* High-Performance CSS Particles */
+.hero-css-particles {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.css-star {
+  position: absolute;
+  top: var(--top);
+  left: var(--left);
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0.15;
+  animation: floatStar var(--dur) ease-in-out var(--delay) infinite alternate;
+}
+
+@keyframes floatStar {
+  0% { transform: translateY(0) scale(1); opacity: 0.1; }
+  100% { transform: translateY(-20px) scale(1.5); opacity: 0.4; }
 }

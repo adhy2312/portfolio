@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './EasterEggOverlay.css';
+import ns from '../core/NervousSystem';
 
 const EasterEggOverlay = ({ egg }) => {
   const canvasRef = useRef(null);
@@ -27,8 +28,9 @@ const EasterEggOverlay = ({ egg }) => {
       tiltAngle: 0,
     }));
 
-    let animId;
+    let isDrawing = true;
     const draw = () => {
+      if (!isDrawing) return;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       pieces.forEach(p => {
         ctx.beginPath();
@@ -43,10 +45,9 @@ const EasterEggOverlay = ({ egg }) => {
         p.tilt = Math.sin(p.tiltAngle) * 15;
         if (p.y > canvas.height) { p.x = Math.random() * canvas.width; p.y = -20; }
       });
-      animId = requestAnimationFrame(draw);
     };
-    draw();
-    return () => cancelAnimationFrame(animId);
+    ns.register('easterEggParty', draw, { priority: 'NORMAL' });
+    return () => { isDrawing = false; ns.unregister('easterEggParty'); };
   });
 
   /* ── MATRIX — canvas rain ── */
@@ -63,8 +64,9 @@ const EasterEggOverlay = ({ egg }) => {
     const drops = Array(cols).fill(1);
     const chars = '01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホ';
 
-    let animId;
+    let isDrawing = true;
     const draw = () => {
+      if (!isDrawing) return;
       ctx.fillStyle = 'rgba(0,0,0,0.06)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       drops.forEach((y, i) => {
@@ -75,10 +77,9 @@ const EasterEggOverlay = ({ egg }) => {
         if (y * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
         drops[i]++;
       });
-      animId = requestAnimationFrame(draw);
     };
-    draw();
-    return () => cancelAnimationFrame(animId);
+    ns.register('easterEggMatrix', draw, { priority: 'NORMAL' });
+    return () => { isDrawing = false; ns.unregister('easterEggMatrix'); };
   });
 
   /* ── THANOS — snap 50% of elements to blank ── */

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useCallback, useState } from 'react';
 import './PingPongGame.css';
+import ns from '../core/NervousSystem';
 
 const W = 800;
 const H = 500;
@@ -40,7 +41,6 @@ function initState() {
 const PingPongGame = ({ onClose }) => {
   const canvasRef = useRef(null);
   const stateRef = useRef(initState());
-  const rafRef = useRef(null);
   const audioCtxRef = useRef(null);
   const [scores, setScores] = useState({ player: 0, ai: 0 });
   const [gameOver, setGameOver] = useState(null); // 'win' | 'lose' | null
@@ -233,12 +233,11 @@ const PingPongGame = ({ onClose }) => {
   const loop = useCallback(() => {
     update();
     draw();
-    rafRef.current = requestAnimationFrame(loop);
   }, [update, draw]);
 
   useEffect(() => {
-    rafRef.current = requestAnimationFrame(loop);
-    return () => cancelAnimationFrame(rafRef.current);
+    ns.register('pingPongGame', loop, { priority: 'NORMAL' });
+    return () => ns.unregister('pingPongGame');
   }, [loop]);
 
   useEffect(() => {

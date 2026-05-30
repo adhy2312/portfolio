@@ -103,7 +103,7 @@ const CustomCursor = () => {
       else if (isHover) next = 'hover';
       else if (isText) next = 'text';
 
-      setCursorState(next);
+      setCursorState(prev => prev !== next ? next : prev);
     };
 
     const onMouseDown = () => {

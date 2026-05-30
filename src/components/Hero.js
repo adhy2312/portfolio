@@ -2,18 +2,17 @@
 import React, { useCallback, useEffect, useState, useRef } from 'react';
 import './Hero.css';
 import { useSiteMode } from '../contexts/SiteModeContext';
-import Particles from "react-tsparticles";
-import { loadBasic } from "tsparticles-basic";
 import { client, urlFor } from '../sanity';
 import LanguageTerminal from './LanguageTerminal';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
 import gsap from 'gsap';
+import { TextPlugin } from 'gsap/TextPlugin';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
-  const [typedCharsCount, setTypedCharsCount] = useState(0);
-  const [typingComplete, setTypingComplete] = useState(false);
-  const [showParticles, setShowParticles] = useState(false);
 
   const { isExperimental } = useSiteMode();
   const heroRef = useRef(null);
@@ -60,16 +59,43 @@ const Hero = () => {
       }, 0.4);
     }
 
-    // Tagline cinematic letter-spacing
+    // Tagline cinematic TextPlugin typing
     if (taglineRef.current) {
-      gsap.set(taglineRef.current, { opacity: 0, letterSpacing: '20px' });
+      gsap.set(taglineRef.current, { opacity: 1 });
       tl.to(taglineRef.current, {
-        opacity: 0.6,
-        letterSpacing: '8px',
-        duration: 2,
-        ease: 'power3.out',
+        duration: 2.5,
+        text: {
+          value: heroData?.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER",
+          delimiter: ""
+        },
+        ease: "none"
       }, 1.5);
     }
+
+    // Split Text Reveal for Name
+    const chars = document.querySelectorAll('.char-typed-hidden');
+    if (chars.length > 0) {
+      gsap.set(chars, { opacity: 0, y: 50 });
+      tl.to(chars, {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.03,
+        ease: 'back.out(1.7)'
+      }, 0.6);
+    }
+
+    // Scroll Parallax
+    gsap.to(contentRef.current, {
+      y: 150,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: heroRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
 
     // 3D tilt on experimental mode (GSAP-powered)
     if (isExperimental && contentRef.current) {
@@ -97,31 +123,25 @@ const Hero = () => {
         });
       };
 
-      heroRef.current?.addEventListener('mousemove', handleMouseMove);
-      heroRef.current?.addEventListener('mouseleave', handleMouseLeave);
+      const el = heroRef.current;
+      el?.addEventListener('mousemove', handleMouseMove);
+      el?.addEventListener('mouseleave', handleMouseLeave);
 
       return () => {
-        heroRef.current?.removeEventListener('mousemove', handleMouseMove);
-        heroRef.current?.removeEventListener('mouseleave', handleMouseLeave);
+        el?.removeEventListener('mousemove', handleMouseMove);
+        el?.removeEventListener('mouseleave', handleMouseLeave);
         tl.kill();
       };
     }
 
     return () => tl.kill();
-  }, [isExperimental]);
+  }, [isExperimental, heroData?.role]);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
     client.fetch(query).then((data) => {
       if (data) setHeroData(data);
     }).catch(console.error);
-
-    // Defer particles until after first paint. Bypass entirely for Lighthouse to save TBT.
-    const isBot = /Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent);
-    if (!isBot) {
-      const t = setTimeout(() => setShowParticles(true), 2000);
-      return () => clearTimeout(t);
-    }
   }, []);
 
   const hour = new Date().getHours();
@@ -142,30 +162,7 @@ const Hero = () => {
     heroImage: heroData?.heroImage ? urlFor(heroData.heroImage).url() : null
   };
 
-  useEffect(() => {
-    const nameStr = displayData.name;
-    let currentIdx = 0;
-    setTypedCharsCount(0);
-    setTypingComplete(false);
 
-    const interval = setInterval(() => {
-      currentIdx++;
-      setTypedCharsCount(currentIdx);
-      if (currentIdx >= nameStr.length) {
-        clearInterval(interval);
-        setTypingComplete(true);
-      }
-    }, 95); // 95ms per character for natural typing flow
-    return () => clearInterval(interval);
-  }, [heroData]); // eslint-disable-line
-
-  const particlesInit = useCallback(async engine => {
-    await loadBasic(engine);
-  }, []);
-
-  const particlesLoaded = useCallback(async container => {
-    // console.log(container);
-  }, []);
 
   return (
     <section 
@@ -195,39 +192,17 @@ const Hero = () => {
         }}
       />
 
-      {showParticles && (
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          loaded={particlesLoaded}
-          options={{
-            background: { color: { value: "#060918" } },
-            fpsLimit: 24,
-            interactivity: {
-              events: { onClick: { enable: false }, onHover: { enable: false }, resize: false },
-            },
-            particles: {
-              color: { value: "#ffffff" },
-              links: { enable: false },
-              move: {
-                enable: true,
-                speed: 0.5,
-                direction: "none",
-                outModes: { default: "out" },
-                random: true,
-              },
-              number: {
-                value: window.matchMedia('(max-width: 768px)').matches ? 0 : 18,
-                density: { enable: false },
-              },
-              opacity: { value: 0.25 },
-              shape: { type: "circle" },
-              size: { value: { min: 1, max: 2 } },
-            },
-            detectRetina: false,
-          }}
-        />
-      )}
+      {/* Pure CSS High-Performance Floating Stars (Replaces heavy WebGL tsparticles) */}
+      <div className="hero-css-particles">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <div key={i} className="css-star" style={{
+            '--top': `${Math.random() * 100}%`,
+            '--left': `${Math.random() * 100}%`,
+            '--dur': `${4 + Math.random() * 4}s`,
+            '--delay': `${Math.random() * 2}s`,
+          }} />
+        ))}
+      </div>
 
       <div 
         ref={contentRef}
@@ -244,46 +219,27 @@ const Hero = () => {
           {(() => {
             const nameStr = displayData.name;
             const words = nameStr.split(" ");
-            let flatIdx = 0;
-
             return words.map((word, wordIdx) => {
               return (
                 <span key={wordIdx} className="hero-name-word">
-                  {word.split("").map((char, charIdx) => {
-                    const currentCharIdx = flatIdx;
-                    flatIdx++;
-                    const isRevealed = currentCharIdx < typedCharsCount;
-                    const isLastTyped = currentCharIdx === typedCharsCount - 1;
-
-                    return (
-                      <span
-                        key={charIdx}
-                        className={`metallic-char ${isRevealed ? 'char-typed-visible' : 'char-typed-hidden'}`}
-                        style={{
-                          visibility: isRevealed ? 'visible' : 'hidden',
-                          display: 'inline-block'
-                        }}
-                      >
-                        {char}
-                        {isLastTyped && !typingComplete && (
-                          <span className="typewriter-cursor-active">|</span>
-                        )}
-                      </span>
-                    );
-                  })}
-                  {/* Counter increments for space between words */}
-                  {wordIdx < words.length - 1 && (() => {
-                    flatIdx++;
-                    return <span className="hero-name-spacer">&nbsp;</span>;
-                  })()}
+                  {word.split("").map((char, charIdx) => (
+                    <span
+                      key={charIdx}
+                      className="metallic-char char-typed-hidden"
+                      style={{ display: 'inline-block' }}
+                    >
+                      {char}
+                    </span>
+                  ))}
+                  {wordIdx < words.length - 1 && (
+                    <span className="hero-name-spacer">&nbsp;</span>
+                  )}
                 </span>
               );
             });
           })()}
-          {typingComplete && (
-            <span className="typewriter-cursor-complete">|</span>
-          )}
         </h1>
+
 
         <LanguageTerminal />
 
@@ -291,7 +247,7 @@ const Hero = () => {
           ref={taglineRef}
           className="hero-tagline-premium"
         >
-          {displayData.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER"}
+          {/* TextPlugin will type here */}
         </div>
       </div>
     </section>

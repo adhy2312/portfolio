@@ -2,6 +2,7 @@ import project from './project'
 import hero from './hero'
 import about from './about'
 import skillCategory from './skillCategory'
+import toolChip from './toolChip'
 import achievement from './achievement'
 import photo from './photo'
 import footer from './footer'
@@ -21,6 +22,7 @@ export const schemaTypes = [
   hero,
   about,
   skillCategory,
+  toolChip,
   achievement,
   project,
   photo,

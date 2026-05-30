@@ -28,13 +28,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  opacity: 0.12; /* Subtle structural lines */
-  background: 
-    /* Paper/Vignette Texture overlay */
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.01) 0%, rgba(0, 0, 0, 0.15) 100%),
-    /* Horizontal scanlines */
-    linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.2) 50%),
-    /* Vertical RGB chromatic aberration */
-    linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
-  background-size: 100% 100%, 100% 3px, 3px 100%;
+  opacity: 0.05; /* Subtle structural lines */
+  background: transparent;
+  pointer-events: none;
 }

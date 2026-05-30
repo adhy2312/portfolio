@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './NowPlaying.css';
 import { getNowPlaying } from '../utils/spotify';
+import ns from '../core/NervousSystem';
 
 const POLL_INTERVAL = 30000;
 const LS_KEY = 'np_minimized';
@@ -97,18 +98,20 @@ const NowPlaying = () => {
     const startProgress = track.progress;
     const duration      = track.duration;
 
-    const animate = (ts) => {
-      if (!start) start = ts;
-      const elapsed = ts - start;
+    const animate = (time) => {
+      if (!start) start = time;
+      const elapsed = time - start;
       const current = Math.min(startProgress + elapsed, duration);
       if (progressRef.current) {
         progressRef.current.style.width = `${(current / duration) * 100}%`;
       }
-      if (current < duration) requestAnimationFrame(animate);
+      if (current >= duration) {
+        ns.unregister('spotify-progress');
+      }
     };
 
-    const raf = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(raf);
+    ns.register('spotify-progress', animate, { priority: 'CRITICAL' });
+    return () => ns.unregister('spotify-progress');
   }, [track]);
 
   const toggleMinimized = () => {

@@ -18,15 +18,88 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// ─── 144Hz Performance Optimization Engine ──────────────────
+gsap.config({
+  force3D: true,        // Force GPU acceleration for all transforms
+  autoSleep: 60,        // Put inactive animations to sleep to save CPU
+  nullTargetWarn: false // Suppress warnings for missing DOM nodes on fast navigations
+});
+gsap.defaults({
+  ease: 'power3.out'
+});
+ScrollTrigger.config({
+  ignoreMobileResize: true, // Prevents lag when address bar collapses on mobile
+  syncInterval: 999999999   // Let requestAnimationFrame handle sync
+});
+
 // ─── Shared Config ──────────────────────────────────────
 const EASE_BUTTER = 'power4.out';
 const EASE_ELASTIC = 'elastic.out(1, 0.5)';
 const EASE_EXPO = 'expo.out';
+const EASE_ELUTE = 'elastic.out(1.2, 0.4)'; // The requested strong GSAP effect
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 const prefersReducedMotion = () => 
   typeof window !== 'undefined' && 
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// ─── GSAP Elute Effect (Strong Global Reveal) ───────────────────
+export function useEluteEffect(options = {}) {
+  const ref = useRef(null);
+  
+  useEffect(() => {
+    if (!ref.current || prefersReducedMotion()) return;
+    
+    const el = ref.current;
+    const {
+      y = 100,
+      duration = 1.5,
+      delay = 0,
+      stagger = 0,
+      children = false,
+      scale = 0.9
+    } = options;
+
+    const targets = children ? el.children : el;
+    
+    gsap.set(targets, { 
+      y, 
+      opacity: 0,
+      scale,
+      rotationY: 5,
+      transformOrigin: 'bottom center',
+      willChange: 'transform, opacity'
+    });
+
+    const anim = gsap.to(targets, {
+      y: 0,
+      opacity: 1,
+      scale: 1,
+      rotationY: 0,
+      duration: isMobile() ? duration * 0.7 : duration,
+      delay,
+      stagger: stagger || (children ? 0.1 : 0),
+      ease: EASE_ELUTE,
+      scrollTrigger: {
+        trigger: el,
+        start: 'top 85%',
+        end: 'top 20%',
+        toggleActions: 'play none none none',
+        once: true,
+      },
+      onComplete: () => {
+        gsap.set(targets, { willChange: 'auto' });
+      }
+    });
+
+    return () => {
+      anim.scrollTrigger?.kill();
+      anim.kill();
+    };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  return ref;
+}
 
 // ─── Fade-Up Animation (Most Common) ───────────────────
 export function useFadeUp(options = {}) {
@@ -301,7 +374,7 @@ export function useTextSplitReveal(options = {}) {
   return ref;
 }
 
-// ─── Section Header (Orchestrated multi-element reveal) ─
+// ─── Section Header (Orchestrated multi-element reveal using Elute Effect) ─
 export function useSectionHeader() {
   const ref = useRef(null);
 
@@ -316,7 +389,14 @@ export function useSectionHeader() {
 
     const elements = [label, title, divider, desc].filter(Boolean);
     
-    gsap.set(elements, { y: 30, opacity: 0 });
+    // The strong 'Elute' effect: scale, Y translation, slight rotation, and blur-like opacity
+    gsap.set(elements, { 
+      y: 80, 
+      opacity: 0, 
+      scale: 0.85, 
+      rotationX: 15,
+      transformOrigin: 'center top'
+    });
 
     const tl = gsap.timeline({
       scrollTrigger: {
@@ -331,9 +411,11 @@ export function useSectionHeader() {
       tl.to(elem, {
         y: 0,
         opacity: 1,
-        duration: 0.9,
-        ease: EASE_BUTTER,
-      }, i * 0.12);
+        scale: 1,
+        rotationX: 0,
+        duration: 1.4,
+        ease: EASE_ELUTE,
+      }, i * 0.15);
     });
 
     return () => {
@@ -475,4 +557,92 @@ export function initGSAPScrollProxy(lenisInstance) {
   gsap.ticker.lagSmoothing(0);
 }
 
+// ─── Global Elute Effect Applier ───────────────────────
+export function applyGlobalEluteEffect() {
+  if (prefersReducedMotion()) return () => {};
+
+  // We wait a tick to ensure DOM is ready and lazy components are mounting
+  // For truly lazy components, this should be a MutationObserver or applied on their mount
+  // We'll target major section headers and apply the Elute Effect
+  const ctx = gsap.context(() => {
+    // Select all section titles that haven't been animated yet
+    const headers = gsap.utils.toArray('.section-title-wrapper, .photo-header, .about-content-wrapper > h2, .skills-header, .timeline-header, .works-header');
+    
+    headers.forEach(header => {
+      // Create the strong Elute Effect
+      gsap.fromTo(header, 
+        { 
+          y: 70, 
+          opacity: 0, 
+          scale: 0.9, 
+          rotationX: 12,
+          transformOrigin: 'bottom center',
+        },
+        {
+          y: 0,
+          opacity: 1,
+          scale: 1,
+          rotationX: 0,
+          duration: 1.4,
+          ease: EASE_ELUTE,
+          scrollTrigger: {
+            trigger: header,
+            start: 'top 88%',
+            toggleActions: 'play none none reverse',
+          }
+        }
+      );
+    });
+
+    // 1. Cards Elute Reveal (Batched Architecture)
+    ScrollTrigger.batch('.marquee-card, .skill-card, .work-card, .achievement-card, .timeline-item-content', {
+      start: 'top 90%',
+      onEnter: (batch) => {
+        gsap.fromTo(batch,
+          { y: 80, opacity: 0, scale: 0.95, rotationY: 5 },
+          { y: 0, opacity: 1, scale: 1, rotationY: 0, duration: 1.4, ease: EASE_ELUTE, stagger: 0.1, overwrite: 'auto' }
+        );
+      }
+    });
+
+    // 2. Premium Image Clip-Path Morphing Reveal (Batched Architecture, NO FILTERS)
+    ScrollTrigger.batch('.about-img, .photo-card img, .work-image img, .timeline-item-image', {
+      start: 'top 90%',
+      onEnter: (batch) => {
+        gsap.fromTo(batch,
+          { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)', scale: 1.15 },
+          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: 1.6, ease: 'power4.out', stagger: 0.15, overwrite: 'auto' }
+        );
+      }
+    });
+
+    // 3. GSAP Text Color Animation (Infinite loop, keeps as toArray)
+    const labels = gsap.utils.toArray('.section-label');
+    labels.forEach(label => {
+      gsap.to(label, {
+        color: 'var(--accent-primary, #6C63FF)',
+        textShadow: '0 0 12px rgba(108, 99, 255, 0.4)',
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+    });
+
+    // 4. Premium Text Fade-Up (Batched Architecture)
+    ScrollTrigger.batch('.about-p, .timeline-item-desc, .work-desc, .photo-desc', {
+      start: 'top 95%',
+      onEnter: (batch) => {
+        gsap.fromTo(batch,
+          { opacity: 0, y: 25, filter: 'blur(4px)' },
+          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out', stagger: 0.05, overwrite: 'auto' }
+        );
+      }
+    });
+  });
+
+  return () => ctx.revert();
+}
+
 export { gsap, ScrollTrigger };
+

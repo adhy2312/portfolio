@@ -57,15 +57,16 @@ const About = () => {
       // Image: scale-in with parallax
       if (imageWrapperRef.current) {
         gsap.fromTo(imageWrapperRef.current,
-          { scale: 0.85, opacity: 0, rotateY: -15 },
+          { clipPath: 'polygon(0 0, 100% 0, 100% 0, 0 0)', scale: 1.1, filter: 'blur(10px)' },
           {
-            scale: 1, opacity: 1, rotateY: 0,
-            duration: 1.4,
-            ease: 'power4.out',
+            clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)',
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 1.8,
+            ease: 'power4.inOut',
             scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 80%',
-              toggleActions: 'play none none none',
+              trigger: imageWrapperRef.current,
+              start: 'top 85%',
               once: true,
             }
           }
@@ -169,14 +170,16 @@ const About = () => {
                 perspective: 1000
               }}
             >
-              <img 
-                src={displayData.profileImage} 
-                alt="Adhithya Mohan" 
-                className="about-img" 
-                style={{ transform: "translateZ(30px)" }} 
-                loading="lazy"
-                decoding="async"
-              />
+              <div style={{ overflow: 'hidden', borderRadius: '12px', width: '100%', height: '100%' }}>
+                <img 
+                  src={displayData.profileImage} 
+                  alt="Adhithya Mohan" 
+                  className="about-img" 
+                  style={{ transform: "translateZ(30px)", width: '100%', height: '100%', objectFit: 'cover' }} 
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
               <div className="about-img-glow" />
             </div>
           </div>

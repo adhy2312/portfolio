@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import gsap from 'gsap';
 import './PageLoader.css';
 
 const PHRASES = [
@@ -88,7 +89,10 @@ function useGlitchCycle(names, intervalMs = 700) {
 const PageLoader = ({ onDone }) => {
   const [progress, setProgress] = useState(0);
   const [phrase, setPhrase] = useState(PHRASES[0]);
-  const [exiting, setExiting] = useState(false);
+  
+  const loaderRef = useRef(null);
+  const barRef = useRef(null);
+  const contentRef = useRef(null);
   
   // High-speed sequence: ~120ms wait + 60ms glitch = 180ms per language. Total time: ~1.6s.
   const { display, langLabel, isGlitching, currentIndex } = useGlitchCycle(LANG_NAMES, 120);
@@ -96,31 +100,54 @@ const PageLoader = ({ onDone }) => {
   useEffect(() => {
     // Performance optimization: Instantly finish loader for Lighthouse
     if (/Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent)) {
-      setProgress(100);
-      setExiting(true);
       onDone();
       return;
     }
 
     // Map progress definitively to the language index
     const calcProgress = Math.min(100, Math.floor((currentIndex / (LANG_NAMES.length - 1)) * 100));
-    setProgress(calcProgress);
+    
+    // GSAP interpolated progress bar width
+    if (barRef.current) {
+      gsap.to(barRef.current, { width: `${calcProgress}%`, duration: 0.3, ease: 'power2.out' });
+    }
     
     // Map phrases 0-3
     const phraseIdx = Math.min(PHRASES.length - 1, Math.floor((calcProgress / 100) * PHRASES.length));
     setPhrase(PHRASES[phraseIdx]);
 
     if (currentIndex >= LANG_NAMES.length - 1 && !isGlitching) {
-      setTimeout(() => {
-        setExiting(true);
-        setTimeout(onDone, 500); // 500ms fade out animation
-      }, 150); // Pause on the final English ADHY for a split second
+      // Premium GSAP Cinematic Exit Sequence
+      const tl = gsap.timeline({
+        onComplete: onDone,
+        delay: 0.15 // Pause on the final English ADHY for a split second
+      });
+
+      // 1. Stagger exit the text content
+      if (contentRef.current) {
+        tl.to(contentRef.current.children, {
+          y: -30,
+          opacity: 0,
+          stagger: 0.05,
+          duration: 0.4,
+          ease: 'power2.in'
+        });
+      }
+
+      // 2. Curtain wipe the loader background up smoothly
+      if (loaderRef.current) {
+        tl.to(loaderRef.current, {
+          yPercent: -100,
+          duration: 0.8,
+          ease: 'power4.inOut'
+        }, "-=0.1"); // overlap slightly with text fade
+      }
     }
   }, [currentIndex, isGlitching, onDone]);
 
   return (
-    <div className={`page-loader ${exiting ? 'page-loader-exit' : ''}`}>
-      <div className="loader-content">
+    <div ref={loaderRef} className="page-loader">
+      <div ref={contentRef} className="loader-content">
 
         {/* Glitch name block */}
         <div className="loader-logo">
@@ -134,7 +161,7 @@ const PageLoader = ({ onDone }) => {
         </div>
 
         <div className="loader-bar-track">
-          <div className="loader-bar-fill" style={{ width: `${progress}%` }} />
+          <div ref={barRef} className="loader-bar-fill" style={{ width: '0%' }} />
         </div>
         <div className="loader-phrase">{phrase}</div>
       </div>

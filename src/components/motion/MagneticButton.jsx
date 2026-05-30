@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useId } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { lerp } from '../utils/mathUtils';
-import ns from '../core/NervousSystem';
+import { lerp } from '../../utils/mathUtils';
 
 /**
  * MagneticButton Component
@@ -13,7 +12,6 @@ import ns from '../core/NervousSystem';
 export default function MagneticButton({ children, strength = 0.4, className = '' }) {
   const buttonRef = useRef(null);
   const containerRef = useRef(null);
-  const uniqueId = useId();
 
   useEffect(() => {
     if (!buttonRef.current || !containerRef.current) return;
@@ -70,21 +68,21 @@ export default function MagneticButton({ children, strength = 0.4, className = '
     container.addEventListener('mouseenter', onMouseEnter);
     container.addEventListener('mouseleave', onMouseLeave);
     
-    // Hook the physics calculation into the Brain (LOW priority so it drops if fatigued)
-    ns.register(`magneticButton-${uniqueId}`, updateMagnet, { priority: 'LOW' });
+    // Hook the physics calculation into the global render loop
+    gsap.ticker.add(updateMagnet);
 
     return () => {
       container.removeEventListener('mousemove', onMouseMove);
       container.removeEventListener('mouseenter', onMouseEnter);
       container.removeEventListener('mouseleave', onMouseLeave);
-      ns.unregister(`magneticButton-${uniqueId}`);
+      gsap.ticker.remove(updateMagnet);
     };
   }, [strength]);
 
   return (
     <div 
       ref={containerRef} 
-      style={{ display: 'inline-block', cursor: 'pointer' }}
+      style={{ padding: '2rem', display: 'inline-block', cursor: 'pointer' }}
       className={className}
     >
       <div 

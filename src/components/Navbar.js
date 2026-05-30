@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
-import { motion } from 'framer-motion';
+import gsap from 'gsap';
 import './Navbar.css';
 import './XRayMode.css';
 import MagneticButton from './MagneticButton';
@@ -15,7 +15,8 @@ const Navbar = () => {
   const clickTimerRef = useRef(null);
   const [logoGlow, setLogoGlow] = useState(false);
   const [xrayActive, setXrayActive] = useState(false);
-  const [hoveredNav, setHoveredNav] = useState(null);
+  const pillRef = useRef(null);
+  const linksRef = useRef([]);
 
   const toggleXray = () => {
     setXrayActive(!xrayActive);
@@ -67,6 +68,42 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // GSAP Liquid Glassmorphic Pill Logic
+  const handlePillHover = (index) => {
+    if (!pillRef.current || !linksRef.current[index]) return;
+    const el = linksRef.current[index];
+    
+    gsap.to(pillRef.current, {
+      x: el.offsetLeft - 12,
+      y: el.offsetTop - 6,
+      width: el.offsetWidth + 24,
+      height: el.offsetHeight + 12,
+      opacity: 1,
+      duration: 0.5,
+      ease: 'elastic.out(1, 0.6)',
+      overwrite: 'auto',
+    });
+    // Liquid morphing effect on hover
+    gsap.to(pillRef.current, {
+      borderRadius: '12px 24px 12px 24px',
+      duration: 0.3,
+      yoyo: true,
+      repeat: 1
+    });
+  };
+
+  const handlePillLeave = () => {
+    if (!pillRef.current) return;
+    gsap.to(pillRef.current, {
+      opacity: 0,
+      scale: 0.8,
+      duration: 0.3,
+      ease: 'power2.out',
+      overwrite: 'auto',
+      borderRadius: '20px'
+    });
+  };
 
   useEffect(() => {
     if (menuOpen) {
@@ -240,20 +277,31 @@ const Navbar = () => {
           </button>
 
           {/* Desktop Nav Links */}
-          <ul className="desktop-nav-links" onMouseLeave={() => setHoveredNav(null)}>
-            {links.map((link) => (
+          <ul className="desktop-nav-links" onMouseLeave={handlePillLeave} style={{ position: 'relative' }}>
+            <div 
+              ref={pillRef}
+              className="nav-pill-bg"
+              style={{
+                opacity: 0,
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                pointerEvents: 'none',
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+                zIndex: 0
+              }}
+            />
+            {links.map((link, i) => (
               <li 
                 key={link.target} 
-                onMouseEnter={() => setHoveredNav(link.target)}
+                ref={el => linksRef.current[i] = el}
+                onMouseEnter={() => handlePillHover(i)}
                 style={{ position: 'relative' }}
               >
-                {hoveredNav === link.target && (
-                  <motion.div
-                    layoutId="navPill"
-                    className="nav-pill-bg"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
                 <a
                   href={`#${link.target}`}
                   className="nav-link"

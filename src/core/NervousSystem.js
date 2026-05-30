@@ -23,6 +23,7 @@
  *   - All state is mutable primitives — no React state, no re-renders
  * ════════════════════════════════════════════════════════════════
  */
+import gsap from 'gsap';
 
 // ─── SOUL EMOTIONAL STATE ────────────────────────────────────────
 // Runs natively inside the NervousSystem RAF loop.
@@ -95,7 +96,7 @@ class NervousSystem {
 
     // ─── RAF SCHEDULER ───────────────────────────────────
     this._callbacks    = new Map();   // id → { fn, opts, lastRun }
-    this._rafId        = null;
+    this._isRunning    = false;
     this._lastTime     = 0;
     this._frameCount   = 0;
     this._lastFpsTime  = 0;
@@ -221,15 +222,16 @@ class NervousSystem {
   // ════════════════════════════════════════
 
   start() {
-    if (this._rafId) return;
+    if (this._isRunning) return;
+    this._isRunning = true;
 
     this._lastFpsTime = performance.now();
     this._lastTime    = performance.now();
 
-    const loop = (time) => {
+    this._loop = () => {
+      const time = performance.now();
       if (this.isSleeping) {
         this._lastTime = time;
-        setTimeout(() => { this._rafId = requestAnimationFrame(loop); }, 100);
         return;
       }
 
@@ -292,18 +294,16 @@ class NervousSystem {
           console.error(`[NervousSystem] Callback error for "${id}":`, err);
         }
       }
-
-      this._rafId = requestAnimationFrame(loop);
     };
 
-    this._rafId = requestAnimationFrame(loop);
+    gsap.ticker.add(this._loop);
     this._setupGlobalListeners();
   }
 
   stop() {
-    if (this._rafId) {
-      cancelAnimationFrame(this._rafId);
-      this._rafId = null;
+    if (this._isRunning) {
+      gsap.ticker.remove(this._loop);
+      this._isRunning = false;
     }
   }
 

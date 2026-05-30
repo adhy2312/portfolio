@@ -18,9 +18,9 @@ const DecryptedText = ({ text, className, speed = 30 }) => {
     const trigger = ScrollTrigger.create({
       trigger: ref.current,
       start: "top 95%",
-      onEnter: () => {
+      onEnter: (self) => {
         setIsInView(true);
-        trigger.kill(); // run once
+        self.kill(); // run once
       }
     });
 
