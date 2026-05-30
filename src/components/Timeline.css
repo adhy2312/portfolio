@@ -30,9 +30,14 @@
 
 .timeline-scroll-wrapper {
   width: 100%;
-  overflow: hidden; /* Needed for horizontal track containment */
+  overflow-x: auto;
+  overflow-y: hidden;
   padding: 60px 0 80px 0;
-  /* GSAP now handles pinning based on normal vertical scroll. No drag required! */
+  cursor: grab;
+}
+
+.timeline-scroll-wrapper:active {
+  cursor: grabbing;
 }
 
 .timeline-scroll-wrapper::-webkit-scrollbar {

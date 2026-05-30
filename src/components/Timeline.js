@@ -1,8 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { client } from '../sanity';
 import DecryptedText from './DecryptedText';
-import { useOrchestrator } from '../contexts/SystemOrchestrator';
-import { neuralEventBus } from '../utils/NeuralEventBus';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import './Timeline.css';
@@ -33,7 +31,6 @@ const Timeline = () => {
   const nodesContainerRef = useRef(null);
 
   const [milestones, setMilestones] = useState(fallbackData);
-  const orchestrator = useOrchestrator();
 
   const scrollState = useRef({
     target: 0,
@@ -85,91 +82,127 @@ const Timeline = () => {
         );
       }
 
-      // 2. Horizontal Scroll Tween (The Pin)
-      const trackWidth = trackRef.current.scrollWidth;
-      const windowWidth = window.innerWidth;
-      
-      // If content is wider than screen, activate pro-level horizontal pin
-      let scrollTween = null;
-      if (trackWidth > windowWidth) {
-        scrollTween = gsap.to(trackRef.current, {
-          x: () => -(trackWidth - windowWidth + 150), // Padding offset
-          ease: 'none',
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            pin: true,
-            scrub: 1, // Smooth scrub
-            start: 'center center',
-            end: () => `+=${trackWidth}`,
-            onUpdate: (self) => {
-              // Dynamic Background Mode
-              if (bgRef.current) {
-                const r = 255 - (self.progress * 10) | 0;
-                const g = 255 - (self.progress * 14) | 0;
-                const b = 255 - (self.progress * 20) | 0;
-                bgRef.current.style.backgroundColor = `rgb(${r},${g},${b})`;
-              }
-              
-              // Active line growth
-              if (activeLineRef.current) {
-                activeLineRef.current.style.transform = `scaleX(${self.progress})`;
-                activeLineRef.current.style.transformOrigin = 'left center';
-              }
-              
-              // Neural Engine Velocity tracking
-              if (Math.abs(self.getVelocity()) > 800) {
-                neuralEventBus.emit("TIMELINE_FAST_SCROLL");
+      // 2. Native Horizontal Scroll with GSAP
+      const container = containerRef.current;
+      if (!container) return;
+
+      const updateScrollProgress = () => {
+        const scrollLeft = container.scrollLeft;
+        const maxScroll = container.scrollWidth - container.clientWidth;
+        const progress = maxScroll > 0 ? scrollLeft / maxScroll : 0;
+
+        // Dynamic Background Mode
+        if (bgRef.current) {
+          const r = 255 - (progress * 10) | 0;
+          const g = 255 - (progress * 14) | 0;
+          const b = 255 - (progress * 20) | 0;
+          bgRef.current.style.backgroundColor = `rgb(${r},${g},${b})`;
+        }
+        
+        // Active line growth
+        if (activeLineRef.current) {
+          activeLineRef.current.style.transform = `scaleX(${progress})`;
+          activeLineRef.current.style.transformOrigin = 'left center';
+        }
+      };
+
+      container.addEventListener('scroll', updateScrollProgress);
+      // Initial call
+      updateScrollProgress();
+
+      // 3. Dynamic Pro-Level Node Animations (triggered by horizontal intersection)
+      const nodes = nodesContainerRef.current.querySelectorAll('.timeline-node-wrapper');
+      nodes.forEach((node, i) => {
+        const content = node.querySelector('.timeline-content');
+        const point = node.querySelector('.timeline-point');
+        const isTop = i % 2 === 0;
+        
+        if (content) {
+          gsap.fromTo(content, 
+            { y: isTop ? -80 : 80, opacity: 0, scale: 0.8, rotateY: 15 },
+            {
+              y: 0, opacity: 1, scale: 1, rotateY: 0,
+              scrollTrigger: {
+                trigger: node,
+                scroller: container, // Use the horizontal container!
+                horizontal: true,
+                start: 'left 95%',
+                end: 'left 50%',
+                scrub: 1,
               }
             }
-          }
-        });
-
-        // 3. Dynamic Pro-Level Node Animations (triggered by horizontal scroll)
-        const nodes = nodesContainerRef.current.querySelectorAll('.timeline-node-wrapper');
-        nodes.forEach((node, i) => {
-          const content = node.querySelector('.timeline-content');
-          const point = node.querySelector('.timeline-point');
-          const isTop = i % 2 === 0;
-          
-          if (content) {
-            gsap.fromTo(content, 
-              { y: isTop ? -80 : 80, opacity: 0, scale: 0.8, rotateY: 15 },
-              {
-                y: 0, opacity: 1, scale: 1, rotateY: 0,
-                scrollTrigger: {
-                  trigger: node,
-                  containerAnimation: scrollTween, // Magic: ties to horizontal scroll!
-                  start: 'left 95%',
-                  end: 'left 50%',
-                  scrub: 1,
-                }
+          );
+        }
+        
+        if (point) {
+          gsap.fromTo(point,
+            { scale: 0, opacity: 0 },
+            {
+              scale: 1, opacity: 1,
+              scrollTrigger: {
+                trigger: node,
+                scroller: container,
+                horizontal: true,
+                start: 'left 95%',
+                end: 'left 60%',
+                scrub: 1,
               }
-            );
-          }
-          
-          if (point) {
-            gsap.fromTo(point,
-              { scale: 0, opacity: 0 },
-              {
-                scale: 1, opacity: 1,
-                scrollTrigger: {
-                  trigger: node,
-                  containerAnimation: scrollTween,
-                  start: 'left 95%',
-                  end: 'left 60%',
-                  scrub: 1,
-                }
-              }
-            );
-          }
-        });
-      }
+            }
+          );
+        }
+      });
+      
+      return () => {
+        container.removeEventListener('scroll', updateScrollProgress);
+      };
     }, sectionRef);
 
     return () => ctx.revert();
   }, [milestones]);
 
-  // Note: Custom manual drag/touch scrolling removed in favor of native vertical scrolling scrubbing the GSAP horizontal pin.
+  // Drag to scroll functionality
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    const onMouseDown = (e) => {
+      isDown = true;
+      startX = e.pageX - container.offsetLeft;
+      scrollLeft = container.scrollLeft;
+    };
+
+    const onMouseLeave = () => {
+      isDown = false;
+    };
+
+    const onMouseUp = () => {
+      isDown = false;
+    };
+
+    const onMouseMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - container.offsetLeft;
+      const walk = (x - startX) * 2; // Scroll-fast
+      container.scrollLeft = scrollLeft - walk;
+    };
+
+    container.addEventListener('mousedown', onMouseDown);
+    container.addEventListener('mouseleave', onMouseLeave);
+    container.addEventListener('mouseup', onMouseUp);
+    container.addEventListener('mousemove', onMouseMove);
+
+    return () => {
+      container.removeEventListener('mousedown', onMouseDown);
+      container.removeEventListener('mouseleave', onMouseLeave);
+      container.removeEventListener('mouseup', onMouseUp);
+      container.removeEventListener('mousemove', onMouseMove);
+    };
+  }, []);
 
   // GSAP hover effects on timeline nodes (micro-interactions)
   useEffect(() => {
