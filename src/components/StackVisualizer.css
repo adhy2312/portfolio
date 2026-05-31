@@ -19,7 +19,11 @@
 
 .stack-viz-section .section-label { color: rgba(255,255,255,0.4) !important; }
 .stack-viz-section .section-title { color: #ffffff !important; }
-.stack-viz-section .section-title span { color: #ffffff !important; }
+.stack-viz-section .section-title span { 
+  color: #ffffff !important; 
+  background: none;
+  -webkit-text-fill-color: #ffffff !important;
+}
 .stack-viz-section .section-desc { color: rgba(255,255,255,0.5) !important; }
 
 /* ─── Performance Metrics Bar ─── */

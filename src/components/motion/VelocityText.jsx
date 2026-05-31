@@ -23,6 +23,7 @@ export default function VelocityText({ text, className = '' }) {
     // 1. Pre-compile highly optimized setters that target the transform layer directly
     const setSkew = gsap.quickSetter(textRef.current, "skewY", "deg");
     const setScale = gsap.quickSetter(textRef.current, "scaleY", "");
+    const setShadow = gsap.quickSetter(textRef.current, "textShadow", "");
 
     let lastScrollY = window.scrollY;
 
@@ -43,12 +44,21 @@ export default function VelocityText({ text, className = '' }) {
       );
 
       // Squish the text slightly as it moves fast
-      const targetScale = 1 - Math.abs(physicsState.current.currentSkew) * 0.005;
+      const absSkew = Math.abs(physicsState.current.currentSkew);
+      const targetScale = 1 - absSkew * 0.005;
       physicsState.current.currentScale = lerp(
         physicsState.current.currentScale,
         targetScale,
         0.15
       );
+
+      // Distort text (Chromatic Aberration) if scrolling fast
+      if (absSkew > 3) {
+        const split = (absSkew - 3) * 1.5;
+        setShadow(`${split}px 0px ${split/2}px rgba(255, 49, 49, 0.8), -${split}px 0px ${split/2}px rgba(0, 255, 255, 0.8)`);
+      } else {
+        setShadow("none");
+      }
 
       // 5. Batch write to the DOM via quickSetter
       setSkew(physicsState.current.currentSkew);
@@ -62,7 +72,7 @@ export default function VelocityText({ text, className = '' }) {
     return () => {
       ns.unregister(`velocityText-${uniqueId}`);
     };
-  }, []);
+  }, [uniqueId]);
 
   return (
     <div style={{ perspective: '1000px', display: 'inline-block' }}>

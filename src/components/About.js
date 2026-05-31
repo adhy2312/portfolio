@@ -5,6 +5,7 @@ import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
+import Typography from './motion/Typography';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -75,7 +76,7 @@ const About = () => {
 
       // Text column: stagger paragraphs
       if (textColRef.current) {
-        const elements = textColRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .about-location, .about-p, .about-cta');
+        const elements = textColRef.current.querySelectorAll('.section-label, .section-title-wrapper, .section-divider, .about-location, .about-cta');
         gsap.fromTo(elements,
           { y: 40, opacity: 0 },
           {
@@ -188,9 +189,9 @@ const About = () => {
           <div className="about-text-col" ref={textColRef}>
             <span className="section-label">{"// who I am"}</span>
             <div className="section-title-wrapper">
-              <h2 className="section-title about-title" data-hover="Adhithya Mohan">
+              <Typography as="h2" variant="mask" className="section-title about-title" data-hover="Adhithya Mohan">
                 <span className="section-title-inner"><DecryptedText text="About" /> <span><DecryptedText text="Me" speed={50} /></span></span>
-              </h2>
+              </Typography>
               {hasStory && (
                 <button className="story-btn" onClick={() => openStory('about')} aria-label="Read story behind this section">
                   <span>✦</span> See Story
@@ -205,7 +206,7 @@ const About = () => {
             </div>
 
             {displayData.bioParagraphs.map((p, i) => (
-              <p key={i} className="about-p">{p}</p>
+              <Typography key={i} variant="split" as="p" className="about-p" text={p} />
             ))}
 
             {/* Stats */}

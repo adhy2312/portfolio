@@ -1,10 +1,11 @@
 // src/components/Hero.js
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import './Hero.css';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { client, urlFor } from '../sanity';
 import LanguageTerminal from './LanguageTerminal';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
+import { motionTokens } from '../core/MotionGovernance';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -46,95 +47,98 @@ const Hero = () => {
   useEffect(() => {
     if (!contentRef.current) return;
 
-    const tl = gsap.timeline({ delay: 0.3 });
+    let handleMouseMove;
+    let handleMouseLeave;
+    const el = heroRef.current;
 
-    // Greeting slide-in
-    if (greetingRef.current) {
-      gsap.set(greetingRef.current, { opacity: 0, y: -20 });
-      tl.to(greetingRef.current, {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power4.out',
-      }, 0.4);
-    }
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ delay: 0.3 });
 
-    // Tagline cinematic TextPlugin typing
-    if (taglineRef.current) {
-      gsap.set(taglineRef.current, { opacity: 1 });
-      tl.to(taglineRef.current, {
-        duration: 2.5,
-        text: {
-          value: heroData?.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER",
-          delimiter: ""
-        },
-        ease: "none"
-      }, 1.5);
-    }
-
-    // Split Text Reveal for Name
-    const chars = document.querySelectorAll('.char-typed-hidden');
-    if (chars.length > 0) {
-      gsap.set(chars, { opacity: 0, y: 50 });
-      tl.to(chars, {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        stagger: 0.03,
-        ease: 'back.out(1.7)'
-      }, 0.6);
-    }
-
-    // Scroll Parallax
-    gsap.to(contentRef.current, {
-      y: 150,
-      ease: 'none',
-      scrollTrigger: {
-        trigger: heroRef.current,
-        start: 'top top',
-        end: 'bottom top',
-        scrub: true
+      // Greeting slide-in
+      if (greetingRef.current) {
+        gsap.set(greetingRef.current, { opacity: 0, y: -20 });
+        tl.to(greetingRef.current, {
+          opacity: 1,
+          y: 0,
+          duration: 1,
+          ease: 'power4.out',
+        }, 0.4);
       }
-    });
 
-    // 3D tilt on experimental mode (GSAP-powered)
-    if (isExperimental && contentRef.current) {
-      const handleMouseMove = (e) => {
-        const rect = heroRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const xPct = (e.clientX - rect.left) / rect.width - 0.5;
-        const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+      // Tagline cinematic TextPlugin typing
+      if (taglineRef.current) {
+        gsap.set(taglineRef.current, { opacity: 1 });
+        tl.to(taglineRef.current, {
+          duration: 2.5,
+          text: {
+            value: heroData?.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER",
+            delimiter: ""
+          },
+          ease: "none"
+        }, 1.5);
+      }
 
-        gsap.to(contentRef.current, {
-          rotateX: yPct * -10,
-          rotateY: xPct * 10,
-          duration: 0.8,
-          ease: 'power2.out',
-          overwrite: 'auto',
-        });
-      };
+      // Split Text Reveal for Name using motionTokens
+      const chars = document.querySelectorAll('.char-typed-hidden');
+      if (chars.length > 0) {
+        gsap.set(chars, { opacity: 0, y: 50 });
+        tl.to(chars, {
+          opacity: 1,
+          y: 0,
+          duration: motionTokens.duration.enter,
+          stagger: motionTokens.stagger.fast,
+          ease: 'back.out(1.7)'
+        }, 0.6);
+      }
 
-      const handleMouseLeave = () => {
-        gsap.to(contentRef.current, {
-          rotateX: 0,
-          rotateY: 0,
-          duration: 1.2,
-          ease: 'elastic.out(1, 0.5)',
-        });
-      };
+      // Scroll Parallax
+      gsap.to(contentRef.current, {
+        y: 150,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: heroRef.current,
+          start: 'top top',
+          end: 'bottom top',
+          scrub: true
+        }
+      });
 
-      const el = heroRef.current;
-      el?.addEventListener('mousemove', handleMouseMove);
-      el?.addEventListener('mouseleave', handleMouseLeave);
+      // 3D tilt on experimental mode (GSAP-powered)
+      if (isExperimental && contentRef.current) {
+        handleMouseMove = (e) => {
+          const rect = el?.getBoundingClientRect();
+          if (!rect) return;
+          const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+          const yPct = (e.clientY - rect.top) / rect.height - 0.5;
 
-      return () => {
-        el?.removeEventListener('mousemove', handleMouseMove);
-        el?.removeEventListener('mouseleave', handleMouseLeave);
-        tl.kill();
-      };
-    }
+          gsap.to(contentRef.current, {
+            rotateX: yPct * -10,
+            rotateY: xPct * 10,
+            duration: 0.8,
+            ease: 'power2.out',
+            overwrite: 'auto',
+          });
+        };
 
-    return () => tl.kill();
+        handleMouseLeave = () => {
+          gsap.to(contentRef.current, {
+            rotateX: 0,
+            rotateY: 0,
+            duration: 1.2,
+            ease: 'elastic.out(1, 0.5)',
+          });
+        };
+
+        el?.addEventListener('mousemove', handleMouseMove);
+        el?.addEventListener('mouseleave', handleMouseLeave);
+      }
+    }, heroRef);
+
+    return () => {
+      ctx.revert();
+      if (handleMouseMove) el?.removeEventListener('mousemove', handleMouseMove);
+      if (handleMouseLeave) el?.removeEventListener('mouseleave', handleMouseLeave);
+    };
   }, [isExperimental, heroData?.role]);
 
   useEffect(() => {

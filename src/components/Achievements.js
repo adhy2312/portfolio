@@ -87,7 +87,7 @@ const Achievements = () => {
     <section className="achievements" id="achievements" ref={sectionRef}>
       <div className="container">
         <div className="ach-header" ref={headerRef}>
-          <span className="section-label">// highlights</span>
+          <span className="section-label">{"// highlights"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Milestones">
               <span className="section-title-inner">What I <span>Bring</span></span>
@@ -108,7 +108,7 @@ const Achievements = () => {
           {displayAchievements.map((item, i) => (
             <div
               key={i}
-              className="ach-card glass-card"
+              className="ach-card"
               style={{ '--ach-accent': item.accent }}
             >
               <div className="ach-icon-wrap">

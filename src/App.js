@@ -15,6 +15,7 @@ import { useSolarLighting } from './hooks/useSolarLighting';
 import DigitalSoul from './components/DigitalSoul';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
+import DeveloperModeOS from './components/DeveloperModeOS';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -28,6 +29,7 @@ const NeuralMap = lazy(() => import('./components/NeuralMap'));
 const Timeline = lazy(() => import('./components/Timeline'));
 const DigitalScars = lazy(() => import('./components/DigitalScars'));
 const Photography = lazy(() => import('./components/Photography'));
+const HowIThink = lazy(() => import('./components/HowIThink'));
 const MyWorks = lazy(() => import('./components/MyWorks'));
 const Achievements = lazy(() => import('./components/Achievements'));
 const Testimonials = lazy(() => import('./components/Testimonials'));
@@ -36,10 +38,10 @@ const Contact = lazy(() => import('./components/Contact'));
 const Footer = lazy(() => import('./components/Footer'));
 const CallToAction = lazy(() => import('./components/CallToAction'));
 const QuoteCanvas = lazy(() => import('./components/QuoteCanvas'));
-const CustomCursor = lazy(() => import('./components/CustomCursor'));
 const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame = lazy(() => import('./components/ZipGame'));
 const TicTacToe = lazy(() => import('./components/TicTacToe'));
+const SnakeGame = lazy(() => import('./components/SnakeGame'));
 const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
 const GravityWell = lazy(() => import('./components/GravityWell'));
 const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
@@ -90,12 +92,13 @@ function LazySection({ name, children }) {
 
 function AppContent() {
   useSolarLighting();
-  const [showGame, setShowGame] = useState(false);
+  const [activeGame, setActiveGame] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
   const [tranceMode, setTranceMode] = useState(false);
+  const [devConsoleOpen, setDevConsoleOpen] = useState(false);
 
   // Late Night Loneliness Mode
   const hour = new Date().getHours();
@@ -105,10 +108,10 @@ function AppContent() {
     const lenis = new Lenis({
       lerp: 0.08,           // Premium buttery interpolation
       wheelMultiplier: 0.8, // Slightly resistant wheel for luxurious feel
+      autoResize: true,
     });
 
-    // GSAP + Lenis Synchronization (butter-smooth scroll-triggered animations)
-    // The RAF loop is handled strictly by GSAP ticker internally to prevent double-firing lag
+    // GSAP + Lenis Synchronization
     initGSAPScrollProxy(lenis);
 
     // Apply the requested strong GSAP Elute Effect globally across the website
@@ -121,7 +124,7 @@ function AppContent() {
     window.addEventListener('resize', handleResize);
 
     // launch-ttt event (from logo 5-click easter egg)
-    const handleLaunch = () => setShowGame(true);
+    const handleLaunch = () => setActiveGame(window.innerWidth <= 768 ? 'zip' : 'tictactoe');
     window.addEventListener('launch-ttt', handleLaunch);
 
     // Konami code → barrel roll
@@ -138,6 +141,22 @@ function AppContent() {
     };
     window.addEventListener('keydown', keydownHandler);
 
+    // Secret 'adhy' trigger for Developer Mode OS
+    let adhyKeyIndex = 0;
+    const adhySequence = ['a', 'd', 'h', 'y'];
+    const adhyHandler = (e) => {
+      if (e.key.toLowerCase() === adhySequence[adhyKeyIndex]) {
+        adhyKeyIndex++;
+        if (adhyKeyIndex === adhySequence.length) {
+          setDevConsoleOpen(true);
+          adhyKeyIndex = 0;
+        }
+      } else {
+        adhyKeyIndex = 0;
+      }
+    };
+    window.addEventListener('keydown', adhyHandler);
+
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
       const name = e.detail?.name ?? e.detail;
@@ -151,6 +170,12 @@ function AppContent() {
       setTranceMode(prev => !prev);
     };
     window.addEventListener('trigger-trance', tranceHandler);
+
+    // Dev Console Listener
+    const devConsoleHandler = () => {
+      setDevConsoleOpen(prev => !prev);
+    };
+    window.addEventListener('trigger-dev-console', devConsoleHandler);
 
 
     // 2. Hacker Decode Reveal (Removed: setInterval causing layout thrashing)
@@ -181,6 +206,8 @@ function AppContent() {
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-trance', tranceHandler);
+      window.removeEventListener('trigger-dev-console', devConsoleHandler);
+      window.removeEventListener('keydown', adhyHandler);
       eluteEffectKiller && eluteEffectKiller();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
@@ -205,7 +232,6 @@ function AppContent() {
       <DigitalSoul />
 
       <Suspense fallback={null}>
-        <CustomCursor />
         <ScrollProgress />
       </Suspense>
       <SiteModeSwitcher />
@@ -227,6 +253,7 @@ function AppContent() {
       <LazySection name="MyWorks"><MyWorks /></LazySection>
       <LazySection name="Timeline"><Timeline /></LazySection>
       <LazySection name="Photography"><Photography /></LazySection>
+      <LazySection name="HowIThink"><HowIThink /></LazySection>
       <LazySection name="Achievements"><Achievements /></LazySection>
       <LazySection name="TrustedBy"><TrustedBy /></LazySection>
       <LazySection name="Testimonials"><Testimonials /></LazySection>
@@ -257,13 +284,17 @@ function AppContent() {
       )}
 
       {/* Easter egg games — outside Suspense */}
-      {showGame && (
-        isMobile ? (
-          <ZipGame onClose={() => setShowGame(false)} />
-        ) : (
-          <TicTacToe onClose={() => setShowGame(false)} />
-        )
-      )}
+      {activeGame === 'tictactoe' && !isMobile && <TicTacToe onClose={() => setActiveGame(null)} />}
+      {activeGame === 'zip' && isMobile && <ZipGame onClose={() => setActiveGame(null)} />}
+      {activeGame === 'snake' && <SnakeGame onClose={() => setActiveGame(null)} />}
+
+      {/* Developer Mode OS (Zero overhead when closed) */}
+      {devConsoleOpen && <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} onLaunchGame={(game) => {
+        // Enforce device constraints
+        if (game === 'tictactoe' && isMobile) return;
+        if (game === 'zip' && !isMobile) return;
+        setActiveGame(game);
+      }} />}
 
     </div>
   );

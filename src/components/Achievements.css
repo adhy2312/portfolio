@@ -105,15 +105,17 @@
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary, #000);
   margin: 0;
+  text-shadow: none; /* Ensure no white shadow */
 }
 
 .ach-desc {
   font-size: 0.87rem;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #444);
   line-height: 1.7;
   margin: 0;
+  text-shadow: none;
 }
 
 /* ── Responsive ── */

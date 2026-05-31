@@ -79,7 +79,7 @@ export default function MagneticButton({ children, strength = 0.4, className = '
       container.removeEventListener('mouseleave', onMouseLeave);
       ns.unregister(`magneticButton-${uniqueId}`);
     };
-  }, [strength]);
+  }, [strength, uniqueId]);
 
   return (
     <div 

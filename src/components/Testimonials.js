@@ -97,8 +97,12 @@ const Testimonials = () => {
     }));
   }, [quotes]);
 
-  /* Only duplicate — 2 groups in JSX handle the seamless loop */
-  const loop = useMemo(() => [...enriched, ...enriched], [enriched]);
+  /* Repeat the items multiple times to guarantee the track is wider than 4K/ultra-wide screens */
+  const loop = useMemo(() => {
+    // If there are very few quotes, we need more repeats to fill an ultrawide screen
+    // 3 items * 5 repeats = 15 items per block. 15 * 400px = 6000px width.
+    return [...enriched, ...enriched, ...enriched, ...enriched, ...enriched];
+  }, [enriched]);
 
   return (
     <section className="testimonials" id="testimonials" ref={sectionRef}>

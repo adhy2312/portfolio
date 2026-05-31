@@ -21,32 +21,32 @@ export default function ColorMorphText({
 
   useEffect(() => {
     if (!textRef.current) return;
+    const el = textRef.current;
 
-    // We animate the background position of the gradient to create the morphing effect
-    // By using a 300% wide background and moving it, the GPU handles it smoothly.
-    const tl = gsap.to(textRef.current, {
-      backgroundPosition: '300% 50%',
-      duration: duration,
-      ease: 'none',
-      repeat: -1,
-    });
+    const ctx = gsap.context(() => {
+      // We animate the background position of the gradient to create the morphing effect
+      // By using a 300% wide background and moving it, the GPU handles it smoothly.
+      const tl = gsap.to(el, {
+        backgroundPosition: '300% 50%',
+        duration: duration,
+        ease: 'none',
+        repeat: -1,
+      });
 
-    // Pause the animation if the element is not in view to save GPU cycles
-    ScrollTrigger.create({
-      trigger: textRef.current,
-      start: "top bottom",
-      end: "bottom top",
-      onEnter: () => tl.play(),
-      onLeave: () => tl.pause(),
-      onEnterBack: () => tl.play(),
-      onLeaveBack: () => tl.pause()
-    });
+      // Pause the animation if the element is not in view to save GPU cycles
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => tl.play(),
+        onLeave: () => tl.pause(),
+        onEnterBack: () => tl.play(),
+        onLeaveBack: () => tl.pause()
+      });
+    }, textRef);
 
     return () => {
-      tl.kill();
-      ScrollTrigger.getAll().forEach(st => {
-        if (st.trigger === textRef.current) st.kill();
-      });
+      ctx.revert();
     };
   }, [duration]);
 

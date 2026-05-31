@@ -88,6 +88,68 @@
   .soul-core-echo, .soul-core-echo-2 { display: none; }
 }
 
+/* ── Higher Intelligence States ── */
+
+.digital-soul.state-overclocked {
+  background: radial-gradient(circle, rgba(0, 255, 255, 1) 0%, rgba(0, 100, 255, 0.8) 40%, transparent 80%);
+  width: 140px; height: 140px;
+  filter: blur(10px) brightness(1.5);
+  animation: pulse-overclock 0.5s ease-in-out infinite alternate;
+}
+@keyframes pulse-overclock {
+  0% { transform: scale(1); filter: blur(10px) brightness(1.5) hue-rotate(0deg); }
+  100% { transform: scale(1.1); filter: blur(5px) brightness(2) hue-rotate(20deg); }
+}
+
+.digital-soul.state-glitching {
+  background: radial-gradient(circle, rgba(255, 0, 255, 0.8) 0%, rgba(0, 255, 255, 0.6) 50%, transparent 80%);
+  width: 100px; height: 100px;
+  filter: blur(8px) contrast(1.5);
+  animation: glitch-soul 0.2s steps(2, end) infinite;
+}
+@keyframes glitch-soul {
+  0% { transform: translate(0, 0) scale(1) skew(0deg); }
+  25% { transform: translate(-5px, 3px) scale(1.1) skew(5deg); filter: blur(5px) hue-rotate(45deg); }
+  50% { transform: translate(5px, -2px) scale(0.9) skew(-10deg); filter: blur(12px) hue-rotate(-45deg); }
+  75% { transform: translate(-2px, 5px) scale(1.05) skew(2deg); filter: blur(8px) hue-rotate(90deg); }
+  100% { transform: translate(2px, -5px) scale(0.95) skew(-5deg); filter: blur(4px) hue-rotate(0deg); }
+}
+
+.digital-soul.state-euphoric {
+  background: radial-gradient(circle, rgba(255, 200, 50, 0.9) 0%, rgba(255, 50, 150, 0.6) 60%, transparent 80%);
+  width: 160px; height: 160px;
+  filter: blur(25px) saturate(2);
+  animation: breathe-euphoric 4s ease-in-out infinite alternate;
+}
+@keyframes breathe-euphoric {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  100% { transform: scale(1.15); opacity: 1; filter: blur(35px) saturate(2.5); }
+}
+
+.digital-soul.state-analyzing {
+  background: radial-gradient(circle, rgba(0, 255, 100, 0.8) 0%, rgba(0, 150, 255, 0.5) 40%, transparent 70%);
+  width: 80px; height: 80px;
+  border-radius: 10px; /* blocky shape */
+  filter: blur(5px);
+  animation: scan-analyzing 1s cubic-bezier(0.8, 0, 0.2, 1) infinite;
+}
+@keyframes scan-analyzing {
+  0% { transform: scale(1) rotate(0deg); border-radius: 10px; }
+  50% { transform: scale(1.5, 0.5) rotate(90deg); border-radius: 50px; filter: blur(2px) brightness(1.5); }
+  100% { transform: scale(1) rotate(180deg); border-radius: 10px; }
+}
+
+.digital-soul.state-melancholic {
+  background: radial-gradient(circle, rgba(30, 10, 60, 0.9) 0%, rgba(10, 5, 30, 0.7) 50%, transparent 80%);
+  width: 90px; height: 90px;
+  filter: blur(20px);
+  animation: sink-melancholic 5s ease-in-out infinite alternate;
+}
+@keyframes sink-melancholic {
+  0% { transform: scale(1) translateY(0); opacity: 0.5; }
+  100% { transform: scale(0.8) translateY(20px); opacity: 0.2; filter: blur(30px) grayscale(0.5); }
+}
+
 /* Subconscious whisper */
 .soul-whisper {
   position: absolute;

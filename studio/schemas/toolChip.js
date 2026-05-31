@@ -1,4 +1,4 @@
-export default {
+const toolChip = {
   name: 'toolChip',
   title: 'Tool / Technology Chip',
   type: 'document',
@@ -37,4 +37,5 @@ export default {
       }
     }
   ]
-}
+};
+export default toolChip;

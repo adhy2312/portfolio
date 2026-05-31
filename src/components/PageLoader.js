@@ -87,7 +87,6 @@ function useGlitchCycle(names, intervalMs = 700) {
 }
 
 const PageLoader = ({ onDone }) => {
-  const [progress, setProgress] = useState(0);
   const [phrase, setPhrase] = useState(PHRASES[0]);
   
   const loaderRef = useRef(null);

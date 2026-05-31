@@ -48,7 +48,7 @@ const EasterEggOverlay = ({ egg }) => {
     };
     ns.register('easterEggParty', draw, { priority: 'NORMAL' });
     return () => { isDrawing = false; ns.unregister('easterEggParty'); };
-  });
+  }, [egg]);
 
   /* ── MATRIX — canvas rain ── */
   useEffect(() => {
@@ -80,7 +80,7 @@ const EasterEggOverlay = ({ egg }) => {
     };
     ns.register('easterEggMatrix', draw, { priority: 'NORMAL' });
     return () => { isDrawing = false; ns.unregister('easterEggMatrix'); };
-  });
+  }, [egg]);
 
   /* ── THANOS — snap 50% of elements to blank ── */
   useEffect(() => {
@@ -155,7 +155,7 @@ const EasterEggOverlay = ({ egg }) => {
     }, 800); // 800ms delay after snap word appears
 
     return () => clearTimeout(snapTimer);
-  });
+  }, [egg]);
 
   if (!egg) return null;
 
@@ -175,7 +175,7 @@ const EasterEggOverlay = ({ egg }) => {
       )}
 
       {egg === 'matrix' && (
-        <div className="matrix-label">// ENTERING THE MATRIX</div>
+        <div className="matrix-label">{"// ENTERING THE MATRIX"}</div>
       )}
 
       {egg === 'barrelroll' && (

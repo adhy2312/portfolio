@@ -1,0 +1,70 @@
+.developer-console {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #fff;
+  font-family: 'Fira Code', 'Courier New', Courier, monospace;
+  font-size: 12px;
+  z-index: 10000;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  will-change: transform, opacity;
+}
+
+.dev-console-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.dev-console-header span {
+  color: #00e5ff;
+}
+
+.dev-console-close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  font-size: 16px;
+  transition: color 0.2s;
+}
+
+.dev-console-close:hover {
+  color: #ff4b4b;
+}
+
+.dev-console-body {
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dev-console-metric {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dev-metric-label {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.dev-metric-value {
+  font-weight: 600;
+}
+
+.metric-good { color: #00ff73; }
+.metric-warn { color: #ff9000; }
+.metric-bad { color: #ff4b4b; }

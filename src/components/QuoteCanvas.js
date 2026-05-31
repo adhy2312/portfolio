@@ -2,14 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { client } from '../sanity';
 import './QuoteCanvas.css';
 import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-
-gsap.registerPlugin(ScrollTrigger);
 
 const QuoteCanvas = () => {
   const [quoteData, setQuoteData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const paperRef = useRef(null);
+  
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const query = '*[_type == "quoteCanvas" && isActive == true][0]';
@@ -22,23 +20,56 @@ const QuoteCanvas = () => {
     });
   }, []);
 
-  // GSAP entrance animation
+  // 3D Magnetic Tilt Effect
   useEffect(() => {
-    if (!paperRef.current || isLoading) return;
+    if (!containerRef.current || isLoading) return;
 
-    gsap.fromTo(paperRef.current,
-      { opacity: 0, y: 40, rotate: -3 },
-      {
-        opacity: 1, y: 0, rotate: 0,
-        duration: 1.2,
-        ease: 'back.out(1.2)',
-        scrollTrigger: {
-          trigger: paperRef.current,
-          start: 'top 85%',
-          once: true,
-        }
-      }
-    );
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const el = containerRef.current;
+
+    const handleMouseMove = (e) => {
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      // Calculate rotation. Reverse polarity: hover top -> pulls top towards you
+      const rotateX = ((y - centerY) / centerY) * 12; 
+      const rotateY = ((x - centerX) / centerX) * -12;
+      
+      // Use gsap.to instead of quickSetter for buttery smooth interpolation (weight/mass simulation)
+      gsap.to(el, {
+        rotateX: rotateX,
+        rotateY: rotateY,
+        scale: 1.02,
+        duration: 0.6,
+        ease: 'power2.out',
+        overwrite: 'auto'
+      });
+    };
+
+    const handleMouseLeave = () => {
+      gsap.to(el, { 
+        rotateX: 0, 
+        rotateY: 0, 
+        scale: 1,
+        duration: 1.2, 
+        ease: 'elastic.out(1, 0.4)',
+        overwrite: 'auto'
+      });
+    };
+
+    el.addEventListener('mousemove', handleMouseMove);
+    el.addEventListener('mouseleave', handleMouseLeave);
+
+    return () => {
+      el.removeEventListener('mousemove', handleMouseMove);
+      el.removeEventListener('mouseleave', handleMouseLeave);
+    };
   }, [isLoading]);
 
   // If loading, don't render anything yet
@@ -49,19 +80,15 @@ const QuoteCanvas = () => {
 
   return (
     <section className="quote-canvas-section">
-      <div className="quote-canvas-container">
-        <div className="quote-paper" ref={paperRef}>
-          <div className="quote-content">
-            <h3 className="quote-text">"{displayData.quoteText}"</h3>
-            {displayData.author && (
-              <p className="quote-author">{displayData.author}</p>
-            )}
-          </div>
-          
-          {/* Aesthetic tape corners */}
-          <div className="tape tape-top-left"></div>
-          <div className="tape tape-bottom-right"></div>
-        </div>
+      <div className="quote-canvas-container" ref={containerRef}>
+        <h3 className="quote-text-elegant">
+          "{displayData.quoteText}"
+        </h3>
+        {displayData.author && (
+          <p className="quote-author-elegant">
+            — {displayData.author}
+          </p>
+        )}
       </div>
     </section>
   );

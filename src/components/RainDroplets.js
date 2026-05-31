@@ -104,7 +104,6 @@ const LocalRainCanvas = () => {
     const drops = Array.from({ length: COUNT }, () => new Drop(true));
     
     let spawnTimer = 0;
-    let animId;
     let lastTime = 0;
     let isVisible = false;
 

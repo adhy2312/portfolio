@@ -15,6 +15,7 @@
 import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { motionTokens } from '../core/MotionGovernance';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,10 +34,10 @@ ScrollTrigger.config({
 });
 
 // ─── Shared Config ──────────────────────────────────────
-const EASE_BUTTER = 'power4.out';
-const EASE_ELASTIC = 'elastic.out(1, 0.5)';
-const EASE_EXPO = 'expo.out';
-const EASE_ELUTE = 'elastic.out(1.2, 0.4)'; // The requested strong GSAP effect
+const EASE_BUTTER = motionTokens.ease.butter;
+const EASE_ELASTIC = motionTokens.ease.elastic;
+const EASE_EXPO = motionTokens.ease.expo;
+const EASE_ELUTE = motionTokens.ease.elute;
 
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth <= 768;
 const prefersReducedMotion = () => 
@@ -53,7 +54,7 @@ export function useEluteEffect(options = {}) {
     const el = ref.current;
     const {
       y = 100,
-      duration = 1.5,
+      duration = motionTokens.duration.transition,
       delay = 0,
       stagger = 0,
       children = false,
@@ -111,7 +112,7 @@ export function useFadeUp(options = {}) {
     const el = ref.current;
     const {
       y = 80,
-      duration = 1.2,
+      duration = motionTokens.duration.reveal,
       delay = 0,
       stagger = 0,
       children = false,
@@ -161,7 +162,7 @@ export function useReveal(options = {}) {
     if (!ref.current || prefersReducedMotion()) return;
 
     const el = ref.current;
-    const { duration = 1.4, delay = 0, direction = 'left' } = options;
+    const { duration = motionTokens.duration.transition, delay = 0, direction = 'left' } = options;
 
     const clipPaths = {
       left:   { from: 'inset(0 100% 0 0)', to: 'inset(0 0% 0 0)' },
@@ -209,8 +210,8 @@ export function useStaggerGrid(options = {}) {
       selector = ':scope > *',
       y = 60,
       scale = 0.95,
-      duration = 0.9,
-      stagger = 0.1,
+      duration = motionTokens.duration.enter,
+      stagger = motionTokens.stagger.line,
     } = options;
 
     const children = el.querySelectorAll(selector);
@@ -296,7 +297,7 @@ export function useMagneticHover(strength = 0.3) {
       gsap.to(el, {
         x: x * strength,
         y: y * strength,
-        duration: 0.4,
+        duration: motionTokens.duration.fast,
         ease: 'power2.out',
       });
     };
@@ -305,7 +306,7 @@ export function useMagneticHover(strength = 0.3) {
       gsap.to(el, {
         x: 0,
         y: 0,
-        duration: 0.7,
+        duration: motionTokens.duration.enter,
         ease: EASE_ELASTIC,
       });
     };
@@ -330,7 +331,7 @@ export function useTextSplitReveal(options = {}) {
     if (!ref.current || prefersReducedMotion()) return;
 
     const el = ref.current;
-    const { duration = 0.8, stagger = 0.02, delay = 0 } = options;
+    const { duration = motionTokens.duration.enter, stagger = motionTokens.stagger.fast, delay = 0 } = options;
 
     // Split text into spans
     const text = el.textContent;
@@ -413,7 +414,7 @@ export function useSectionHeader() {
         opacity: 1,
         scale: 1,
         rotationX: 0,
-        duration: 1.4,
+        duration: motionTokens.duration.reveal,
         ease: EASE_ELUTE,
       }, i * 0.15);
     });
@@ -435,7 +436,7 @@ export function useCountUp(target, options = {}) {
     if (!ref.current) return;
 
     const el = ref.current;
-    const { duration = 2, suffix = '' } = options;
+    const { duration = motionTokens.duration.slow, suffix = '' } = options;
     const numTarget = parseInt(target, 10);
     if (isNaN(numTarget)) return;
 
@@ -473,7 +474,7 @@ export function useScaleIn(options = {}) {
     if (!ref.current || prefersReducedMotion()) return;
 
     const el = ref.current;
-    const { duration = 1.4, delay = 0, from = 0.85 } = options;
+    const { duration = motionTokens.duration.reveal, delay = 0, from = 0.85 } = options;
 
     gsap.set(el, { scale: from, opacity: 0 });
 
@@ -508,7 +509,7 @@ export function useSlideIn(direction = 'left', options = {}) {
     if (!ref.current || prefersReducedMotion()) return;
 
     const el = ref.current;
-    const { duration = 1.2, delay = 0 } = options;
+    const { duration = motionTokens.duration.transition, delay = 0 } = options;
     const x = direction === 'left' ? -80 : 80;
 
     gsap.set(el, { x, opacity: 0 });
@@ -550,10 +551,12 @@ export function initGSAPScrollProxy(lenisInstance) {
   // Sync Lenis scroll position with GSAP ScrollTrigger
   lenisInstance.on('scroll', ScrollTrigger.update);
 
+  // Sync GSAP ticker to Lenis (Architecturally Perfect)
   gsap.ticker.add((time) => {
     lenisInstance.raf(time * 1000);
   });
 
+  // Turn off GSAP's internal lag smoothing to prevent fighting with Lenis
   gsap.ticker.lagSmoothing(0);
 }
 
@@ -583,7 +586,7 @@ export function applyGlobalEluteEffect() {
           opacity: 1,
           scale: 1,
           rotationX: 0,
-          duration: 1.4,
+          duration: motionTokens.duration.reveal,
           ease: EASE_ELUTE,
           scrollTrigger: {
             trigger: header,
@@ -600,7 +603,7 @@ export function applyGlobalEluteEffect() {
       onEnter: (batch) => {
         gsap.fromTo(batch,
           { y: 80, opacity: 0, scale: 0.95, rotationY: 5 },
-          { y: 0, opacity: 1, scale: 1, rotationY: 0, duration: 1.4, ease: EASE_ELUTE, stagger: 0.1, overwrite: 'auto' }
+          { y: 0, opacity: 1, scale: 1, rotationY: 0, duration: motionTokens.duration.reveal, ease: EASE_ELUTE, stagger: 0.1, overwrite: 'auto' }
         );
       }
     });
@@ -611,7 +614,7 @@ export function applyGlobalEluteEffect() {
       onEnter: (batch) => {
         gsap.fromTo(batch,
           { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)', scale: 1.15 },
-          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: 1.6, ease: 'power4.out', stagger: 0.15, overwrite: 'auto', clearProps: 'clipPath,scale' }
+          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: motionTokens.duration.slow, ease: 'power4.out', stagger: 0.15, overwrite: 'auto', clearProps: 'clipPath,scale' }
         );
       }
     });
@@ -622,7 +625,7 @@ export function applyGlobalEluteEffect() {
       gsap.to(label, {
         color: 'var(--accent-primary, #6C63FF)',
         textShadow: '0 0 12px rgba(108, 99, 255, 0.4)',
-        duration: 2,
+        duration: motionTokens.duration.slow,
         repeat: -1,
         yoyo: true,
         ease: 'sine.inOut'
@@ -635,7 +638,7 @@ export function applyGlobalEluteEffect() {
       onEnter: (batch) => {
         gsap.fromTo(batch,
           { opacity: 0, y: 25 },
-          { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', stagger: 0.05, overwrite: 'auto' }
+          { opacity: 1, y: 0, duration: motionTokens.duration.enter, ease: EASE_BUTTER, stagger: motionTokens.stagger.word, overwrite: 'auto' }
         );
       }
     });

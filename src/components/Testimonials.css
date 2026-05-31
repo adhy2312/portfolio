@@ -39,9 +39,11 @@
 .marquee-track {
   display: flex;
   width: max-content;
+  animation: scrollMarquee 35s linear infinite;
+  will-change: transform;
 }
 
-.marquee-track:hover .marquee-content {
+.marquee-track:hover {
   animation-play-state: paused;
 }
 
@@ -49,16 +51,13 @@
   display: flex;
   gap: 2rem;
   padding-right: 2rem;
-  animation: scrollMarquee 35s linear infinite;
-  /* promote to own GPU layer — eliminates jank */
-  will-change: transform;
   backface-visibility: hidden;
 }
 
 @keyframes scrollMarquee {
-  /* translate3d forces GPU compositing path */
   0%   { transform: translate3d(0, 0, 0); }
-  100% { transform: translate3d(-100%, 0, 0); }
+  /* -50% translates exactly one half of the track's width (one full set of cards) */
+  100% { transform: translate3d(-50%, 0, 0); }
 }
 
 /* ── Card ── */

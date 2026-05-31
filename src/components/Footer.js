@@ -29,6 +29,21 @@ const Footer = () => {
   const footerRef = useRef(null);
   const popupRef = useRef(null);
   const mainRowRef = useRef(null);
+  
+  const devConsoleClickCount = useRef(0);
+  const devConsoleTimer = useRef(null);
+
+  const handleLogoClick = () => {
+    devConsoleClickCount.current += 1;
+    if (devConsoleClickCount.current >= 3) {
+      window.dispatchEvent(new CustomEvent('trigger-dev-console'));
+      devConsoleClickCount.current = 0;
+    }
+    clearTimeout(devConsoleTimer.current);
+    devConsoleTimer.current = setTimeout(() => {
+      devConsoleClickCount.current = 0;
+    }, 1000);
+  };
 
   useEffect(() => {
     const query = '*[_type == "footer"][0]';
@@ -167,7 +182,12 @@ const Footer = () => {
 
         <div className="footer-main-row" ref={mainRowRef}>
           <div className="footer-brand-column">
-            <div className="footer-logo-simple">
+            <div 
+              className="footer-logo-simple" 
+              onClick={handleLogoClick}
+              style={{ cursor: 'pointer' }}
+              title="Sys Console: Click 3x"
+            >
               ADHY<span>.</span>
             </div>
             <p className="footer-simple-tagline">

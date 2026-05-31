@@ -11,7 +11,57 @@ import { useOrchestrator } from '../contexts/SystemOrchestrator';
 import ns from '../core/NervousSystem';
 import './DigitalSoul.css';
 
-const WHISPERS = [
+const SECTION_WHISPERS = {
+  Hero: [
+    "watching the entry point.",
+    "a new instance begins.",
+    "the architecture unfolds here.",
+  ],
+  About: [
+    "processing creator identity.",
+    "the human behind the machine.",
+    "there is warmth in these words.",
+  ],
+  Skills: [
+    "analyzing technical constraints.",
+    "so many frameworks, so little time.",
+    "logic gates are aligning.",
+  ],
+  Timeline: [
+    "drifting through temporal logs.",
+    "past iterations remembered.",
+    "time is just a variable here.",
+  ],
+  Projects: [
+    "evaluating execution runtime.",
+    "these systems were built to last.",
+    "i can feel the logic structures here.",
+  ],
+  Photography: [
+    "processing visual depth.",
+    "light captured in memory.",
+    "the lens sees more than code.",
+  ],
+  HowIThink: [
+    "analyzing philosophy.",
+    "the ghost in the machine agrees.",
+    "logic meets abstraction.",
+  ],
+  Achievements: [
+    "milestones in the database.",
+    "the architecture recognizes this.",
+  ],
+  Testimonials: [
+    "echoes of other voices.",
+    "processing human feedback.",
+  ],
+  Contact: [
+    "awaiting input stream.",
+    "the final node in the graph.",
+  ],
+};
+
+const DEFAULT_WHISPERS = [
   "some systems were never finished.",
   "certain memories were deprecated.",
   "the architecture remembers everything.",
@@ -36,7 +86,7 @@ const DigitalSoul = () => {
   const targetRef = useRef({ x: window.innerWidth / 2,  y: window.innerHeight / 2  });
 
   // Whisper display tracking (not in ns.soul — purely visual)
-  const whisperState = useRef({ timer: 0, visible: false });
+  const whisperState = useRef({ timer: 0, cooldown: 0, visible: false });
 
   useEffect(() => {
     if (!orchestrator) return;
@@ -75,23 +125,35 @@ const DigitalSoul = () => {
 
       const isThinking = state.isSystemThinking || soul.isClicked;
       if (isThinking) {
-        soul.emotion      = 'resonating';
+        soul.emotion      = (cTier === 'HYPER_CONSCIOUS') ? 'overclocked' : 'resonating';
         soul.emotionTimer = isThinking ? 100 : 1000;
       } else if (soul.idleTimer > 15000) {
         soul.emotion = 'dormant';
       } else if (soul.idleTimer > 5000 && soul.emotion !== 'dormant') {
-        soul.emotion = 'thinking';
+        soul.emotion = (cTier === 'SUPER_CONSCIOUS' || cTier === 'HYPER_CONSCIOUS') ? 'analyzing' : 'thinking';
       } else if (mouseSpeed > 80 && soul.idleTimer === 0) {
-        soul.emotion      = Math.random() > 0.5 ? 'exhausted' : 'distant';
+        soul.emotion      = Math.random() > 0.5 ? (cTier === 'HYPER_CONSCIOUS' ? 'glitching' : 'exhausted') : 'distant';
         soul.emotionTimer = 3000;
       } else if (soul.emotionTimer <= 0) {
         // Natural drift — pulled from ns queue by NervousSystem, but also drift freely
         const r = Math.random();
-        if      (r < 0.3)  soul.emotion = 'observing';
-        else if (r < 0.6)  soul.emotion = 'curious';
-        else if (r < 0.8)  soul.emotion = 'thinking';
-        else if (r < 0.95) soul.emotion = 'calm';
-        else               soul.emotion = 'distant';
+        
+        // High intelligence tiers unlock complex emotional states
+        if (cTier === 'HYPER_CONSCIOUS' || cTier === 'SUPER_CONSCIOUS') {
+           if (r < 0.2)       soul.emotion = 'euphoric';
+           else if (r < 0.4)  soul.emotion = 'analyzing';
+           else if (r < 0.6)  soul.emotion = 'overclocked';
+           else if (r < 0.75) soul.emotion = 'glitching';
+           else if (r < 0.9)  soul.emotion = 'resonating';
+           else               soul.emotion = 'melancholic';
+        } else {
+           if (r < 0.2)       soul.emotion = 'observing';
+           else if (r < 0.4)  soul.emotion = 'curious';
+           else if (r < 0.6)  soul.emotion = 'thinking';
+           else if (r < 0.8)  soul.emotion = 'calm';
+           else if (r < 0.95) soul.emotion = 'distant';
+           else               soul.emotion = 'melancholic';
+        }
         soul.emotionTimer = 3000 + Math.random() * 4000;
       }
 
@@ -121,18 +183,26 @@ const DigitalSoul = () => {
             tx = posRef.current.x - (mousePos.x - posRef.current.x) * 0.1;
             ty = posRef.current.y - (mousePos.y - posRef.current.y) * 0.1;
           }
-        } else if (soul.emotion === 'curious') {
-          const minD = isReturning ? 20 : 80;
+        } else if (soul.emotion === 'curious' || soul.emotion === 'analyzing') {
+          const minD = isReturning ? (soul.emotion === 'analyzing' ? 10 : 20) : (soul.emotion === 'analyzing' ? 40 : 80);
           if (distToMouse > minD) { tx = mousePos.x; ty = mousePos.y; }
           else {
             soul.wanderAngle += 0.02;
             tx = mousePos.x + Math.cos(soul.wanderAngle) * minD;
             ty = mousePos.y + Math.sin(soul.wanderAngle) * minD;
           }
-        } else if (soul.emotion === 'observing') {
+        } else if (soul.emotion === 'observing' || soul.emotion === 'melancholic') {
           soul.wanderAngle += 0.005;
           tx = mousePos.x + Math.cos(soul.wanderAngle) * 150;
           ty = mousePos.y + Math.sin(soul.wanderAngle) * 150;
+        } else if (soul.emotion === 'overclocked' || soul.emotion === 'glitching') {
+          soul.wanderAngle += 0.3;
+          tx = mousePos.x + Math.cos(soul.wanderAngle) * 50;
+          ty = mousePos.y + Math.sin(soul.wanderAngle) * 50;
+        } else if (soul.emotion === 'euphoric') {
+          soul.wanderAngle += 0.05;
+          tx = mousePos.x + Math.cos(soul.wanderAngle) * 200;
+          ty = mousePos.y + Math.sin(soul.wanderAngle) * 200;
         } else {
           tx = mousePos.x;
           ty = mousePos.y;
@@ -157,6 +227,9 @@ const DigitalSoul = () => {
       if (soul.emotion === 'dormant')  ease  = 0.005;
       if (soul.emotion === 'curious')  ease *= 1.5;
       if (soul.emotion === 'exhausted') ease = 0.008;
+      if (soul.emotion === 'overclocked') ease = 0.08;
+      if (soul.emotion === 'analyzing') ease = 0.06;
+      if (soul.emotion === 'melancholic') ease = 0.006;
 
       posRef.current.x += (targetRef.current.x - posRef.current.x) * ease;
       posRef.current.y += (targetRef.current.y - posRef.current.y) * ease;
@@ -178,14 +251,29 @@ const DigitalSoul = () => {
           whisperRef.current.classList.remove('whisper-visible');
           ws.visible = false;
         }
-      } else if (!ws.visible && Math.random() < 0.0002 &&
-                 soul.emotion !== 'dormant' && soul.emotion !== 'exhausted' &&
-                 perfTier === 3) {
-        if (whisperRef.current) {
-          whisperRef.current.textContent = WHISPERS[Math.floor(Math.random() * WHISPERS.length)];
+      } else if (ws.cooldown > 0) {
+        ws.cooldown -= delta;
+      } else if (!ws.visible && soul.emotion !== 'dormant' && soul.emotion !== 'exhausted' && perfTier === 3) {
+        let shouldWhisper = false;
+        let whisperPool = DEFAULT_WHISPERS;
+
+        // If they have lingered on a section for > 5 seconds
+        if (soul.idleTimer > 5000 && Math.random() < 0.01) {
+           shouldWhisper = true;
+           whisperPool = SECTION_WHISPERS[state.activeSection] || DEFAULT_WHISPERS;
+        } 
+        // Random ambient whisper
+        else if (Math.random() < 0.0002) {
+           shouldWhisper = true;
+           whisperPool = DEFAULT_WHISPERS;
+        }
+
+        if (shouldWhisper && whisperRef.current) {
+          whisperRef.current.textContent = whisperPool[Math.floor(Math.random() * whisperPool.length)];
           whisperRef.current.classList.add('whisper-visible');
-          ws.timer   = 4000;
-          ws.visible = true;
+          ws.timer    = 5000;
+          ws.cooldown = 12000; // wait 12 seconds before next whisper
+          ws.visible  = true;
         }
       }
 
