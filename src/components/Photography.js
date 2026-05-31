@@ -307,8 +307,11 @@ const Photography = () => {
   const currentPhotos = useMemo(() => {
     return all.filter(p => {
       const cat = p.category?.toLowerCase() || '';
-      const isPhoto = cat.includes('photo') || cat.includes('visual');
-      return activeTab === 'photography' ? isPhoto : !isPhoto;
+      // Due to the DB value inversion to fix previous data entry mixup:
+      // Value 'design' actually means Photography.
+      // Value 'photography' actually means Design.
+      const isActuallyPhoto = cat.includes('design');
+      return activeTab === 'photography' ? isActuallyPhoto : !isActuallyPhoto;
     });
   }, [all, activeTab]);
 
