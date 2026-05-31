@@ -44,28 +44,33 @@ export default function HowIThink() {
         }
       });
 
-      // Animate each thought sequentially
+      // Animate each thought with overlaps
       thoughtsRef.current.forEach((thoughtEl, index) => {
         if (!thoughtEl) return;
 
+        const startTime = index * 2; // 0, 2, 4
+        
         // Enter
         tl.fromTo(thoughtEl, 
           { opacity: 0, y: 50, scale: 0.95 },
-          { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power2.out' }
+          { opacity: 1, y: 0, scale: 1, duration: 1, ease: 'power2.out' },
+          startTime
         );
 
-        // Hold
-        tl.to(thoughtEl, { duration: 0.5 }); // Keep it on screen
-
-        // Exit (for all thoughts)
-        tl.to(thoughtEl, {
-          opacity: 0,
-          y: -50,
-          scale: 1.05,
-          duration: 1,
-          ease: 'power2.in'
-        });
+        // Exit (only if NOT the last thought)
+        if (index < thoughtsRef.current.length - 1) {
+          tl.to(thoughtEl, {
+            opacity: 0,
+            y: -50,
+            scale: 1.05,
+            duration: 1,
+            ease: 'power2.in'
+          }, startTime + 1.5); // Starts exiting before the next one fully enters
+        }
       });
+      
+      // Add a buffer at the end so the last quote stays visible while scrolling before the pin releases
+      tl.to({}, { duration: 1.5 });
 
     }, sectionRef);
 

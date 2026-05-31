@@ -125,14 +125,14 @@ const DigitalSoul = () => {
 
       const isThinking = state.isSystemThinking || soul.isClicked;
       if (isThinking) {
-        soul.emotion      = (cTier === 'HYPER_CONSCIOUS') ? 'overclocked' : 'resonating';
+        soul.emotion      = (cTier === 'HYPER_CONSCIOUS') ? 'analyzing' : 'resonating';
         soul.emotionTimer = isThinking ? 100 : 1000;
       } else if (soul.idleTimer > 15000) {
         soul.emotion = 'dormant';
       } else if (soul.idleTimer > 5000 && soul.emotion !== 'dormant') {
         soul.emotion = (cTier === 'SUPER_CONSCIOUS' || cTier === 'HYPER_CONSCIOUS') ? 'analyzing' : 'thinking';
       } else if (mouseSpeed > 80 && soul.idleTimer === 0) {
-        soul.emotion      = Math.random() > 0.5 ? (cTier === 'HYPER_CONSCIOUS' ? 'glitching' : 'exhausted') : 'distant';
+        soul.emotion      = Math.random() > 0.5 ? (cTier === 'HYPER_CONSCIOUS' ? 'euphoric' : 'exhausted') : 'distant';
         soul.emotionTimer = 3000;
       } else if (soul.emotionTimer <= 0) {
         // Natural drift — pulled from ns queue by NervousSystem, but also drift freely
@@ -142,8 +142,8 @@ const DigitalSoul = () => {
         if (cTier === 'HYPER_CONSCIOUS' || cTier === 'SUPER_CONSCIOUS') {
            if (r < 0.2)       soul.emotion = 'euphoric';
            else if (r < 0.4)  soul.emotion = 'analyzing';
-           else if (r < 0.6)  soul.emotion = 'overclocked';
-           else if (r < 0.75) soul.emotion = 'glitching';
+           else if (r < 0.6)  soul.emotion = 'euphoric';
+           else if (r < 0.75) soul.emotion = 'analyzing';
            else if (r < 0.9)  soul.emotion = 'resonating';
            else               soul.emotion = 'melancholic';
         } else {
