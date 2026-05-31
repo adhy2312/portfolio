@@ -13,7 +13,7 @@
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.12);
   background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
   color: rgba(255, 255, 255, 0.8);
   cursor: pointer;
   display: flex;
@@ -38,7 +38,7 @@
   max-height: 80vh;
   overflow-y: auto;
   background: rgba(12, 12, 20, 0.92);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
   padding: 16px;

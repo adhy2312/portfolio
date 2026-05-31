@@ -611,7 +611,7 @@ export function applyGlobalEluteEffect() {
       onEnter: (batch) => {
         gsap.fromTo(batch,
           { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)', scale: 1.15 },
-          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: 1.6, ease: 'power4.out', stagger: 0.15, overwrite: 'auto' }
+          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: 1.6, ease: 'power4.out', stagger: 0.15, overwrite: 'auto', clearProps: 'clipPath,scale' }
         );
       }
     });
@@ -634,8 +634,8 @@ export function applyGlobalEluteEffect() {
       start: 'top 95%',
       onEnter: (batch) => {
         gsap.fromTo(batch,
-          { opacity: 0, y: 25, filter: 'blur(4px)' },
-          { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, ease: 'power3.out', stagger: 0.05, overwrite: 'auto' }
+          { opacity: 0, y: 25 },
+          { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out', stagger: 0.05, overwrite: 'auto' }
         );
       }
     });

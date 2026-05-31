@@ -629,8 +629,8 @@ body {
 .glass-card {
   position: relative;
   background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.5);
   border-radius: 24px;
   box-shadow: 
@@ -1388,8 +1388,8 @@ html:not(.dream-state) .App {
    EXPERIMENTAL LAB MODE — Heavy effects
 ═══════════════════════════════════════════ */
 .mode-experimental .glass-card {
-  backdrop-filter: blur(20px) saturate(1.5) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(1.5) !important;
+  backdrop-filter: blur(8px) saturate(1.5) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(1.5) !important;
   border: 1px solid rgba(255, 255, 255, 0.15) !important;
   box-shadow: 
     0 8px 32px rgba(0,0,0,0.4),

@@ -19,8 +19,8 @@
   min-width: 210px;
 
   background: rgba(10, 10, 20, 0.82);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.07);
   box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.45),
@@ -82,8 +82,8 @@
 
   /* Pill attached to the left edge */
   background: rgba(10, 10, 20, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border-radius: 0 10px 10px 0;
   border-top: 1px solid rgba(30, 215, 96, 0.2);
   border-right: 1px solid rgba(30, 215, 96, 0.2);

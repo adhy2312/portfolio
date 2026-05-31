@@ -40,58 +40,18 @@ class ImmersiveEngine {
   _applyImmersionPhysics(delta, heartbeat) {
     if (!this.ns) return;
 
-    const root = document.documentElement;
+    // PERFORMANCE FIX: Removed unused global root CSS variable updates.
+    // Setting properties on document.documentElement at 60fps causes massive layout thrashing.
     
-    // 1. Biological Rhythm Injection
-    // Expose the raw heartbeat value to CSS for global breathing animations
-    root.style.setProperty('--ns-heartbeat', heartbeat.toFixed(4));
-
     // 2. Adrenaline Mapping
     // Calculate global tension based on scrolling and moving speeds
     const targetAdrenaline = this.ns.isMoving ? 1.0 : Math.max(0, 1.0 - (this.ns.state.idleSeconds / 10));
     // Smooth dampening
     this.ns.state.adrenaline += (targetAdrenaline - this.ns.state.adrenaline) * (delta * 0.005);
-    
-    // Expose adrenaline so CSS can speed up animations when the user is erratic
-    root.style.setProperty('--ns-adrenaline', this.ns.state.adrenaline.toFixed(3));
-
-    // 3. Fatigue / Performance Degradation (Battery Symbiosis)
-    // If the system is tired, physically darken the UI to save power
-    const fatigue = this.ns.fatigue;
-    if (fatigue > 30) {
-      const dimming = Math.min(0.4, (fatigue - 30) * 0.01);
-      root.style.setProperty('--ns-fatigue-dimming', dimming.toFixed(3));
-    } else {
-      root.style.setProperty('--ns-fatigue-dimming', '0');
-    }
   }
 
   _triggerAtmosphereShift(atmosphereType) {
-    const root = document.documentElement;
-    
-    // Apply a massive but subtle global atmospheric filter shift
-    switch(atmosphereType) {
-      case 'dreaming':
-        root.style.setProperty('--atmosphere-hue', '280deg');
-        root.style.setProperty('--atmosphere-sat', '120%');
-        break;
-      case 'overload':
-        root.style.setProperty('--atmosphere-hue', '0deg');
-        root.style.setProperty('--atmosphere-sat', '60%');
-        break;
-      case 'cold':
-        root.style.setProperty('--atmosphere-hue', '200deg');
-        root.style.setProperty('--atmosphere-sat', '90%');
-        break;
-      case 'warm':
-        root.style.setProperty('--atmosphere-hue', '30deg');
-        root.style.setProperty('--atmosphere-sat', '110%');
-        break;
-      default:
-        // Return to normal baseline
-        root.style.setProperty('--atmosphere-hue', '260deg'); // Default purple lean
-        root.style.setProperty('--atmosphere-sat', '100%');
-    }
+    // PERFORMANCE FIX: Disabled unused atmospheric CSS variables.
   }
 
   stop() {

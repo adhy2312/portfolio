@@ -22,6 +22,15 @@ const CustomCursor = () => {
   // Track last activity time for AI idle wandering
   const lastActiveRef = useRef(Date.now());
   const isIdleRef = useRef(false);
+  
+  // Refs for closure access inside RAF without rebuilding effect
+  const isExpRef = useRef(isExperimental);
+  const visibleRef = useRef(visible);
+  const stateRef = useRef(cursorState);
+  
+  useEffect(() => { isExpRef.current = isExperimental; }, [isExperimental]);
+  useEffect(() => { visibleRef.current = visible; }, [visible]);
+  useEffect(() => { stateRef.current = cursorState; }, [cursorState]);
 
   useEffect(() => {
     if (!hasFinePointer() || !orchestrator || !cursorRef.current) return;
@@ -35,7 +44,7 @@ const CustomCursor = () => {
       const ease = isExperimental ? 0.2 : 0.8;
       
       // If idle (no mouse movement for 3s), AI slightly floats around its position
-      if (isExperimental && isIdleRef.current && visible) {
+      if (isExpRef.current && isIdleRef.current && visibleRef.current) {
         const t = time * 0.001;
         const driftX = Math.sin(t) * 10;
         const driftY = Math.cos(t * 1.3) * 10;
@@ -53,14 +62,14 @@ const CustomCursor = () => {
       if (Date.now() - lastActiveRef.current > 3000) {
         if (!isIdleRef.current) {
           isIdleRef.current = true;
-          if (isExperimental && cursorState === 'default') {
+          if (isExpRef.current && stateRef.current === 'default') {
             setCursorState('ai-idle');
           }
         }
       } else {
         if (isIdleRef.current) {
           isIdleRef.current = false;
-          if (cursorState === 'ai-idle') {
+          if (stateRef.current === 'ai-idle') {
             setCursorState('default');
           }
         }
@@ -82,7 +91,7 @@ const CustomCursor = () => {
       
       // Check for AI Project Hover
       const aiProject = el.closest('[data-cursor-ai="true"]');
-      if (aiProject && isExperimental) {
+      if (aiProject && isExpRef.current) {
         const title = aiProject.getAttribute('data-project-title') || '';
         const desc = aiProject.getAttribute('data-project-desc') || '';
         setAiData({ title, desc });
@@ -130,7 +139,7 @@ const CustomCursor = () => {
       document.documentElement.removeEventListener('mouseleave', onLeave);
       document.documentElement.removeEventListener('mouseenter', onEnter);
     };
-  }, [orchestrator, isExperimental, visible, cursorState]); // eslint-disable-line
+  }, [orchestrator]); // eslint-disable-line
 
   if (!hasFinePointer()) return null;
 

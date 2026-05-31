@@ -9,7 +9,6 @@
   pointer-events: none;
   z-index: 9999;
   will-change: transform;
-  mix-blend-mode: difference;
   display: flex;
   align-items: center;
   justify-content: center;

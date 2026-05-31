@@ -262,6 +262,10 @@ class NervousSystem {
       this.state._heartbeatPhase += delta * hbSpeed * Math.max(0.2, 1 - this.fatigue / 100);
       this.state.heartbeatValue   = Math.sin(this.state._heartbeatPhase);
 
+      if (this.isMoving && time - this._lastMoveTime > 2000) {
+        this.isMoving = false;
+      }
+
       // ─── Process Soul Reaction Queue ───
       const now = Date.now();
       let processed = false;
@@ -312,13 +316,13 @@ class NervousSystem {
   // ════════════════════════════════════════
 
   _setupGlobalListeners() {
+    this._lastMoveTime = 0;
     const onMove = (e) => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
       this.mousePos  = { x: clientX, y: clientY };
       this.isMoving  = true;
-      clearTimeout(this._idleMovTimer);
-      this._idleMovTimer = setTimeout(() => { this.isMoving = false; }, 2000);
+      this._lastMoveTime = performance.now();
     };
 
     const onScroll = () => { this.scrollPos = window.scrollY; };

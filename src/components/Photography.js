@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import './Photography.css';
 import { motion, AnimatePresence } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun } from 'react-icons/fi';
+import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun, FiPenTool } from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';
 import photo3 from '../assets/photo3.jpg';
@@ -185,8 +185,101 @@ const ExifPanel = ({ src }) => {
   );
 };
 
+/* ─── Glass Toggle Component ─── */
+const GlassToggle = ({ activeTab, setActiveTab }) => {
+  const toggleRef = useRef(null);
+  const pillRef = useRef(null);
+  const photoTextRef = useRef(null);
+  const designTextRef = useRef(null);
+
+  const handleToggle = (tab) => {
+    if (tab === activeTab) return;
+    
+    // Smooth liquid squeeze down
+    gsap.timeline()
+      .to(toggleRef.current, { scale: 0.97, duration: 0.15, ease: "power2.in" })
+      .to(toggleRef.current, { scale: 1, duration: 0.5, ease: "power4.out" });
+    
+    // Smooth Pill sliding
+    gsap.to(pillRef.current, {
+      x: tab === 'photography' ? 0 : '100%',
+      duration: 0.5,
+      ease: "power4.inOut"
+    });
+
+    // Icon pop
+    if (tab === 'photography') {
+       gsap.fromTo(photoTextRef.current, { scale: 0.85, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.2)", delay: 0.1 });
+       gsap.to(designTextRef.current, { scale: 0.9, opacity: 0.5, duration: 0.3 });
+    } else {
+       gsap.fromTo(designTextRef.current, { scale: 0.85, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.2)", delay: 0.1 });
+       gsap.to(photoTextRef.current, { scale: 0.9, opacity: 0.5, duration: 0.3 });
+    }
+    
+    setActiveTab(tab);
+  };
+
+  useEffect(() => {
+    // Initial state setup for text refs
+    if (activeTab === 'photography') {
+      gsap.set(photoTextRef.current, { scale: 1, opacity: 1 });
+      gsap.set(designTextRef.current, { scale: 0.9, opacity: 0.5 });
+      gsap.set(pillRef.current, { x: 0 });
+    } else {
+      gsap.set(designTextRef.current, { scale: 1, opacity: 1 });
+      gsap.set(photoTextRef.current, { scale: 0.9, opacity: 0.5 });
+      gsap.set(pillRef.current, { x: '100%' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="glass-toggle-container">
+      <div 
+        className="glass-toggle-wrapper" 
+        ref={toggleRef}
+      >
+        <div className="glass-toggle">
+          
+          <div className="glass-toggle-pill-container">
+            <div 
+              className={`glass-toggle-pill ${activeTab === 'photography' ? 'photo-active' : 'design-active'}`}
+              ref={pillRef}
+            >
+              <div className="pill-inner-glow" />
+            </div>
+          </div>
+
+          <div className="glass-toggle-divider" />
+
+          <button 
+            className={`glass-toggle-btn ${activeTab === 'photography' ? 'active' : ''}`}
+            onClick={() => handleToggle('photography')}
+          >
+            <div className="btn-content" ref={photoTextRef}>
+              <FiCamera className="glass-toggle-icon" />
+              <span>Photography</span>
+            </div>
+          </button>
+
+          <button 
+            className={`glass-toggle-btn ${activeTab === 'design' ? 'active' : ''}`}
+            onClick={() => handleToggle('design')}
+          >
+            <div className="btn-content" ref={designTextRef}>
+              <FiPenTool className="glass-toggle-icon" />
+              <span>Design</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─── Main Photography Section ─── */
 const Photography = () => {
+  const [activeTab, setActiveTab] = useState('photography'); // 'photography' | 'design'
   const [lightbox,      setLightbox]      = useState(null);
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
@@ -210,6 +303,16 @@ const Photography = () => {
   }, []);
 
   const all = fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
+
+  const currentPhotos = useMemo(() => {
+    return all.filter(p => {
+      const cat = p.category?.toLowerCase() || '';
+      const isPhoto = cat.includes('photo') || cat.includes('visual');
+      return activeTab === 'photography' ? isPhoto : !isPhoto;
+    });
+  }, [all, activeTab]);
+
+  const displayPhotos = currentPhotos.length > 0 ? currentPhotos : all;
 
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
@@ -253,6 +356,7 @@ const Photography = () => {
           <p className="section-desc">
             Capturing the world through my lens and crafting digital experiences through design.
           </p>
+          <GlassToggle activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
 
@@ -264,8 +368,8 @@ const Photography = () => {
           </div>
         ) : (
           <>
-            <MarqueeTrack photos={all} reverse={false} onPhotoClick={setLightbox} />
-            <MarqueeTrack photos={all} reverse={true}  onPhotoClick={setLightbox} />
+            <MarqueeTrack photos={displayPhotos} reverse={false} onPhotoClick={setLightbox} />
+            <MarqueeTrack photos={displayPhotos} reverse={true}  onPhotoClick={setLightbox} />
           </>
         )}
       </div>

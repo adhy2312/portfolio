@@ -213,7 +213,7 @@ const DigitalSoul = () => {
 
       soulRef.current.style.opacity   = '1';
       soulRef.current.style.transform =
-        `translate3d(${posRef.current.x | 0}px,${posRef.current.y | 0}px,0) scaleX(${sx}) scaleY(${sy})`;
+        `translate3d(${posRef.current.x.toFixed(2)}px, ${posRef.current.y.toFixed(2)}px, 0) scaleX(${sx.toFixed(3)}) scaleY(${sy.toFixed(3)})`;
     };
 
     orchestrator.subscribeToRAF('digital-soul', tick, { priority: 'CRITICAL', gpuCost: 'LOW' });
