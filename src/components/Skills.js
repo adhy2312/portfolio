@@ -105,28 +105,48 @@ const tools = [
 const SkillCard = ({ cat, iconMap }) => {
   const cardRef = useRef(null);
   const barsRef = useRef([]);
+  const percentRefs = useRef([]);
 
   useEffect(() => {
     if (!cardRef.current) return;
 
-    // Scroll-scrubbed progress bars
+    // Use a unified timeline for both bars and numbers
     const ctx = gsap.context(() => {
-      barsRef.current.forEach((bar) => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: cardRef.current,
+          start: 'top 85%',
+          toggleActions: 'play none none reverse'
+        }
+      });
+
+      barsRef.current.forEach((bar, i) => {
         if (!bar) return;
         const targetWidth = bar.dataset.targetWidth;
-        gsap.fromTo(bar, 
+        const percentEl = percentRefs.current[i];
+        const targetLevel = percentEl ? parseInt(percentEl.dataset.targetLevel, 10) : 0;
+        
+        // Liquid bar filling effect
+        tl.fromTo(bar, 
           { width: '0%' },
           {
             width: targetWidth,
-            ease: 'none',
-            scrollTrigger: {
-              trigger: cardRef.current,
-              start: 'top 85%',
-              end: 'center center',
-              scrub: true
+            duration: 1.2,
+            ease: 'power3.out',
+          }, i * 0.12);
+
+        // Percentage counter animation
+        if (percentEl) {
+          const obj = { val: 0 };
+          tl.to(obj, {
+            val: targetLevel,
+            duration: 1.2,
+            ease: 'power3.out',
+            onUpdate: () => {
+              percentEl.innerText = Math.round(obj.val) + '%';
             }
-          }
-        );
+          }, i * 0.12);
+        }
       });
     }, cardRef);
 
@@ -183,7 +203,13 @@ const SkillCard = ({ cat, iconMap }) => {
           <div key={skillIdx} className="skill-bar-item">
             <div className="skill-bar-label">
               <span>{skill.name}</span>
-              <span className="skill-bar-percent">{skill.level}%</span>
+              <span 
+                className="skill-bar-percent"
+                ref={el => percentRefs.current[skillIdx] = el}
+                data-target-level={skill.level}
+              >
+                0%
+              </span>
             </div>
             <div className="skill-bar-track">
               <div
@@ -250,16 +276,16 @@ const Skills = () => {
         );
       }
 
-      // Skill cards: stagger grid with 3D rotation
+      // Skill cards: stagger grid with 3D dynamic rotation and bounce
       if (gridRef.current) {
         const cards = gridRef.current.querySelectorAll('.skill-card');
         gsap.fromTo(cards,
-          { y: 60, opacity: 0, rotateX: 15, scale: 0.95 },
+          { y: 100, opacity: 0, rotateX: 30, rotateY: -10, scale: 0.9 },
           {
-            y: 0, opacity: 1, rotateX: 0, scale: 1,
-            duration: 0.9,
-            stagger: 0.12,
-            ease: 'power4.out',
+            y: 0, opacity: 1, rotateX: 0, rotateY: 0, scale: 1,
+            duration: 1.2,
+            stagger: 0.15,
+            ease: 'back.out(1.2)',
             scrollTrigger: {
               trigger: gridRef.current,
               start: 'top 80%',
@@ -269,16 +295,16 @@ const Skills = () => {
         );
       }
 
-      // Tools cloud: wave stagger
+      // Tools cloud: super wave stagger with random rotation
       if (toolsRef.current) {
         const chips = toolsRef.current.querySelectorAll('.tech-tag');
         gsap.fromTo(chips,
-          { y: 20, opacity: 0, scale: 0.8 },
+          { y: 40, opacity: 0, scale: 0.5, rotateZ: () => Math.random() * 40 - 20 },
           {
-            y: 0, opacity: 1, scale: 1,
-            duration: 0.6,
-            stagger: { each: 0.04, from: 'center' },
-            ease: 'back.out(1.7)',
+            y: 0, opacity: 1, scale: 1, rotateZ: 0,
+            duration: 0.8,
+            stagger: { each: 0.03, from: 'random' },
+            ease: 'back.out(1.5)',
             scrollTrigger: {
               trigger: toolsRef.current,
               start: 'top 85%',
