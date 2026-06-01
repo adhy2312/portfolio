@@ -98,6 +98,14 @@ function AppContent() {
       autoResize: true,
     });
 
+    // Dedicated native RAF loop for flawless 144Hz scrolling unblocked by GSAP autoSleep
+    let rafId;
+    function raf(time) {
+      lenis.raf(time);
+      rafId = requestAnimationFrame(raf);
+    }
+    rafId = requestAnimationFrame(raf);
+
     // GSAP + Lenis Synchronization
     initGSAPScrollProxy(lenis);
 
@@ -215,6 +223,7 @@ function AppContent() {
     }, 3500);
 
     return () => {
+      cancelAnimationFrame(rafId);
       lenis.destroy();
       clearTimeout(widgetTimer);
       window.removeEventListener('resize', handleResize);

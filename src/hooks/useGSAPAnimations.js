@@ -551,13 +551,8 @@ export function initGSAPScrollProxy(lenisInstance) {
   // Sync Lenis scroll position with GSAP ScrollTrigger
   lenisInstance.on('scroll', ScrollTrigger.update);
 
-  // Sync GSAP ticker to Lenis (Architecturally Perfect)
-  gsap.ticker.add((time) => {
-    lenisInstance.raf(time * 1000);
-  });
-
-  // Turn off GSAP's internal lag smoothing to prevent fighting with Lenis
-  gsap.ticker.lagSmoothing(0);
+  // Removed gsap.ticker.add(lenis.raf) because GSAP autoSleep causes Lenis to freeze!
+  // lenis.raf is now handled by a dedicated native RAF loop in App.js.
 }
 
 // ─── Global Elute Effect Applier ───────────────────────
@@ -572,49 +567,43 @@ export function applyGlobalEluteEffect() {
     const headers = gsap.utils.toArray('.section-title-wrapper, .photo-header, .about-content-wrapper > h2, .skills-header, .timeline-header, .works-header');
     
     headers.forEach(header => {
-      // Create the strong Elute Effect
       gsap.fromTo(header, 
         { 
-          y: 70, 
+          y: 60, 
           opacity: 0, 
-          scale: 0.9, 
-          rotationX: 12,
-          transformOrigin: 'bottom center',
         },
         {
           y: 0,
           opacity: 1,
-          scale: 1,
-          rotationX: 0,
           duration: motionTokens.duration.reveal,
           ease: EASE_ELUTE,
           scrollTrigger: {
             trigger: header,
-            start: 'top 88%',
+            start: 'top 90%',
             toggleActions: 'play none none reverse',
           }
         }
       );
     });
 
-    // 1. Cards Elute Reveal (Batched Architecture)
+    // 1. Cards Reveal (Batched Architecture, GPU Optimized)
     ScrollTrigger.batch('.marquee-card, .skill-card, .work-card, .achievement-card, .timeline-item-content', {
       start: 'top 90%',
       onEnter: (batch) => {
         gsap.fromTo(batch,
-          { y: 80, opacity: 0, scale: 0.95, rotationY: 5 },
-          { y: 0, opacity: 1, scale: 1, rotationY: 0, duration: motionTokens.duration.reveal, ease: EASE_ELUTE, stagger: 0.1, overwrite: 'auto' }
+          { y: 60, opacity: 0 },
+          { y: 0, opacity: 1, duration: motionTokens.duration.reveal, ease: EASE_BUTTER, stagger: 0.1, overwrite: 'auto' }
         );
       }
     });
 
-    // 2. Premium Image Clip-Path Morphing Reveal (Batched Architecture, NO FILTERS)
+    // 2. Premium Image Reveal (Removed Clip-Path for WebKit FPS stability)
     ScrollTrigger.batch('.about-img, .photo-card img, .work-image img, .timeline-item-image', {
       start: 'top 90%',
       onEnter: (batch) => {
         gsap.fromTo(batch,
-          { clipPath: 'polygon(0 100%, 100% 100%, 100% 100%, 0 100%)', scale: 1.15 },
-          { clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0 100%)', scale: 1, duration: motionTokens.duration.slow, ease: 'power4.out', stagger: 0.15, overwrite: 'auto', clearProps: 'clipPath,scale' }
+          { scale: 1.05, opacity: 0 },
+          { scale: 1, opacity: 1, duration: motionTokens.duration.slow, ease: 'power3.out', stagger: 0.1, overwrite: 'auto', clearProps: 'scale' }
         );
       }
     });

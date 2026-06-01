@@ -32,19 +32,16 @@
   align-items: center;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0.6rem 2rem;
+  background: rgba(10, 10, 10, 0.95);
   border-radius: 100px;
-  transition: all 0.4s ease;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px) saturate(1.8);
-  -webkit-backdrop-filter: blur(8px) saturate(1.8);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  margin-top: 1rem;
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.8) inset,
-    0 -1px 0 rgba(0,0,0,0.05) inset,
-    0 8px 32px rgba(0,0,0,0.1);
-  position: relative; /* needed for canvas absolute child */
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 0.6rem 2rem;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  position: relative;
+  z-index: 100;
+  transition: all var(--transition-bounce);
 }
 
 /* All direct children of navbar-inner sit above the rain canvas (z-index: 2) */
