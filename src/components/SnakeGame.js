@@ -264,15 +264,40 @@ export default function SnakeGame({ onClose }) {
       }
 
       // Draw Snake Body
-      ctx.fillStyle = '#1a2214'; // Dark LCD black
       s.snake.forEach((seg, idx) => {
-        // Pixel gap simulation
-        ctx.fillRect(seg.x * cellSize + 1, seg.y * cellSize + 1, cellSize - 2, cellSize - 2);
+        const x = Math.floor(seg.x * cellSize);
+        const y = Math.floor(seg.y * cellSize);
+        const size = Math.ceil(cellSize);
+        
+        if (idx === 0) {
+          // Head: Solid with vintage pixel eyes
+          ctx.fillStyle = '#1a2214';
+          ctx.fillRect(x, y, size, size);
+          ctx.fillStyle = '#879a73'; // Background color for eyes
+          if (s.direction.x !== 0) { // Moving horizontally
+            ctx.fillRect(x + size/2 - 1.5, y + 3, 3, 3);
+            ctx.fillRect(x + size/2 - 1.5, y + size - 6, 3, 3);
+          } else { // Moving vertically
+            ctx.fillRect(x + 3, y + size/2 - 1.5, 3, 3);
+            ctx.fillRect(x + size - 6, y + size/2 - 1.5, 3, 3);
+          }
+        } else {
+          // Body: The classic Xenzia "hollow ring" segment pattern
+          ctx.fillStyle = '#1a2214';
+          ctx.fillRect(x, y, size, size);
+          ctx.fillStyle = '#879a73';
+          ctx.fillRect(x + 3, y + 3, size - 6, size - 6);
+        }
       });
 
-      // Draw Food (Blinking effect via timestamp parity)
+      // Draw Food (Classic diamond/cross bug shape)
       if (Math.floor(timestamp / 300) % 2 === 0) {
-        ctx.fillRect(s.food.x * cellSize + 1, s.food.y * cellSize + 1, cellSize - 2, cellSize - 2);
+        ctx.fillStyle = '#1a2214';
+        const fx = Math.floor(s.food.x * cellSize);
+        const fy = Math.floor(s.food.y * cellSize);
+        const cs = Math.ceil(cellSize);
+        ctx.fillRect(fx + cs/2 - 2, fy + 2, 4, cs - 4);
+        ctx.fillRect(fx + 2, fy + cs/2 - 2, cs - 4, 4);
       }
     };
 
