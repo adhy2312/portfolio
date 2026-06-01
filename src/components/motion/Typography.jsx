@@ -23,6 +23,7 @@ export default function Typography({
   className = '',
   as = 'div',
   delay = 0,
+  ...props
 }) {
   const ref = useRef(null);
 
@@ -46,6 +47,9 @@ export default function Typography({
           y: 0,
           duration: motionTokens.duration.reveal,
           ease: EASE_EXPO,
+          onComplete: () => {
+            gsap.set(el, { clearProps: "clipPath" });
+          },
           scrollTrigger: {
             trigger: el,
             start: 'top 90%',
@@ -106,8 +110,15 @@ export default function Typography({
 
   const Tag = as;
   return (
-    <Tag ref={ref} className={className} style={{ display: 'inline-block', position: 'relative' }}>
-      {variant === 'split' ? null : (text || children)}
+    <Tag ref={ref} className={className} style={{ display: 'inline-block', position: 'relative' }} {...props}>
+      <span className="section-title-content" style={{ display: 'inline-block', transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)' }}>
+        {variant === 'split' ? null : (text || children)}
+      </span>
+      {props['data-hover'] && (
+        <span className="section-title-hover-text" aria-hidden="true">
+          {props['data-hover']}
+        </span>
+      )}
     </Tag>
   );
 }

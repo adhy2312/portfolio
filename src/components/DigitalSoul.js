@@ -308,6 +308,48 @@ const DigitalSoul = () => {
     return () => orchestrator.unsubscribeFromRAF('digital-soul');
   }, [orchestrator]);
 
+  useEffect(() => {
+    const handleBoot = () => {
+      if (!whisperRef.current) return;
+      const visits = ns.state.totalVisits || 1;
+      let greeting = "hello stranger.";
+      if (visits === 3) greeting = "you've returned.";
+      else if (visits === 5) greeting = "the journey continues.";
+      else if (visits === 2) greeting = "we meet again.";
+      else if (visits === 4) greeting = "i remember you.";
+      else if (visits > 5) greeting = `aware across sessions. visit ${visits}.`;
+      
+      whisperRef.current.textContent = greeting;
+      whisperRef.current.classList.add('whisper-visible');
+      whisperState.current.timer = 5000;
+      whisperState.current.visible = true;
+      whisperState.current.cooldown = 10000;
+    };
+    window.addEventListener('system-boot', handleBoot);
+    
+    const handlePersona = (e) => {
+      if (!whisperRef.current) return;
+      const { persona } = e.detail || {};
+      let msg = "";
+      if (persona === 'Developer') msg = "ah, a fellow developer...";
+      else if (persona === 'Recruiter') msg = "seeking talent...";
+      else if (persona === 'Creator') msg = "an eye for design...";
+      else return;
+
+      whisperRef.current.textContent = msg;
+      whisperRef.current.classList.add('whisper-visible');
+      whisperState.current.timer = 5000;
+      whisperState.current.visible = true;
+      whisperState.current.cooldown = 10000;
+    };
+    window.addEventListener('persona-shift', handlePersona);
+
+    return () => {
+      window.removeEventListener('system-boot', handleBoot);
+      window.removeEventListener('persona-shift', handlePersona);
+    };
+  }, []);
+
   return (
     <div ref={soulRef} className="digital-soul">
       <div className="soul-core" />

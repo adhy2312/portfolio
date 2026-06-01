@@ -17,7 +17,186 @@ const INITIAL_ACHIEVEMENTS = [
   { id: 'insomniac', title: 'Insomniac', desc: 'Accessed the core during late-night hours.', icon: '🦉', unlocked: false, rarity: 'Rare', color: '#7986cb' },
 ];
 
+const FrequencyCanvas = () => {
+  const canvasRef = useRef(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    let particles = Array.from({ length: 50 }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      vx: (Math.random() - 0.5) * 2,
+      vy: (Math.random() - 0.5) * 2,
+      baseRadius: Math.random() * 3 + 1
+    }));
+
+    const resize = () => {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const pulse = Math.abs(ns.state.heartbeatValue) || 0.1;
+      const stress = (ns.fatigue || 0) / 100;
+      
+      particles.forEach(p => {
+        p.x += p.vx * (1 + stress * 5);
+        p.y += p.vy * (1 + stress * 5);
+        
+        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+        
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.baseRadius * (1 + pulse * 2), 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0, ${255 - stress * 200}, 255, ${0.5 + pulse * 0.5})`;
+        ctx.fill();
+        
+        if (stress > 0.5 && Math.random() > 0.9) {
+          ctx.strokeStyle = `rgba(255, 0, 0, ${stress})`;
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + (Math.random() - 0.5) * 50, p.y + (Math.random() - 0.5) * 50);
+          ctx.stroke();
+        }
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />;
+};
+
+const ArchitectureConstellation = () => {
+  const canvasRef = useRef(null);
+  
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    const nodes = [
+      { id: 'App', x: 0.5, y: 0.2, color: '#0ff' },
+      { id: 'NervousSystem', x: 0.5, y: 0.5, color: '#e040fb' },
+      { id: 'DigitalSoul', x: 0.3, y: 0.5, color: '#ffb300' },
+      { id: 'DeveloperModeOS', x: 0.7, y: 0.5, color: '#00e676' },
+      { id: 'Hero', x: 0.2, y: 0.8, color: '#fff' },
+      { id: 'Skills', x: 0.5, y: 0.8, color: '#fff' },
+      { id: 'Projects', x: 0.8, y: 0.8, color: '#fff' }
+    ];
+
+    const edges = [
+      ['App', 'NervousSystem'],
+      ['App', 'DigitalSoul'],
+      ['App', 'DeveloperModeOS'],
+      ['NervousSystem', 'DigitalSoul'],
+      ['NervousSystem', 'DeveloperModeOS'],
+      ['App', 'Hero'],
+      ['App', 'Skills'],
+      ['App', 'Projects']
+    ];
+
+    let time = 0;
+
+    const resize = () => {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    let mouse = { x: -1000, y: -1000 };
+    canvas.addEventListener('mousemove', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - rect.left;
+      mouse.y = e.clientY - rect.top;
+    });
+    canvas.addEventListener('mouseleave', () => { mouse.x = -1000; mouse.y = -1000; });
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      time += 0.01;
+
+      // Draw edges
+      ctx.lineWidth = 1;
+      edges.forEach(([idA, idB]) => {
+        const a = nodes.find(n => n.id === idA);
+        const b = nodes.find(n => n.id === idB);
+        if (a && b) {
+          const ax = a.x * canvas.width + Math.sin(time + a.y * 10) * 10;
+          const ay = a.y * canvas.height + Math.cos(time + a.x * 10) * 10;
+          const bx = b.x * canvas.width + Math.sin(time + b.y * 10) * 10;
+          const by = b.y * canvas.height + Math.cos(time + b.x * 10) * 10;
+          
+          ctx.beginPath();
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+          ctx.strokeStyle = 'rgba(0, 255, 255, 0.15)';
+          ctx.stroke();
+        }
+      });
+
+      // Draw nodes
+      nodes.forEach(n => {
+        const nx = n.x * canvas.width + Math.sin(time + n.y * 10) * 10;
+        const ny = n.y * canvas.height + Math.cos(time + n.x * 10) * 10;
+        
+        const dist = Math.hypot(nx - mouse.x, ny - mouse.y);
+        const isHover = dist < 40;
+
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = n.color;
+        ctx.beginPath();
+        ctx.arc(nx, ny, isHover ? 8 : 4, 0, Math.PI * 2);
+        ctx.fillStyle = n.color;
+        ctx.fill();
+
+        if (isHover) {
+          ctx.fillStyle = '#fff';
+          ctx.font = '14px "Fira Code", monospace';
+          ctx.shadowBlur = 5;
+          ctx.shadowColor = '#000';
+          ctx.fillText(n.id, nx + 15, ny + 5);
+        }
+      });
+      ctx.shadowBlur = 0;
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', cursor: 'crosshair' }} />;
+};
+
 export default function DeveloperModeOS({ onClose, onLaunchGame }) {
+  const [osState, setOsState] = useState({
+    cursorMode: 'hybrid',
+    crt: true,
+    scanlines: true,
+    fps: true,
+    audio: true,
+    glitches: true,
+    soulEnabled: true
+  });
+
   const [activeTab, setActiveTab] = useState('Terminal');
   const [metrics, setMetrics] = useState({ fps: 60, fatigue: 0, memory: 'N/A' });
   const [achievements, setAchievements] = useState(INITIAL_ACHIEVEMENTS);
@@ -30,6 +209,19 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
   ]);
   const [inputVal, setInputVal] = useState('');
   const endOfHistoryRef = useRef(null);
+
+  // Soul Override State
+  const [soulConfig, setSoulConfig] = useState({ speed: 3, scale: 1, color: '#ffffff' });
+
+  // Corrupted Sectors State
+  const [corruptions, setCorruptions] = useState([]);
+
+  const handleSoulConfigChange = (key, value) => {
+    setSoulConfig(prev => ({ ...prev, [key]: value }));
+    if (key === 'color') document.documentElement.style.setProperty('--soul-core-override', value);
+    if (key === 'speed') document.documentElement.style.setProperty('--soul-orbit-speed', `${value}s`);
+    if (key === 'scale') document.documentElement.style.setProperty('--soul-aura-scale', value);
+  };
 
   useEffect(() => {
     // Premium Glassmorphic Entrance Animation (VisionOS style)
@@ -82,7 +274,35 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
       } catch(e){}
     }
 
-    return () => clearInterval(interval);
+    // Spawn Corrupted Sectors randomly
+    const glitchInterval = setInterval(() => {
+      setCorruptions(prev => {
+        if (Math.random() > 0.8 && prev.length < 2) {
+          const secrets = [
+            "DECRYPTED: The original design used a pure white theme. It was too bright.",
+            "DECRYPTED: There are exactly 3 ways to crash this terminal.",
+            "DECRYPTED: The Digital Soul was almost named 'Core Entity'.",
+            "DECRYPTED: You are being tracked by the Markov Chain."
+          ];
+          return [...prev, {
+            id: Date.now(),
+            top: 10 + Math.random() * 80,
+            left: 10 + Math.random() * 80,
+            secret: secrets[Math.floor(Math.random() * secrets.length)]
+          }];
+        }
+        // Also randomly despawn them
+        if (Math.random() > 0.6 && prev.length > 0) {
+          return prev.slice(1);
+        }
+        return prev;
+      });
+    }, 4000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(glitchInterval);
+    };
   }, []);
 
   useEffect(() => {
@@ -116,6 +336,15 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
     });
   };
 
+  const handleCorruptionClick = (id, secret) => {
+    setCorruptions(prev => prev.filter(c => c.id !== id));
+    setTerminalHistory(prev => [...prev, 
+      { type: 'system', text: '>>> INTERCEPTING CORRUPTED SECTOR...' },
+      { type: 'output', text: secret }
+    ]);
+    setActiveTab('Terminal');
+  };
+
   const executeCommand = (cmd) => {
     const trimmed = cmd.trim().toLowerCase();
     if (!trimmed) return;
@@ -126,7 +355,33 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
     let response = null;
 
     if (trimmed === 'help') {
-      response = 'Available commands: ls, cat <file>, clear, play <game>, whoami, exit';
+      response = 'Available commands: ls, cat <file>, clear, play <game>, whoami, fork bomb, killall, exit';
+    } else if (trimmed === 'fork bomb') {
+      response = 'CRITICAL ERROR: MEMORY LEAK DETECTED. SYSTEM COMPROMISED.';
+      const elements = document.querySelectorAll('.dev-os-content *, .dev-os-sidebar *');
+      gsap.to(elements, {
+        y: '100vh',
+        rotation: 'random(-90, 90)',
+        x: 'random(-100, 100)',
+        duration: 3,
+        stagger: 0.02,
+        ease: 'power2.in',
+        onComplete: () => {
+          unlockAchievement('void');
+        }
+      });
+    } else if (trimmed === 'killall') {
+      response = 'Processes terminated. Memory cleared. Restoring UI...';
+      const elements = document.querySelectorAll('.dev-os-content *, .dev-os-sidebar *');
+      gsap.killTweensOf(elements);
+      gsap.to(elements, {
+        y: 0,
+        x: 0,
+        rotation: 0,
+        duration: 0.5,
+        stagger: 0.01,
+        ease: 'power3.out'
+      });
     } else if (trimmed === 'ls') {
       response = 'notes/   secrets/   games/';
     } else if (trimmed === 'matrix') {
@@ -202,6 +457,53 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
                 spellCheck="false"
               />
             </form>
+          </div>
+        );
+      case '[SOUL_LINK]':
+        return (
+          <div className="dev-soul-link">
+            <h3 className="dev-section-title">SOUL OVERRIDE PROTOCOL</h3>
+            <p className="dev-desc" style={{marginBottom: '2rem', color: 'rgba(255,255,255,0.6)'}}>Direct hardware link established. Manipulate the emotional rendering engine.</p>
+            
+            <div className="soul-controls" style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+              <div className="soul-control-group" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem', border: '1px solid rgba(0, 255, 255, 0.2)', borderRadius: '8px' }}>
+                <label style={{ fontFamily: 'monospace', color: '#0ff', margin: 0 }}>SYS.SOUL_VISIBILITY</label>
+                <input 
+                  type="checkbox" 
+                  checked={osState.soulEnabled} 
+                  onChange={(e) => setOsState(prev => ({ ...prev, soulEnabled: e.target.checked }))} 
+                  style={{ transform: 'scale(1.5)', cursor: 'pointer' }}
+                />
+              </div>
+
+              <div className="soul-control-group">
+                <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'monospace', color: '#0ff' }}>CORE HEX_COLOR</label>
+                <div className="color-picker-row" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <input type="color" value={soulConfig.color} onChange={(e) => handleSoulConfigChange('color', e.target.value)} style={{ width: '50px', height: '30px', background: 'none', border: '1px solid rgba(255,255,255,0.2)', cursor: 'pointer' }} />
+                  <span className="hex-display" style={{ fontFamily: 'monospace', fontSize: '1.2rem' }}>{soulConfig.color.toUpperCase()}</span>
+                </div>
+              </div>
+
+              <div className="soul-control-group">
+                <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'monospace', color: '#0ff' }}>ORBIT_SPEED: {soulConfig.speed}s</label>
+                <input type="range" min="0.5" max="10" step="0.1" value={soulConfig.speed} onChange={(e) => handleSoulConfigChange('speed', e.target.value)} style={{ width: '100%', cursor: 'pointer' }} />
+              </div>
+
+              <div className="soul-control-group">
+                <label style={{ display: 'block', marginBottom: '8px', fontFamily: 'monospace', color: '#0ff' }}>AURA_SCALE: {soulConfig.scale}x</label>
+                <input type="range" min="0.5" max="5" step="0.1" value={soulConfig.scale} onChange={(e) => handleSoulConfigChange('scale', e.target.value)} style={{ width: '100%', cursor: 'pointer' }} />
+              </div>
+            </div>
+          </div>
+        );
+      case '[FREQUENCY]':
+        return (
+          <div className="dev-frequency-tab" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h3 className="dev-section-title">FREQUENCY MATRIX</h3>
+            <p className="dev-desc" style={{marginBottom: '1rem', color: 'rgba(255,255,255,0.6)'}}>Generative art reacting to realtime heartbeat and system fatigue.</p>
+            <div style={{ flex: 1, position: 'relative', border: '1px solid rgba(0, 255, 255, 0.2)', borderRadius: '8px', overflow: 'hidden' }}>
+               <FrequencyCanvas />
+            </div>
           </div>
         );
       case 'Performance':
@@ -296,17 +598,12 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
         );
       case 'Architecture':
         return (
-          <div className="dev-markdown">
+          <div className="dev-markdown" style={{ display: 'flex', flexDirection: 'column', height: '100%', maxWidth: '100%' }}>
             <h3 className="dev-section-title">ARCHITECTURE EXPLORER</h3>
-            <p>Welcome to the source of truth.</p>
-            <h3>Core Modules</h3>
-            <ul>
-              <li><strong>NervousSystem.js</strong>: A centralized singleton managing RAF polling and emotional state (fatigue, curiosity) to avoid React re-rendering latency.</li>
-              <li><strong>DigitalSoul.js</strong>: Render layer mapping NervousSystem values to visual attributes (red dot).</li>
-              <li><strong>DeveloperModeOS.jsx</strong>: You are here. The meta-layer.</li>
-            </ul>
-            <h3>Performance Philosophy</h3>
-            <p>Zero overhead when inactive. Lazy-loaded games via suspense boundaries. Hardware-accelerated GSAP manipulation directly to the DOM.</p>
+            <p className="dev-desc" style={{ marginBottom: '1rem' }}>Interactive map of the core NervousSystem architecture. Hover over nodes to identify them.</p>
+            <div style={{ flex: 1, position: 'relative', border: '1px solid rgba(0, 255, 255, 0.2)', borderRadius: '8px', overflow: 'hidden' }}>
+               <ArchitectureConstellation />
+            </div>
           </div>
         );
       case 'Stats':
@@ -380,13 +677,13 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
           <p>NervousSystem Engine</p>
         </div>
         <nav className="dev-os-nav">
-          {['Terminal', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
+          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
             <button 
               key={tab} 
               className={`dev-os-tab-btn ${activeTab === tab ? 'active' : ''}`}
               onClick={() => handleTabChange(tab)}
             >
-              [{tab.toUpperCase()}]
+              {tab.startsWith('[') ? tab : `[${tab.toUpperCase()}]`}
             </button>
           ))}
           {/* Close button inside sidebar for mobile accessibility */}
@@ -402,6 +699,19 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
         
         {renderContent()}
       </main>
+
+      {/* Corrupted Sectors Layer */}
+      {corruptions.map(c => (
+        <div 
+          key={c.id} 
+          className="hud-corrupted-sector" 
+          style={{ top: `${c.top}%`, left: `${c.left}%` }}
+          onClick={() => handleCorruptionClick(c.id, c.secret)}
+          title="Decrypt Sector"
+        >
+          [ERR_DATA]
+        </div>
+      ))}
     </div>
   );
 }

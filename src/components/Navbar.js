@@ -134,7 +134,7 @@ const Navbar = () => {
       clickCountRef.current = 0;
     }, 2000);
 
-    if (clickCountRef.current >= 5) {
+    if (clickCountRef.current >= 3) {
       clickCountRef.current = 0;
       clearTimeout(clickTimerRef.current);
       window.dispatchEvent(new CustomEvent('launch-ttt'));
@@ -259,7 +259,7 @@ const Navbar = () => {
             className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
             href="#hero"
             onClick={handleLogoClick}
-            title="Try clicking me 5 times... ✨"
+            title="Try clicking me 3 times... ✨"
           >
             <span className="logo-text">ADHY</span>
             <span className="logo-dot">.</span>

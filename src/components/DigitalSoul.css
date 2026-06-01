@@ -20,14 +20,14 @@
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: #ffffff;
+  background: var(--soul-core-override, #ffffff);
   will-change: transform, opacity;
 }
 
 .soul-core {
   width: 4px;
   height: 4px;
-  box-shadow: 0 0 10px 3px rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px 3px var(--soul-core-override, rgba(255, 255, 255, 0.9));
   animation: soul-pulse var(--bio-rhythm, 4s) ease-in-out infinite alternate;
   transition: background 2s ease, box-shadow 2s ease;
   z-index: 3;
@@ -37,7 +37,7 @@
   width: 6px;
   height: 6px;
   background: rgba(163, 255, 220, 0.8);
-  animation: soul-orbit 3s linear infinite;
+  animation: soul-orbit var(--soul-orbit-speed, 3s) linear infinite;
   transform-origin: -8px -8px;
   z-index: 2;
 }
@@ -57,12 +57,13 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: radial-gradient(circle, rgba(108, 99, 255, 0.15) 0%, transparent 70%);
+  width: 40px;
+  height: 40px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.25) 0%, transparent 70%);
   border-radius: 50%;
+  filter: blur(8px);
   animation: soul-breathe var(--bio-rhythm, 8s) ease-in-out infinite alternate;
-  transition: width 2s ease, height 2s ease, background 2s ease;
+  transition: width 2s ease, height 2s ease, background 2s ease, filter 2s ease;
   will-change: transform, opacity;
 }
 
@@ -71,10 +72,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 150px;
-  height: 150px;
-  background: radial-gradient(circle, rgba(108, 99, 255, 0.05) 0%, transparent 70%);
+  width: 80px;
+  height: 80px;
+  background: radial-gradient(circle, rgba(108, 99, 255, 0.1) 0%, transparent 70%);
   border-radius: 50%;
+  filter: blur(12px);
   animation: soul-breathe-outer calc(var(--bio-rhythm, 8s) * 1.5) ease-in-out infinite alternate-reverse;
   pointer-events: none;
 }
@@ -83,71 +85,91 @@
   .digital-soul {
     mix-blend-mode: normal;
   }
-  .soul-aura { width: 40px; height: 40px; filter: none; }
+  .soul-aura { width: 30px; height: 30px; filter: blur(4px); }
   .soul-aura-outer { display: none; }
   .soul-core-echo, .soul-core-echo-2 { display: none; }
 }
 
 /* ── Higher Intelligence States ── */
 
-.digital-soul.state-overclocked {
+.state-overclocked .soul-core {
+  background: #00ffff;
+  box-shadow: 0 0 10px 5px rgba(0, 255, 255, 0.8);
+  animation-duration: 0.5s;
+}
+.state-overclocked .soul-aura {
   background: radial-gradient(circle, rgba(0, 255, 255, 1) 0%, rgba(0, 100, 255, 0.8) 40%, transparent 80%);
-  width: 140px; height: 140px;
-  filter: blur(10px) brightness(1.5);
+  width: 80px; height: 80px;
+  filter: blur(15px) brightness(1.5);
   animation: pulse-overclock 0.5s ease-in-out infinite alternate;
 }
 @keyframes pulse-overclock {
-  0% { transform: scale(1); filter: blur(10px) brightness(1.5) hue-rotate(0deg); }
-  100% { transform: scale(1.1); filter: blur(5px) brightness(2) hue-rotate(20deg); }
+  0% { transform: translate(-50%, -50%) scale(1); filter: blur(15px) brightness(1.5) hue-rotate(0deg); }
+  100% { transform: translate(-50%, -50%) scale(1.1); filter: blur(10px) brightness(2) hue-rotate(20deg); }
 }
 
-.digital-soul.state-glitching {
+.state-glitching .soul-core {
+  background: #ff00ff;
+  animation: glitch-soul 0.2s steps(2, end) infinite;
+}
+.state-glitching .soul-aura {
   background: radial-gradient(circle, rgba(255, 0, 255, 0.8) 0%, rgba(0, 255, 255, 0.6) 50%, transparent 80%);
-  width: 100px; height: 100px;
-  filter: blur(8px) contrast(1.5);
+  width: 70px; height: 70px;
+  filter: blur(10px) contrast(1.5);
   animation: glitch-soul 0.2s steps(2, end) infinite;
 }
 @keyframes glitch-soul {
-  0% { transform: translate(0, 0) scale(1) skew(0deg); }
-  25% { transform: translate(-5px, 3px) scale(1.1) skew(5deg); filter: blur(5px) hue-rotate(45deg); }
-  50% { transform: translate(5px, -2px) scale(0.9) skew(-10deg); filter: blur(12px) hue-rotate(-45deg); }
-  75% { transform: translate(-2px, 5px) scale(1.05) skew(2deg); filter: blur(8px) hue-rotate(90deg); }
-  100% { transform: translate(2px, -5px) scale(0.95) skew(-5deg); filter: blur(4px) hue-rotate(0deg); }
+  0% { transform: translate(-50%, -50%) scale(1) skew(0deg); }
+  25% { transform: translate(calc(-50% - 4px), calc(-50% + 4px)) scale(1.1) skew(5deg); filter: blur(6px) hue-rotate(45deg); }
+  50% { transform: translate(calc(-50% + 4px), calc(-50% - 2px)) scale(0.9) skew(-10deg); filter: blur(12px) hue-rotate(-45deg); }
+  75% { transform: translate(calc(-50% - 2px), calc(-50% + 4px)) scale(1.05) skew(2deg); filter: blur(8px) hue-rotate(90deg); }
+  100% { transform: translate(calc(-50% + 2px), calc(-50% - 4px)) scale(0.95) skew(-5deg); filter: blur(6px) hue-rotate(0deg); }
 }
 
-.digital-soul.state-euphoric {
+.state-euphoric .soul-core {
+  background: #ffc832;
+  box-shadow: 0 0 15px 5px rgba(255, 200, 50, 0.9);
+}
+.state-euphoric .soul-aura {
   background: radial-gradient(circle, rgba(255, 200, 50, 0.9) 0%, rgba(255, 50, 150, 0.6) 60%, transparent 80%);
-  width: 160px; height: 160px;
-  filter: blur(25px) saturate(2);
+  width: 90px; height: 90px;
+  filter: blur(20px) saturate(2);
   animation: breathe-euphoric 4s ease-in-out infinite alternate;
 }
 @keyframes breathe-euphoric {
-  0% { transform: scale(0.95); opacity: 0.8; }
-  100% { transform: scale(1.15); opacity: 1; filter: blur(35px) saturate(2.5); }
+  0% { transform: translate(-50%, -50%) scale(0.95); opacity: 0.8; filter: blur(20px) saturate(2); }
+  100% { transform: translate(-50%, -50%) scale(1.15); opacity: 1; filter: blur(25px) saturate(2.5); }
 }
 
-.digital-soul.state-analyzing {
+.state-analyzing .soul-core {
+  background: #00ff64;
+  box-shadow: 0 0 10px 3px rgba(0, 255, 100, 0.8);
+}
+.state-analyzing .soul-aura {
   background: radial-gradient(circle, rgba(0, 255, 100, 0.8) 0%, rgba(0, 150, 255, 0.5) 40%, transparent 70%);
-  width: 80px; height: 80px;
+  width: 60px; height: 60px;
   border-radius: 10px; /* blocky shape */
-  filter: blur(5px);
+  filter: blur(10px);
   animation: scan-analyzing 1s cubic-bezier(0.8, 0, 0.2, 1) infinite;
 }
 @keyframes scan-analyzing {
-  0% { transform: scale(1) rotate(0deg); border-radius: 10px; }
-  50% { transform: scale(1.5, 0.5) rotate(90deg); border-radius: 50px; filter: blur(2px) brightness(1.5); }
-  100% { transform: scale(1) rotate(180deg); border-radius: 10px; }
+  0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); border-radius: 10px; filter: blur(10px); }
+  50% { transform: translate(-50%, -50%) scale(1.5, 0.5) rotate(90deg); border-radius: 30px; filter: blur(6px) brightness(1.5); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(180deg); border-radius: 10px; filter: blur(10px); }
 }
 
-.digital-soul.state-melancholic {
+.state-melancholic .soul-core {
+  background: #1e0a3c;
+}
+.state-melancholic .soul-aura {
   background: radial-gradient(circle, rgba(30, 10, 60, 0.9) 0%, rgba(10, 5, 30, 0.7) 50%, transparent 80%);
-  width: 90px; height: 90px;
-  filter: blur(20px);
+  width: 70px; height: 70px;
+  filter: blur(15px);
   animation: sink-melancholic 5s ease-in-out infinite alternate;
 }
 @keyframes sink-melancholic {
-  0% { transform: scale(1) translateY(0); opacity: 0.5; }
-  100% { transform: scale(0.8) translateY(20px); opacity: 0.2; filter: blur(30px) grayscale(0.5); }
+  0% { transform: translate(-50%, -50%) scale(1) translateY(0); opacity: 0.6; filter: blur(15px); }
+  100% { transform: translate(-50%, -50%) scale(0.8) translateY(15px); opacity: 0.3; filter: blur(25px) grayscale(0.5); }
 }
 
 /* Subconscious whisper */
@@ -158,16 +180,24 @@
   transform: translateX(-50%);
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.6);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.8);
   white-space: nowrap;
-  letter-spacing: 1px;
-  opacity: 0;
-  transition: opacity 2s ease-in-out;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
   pointer-events: none;
+  opacity: 0;
+  text-shadow: 0 0 10px rgba(0,0,0,0.8);
 }
+
 .whisper-visible {
-  opacity: 1;
+  animation: whisper-fade 5s forwards;
+}
+
+@keyframes whisper-fade {
+  0% { opacity: 0; transform: translate(-50%, 5px); }
+  20% { opacity: 1; transform: translate(-50%, -5px); }
+  80% { opacity: 1; transform: translate(-50%, -8px); }
+  100% { opacity: 0; transform: translate(-50%, -15px); }
 }
 
 /* ── EMOTIONAL STATES ── */
@@ -179,10 +209,11 @@
   animation-duration: 10s;
 }
 .state-dormant .soul-aura {
-  width: 20px;
-  height: 20px;
-  background: radial-gradient(circle, rgba(92, 85, 217, 0.05) 0%, transparent 70%);
+  width: 25px;
+  height: 25px;
+  background: radial-gradient(circle, rgba(92, 85, 217, 0.1) 0%, transparent 70%);
   animation-duration: 12s;
+  filter: blur(6px);
 }
 
 /* Exhausted: Dim, slow, reddish hue */
@@ -192,9 +223,10 @@
   animation-duration: 6s;
 }
 .state-exhausted .soul-aura {
-  width: 25px;
-  height: 25px;
-  background: radial-gradient(circle, rgba(255, 123, 123, 0.08) 0%, transparent 70%);
+  width: 35px;
+  height: 35px;
+  background: radial-gradient(circle, rgba(255, 123, 123, 0.15) 0%, transparent 70%);
+  filter: blur(8px);
 }
 
 /* Curious: Bright, active, white/blue */
@@ -204,10 +236,11 @@
   animation-duration: 2s;
 }
 .state-curious .soul-aura {
-  width: 50px;
-  height: 50px;
-  background: radial-gradient(circle, rgba(200, 230, 255, 0.18) 0%, transparent 70%);
+  width: 60px;
+  height: 60px;
+  background: radial-gradient(circle, rgba(200, 230, 255, 0.25) 0%, transparent 70%);
   animation-duration: 4s;
+  filter: blur(12px);
 }
 
 /* Distant: Dimmed out, observing from afar */
@@ -216,9 +249,10 @@
   box-shadow: 0 0 2px 1px rgba(255, 255, 255, 0.3);
 }
 .state-distant .soul-aura {
-  width: 30px;
-  height: 30px;
+  width: 20px;
+  height: 20px;
   opacity: 0.3;
+  filter: blur(4px);
 }
 
 /* Thinking: Pulsating slow white/purple, medium aura */
@@ -228,10 +262,11 @@
   animation-duration: 4s;
 }
 .state-thinking .soul-aura {
-  width: 45px;
-  height: 45px;
-  background: radial-gradient(circle, rgba(224, 176, 255, 0.15) 0%, transparent 70%);
+  width: 50px;
+  height: 50px;
+  background: radial-gradient(circle, rgba(224, 176, 255, 0.2) 0%, transparent 70%);
   animation-duration: 6s;
+  filter: blur(10px);
 }
 
 /* Resonating: Bright flash on interaction */
@@ -241,10 +276,11 @@
   animation-duration: 0.5s;
 }
 .state-resonating .soul-aura {
-  width: 80px;
-  height: 80px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+  width: 90px;
+  height: 90px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.4) 0%, transparent 70%);
   animation-duration: 0.5s;
+  filter: blur(15px);
 }
 
 /* Fractured: Instability */

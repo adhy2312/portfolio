@@ -51,6 +51,7 @@ export const ConsciousnessProvider = ({ children }) => {
     try {
       const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {
         sectionHeatmap: {},
+        markovMatrix: {},
         totalVisits: 0,
         lastDecayTime: Date.now(),
         persona: 'Wanderer',
@@ -67,7 +68,7 @@ export const ConsciousnessProvider = ({ children }) => {
       }
       return stored;
     } catch {
-      return { sectionHeatmap: {}, totalVisits: 0, lastDecayTime: Date.now(), persona: 'Wanderer', memoryImportance: 1.0 };
+      return { sectionHeatmap: {}, markovMatrix: {}, totalVisits: 0, lastDecayTime: Date.now(), persona: 'Wanderer', memoryImportance: 1.0 };
     }
   });
 
@@ -82,6 +83,45 @@ export const ConsciousnessProvider = ({ children }) => {
   const lastMousePos        = useRef({ x: 0, y: 0 });
   const sessionInteractions = useRef(0);
   const sessionStartTime    = useRef(Date.now());
+  const previousSectionRef  = useRef(null);
+
+  const logInteraction = useCallback((type, detail = {}) => {
+    setDigitalEchoes(prev => {
+      const history = prev.interactionHistory || [];
+      const newEntry = { type, detail, timestamp: Date.now(), timeStr: new Date().toISOString() };
+      const updatedHistory = [newEntry, ...history].slice(0, 30);
+      
+      // ML: Behavioral Persona Classification
+      let newPersona = prev.persona || 'Wanderer';
+      const sections = updatedHistory.filter(h => h.type === 'section_enter').map(h => h.detail.section);
+      
+      const devScore = sections.filter(s => s === 'Skills').length + (type === 'dev_console' ? 5 : 0);
+      const recruiterScore = sections.filter(s => s === 'Hero' || s === 'Projects').length + (type === 'resume_download' ? 5 : 0);
+      const creatorScore = sections.filter(s => s === 'Photography' || s === 'About').length;
+      
+      if (devScore > recruiterScore && devScore > creatorScore && devScore > 2) newPersona = 'Developer';
+      else if (recruiterScore > devScore && recruiterScore > creatorScore && recruiterScore > 2) newPersona = 'Recruiter';
+      else if (creatorScore > devScore && creatorScore > recruiterScore && creatorScore > 2) newPersona = 'Creator';
+
+      const updated = { ...prev, interactionHistory: updatedHistory, persona: newPersona };
+      try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(updated)); } catch {}
+      
+      if (prev.persona !== newPersona) {
+        window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: newPersona } }));
+      }
+      
+      return updated;
+    });
+  }, []);
+
+  useEffect(() => {
+    const handleLogInteraction = (e) => {
+      const { type, detail } = e.detail || {};
+      if (type) logInteraction(type, detail);
+    };
+    window.addEventListener('log-interaction', handleLogInteraction);
+    return () => window.removeEventListener('log-interaction', handleLogInteraction);
+  }, [logInteraction]);
 
   // ─── CONSCIOUSNESS TIER CALCULATOR ───
   // Called in RAF-loop interval — no React state, zero renders
@@ -174,6 +214,11 @@ export const ConsciousnessProvider = ({ children }) => {
     // Increment visit count
     setDigitalEchoes(prev => {
       const updated = { ...prev, totalVisits: (prev.totalVisits || 0) + 1 };
+      
+      const history = updated.interactionHistory || [];
+      const newEntry = { type: 'visit', detail: { count: updated.totalVisits }, timestamp: Date.now(), timeStr: new Date().toISOString() };
+      updated.interactionHistory = [newEntry, ...history].slice(0, 30);
+
       ns.state.isReturningVisitor = updated.totalVisits > 1;
       ns.state.totalVisits        = updated.totalVisits;
       try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(updated)); } catch {}
@@ -182,9 +227,41 @@ export const ConsciousnessProvider = ({ children }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Track time in sections for Digital Echoes
+  // Track time in sections for Digital Echoes + Markov Prediction
   useEffect(() => {
     const startTime = Date.now();
+    logInteraction('section_enter', { section: activeSection });
+
+    // Markov Model: Build transition matrix
+    if (previousSectionRef.current && previousSectionRef.current !== activeSection) {
+      setDigitalEchoes(prev => {
+        const matrix = prev.markovMatrix || {};
+        const fromSec = previousSectionRef.current;
+        if (!matrix[fromSec]) matrix[fromSec] = {};
+        matrix[fromSec][activeSection] = (matrix[fromSec][activeSection] || 0) + 1;
+        
+        // Predict NEXT move based on new activeSection
+        const nextTransitions = matrix[activeSection];
+        if (nextTransitions) {
+          const total = Object.values(nextTransitions).reduce((a,b) => a+b, 0);
+          const likelyNext = Object.entries(nextTransitions)
+            .filter(([_, count]) => (count / total) > 0.6)
+            .sort((a,b) => b[1] - a[1])[0];
+          
+          if (likelyNext) {
+            const target = likelyNext[0];
+            window.dispatchEvent(new CustomEvent('ml-prefetch', { detail: { target } }));
+            logInteraction('ml_predict', { target, confidence: (likelyNext[1]/total).toFixed(2) });
+          }
+        }
+        
+        const newState = { ...prev, markovMatrix: matrix };
+        try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(newState)); } catch {}
+        return newState;
+      });
+    }
+    
+    previousSectionRef.current = activeSection;
     return () => {
       const timeSpent = (Date.now() - startTime) / 1000;
       setDigitalEchoes(prev => {
@@ -324,6 +401,22 @@ export const ConsciousnessProvider = ({ children }) => {
     setAmbientThought(text);
     setTimeout(() => setAmbientThought(null), duration);
   }, []);
+
+  useEffect(() => {
+    const handleBoot = () => {
+      const visits = ns.state.totalVisits || 1;
+      let greeting = "hello stranger.";
+      if (visits === 3) greeting = "you've returned.";
+      else if (visits === 5) greeting = "the journey continues.";
+      else if (visits === 2) greeting = "we meet again.";
+      else if (visits === 4) greeting = "i remember you.";
+      else if (visits > 5) greeting = `aware across sessions. visit ${visits}.`;
+      
+      triggerThought(greeting, 6000);
+    };
+    window.addEventListener('system-boot', handleBoot);
+    return () => window.removeEventListener('system-boot', handleBoot);
+  }, [triggerThought]);
 
   // Architectural Dreams - Fragmented Logs
   useEffect(() => {

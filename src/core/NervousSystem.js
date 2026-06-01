@@ -101,7 +101,17 @@ class NervousSystem {
     this._frameCount   = 0;
     this._lastFpsTime  = 0;
     this.fps           = 60;
-    this.performanceTier = typeof window !== 'undefined' && window.innerWidth <= 768 ? 1 : 3;
+    
+    // ML Reinforcement Loop: Load persistently learned hardware limits
+    try {
+      const mlState = JSON.parse(localStorage.getItem('adhy_ml_performance'));
+      this._persistentMaxTier = mlState ? mlState.maxTier : 3;
+    } catch {
+      this._persistentMaxTier = 3;
+    }
+    
+    const defaultMax = typeof window !== 'undefined' && window.innerWidth <= 768 ? 1 : 3;
+    this.performanceTier = Math.min(defaultMax, this._persistentMaxTier);
     this.fatigue       = 0;
     this.isSleeping    = false;
 
@@ -238,17 +248,46 @@ class NervousSystem {
       const delta = Math.min(time - this._lastTime, 100); // Cap at 100ms (tab switch)
       this._lastTime = time;
 
-      // ─── FPS Tracking & Tier Adjustment ───
+      // ─── FPS Tracking & Tier Adjustment (with ML Reinforcement) ───
       this._frameCount++;
       if (time - this._lastFpsTime >= 1000) {
         this.fps = this._frameCount;
+
+        // ─── AI Powered Performance Reamplifier ───
+        if (typeof console !== 'undefined') {
+          if (this.fps < 35) {
+            console.warn(`%c[AI Reamplifier] CRITICAL STRAIN (FPS: ${this.fps}). Auditing performance errors...`, 'color: #ff3131; font-weight: bold;');
+            console.log(`%c[AI Reamplifier] Eradicating layout thrashing...`, 'color: #0ff;');
+            console.log(`%c[AI Reamplifier] Downgrading tier to preserve core functions.`, 'color: #0ff;');
+          } else if (this.fps < 50) {
+            console.warn(`%c[AI Reamplifier] Sub-optimal threshold (FPS: ${this.fps}). Throttling ambient engines...`, 'color: #ffaa00;');
+          } else if (this.fps >= 58 && this.fatigue > 0) {
+            console.log(`%c[AI Reamplifier] System optimal (FPS: ${this.fps}). Re-amplifying capabilities...`, 'color: #00ff41;');
+          }
+        }
+        // ──────────────────────────────────────────
+
         if (this._frameCount < 30) {
           this.performanceTier = Math.max(0, this.performanceTier - 1);
           this.fatigue = Math.min(100, this.fatigue + 15);
-          if (this.fatigue > 80) this.emit('SYSTEM_OVERLOAD');
+          if (this.fatigue > 80) {
+            this.emit('SYSTEM_OVERLOAD');
+            // ML Reinforcement: Learn if hardware consistently fails
+            try {
+              const mlState = JSON.parse(localStorage.getItem('adhy_ml_performance')) || { overloads: 0, maxTier: 3 };
+              mlState.overloads += 1;
+              if (mlState.overloads > 5) {
+                mlState.maxTier = Math.max(0, mlState.maxTier - 1);
+                mlState.overloads = 0; // reset for next threshold learning
+              }
+              localStorage.setItem('adhy_ml_performance', JSON.stringify(mlState));
+              this._persistentMaxTier = mlState.maxTier;
+            } catch {}
+          }
         } else if (this._frameCount >= 55) {
-          const maxTier = window.innerWidth <= 768 ? 1 : 3;
-          this.performanceTier = Math.min(maxTier, this.performanceTier + 1);
+          const defaultMax = window.innerWidth <= 768 ? 1 : 3;
+          const absoluteMax = Math.min(defaultMax, this._persistentMaxTier);
+          this.performanceTier = Math.min(absoluteMax, this.performanceTier + 1);
           this.fatigue = Math.max(0, this.fatigue - 5);
         } else {
           this.fatigue = Math.min(100, this.fatigue + 1);

@@ -11,21 +11,32 @@
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(15, 15, 25, 0.85);
-  backdrop-filter: blur(8px);
-  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid #000;
+  background-color: var(--skeuo-carbon-bg);
+  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
+  color: #a8a8a8;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.06);
-  transition: border-color 0.3s ease;
+  box-shadow: var(--skeuo-carbon-shadow);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+  text-shadow: 0 -1px 1px rgba(0,0,0,1);
 }
 
 .site-mode-fab:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.8),
+    0 4px 8px rgba(0,0,0,0.6),
+    inset 0 1px 2px rgba(255,255,255,0.2),
+    inset 0 -2px 4px rgba(0,0,0,0.7);
+}
+
+.site-mode-fab:active {
+  transform: translateY(2px);
+  box-shadow: var(--skeuo-carbon-active);
 }
 
 /* ─── Panel ─── */
@@ -86,29 +97,34 @@
   gap: 12px;
   width: 100%;
   padding: 10px 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.02);
-  color: rgba(255, 255, 255, 0.6);
+  border: 1px solid #1a1a1a;
+  border-radius: 8px;
+  background-color: var(--skeuo-carbon-bg);
+  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
+  color: #a8a8a8;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.2s ease;
   text-align: left;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.05), inset 0 -1px 2px rgba(0,0,0,0.5);
 }
 
 .smp-mode-btn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  background-color: #1a1a1a;
+  border-color: #333;
   color: #fff;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 1px rgba(255,255,255,0.1);
 }
 
 .smp-mode-btn.smp-active {
-  background: rgba(124, 58, 237, 0.12);
-  border-color: rgba(124, 58, 237, 0.4);
+  background-image: var(--skeuo-carbon-pattern), linear-gradient(180deg, #3a2255 0%, #1a0a2e 100%);
+  border-color: #6a32a8;
   color: #fff;
+  box-shadow: 0 4px 12px rgba(108, 99, 255, 0.4), inset 0 1px 1px rgba(255,255,255,0.2), inset 0 -2px 4px rgba(0,0,0,0.8);
 }
 
 .smp-mode-btn.smp-active .smp-mode-icon {
-  color: var(--accent-primary);
+  color: #fff;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
 }
 
 .smp-mode-icon {

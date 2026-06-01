@@ -24,25 +24,6 @@ const Hero = () => {
 
   const orchestrator = useOrchestrator();
 
-  // GSAP Kinetic Spotlight (replaces Framer useMotionValue)
-  useEffect(() => {
-    if (!orchestrator || !spotlightRef.current) return;
-    const tick = (time, delta, mousePos, isMoving, tier) => {
-      if (tier === 0) return;
-      if (mousePos.x > -500 && spotlightRef.current) {
-        gsap.to(spotlightRef.current, {
-          x: mousePos.x - 400,
-          y: mousePos.y - 400,
-          duration: 0.8,
-          ease: 'power2.out',
-          overwrite: 'auto',
-        });
-      }
-    };
-    orchestrator.subscribeToRAF('hero-spotlight', tick);
-    return () => orchestrator.unsubscribeFromRAF('hero-spotlight');
-  }, [orchestrator]);
-
   // GSAP Hero Entrance Timeline
   useEffect(() => {
     if (!contentRef.current) return;
@@ -177,25 +158,6 @@ const Hero = () => {
       style={isExperimental ? { perspective: "1500px" } : {}}
     >
       
-      {/* Kinetic Ambient Spotlight — GSAP driven */}
-      <div 
-        ref={spotlightRef}
-        className="hero-kinetic-spotlight"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          width: '800px',
-          height: '800px',
-          background: 'radial-gradient(circle, rgba(108, 99, 255, 0.08) 0%, transparent 70%)',
-          borderRadius: '50%',
-          pointerEvents: 'none',
-          zIndex: 0,
-          willChange: 'transform',
-          transform: 'translate(-1000px, -1000px)',
-        }}
-      />
-
       {/* Pure CSS High-Performance Floating Stars (Replaces heavy WebGL tsparticles) */}
       <div className="hero-css-particles">
         {Array.from({ length: 15 }).map((_, i) => (

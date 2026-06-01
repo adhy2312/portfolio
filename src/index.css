@@ -85,13 +85,22 @@
   --dynamic-weight: 700;
   --dynamic-slant: 0deg;
 
-  /* Retro Tokens */
-  --retro-bezel: #e8e8e8;
-  --retro-inset: inset 2px 2px 5px rgba(0,0,0,0.1), inset -2px -2px 5px rgba(255,255,255,0.9);
-  --retro-outset: 4px 4px 10px rgba(0,0,0,0.5), -2px -2px 6px rgba(255,255,255,0.03);
-  --retro-led-green: #39ff14;
-  --retro-led-red: #ff3131;
-  --retro-led-amber: #ffbf00;
+  /* Premium Skeuomorphic Carbon Tokens */
+  --skeuo-carbon-bg: #141414;
+  --skeuo-carbon-pattern: 
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px),
+    repeating-linear-gradient(-45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
+  --skeuo-carbon-gradient: linear-gradient(180deg, #2a2a2a 0%, #111111 100%);
+  --skeuo-carbon-shadow: 
+    0 8px 16px rgba(0,0,0,0.6),
+    0 4px 6px rgba(0,0,0,0.4),
+    inset 0 1px 1px rgba(255,255,255,0.15),
+    inset 0 -2px 4px rgba(0,0,0,0.6),
+    inset 0 0 8px rgba(0,0,0,0.5);
+  --skeuo-carbon-active:
+    0 2px 3px rgba(0,0,0,0.4),
+    inset 0 4px 8px rgba(0,0,0,0.8),
+    inset 0 -1px 1px rgba(255,255,255,0.05);
 }
 
 /* ═══════════════════════════════════════════
@@ -119,7 +128,7 @@ body.mode-recruiter .metallic-char, body.mode-recruiter .section-title span, bod
   -webkit-text-fill-color: #0f172a !important;
   text-shadow: none !important;
 }
-body.mode-recruiter .ambient-blob {
+body.mode-recruiter {
   display: none !important; /* Remove distractions */
 }
 
@@ -148,7 +157,7 @@ body.mode-expert img, body.mode-expert video {
   filter: grayscale(100%) sepia(100%) hue-rotate(70deg) contrast(1.5) !important;
   border: 1px solid #00ff41 !important;
 }
-body.mode-expert .ambient-blob, body.mode-expert .particle-network {
+body.mode-expert .particle-network {
   display: none !important;
 }
 
@@ -265,7 +274,6 @@ html.low-power-symbiosis * {
   box-shadow: none !important;
   text-shadow: none !important;
 }
-html.low-power-symbiosis .ambient-blob,
 html.low-power-symbiosis .performance-breathing-overlay,
 html.low-power-symbiosis .soul-aura-outer,
 html.low-power-symbiosis .particle-network {
@@ -483,15 +491,13 @@ body {
 
 .section-title-inner {
   display: inline-block;
-  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .section-title[data-hover] {
   cursor: pointer;
 }
 
-.section-title[data-hover]::after {
-  content: attr(data-hover);
+.section-title-hover-text {
   position: absolute;
   top: 0;
   left: 0;
@@ -500,18 +506,17 @@ body {
   transform: translateY(15px);
   transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   pointer-events: none;
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--accent-primary);
+  text-shadow: none;
+  white-space: nowrap;
 }
 
-.section-title[data-hover]:hover .section-title-inner {
+.section-title[data-hover]:hover .section-title-content {
   opacity: 0;
   transform: translateY(-15px);
 }
 
-.section-title[data-hover]:hover::after {
+.section-title[data-hover]:hover .section-title-hover-text {
   opacity: 1;
   transform: translateY(0);
 }
@@ -531,79 +536,7 @@ body {
   margin-top: 0;
 }
 
-/* ═══════════════════════════════════════════
-   AMBIENT BACKGROUND EFFECTS
-═══════════════════════════════════════════ */
-.ambient-blob {
-  position: fixed;
-  border-radius: 50%;
-  opacity: 0.14;
-  pointer-events: none;
-  z-index: 0;
-  animation: blobFloat 20s ease-in-out infinite alternate;
-  will-change: transform;
-  contain: layout style;
-}
-
-/* Mobile: hide blobs — expensive GPU compositing with zero user benefit on small screens */
-@media (max-width: 768px) {
-  .ambient-blob {
-    display: none;
-  }
-}
-
-
-.ambient-blob-1 {
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, #6C63FF, transparent);
-  top: -200px;
-  left: -200px;
-}
-
-.ambient-blob-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, #4FC3F7, transparent);
-  bottom: 10%;
-  right: -150px;
-  animation-delay: -6s;
-}
-
-.ambient-blob-3 {
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, #F5A623, transparent);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation-delay: -3s;
-}
-
-@keyframes blobFloat {
-  0% { transform: translate(0, 0) scale(1); }
-  33% { transform: translate(100px, -80px) scale(1.15); }
-  66% { transform: translate(-80px, 120px) scale(0.85); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-
-/* ═══════════════════════════════════════════
-   PREMIUM MOUSE SPOTLIGHT (Replaces Breathing Overlay)
-   (Follows global --mouse-x and --mouse-y for an elegant ambient glow)
-═══════════════════════════════════════════ */
-.App::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 100;
-  background: radial-gradient(
-    800px circle at var(--mouse-x, 50vw) var(--mouse-y, 50vh),
-    rgba(108, 99, 255, 0.05),
-    transparent 40%
-  );
-  transition: opacity var(--transition-smooth);
-}
+/* Ambient blobs removed */
 
 /* Fallback for performance breathing overlay removal */
 .performance-breathing-overlay {
@@ -666,36 +599,47 @@ body {
   align-items: center;
   gap: 8px;
   padding: 14px 32px;
-  background: rgba(108, 99, 255, 0.9);
+  background-color: var(--skeuo-carbon-bg);
+  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
   color: #fff;
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 50px;
+  border: 1px solid #000;
+  border-radius: 8px; /* Sharper radius for carbon hardware feel */
   text-decoration: none;
   cursor: pointer;
-  transition: all var(--transition-smooth);
-  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.25);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  box-shadow: var(--skeuo-carbon-shadow);
   position: relative;
   overflow: hidden;
+  text-shadow: 0 -1px 2px rgba(0,0,0,1);
 }
 
 .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent);
   opacity: 0;
   transition: opacity var(--transition-fast);
+  border-radius: inherit;
+  pointer-events: none;
 }
 
 .btn-primary:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(108, 99, 255, 0.35);
-  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 24px rgba(0,0,0,0.8),
+    0 6px 12px rgba(0,0,0,0.6),
+    inset 0 2px 3px rgba(255,255,255,0.2),
+    inset 0 -3px 6px rgba(0,0,0,0.8),
+    inset 0 0 15px rgba(0,0,0,0.7);
+}
+
+.btn-primary:active {
+  transform: translateY(4px);
+  box-shadow: var(--skeuo-carbon-active);
 }
 
 .btn-primary:hover::before {
@@ -707,18 +651,19 @@ body {
   align-items: center;
   gap: 8px;
   padding: 13px 32px;
-  background: rgba(255, 255, 255, 0.1);
-  color: var(--text-primary);
+  background-color: var(--skeuo-carbon-bg);
+  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
+  color: #a8a8a8; /* Lighter grey for outline button contrast */
   font-family: 'DM Sans', sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 0.95rem;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 50px;
+  border: 1px solid #0a0a0a;
+  border-radius: 8px;
   text-decoration: none;
   cursor: pointer;
-  transition: all var(--transition-smooth);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, color 0.3s ease;
+  box-shadow: var(--skeuo-carbon-shadow);
+  text-shadow: 0 -1px 2px rgba(0,0,0,1);
 }
 
 .App {
@@ -730,10 +675,18 @@ body {
 }
 
 .btn-outline:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  transform: translateY(-3px) scale(1.02);
+  transform: translateY(-2px);
+  color: #fff;
+  box-shadow: 
+    0 10px 20px rgba(0,0,0,0.8),
+    0 4px 8px rgba(0,0,0,0.6),
+    inset 0 2px 3px rgba(255,255,255,0.1),
+    inset 0 -3px 5px rgba(0,0,0,0.7);
+}
+
+.btn-outline:active {
+  transform: translateY(4px);
+  box-shadow: var(--skeuo-carbon-active);
 }
 
 /* ═══════════════════════════════════════════
@@ -1204,7 +1157,6 @@ body {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
-  .ambient-blob { display: none; }
 }
 
 /* ═══════════════════════════════════════════
@@ -1360,7 +1312,6 @@ html:not(.dream-state) .App {
 .mode-recruiter .performance-breathing-overlay,
 .mode-recruiter .digital-texture-overlay,
 .mode-recruiter .trance-overlay-container,
-.mode-recruiter .ambient-thought,
 .mode-recruiter .hero-kinetic-spotlight { display: none !important; }
 
 .mode-recruiter .site-mode-fab {
@@ -1488,6 +1439,6 @@ section {
   contain-intrinsic-size: 1000px;
 }
 
-.ambient-blob, .glass-card {
+.glass-card {
   will-change: transform;
 }

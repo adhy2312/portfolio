@@ -4,7 +4,7 @@
 .dev-os-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 99999;
   background: rgba(2, 6, 12, 0.85); /* Deep space dark */
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
@@ -605,4 +605,35 @@
   .dev-section-title {
     font-size: 1.4rem;
   }
+}
+
+/* ── Corrupted Sectors ── */
+.hud-corrupted-sector {
+  position: absolute;
+  background: #ff003c;
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-weight: bold;
+  padding: 4px 8px;
+  cursor: crosshair;
+  z-index: 10000;
+  animation: glitch-anim 0.1s infinite;
+  box-shadow: 0 0 15px #ff003c, 0 0 5px #fff;
+  text-shadow: 2px 0 0 #0ff, -2px 0 0 #0f0;
+  pointer-events: auto;
+}
+
+.hud-corrupted-sector:hover {
+  background: #fff;
+  color: #000;
+  animation: none;
+}
+
+@keyframes glitch-anim {
+  0% { transform: translate(0) skew(0deg); }
+  20% { transform: translate(-3px, 3px) skew(5deg); }
+  40% { transform: translate(-3px, -3px) skew(-5deg); }
+  60% { transform: translate(3px, 3px) skew(5deg); }
+  80% { transform: translate(3px, -3px) skew(-5deg); }
+  100% { transform: translate(0) skew(0deg); }
 }

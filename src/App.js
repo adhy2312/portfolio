@@ -11,8 +11,8 @@ import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
 import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
 import AmbientThoughts from './components/AmbientThoughts';
-import { useSolarLighting } from './hooks/useSolarLighting';
 import DigitalSoul from './components/DigitalSoul';
+import { useSolarLighting } from './hooks/useSolarLighting';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 import DeveloperModeOS from './components/DeveloperModeOS';
@@ -42,6 +42,7 @@ const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
 const ZipGame = lazy(() => import('./components/ZipGame'));
 const TicTacToe = lazy(() => import('./components/TicTacToe'));
 const SnakeGame = lazy(() => import('./components/SnakeGame'));
+const GamesHub = lazy(() => import('./components/GamesHub'));
 const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
 const GravityWell = lazy(() => import('./components/GravityWell'));
 const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
@@ -123,9 +124,38 @@ function AppContent() {
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
-    // launch-ttt event (from logo 5-click easter egg)
-    const handleLaunch = () => setActiveGame(window.innerWidth <= 768 ? 'zip' : 'tictactoe');
+    // launch-ttt event (from logo 3-click easter egg)
+    const handleLaunch = () => setActiveGame('gameshub');
     window.addEventListener('launch-ttt', handleLaunch);
+
+    // ML Predictive Pre-fetching listener
+    const handlePrefetch = (e) => {
+      const { target } = e.detail || {};
+      if (!target) return;
+      
+      // If the model predicts the user will need heavy lazy-loaded components, fetch their chunks early.
+      if (target === 'Photography' || target === 'GamesHub') {
+        import('./components/GamesHub');
+        import('./components/SnakeGame');
+      } else if (target === 'Contact' || target === 'Hero') {
+        import('./components/DigitalSeed');
+        import('./components/GravityWell');
+      }
+    };
+    window.addEventListener('ml-prefetch', handlePrefetch);
+
+    // ML Persona-driven Behavioral Adaptation
+    const handlePersona = (e) => {
+      const { persona } = e.detail || {};
+      if (persona === 'Developer') {
+        import('./components/StackVisualizer');
+        import('./components/DeveloperModeOS');
+      } else if (persona === 'Creator') {
+        import('./components/Photography');
+      }
+      document.body.setAttribute('data-persona', persona);
+    };
+    window.addEventListener('persona-shift', handlePersona);
 
     // Konami code → barrel roll
     const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
@@ -213,6 +243,12 @@ function AppContent() {
     };
   }, []);
 
+  useEffect(() => {
+    if (!loading) {
+      window.dispatchEvent(new CustomEvent('system-boot'));
+    }
+  }, [loading]);
+
   const triggerEgg = (name, duration = 5000) => {
     setActiveEgg(name);
     setTimeout(() => setActiveEgg(null), duration);
@@ -284,6 +320,7 @@ function AppContent() {
       )}
 
       {/* Easter egg games — outside Suspense */}
+      {activeGame === 'gameshub' && <GamesHub onClose={() => setActiveGame(null)} />}
       {activeGame === 'tictactoe' && !isMobile && <TicTacToe onClose={() => setActiveGame(null)} />}
       {activeGame === 'zip' && isMobile && <ZipGame onClose={() => setActiveGame(null)} />}
       {activeGame === 'snake' && <SnakeGame onClose={() => setActiveGame(null)} />}

@@ -10,27 +10,34 @@ const INITIAL_SNAKE = [
   { x: 10, y: 12 },
 ];
 const INITIAL_DIRECTION = { x: 0, y: -1 }; // Moving up
-const GAME_SPEED = 120; // ms per frame
+const GAME_SPEED = 100; // ms per frame (approx 10 ticks per second like vintage snake)
 
 export default function SnakeGame({ onClose }) {
-  const [snake, setSnake] = useState(INITIAL_SNAKE);
-  const [direction, setDirection] = useState(INITIAL_DIRECTION);
-  const [food, setFood] = useState({ x: 5, y: 5 });
   const [gameOver, setGameOver] = useState(false);
   const [score, setScore] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
 
   const { triggerHyperConscious } = useConsciousness();
-  const directionRef = useRef(direction);
+  
+  // Mutable game state to prevent React re-renders during gameplay
+  const stateRef = useRef({
+    snake: [...INITIAL_SNAKE],
+    direction: { ...INITIAL_DIRECTION },
+    food: { x: 5, y: 5 },
+    lastTick: 0,
+    hasStarted: false,
+    gameOver: false,
+    isPaused: false,
+    score: 0
+  });
+
+  const canvasRef = useRef(null);
   const containerRef = useRef(null);
+  const rafRef = useRef(null);
   
   // Audio context for authentic retro beeps
   const audioCtx = useRef(null);
-
-  useEffect(() => {
-    directionRef.current = direction;
-  }, [direction]);
 
   const playBeep = useCallback((type) => {
     try {
@@ -66,30 +73,29 @@ export default function SnakeGame({ onClose }) {
     }
   }, []);
 
-  const spawnFood = useCallback((currentSnake) => {
-    let newFood;
+  const spawnFood = useCallback(() => {
+    const s = stateRef.current;
     while (true) {
-      newFood = {
+      s.food = {
         x: Math.floor(Math.random() * GRID_SIZE),
         y: Math.floor(Math.random() * GRID_SIZE),
       };
       // Make sure food doesn't spawn on snake
-      const onSnake = currentSnake.some(segment => segment.x === newFood.x && segment.y === newFood.y);
+      const onSnake = s.snake.some(segment => segment.x === s.food.x && segment.y === s.food.y);
       if (!onSnake) break;
     }
-    setFood(newFood);
   }, []);
 
-  // Entrance animation
+  // Entrance animation & Init
   useEffect(() => {
     gsap.fromTo(containerRef.current,
       { y: 100, opacity: 0, scale: 0.9 },
       { y: 0, opacity: 1, scale: 1, duration: 0.5, ease: 'back.out(1.5)' }
     );
-    spawnFood(INITIAL_SNAKE);
+    spawnFood();
     triggerHyperConscious('playing_snake');
     
-    // Unlock achievement via localStorage directly just to be safe
+    // Unlock achievement
     try {
       const achs = JSON.parse(localStorage.getItem('adhy_achievements') || '[]');
       if (!achs.find(a => a.id === 'retro_gamer')) {
@@ -100,13 +106,19 @@ export default function SnakeGame({ onClose }) {
   }, [spawnFood, triggerHyperConscious]);
 
   const resetGame = () => {
-    setSnake(INITIAL_SNAKE);
-    setDirection(INITIAL_DIRECTION);
-    directionRef.current = INITIAL_DIRECTION;
+    stateRef.current.snake = [...INITIAL_SNAKE];
+    stateRef.current.direction = { ...INITIAL_DIRECTION };
+    stateRef.current.score = 0;
+    stateRef.current.gameOver = false;
+    stateRef.current.hasStarted = true;
+    stateRef.current.isPaused = false;
+    
     setScore(0);
     setGameOver(false);
     setHasStarted(true);
-    spawnFood(INITIAL_SNAKE);
+    setIsPaused(false);
+    
+    spawnFood();
   };
 
   const handleClose = () => {
@@ -116,6 +128,7 @@ export default function SnakeGame({ onClose }) {
     });
   };
 
+  // Keyboard Input
   useEffect(() => {
     const handleKeyDown = (e) => {
       // Prevent scrolling when playing
@@ -123,34 +136,47 @@ export default function SnakeGame({ onClose }) {
         e.preventDefault();
       }
 
-      if (e.key === ' ') {
-        if (gameOver) resetGame();
-        else if (hasStarted) setIsPaused(p => !p);
-        else setHasStarted(true);
+      if (e.key === 'Escape') {
+        handleClose();
         return;
       }
 
-      const currDir = directionRef.current;
+      const s = stateRef.current;
+
+      if (e.key === ' ') {
+        if (s.gameOver) resetGame();
+        else if (s.hasStarted) {
+          s.isPaused = !s.isPaused;
+          setIsPaused(s.isPaused);
+        } else {
+
+          s.hasStarted = true;
+          setHasStarted(true);
+        }
+        return;
+      }
+
+      const currDir = s.direction;
       switch (e.key) {
         case 'ArrowUp':
         case 'w':
         case 'W':
-          if (currDir.y === 0) setDirection({ x: 0, y: -1 });
+          if (currDir.y === 0) s.direction = { x: 0, y: -1 };
           break;
         case 'ArrowDown':
         case 's':
         case 'S':
-          if (currDir.y === 0) setDirection({ x: 0, y: 1 });
+          if (currDir.y === 0) s.direction = { x: 0, y: 1 };
           break;
         case 'ArrowLeft':
         case 'a':
         case 'A':
-          if (currDir.x === 0) setDirection({ x: -1, y: 0 });
+          if (currDir.x === 0) s.direction = { x: -1, y: 0 };
           break;
         case 'ArrowRight':
         case 'd':
         case 'D':
-          if (currDir.x === 0) setDirection({ x: 1, y: 0 });
+          if (currDir.x === 0) s.direction = { x: 1, y: 0 };
           break;
         default:
           break;
@@ -159,69 +185,113 @@ export default function SnakeGame({ onClose }) {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameOver, hasStarted]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
+  // Main Game Loop (Canvas Render + Logic)
   useEffect(() => {
-    if (gameOver || isPaused || !hasStarted) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    // Virtual resolution (authentic chunky pixels)
+    canvas.width = 300;
+    canvas.height = 300;
+    
+    const cellSize = canvas.width / GRID_SIZE;
 
-    const moveSnake = () => {
-      setSnake((prevSnake) => {
-        const head = prevSnake[0];
-        const newHead = {
-          x: head.x + directionRef.current.x,
-          y: head.y + directionRef.current.y
-        };
+    const gameLoop = (timestamp) => {
+      rafRef.current = requestAnimationFrame(gameLoop);
+      
+      const s = stateRef.current;
+      
+      // Fixed time step logic
+      if (timestamp - s.lastTick > GAME_SPEED) {
+        s.lastTick = timestamp;
+        
+        if (s.hasStarted && !s.isPaused && !s.gameOver) {
+          const head = s.snake[0];
+          const newHead = {
+            x: head.x + s.direction.x,
+            y: head.y + s.direction.y
+          };
 
-        // Wall Collision
-        if (
-          newHead.x < 0 ||
-          newHead.x >= GRID_SIZE ||
-          newHead.y < 0 ||
-          newHead.y >= GRID_SIZE
-        ) {
-          playBeep('die');
-          setGameOver(true);
-          return prevSnake;
+          // Wall Collision
+          if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+            playBeep('die');
+            s.gameOver = true;
+            setGameOver(true);
+          } else {
+            // Self Collision
+            const isSelfCollision = s.snake.some(
+              (seg, idx) => idx !== s.snake.length - 1 && seg.x === newHead.x && seg.y === newHead.y
+            );
+
+            if (isSelfCollision) {
+              playBeep('die');
+              s.gameOver = true;
+              setGameOver(true);
+            } else {
+              s.snake.unshift(newHead); // Add new head
+
+              // Eat food
+              if (newHead.x === s.food.x && newHead.y === s.food.y) {
+                s.score += 10;
+                setScore(s.score);
+                playBeep('eat');
+                spawnFood();
+                // We keep the tail, effectively growing
+              } else {
+                s.snake.pop(); // Remove tail
+              }
+            }
+          }
         }
+      }
 
-        // Self Collision
-        const isSelfCollision = prevSnake.some(
-          (segment, index) => index !== prevSnake.length - 1 && segment.x === newHead.x && segment.y === newHead.y
-        );
+      // ─── RENDER ENGINE ───
+      
+      // Clear background (Vintage LCD Green)
+      ctx.fillStyle = '#879a73';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        if (isSelfCollision) {
-          playBeep('die');
-          setGameOver(true);
-          return prevSnake;
-        }
+      // Draw faint grid (optional, for extreme retro feel)
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.lineWidth = 1;
+      for(let i=0; i<GRID_SIZE; i++) {
+        ctx.beginPath(); ctx.moveTo(i * cellSize, 0); ctx.lineTo(i * cellSize, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, i * cellSize); ctx.lineTo(canvas.width, i * cellSize); ctx.stroke();
+      }
 
-        const newSnake = [newHead, ...prevSnake];
-
-        // Eat food
-        if (newHead.x === food.x && newHead.y === food.y) {
-          setScore(s => s + 10);
-          playBeep('eat');
-          spawnFood(newSnake);
-          // Don't pop the tail so it grows
-        } else {
-          newSnake.pop(); // Remove tail
-        }
-
-        return newSnake;
+      // Draw Snake Body
+      ctx.fillStyle = '#1a2214'; // Dark LCD black
+      s.snake.forEach((seg, idx) => {
+        // Pixel gap simulation
+        ctx.fillRect(seg.x * cellSize + 1, seg.y * cellSize + 1, cellSize - 2, cellSize - 2);
       });
+
+      // Draw Food (Blinking effect via timestamp parity)
+      if (Math.floor(timestamp / 300) % 2 === 0) {
+        ctx.fillRect(s.food.x * cellSize + 1, s.food.y * cellSize + 1, cellSize - 2, cellSize - 2);
+      }
     };
 
-    const intervalId = setInterval(moveSnake, GAME_SPEED);
-    return () => clearInterval(intervalId);
-  }, [direction, food, gameOver, isPaused, hasStarted, spawnFood, playBeep]);
+    rafRef.current = requestAnimationFrame(gameLoop);
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [playBeep, spawnFood]);
 
   // Touch/DPAD Controls
   const handleDPad = (dx, dy) => {
-    if (gameOver || isPaused || !hasStarted) return;
-    const currDir = directionRef.current;
-    if (dx !== 0 && currDir.x === 0) setDirection({ x: dx, y: 0 });
-    if (dy !== 0 && currDir.y === 0) setDirection({ x: 0, y: dy });
+    const s = stateRef.current;
+    if (s.gameOver || s.isPaused || !s.hasStarted) return;
+    const currDir = s.direction;
+    if (dx !== 0 && currDir.x === 0) s.direction = { x: dx, y: 0 };
+    if (dy !== 0 && currDir.y === 0) s.direction = { x: 0, y: dy };
   };
+
+  // Calculate length for progress bar (max visual length ~ 50)
+  const snakeLength = stateRef.current.snake.length;
+  const progressRatio = Math.min((snakeLength - 3) / 47, 1);
 
   return (
     <div className="snake-overlay">
@@ -236,30 +306,9 @@ export default function SnakeGame({ onClose }) {
         {/* Display Screen */}
         <div className="snake-screen-bezel">
           <div className="snake-screen">
-            {/* Grid */}
-            <div 
-              className="snake-grid" 
-              style={{
-                gridTemplateColumns: `repeat(${GRID_SIZE}, 1fr)`,
-                gridTemplateRows: `repeat(${GRID_SIZE}, 1fr)`
-              }}
-            >
-              {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, i) => {
-                const x = i % GRID_SIZE;
-                const y = Math.floor(i / GRID_SIZE);
-                
-                const isHead = snake[0].x === x && snake[0].y === y;
-                const isBody = snake.some((seg, idx) => idx !== 0 && seg.x === x && seg.y === y);
-                const isFood = food.x === x && food.y === y;
-                
-                let cellClass = 'snake-cell';
-                if (isHead) cellClass += ' snake-head';
-                else if (isBody) cellClass += ' snake-body';
-                else if (isFood) cellClass += ' snake-food';
-
-                return <div key={i} className={cellClass} />;
-              })}
-            </div>
+            
+            {/* High-Performance Canvas */}
+            <canvas ref={canvasRef} className="snake-canvas" />
 
             {/* Overlays */}
             {!hasStarted && !gameOver && (
@@ -283,10 +332,14 @@ export default function SnakeGame({ onClose }) {
               </div>
             )}
 
-            {/* Score HUD */}
-            <div className="snake-score-hud">
-              SCORE: {score.toString().padStart(4, '0')}
+            {/* Authentic Nokia Score & Progress HUD */}
+            <div className="snake-hud-bottom">
+              <div className="snake-score-classic">{score.toString().padStart(4, '0')}</div>
+              <div className="snake-progress-bar">
+                <div className="snake-progress-fill" style={{ width: `${progressRatio * 100}%` }} />
+              </div>
             </div>
+            
           </div>
         </div>
 
@@ -297,9 +350,10 @@ export default function SnakeGame({ onClose }) {
             <div className="dpad-middle">
               <button className="dpad-btn left" onClick={() => handleDPad(-1, 0)}>◀</button>
               <button className="dpad-btn center" onClick={() => {
-                if (gameOver) resetGame();
-                else if (!hasStarted) setHasStarted(true);
-                else setIsPaused(!isPaused);
+                const s = stateRef.current;
+                if (s.gameOver) resetGame();
+                else if (!s.hasStarted) { s.hasStarted = true; setHasStarted(true); }
+                else { s.isPaused = !s.isPaused; setIsPaused(s.isPaused); }
               }}>
                 {gameOver ? 'R' : hasStarted ? 'P' : '▶'}
               </button>

@@ -35,7 +35,7 @@ export function useHybridMotion() {
     // 3. THE UNIFIED LOOP (The "Brain" of the hybrid system)
     const updateEngine = (time, deltaTime) => {
       // Tick Lenis forward
-      lenis.raf(time * 1000);
+      lenis.raf(time);
       
       // Cache physics data so child components (like VelocityText) 
       // can read it without interrogating the DOM
