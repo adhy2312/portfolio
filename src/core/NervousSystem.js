@@ -56,6 +56,21 @@ class NervousSystem {
     this._listeners = {};
     this._history   = [];   // Rolling 80-event log
 
+    // ─── MEMORY LAYER (LocalStorage Sync) ───────────────
+    let totalVisits = 0;
+    let isReturningVisitor = false;
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const stored = localStorage.getItem('ns_visits');
+        if (stored) {
+          totalVisits = parseInt(stored, 10);
+          isReturningVisitor = totalVisits > 0;
+        }
+        localStorage.setItem('ns_visits', (totalVisits + 1).toString());
+        localStorage.setItem('ns_last_visit', Date.now().toString());
+      }
+    } catch(e) {}
+
     // ─── LIVE STATE (direct read by all RAF loops) ───────
     this.state = {
       // Consciousness tier
@@ -63,9 +78,9 @@ class NervousSystem {
       score:         0,
       isHyperActive: false,
 
-      // Visitor identity
-      isReturningVisitor: false,
-      totalVisits:        0,
+      // Visitor identity (Memory Layer)
+      isReturningVisitor,
+      totalVisits,
       temporalAge:        0,
 
       // Presence / adrenaline

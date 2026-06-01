@@ -38,18 +38,14 @@ export default function Typography({
 
     let ctx = gsap.context(() => {
       if (variant === 'mask') {
-        // High-end editorial mask reveal (curtain rise)
-        gsap.set(el, { clipPath: 'inset(100% 0 0 0)', opacity: 0, y: 40 });
+        // High-end editorial reveal without clipPath to prevent WebKit compositor bugs
+        gsap.set(el, { opacity: 0, y: 30 });
         
         gsap.to(el, {
-          clipPath: 'inset(0% 0 0 0)',
           opacity: 1,
           y: 0,
           duration: motionTokens.duration.reveal,
           ease: EASE_EXPO,
-          onComplete: () => {
-            gsap.set(el, { clearProps: "clipPath" });
-          },
           scrollTrigger: {
             trigger: el,
             start: 'top 90%',

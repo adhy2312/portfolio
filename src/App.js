@@ -48,7 +48,6 @@ const GravityWell = lazy(() => import('./components/GravityWell'));
 const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
 
 function LazySection({ name, children }) {
-  const [inView, setInView] = useState(false);
   const ref = React.useRef();
   const { setActiveSection } = useConsciousness();
   const { isSectionVisible } = useSiteMode();
@@ -57,7 +56,6 @@ function LazySection({ name, children }) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setInView(true);
           setActiveSection(name);
         }
       },
@@ -67,26 +65,14 @@ function LazySection({ name, children }) {
     return () => observer.disconnect();
   }, [name, setActiveSection]);
 
-  useEffect(() => {
-    const preloader = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          preloader.disconnect();
-        }
-      },
-      { rootMargin: '600px' }
-    );
-    if (ref.current) preloader.observe(ref.current);
-    return () => preloader.disconnect();
-  }, []);
-
   // Mode-aware: hide sections not relevant to current mode
   if (!isSectionVisible(name)) return null;
 
   return (
-    <div ref={ref} className="lazy-section-container" style={{ minHeight: inView ? 'auto' : '100vh' }} data-xray="[SYSTEM: LAZY_LOADER]&#10;Strategy: IntersectionObserver&#10;RootMargin: 600px&#10;Fallback: Skeleton UI">
-      {inView && <Suspense fallback={<div className="lazy-loading-skeleton" />}>{children}</Suspense>}
+    <div ref={ref} className="section-container" data-xray="[SYSTEM: RENDERED]">
+      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ height: '100vh' }} />}>
+        {children}
+      </Suspense>
     </div>
   );
 }
@@ -246,6 +232,7 @@ function AppContent() {
   useEffect(() => {
     if (!loading) {
       window.dispatchEvent(new CustomEvent('system-boot'));
+      setTimeout(() => ScrollTrigger.refresh(), 100);
     }
   }, [loading]);
 

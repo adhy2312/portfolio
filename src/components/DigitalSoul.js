@@ -257,8 +257,14 @@ const DigitalSoul = () => {
         let shouldWhisper = false;
         let whisperPool = DEFAULT_WHISPERS;
 
+        // Memory Layer: Greet returning visitors (once per session)
+        if (state.isReturningVisitor && !ws.greeted) {
+           shouldWhisper = true;
+           whisperPool = ["welcome back.", "familiar patterns detected.", "i remember this presence."];
+           ws.greeted = true;
+        }
         // If they have lingered on a section for > 5 seconds
-        if (soul.idleTimer > 5000 && Math.random() < 0.01) {
+        else if (soul.idleTimer > 5000 && Math.random() < 0.01) {
            shouldWhisper = true;
            whisperPool = SECTION_WHISPERS[state.activeSection] || DEFAULT_WHISPERS;
         } 
