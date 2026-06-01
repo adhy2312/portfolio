@@ -9,9 +9,9 @@
   margin-left: -50vw;
   margin-right: -50vw;
   padding: 2rem 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: var(--bg-dark);
+  border-top: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-secondary);
 }
 
 .kinetic-marquee-track {
@@ -35,7 +35,7 @@
   margin: 0;
   padding-right: 2rem;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+  -webkit-text-stroke: 1px var(--text-muted);
   transition: color 0.3s ease, -webkit-text-stroke 0.3s ease;
   cursor: default;
 }

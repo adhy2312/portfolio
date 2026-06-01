@@ -39,7 +39,6 @@ const dynamicImports = {
   Timeline: () => import('./components/Timeline'),
   DigitalScars: () => import('./components/DigitalScars'),
   Photography: () => import('./components/Photography'),
-  HowIThink: () => import('./components/HowIThink'),
   MyWorks: () => import('./components/MyWorks'),
   Achievements: () => import('./components/Achievements'),
   Testimonials: () => import('./components/Testimonials'),
@@ -55,7 +54,8 @@ const dynamicImports = {
   StackVisualizer: () => import('./components/StackVisualizer'),
   DigitalSeed: () => import('./components/DigitalSeed'),
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
-  CustomCursor: () => import('./components/motion/CustomCursor')
+  CustomCursor: () => import('./components/motion/CustomCursor'),
+  ZAxisTunnel: () => import('./components/motion/ZAxisTunnel')
 };
 
 // Wrap dictionary into React.lazy
@@ -66,11 +66,10 @@ const NeuralMap = lazy(dynamicImports.NeuralMap);
 const Timeline = lazy(dynamicImports.Timeline);
 const DigitalScars = lazy(dynamicImports.DigitalScars);
 const Photography = lazy(dynamicImports.Photography);
-const HowIThink = lazy(dynamicImports.HowIThink);
 const MyWorks = lazy(dynamicImports.MyWorks);
 const Achievements = lazy(dynamicImports.Achievements);
-const Testimonials = lazy(dynamicImports.Testimonials);
 const TrustedBy = lazy(dynamicImports.TrustedBy);
+const Testimonials = lazy(dynamicImports.Testimonials);
 const Contact = lazy(dynamicImports.Contact);
 const Footer = lazy(dynamicImports.Footer);
 const CallToAction = lazy(dynamicImports.CallToAction);
@@ -83,6 +82,7 @@ const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
 const CustomCursor = lazy(dynamicImports.CustomCursor);
+const ZAxisTunnel = lazy(dynamicImports.ZAxisTunnel);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
 if (typeof window !== 'undefined') {
@@ -351,6 +351,9 @@ function AppContent() {
       )}
 
       <AmbientThoughts />
+      <Suspense fallback={null}>
+        <CustomCursor />
+      </Suspense>
       <DigitalSoul />
       <FluidCanvas />
 
@@ -373,10 +376,9 @@ function AppContent() {
       <LazySection name="Skills"><Skills /></LazySection>
       <LazySection name="NeuralMap"><NeuralMap /></LazySection>
       <LazySection name="Experience"><Experience /></LazySection>
-      <LazySection name="MyWorks"><MyWorks /></LazySection>
+      <LazySection name="MyWorks"><ZAxisTunnel depth={1500}><MyWorks /></ZAxisTunnel></LazySection>
       <LazySection name="Timeline"><Timeline /></LazySection>
       <LazySection name="Photography"><Photography /></LazySection>
-      <LazySection name="HowIThink"><HowIThink /></LazySection>
       <LazySection name="Achievements"><Achievements /></LazySection>
       <LazySection name="TrustedBy"><TrustedBy /></LazySection>
       <LazySection name="Testimonials"><Testimonials /></LazySection>

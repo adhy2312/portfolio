@@ -1,0 +1,66 @@
+/* ════════════════════════════════════════════════════════
+   RAY-TRACED OPTIC GLASSMORPHISM (Fake WebGL via CSS)
+════════════════════════════════════════════════════════ */
+
+.raytraced-glass {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0.01) 100%
+  ) !important;
+  
+  /* Physical blur and saturation increase to mimic thick acrylic */
+  backdrop-filter: blur(16px) saturate(180%) contrast(1.2) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(180%) contrast(1.2) !important;
+  
+  /* 
+    The secret to "raytraced" CSS glass is chromatic dispersion.
+    We use inset box shadows with red, green, and blue to simulate 
+    light bending around the edges of the 3D surface.
+  */
+  box-shadow: 
+    inset 1px 1px 2px rgba(255, 0, 0, 0.15),
+    inset -1px -1px 2px rgba(0, 255, 255, 0.15),
+    inset 0px 0px 20px rgba(255, 255, 255, 0.05),
+    0 10px 30px rgba(0, 0, 0, 0.3) !important;
+    
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  position: relative;
+  overflow: hidden;
+  border-radius: 16px !important;
+}
+
+/* 
+  Specular highlight (Fresnel reflection) 
+  Moves dynamically over the surface to simulate light bouncing off the glass 
+*/
+.raytraced-glass::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+  transform: translateZ(0);
+  mix-blend-mode: overlay;
+  z-index: 10;
+}
+
+.work-card-wrapper:hover .raytraced-glass::before {
+  opacity: 1;
+}
+
+/* Tie into the existing Anisotropic surface for maximum gloss */
+.anisotropic-surface.raytraced-glass {
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.01) 0,
+    rgba(255, 255, 255, 0.01) 1px,
+    transparent 1px,
+    transparent 4px
+  ) !important;
+}

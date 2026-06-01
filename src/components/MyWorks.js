@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
+import './motion/OpticGlass.css';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
@@ -174,7 +175,7 @@ const TiltCard = ({ children, project, index }) => {
         data-project-title={project.title}
         data-project-desc={project.description}
       >
-        <div className="work-card glass-card anisotropic-surface" style={{ transform: 'translateZ(50px)' }}>
+        <div className="work-card raytraced-glass anisotropic-surface" style={{ transform: 'translateZ(50px)' }}>
           {showMemory ? (
             <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
               <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>

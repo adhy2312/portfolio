@@ -3,7 +3,7 @@ import gsap from 'gsap';
 import ns from '../../core/NervousSystem';
 import './KineticMarquee.css';
 
-export default function KineticMarquee({ text = "CREATIVE DEVELOPER • FULL STACK ENGINEER • ", baseVelocity = 0.05, className = "" }) {
+export default function KineticMarquee({ text = "ENGINEER • PHOTOGRAPHER • DESIGNER • ", baseVelocity = 0.05, className = "" }) {
   const containerRef = useRef(null);
   const xPercent = useRef(0);
   const direction = useRef(1);
