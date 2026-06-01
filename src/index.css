@@ -722,6 +722,14 @@ body {
 /* ═══════════════════════════════════════════
    DIVIDER — Retro Cassette-tape Style
 ═══════════════════════════════════════════ */
+.section-container {
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  /* V20 Re-Amplifier: Off-screen aggressive culling */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1000px;
+}
 .section-divider {
   width: 60px;
   height: 3px;

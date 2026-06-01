@@ -646,6 +646,28 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
             </ul>
           </div>
         );
+      case '[ML_CORE]':
+        const persona = document.documentElement.getAttribute('data-persona') || 'Unidentified';
+        return (
+          <div className="perf-tab-wrapper">
+             <h3 className="dev-section-title">PREDICTIVE MARKOV MODEL</h3>
+             <p className="dev-desc" style={{marginBottom: '1rem'}}>Machine Learning engine analyzing scroll velocity and section dwell time to adapt the OS to your persona.</p>
+             <div className="perf-grid">
+               <div className="perf-card">
+                 <span className="perf-card-label">CLASSIFIED PERSONA</span>
+                 <span className="perf-card-value" style={{color: persona !== 'Unidentified' ? '#e040fb' : 'rgba(255,255,255,0.3)'}}>{persona}</span>
+               </div>
+               <div className="perf-card">
+                 <span className="perf-card-label">MARKOV STATE</span>
+                 <span className="perf-card-value" style={{color: '#00e676'}}>Active</span>
+               </div>
+               <div className="perf-card">
+                 <span className="perf-card-label">PRE-FETCHING</span>
+                 <span className="perf-card-value">Enabled</span>
+               </div>
+             </div>
+          </div>
+        );
       default: return null;
     }
   };
@@ -677,7 +699,7 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
           <p>NervousSystem Engine</p>
         </div>
         <nav className="dev-os-nav">
-          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
+          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', '[ML_CORE]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
             <button 
               key={tab} 
               className={`dev-os-tab-btn ${activeTab === tab ? 'active' : ''}`}

@@ -40,8 +40,9 @@ class LifeEngine {
     this.worker = new Worker(new URL('./LifeEngine.worker.js', import.meta.url));
 
     // 2. Load Memory from Disk (Main Thread)
-    const memory = this._loadMemory();
-    this.worker.postMessage({ type: 'INIT_MEMORY', payload: memory });
+    this._loadMemory().then(memory => {
+      this.worker.postMessage({ type: 'INIT_MEMORY', payload: memory });
+    });
 
     // 3. Listen to the Worker Thread
     this.worker.onmessage = (e) => {
@@ -85,13 +86,19 @@ class LifeEngine {
     // 5. Send Low-Frequency Ticks to the Worker
     // The main thread does NO math here. It just sends raw data to the backend thread.
     let lastTick = Date.now();
+    let lastScrollPos = 0;
     ns.register('LifeEngineTick', (time) => {
       if (time - lastTick > 5000) { // Every 5 seconds
+        const currentScroll = ns.scrollPos || 0;
+        const velocity = Math.abs(currentScroll - lastScrollPos) / 5; // Pixels per second
+        lastScrollPos = currentScroll;
+        
         this.worker.postMessage({
           type: 'TICK',
           payload: {
             idleSeconds: ns.state.idleSeconds,
-            fatigue: ns.fatigue
+            fatigue: ns.fatigue,
+            velocity: velocity
           }
         });
         lastTick = time;
@@ -99,14 +106,42 @@ class LifeEngine {
     }, { priority: 'LOW', cooldown: 5000 });
   }
 
-  // ─── LOCAL STORAGE (Runs on Main Thread) ───
+  // ─── LOCAL STORAGE -> INDEXEDDB (V20 Upgrade) ───
 
-  _loadMemory() {
+  async _initDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('LifeEngineDB', 1);
+      request.onerror = () => reject(request.error);
+      request.onsuccess = () => resolve(request.result);
+      request.onupgradeneeded = (e) => {
+        const db = e.target.result;
+        if (!db.objectStoreNames.contains('memory')) {
+          db.createObjectStore('memory');
+        }
+      };
+    });
+  }
+
+  async _loadMemory() {
     try {
-      const stored = localStorage.getItem('life_memory');
-      if (stored) return JSON.parse(stored);
-    } catch (e) {}
+      const db = await this._initDB();
+      return new Promise((resolve) => {
+        const transaction = db.transaction(['memory'], 'readonly');
+        const store = transaction.objectStore('memory');
+        const request = store.get('life_memory');
+        
+        request.onsuccess = () => {
+          if (request.result) resolve(request.result);
+          else resolve(this._getDefaultMemory());
+        };
+        request.onerror = () => resolve(this._getDefaultMemory());
+      });
+    } catch (e) {
+      return this._getDefaultMemory();
+    }
+  }
 
+  _getDefaultMemory() {
     return {
       birthDate: Date.now(),
       lastInteraction: Date.now(),
@@ -116,9 +151,12 @@ class LifeEngine {
     };
   }
 
-  _saveMemory(memory) {
+  async _saveMemory(memory) {
     try {
-      localStorage.setItem('life_memory', JSON.stringify(memory));
+      const db = await this._initDB();
+      const transaction = db.transaction(['memory'], 'readwrite');
+      const store = transaction.objectStore('memory');
+      store.put(memory, 'life_memory');
     } catch (e) {}
   }
 }

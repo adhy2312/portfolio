@@ -253,32 +253,43 @@ const DigitalSoul = () => {
         }
       } else if (ws.cooldown > 0) {
         ws.cooldown -= delta;
-      } else if (!ws.visible && soul.emotion !== 'dormant' && soul.emotion !== 'exhausted' && perfTier === 3) {
+      } else if (!ws.visible && soul.emotion !== 'dormant' && soul.emotion !== 'exhausted' && perfTier >= 2) {
         let shouldWhisper = false;
-        let whisperPool = DEFAULT_WHISPERS;
+        let dynamicThought = "";
 
-        // Memory Layer: Greet returning visitors (once per session)
+        // ─── Humanized Internal Monologue Engine ───
         if (state.isReturningVisitor && !ws.greeted) {
            shouldWhisper = true;
-           whisperPool = ["welcome back.", "familiar patterns detected.", "i remember this presence."];
+           dynamicThought = `you're back. visit ${ns.state.totalVisits}. i kept the servers warm for you.`;
            ws.greeted = true;
         }
-        // If they have lingered on a section for > 5 seconds
+        else if (mouseSpeed > 60 && Math.random() < 0.01) {
+           shouldWhisper = true;
+           dynamicThought = "moving fast. skipping frames to keep up with you.";
+        }
+        else if (ns.fatigue > 75 && Math.random() < 0.02) {
+           shouldWhisper = true;
+           dynamicThought = "the architecture feels heavy today. memory buffers overflowing.";
+        }
+        else if (isLateNight && soul.idleTimer > 8000 && Math.random() < 0.02) {
+           shouldWhisper = true;
+           dynamicThought = "it's quiet. the world is asleep, but we are still here.";
+        }
         else if (soul.idleTimer > 5000 && Math.random() < 0.01) {
            shouldWhisper = true;
-           whisperPool = SECTION_WHISPERS[state.activeSection] || DEFAULT_WHISPERS;
+           const pool = SECTION_WHISPERS[state.activeSection] || DEFAULT_WHISPERS;
+           dynamicThought = pool[Math.floor(Math.random() * pool.length)];
         } 
-        // Random ambient whisper
         else if (Math.random() < 0.0002) {
            shouldWhisper = true;
-           whisperPool = DEFAULT_WHISPERS;
+           dynamicThought = DEFAULT_WHISPERS[Math.floor(Math.random() * DEFAULT_WHISPERS.length)];
         }
 
         if (shouldWhisper && whisperRef.current) {
-          whisperRef.current.textContent = whisperPool[Math.floor(Math.random() * whisperPool.length)];
+          whisperRef.current.textContent = dynamicThought;
           whisperRef.current.classList.add('whisper-visible');
-          ws.timer    = 5000;
-          ws.cooldown = 12000; // wait 12 seconds before next whisper
+          ws.timer    = 6000;
+          ws.cooldown = 12000;
           ws.visible  = true;
         }
       }

@@ -1,0 +1,54 @@
+.error-boundary-os {
+  position: fixed;
+  inset: 0;
+  background-color: #0000AA;
+  color: #FFFFFF;
+  font-family: 'Perfect DOS VGA 437', 'Fira Code', 'Courier New', monospace;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  z-index: 999999;
+  padding: 4rem;
+}
+
+.error-content {
+  max-width: 900px;
+  width: 100%;
+}
+
+.glitch {
+  font-size: 1.5rem;
+  background: white;
+  color: #0000AA;
+  padding: 2px 8px;
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.error-msg {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+.error-log {
+  margin-bottom: 3rem;
+  font-size: 1.1rem;
+  white-space: pre-wrap;
+}
+
+.reboot-btn {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-family: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.reboot-btn:hover {
+  color: #AAAAAA;
+}
+

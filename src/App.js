@@ -16,6 +16,8 @@ import { useSolarLighting } from './hooks/useSolarLighting';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 import DeveloperModeOS from './components/DeveloperModeOS';
+import ErrorBoundary from './components/ErrorBoundary';
+import ns from './core/NervousSystem';
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -96,12 +98,35 @@ function AppContent() {
       lerp: 0.08,           // Premium buttery interpolation
       wheelMultiplier: 0.8, // Slightly resistant wheel for luxurious feel
       autoResize: true,
+      syncTouch: true,      // Crucial for mobile touch scroll bug
+      touchMultiplier: 2,   // Improve mobile scroll speed
     });
 
     // Dedicated native RAF loop for flawless 144Hz scrolling unblocked by GSAP autoSleep
     let rafId;
     function raf(time) {
       lenis.raf(time);
+      
+      // ─── Emotional Bleed (Performance cost: 0) ───
+      // If the system gets tired (fatigue > 50), the UI visually bleeds/desaturates
+      if (ns) {
+        if (ns.performanceTier < 2) {
+          lenis.options.lerp = 0.15; // Snappier scroll to save CPU calculations
+        } else {
+          lenis.options.lerp = 0.08; // Buttery smooth for high-end
+        }
+
+        if (ns.fatigue) {
+          const fatigue = ns.fatigue;
+          if (fatigue > 60) {
+            const desaturation = 1 - ((fatigue - 60) / 80); 
+            document.documentElement.style.setProperty('--global-saturation', Math.max(0.4, desaturation));
+          } else {
+            document.documentElement.style.setProperty('--global-saturation', '1');
+          }
+        }
+      }
+      
       rafId = requestAnimationFrame(raf);
     }
     rafId = requestAnimationFrame(raf);
@@ -122,12 +147,25 @@ function AppContent() {
     const handleLaunch = () => setActiveGame('gameshub');
     window.addEventListener('launch-ttt', handleLaunch);
 
-    // ML Predictive Pre-fetching listener
+    // V20 Quantum Prefetching Listener
     const handlePrefetch = (e) => {
       const { target } = e.detail || {};
       if (!target) return;
       
-      // If the model predicts the user will need heavy lazy-loaded components, fetch their chunks early.
+      const injectPrefetch = (componentName) => {
+        if (!document.querySelector(`link[data-prefetch="${componentName}"]`)) {
+          const link = document.createElement('link');
+          link.rel = 'prefetch';
+          link.as = 'script';
+          link.href = `/${componentName.toLowerCase()}.chunk.js`; // Simulated chunk name for V20 
+          link.setAttribute('data-prefetch', componentName);
+          document.head.appendChild(link);
+        }
+      };
+
+      // Prefetch specific top-level components
+      injectPrefetch(target);
+      
       if (target === 'Photography' || target === 'GamesHub') {
         import('./components/GamesHub');
         import('./components/SnakeGame');
@@ -140,14 +178,19 @@ function AppContent() {
 
     // ML Persona-driven Behavioral Adaptation
     const handlePersona = (e) => {
-      const { persona } = e.detail || {};
+      const { persona, confidence } = e.detail || {};
       if (persona === 'Developer') {
         import('./components/StackVisualizer');
         import('./components/DeveloperModeOS');
+        // Snappy, fast transitions for developers
+        document.documentElement.style.setProperty('--transition-bounce', '0.2s cubic-bezier(0.2, 0, 0, 1)');
       } else if (persona === 'Creator') {
         import('./components/Photography');
+        // Cinematic, slow transitions for creators
+        document.documentElement.style.setProperty('--transition-bounce', '0.6s cubic-bezier(0.4, 0, 0.2, 1)');
       }
-      document.body.setAttribute('data-persona', persona);
+      document.documentElement.setAttribute('data-persona', persona);
+      console.log(`[ML_ENGINE] Persona identified: ${persona} (Confidence: ${confidence})`);
     };
     window.addEventListener('persona-shift', handlePersona);
 
@@ -335,15 +378,17 @@ function AppContent() {
 
 function App() {
   return (
-    <SystemOrchestratorProvider>
-      <SiteModeProvider>
-        <ConsciousnessProvider>
-          <StoryProvider>
-            <AppContent />
-          </StoryProvider>
-        </ConsciousnessProvider>
-      </SiteModeProvider>
-    </SystemOrchestratorProvider>
+    <ErrorBoundary>
+      <SystemOrchestratorProvider>
+        <SiteModeProvider>
+          <ConsciousnessProvider>
+            <StoryProvider>
+              <AppContent />
+            </StoryProvider>
+          </ConsciousnessProvider>
+        </SiteModeProvider>
+      </SystemOrchestratorProvider>
+    </ErrorBoundary>
   );
 }
 

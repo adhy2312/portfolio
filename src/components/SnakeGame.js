@@ -211,39 +211,39 @@ export default function SnakeGame({ onClose }) {
         
         if (s.hasStarted && !s.isPaused && !s.gameOver) {
           const head = s.snake[0];
-          const newHead = {
+          let newHead = {
             x: head.x + s.direction.x,
             y: head.y + s.direction.y
           };
 
-          // Wall Collision
-          if (newHead.x < 0 || newHead.x >= GRID_SIZE || newHead.y < 0 || newHead.y >= GRID_SIZE) {
+          // Endless Wrapping (Classic Nokia Snake Box Mode)
+          if (newHead.x < 0) newHead.x = GRID_SIZE - 1;
+          else if (newHead.x >= GRID_SIZE) newHead.x = 0;
+          
+          if (newHead.y < 0) newHead.y = GRID_SIZE - 1;
+          else if (newHead.y >= GRID_SIZE) newHead.y = 0;
+
+          // Self Collision (Dying only happens if it bites itself)
+          const isSelfCollision = s.snake.some(
+            (seg, idx) => idx !== s.snake.length - 1 && seg.x === newHead.x && seg.y === newHead.y
+          );
+
+          if (isSelfCollision) {
             playBeep('die');
             s.gameOver = true;
             setGameOver(true);
           } else {
-            // Self Collision
-            const isSelfCollision = s.snake.some(
-              (seg, idx) => idx !== s.snake.length - 1 && seg.x === newHead.x && seg.y === newHead.y
-            );
+            s.snake.unshift(newHead); // Add new head
 
-            if (isSelfCollision) {
-              playBeep('die');
-              s.gameOver = true;
-              setGameOver(true);
+            // Eat food
+            if (newHead.x === s.food.x && newHead.y === s.food.y) {
+              s.score += 10;
+              setScore(s.score);
+              playBeep('eat');
+              spawnFood();
+              // We keep the tail, effectively growing
             } else {
-              s.snake.unshift(newHead); // Add new head
-
-              // Eat food
-              if (newHead.x === s.food.x && newHead.y === s.food.y) {
-                s.score += 10;
-                setScore(s.score);
-                playBeep('eat');
-                spawnFood();
-                // We keep the tail, effectively growing
-              } else {
-                s.snake.pop(); // Remove tail
-              }
+              s.snake.pop(); // Remove tail
             }
           }
         }

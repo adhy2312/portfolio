@@ -263,7 +263,18 @@ class NervousSystem {
       const delta = Math.min(time - this._lastTime, 100); // Cap at 100ms (tab switch)
       this._lastTime = time;
 
-      // ─── FPS Tracking & Tier Adjustment (with ML Reinforcement) ───
+      // ─── Einstein-Class Predictive Performance Re-Amplifier (EMA) ───
+      const instantFps = delta > 0 ? 1000 / delta : 60;
+      this._emaFps = (this._emaFps || 60) * 0.9 + instantFps * 0.1;
+
+      // Proactive Throttling (Don't wait for 1 second to drop frames)
+      if (this._emaFps < 35 && this.performanceTier > 0) {
+        this.performanceTier = Math.max(0, this.performanceTier - 1);
+        this.fatigue = Math.min(100, this.fatigue + 5);
+        this.emit('SYSTEM_AUTO_RECOVER');
+      }
+
+      // ─── Standard FPS Tracking & Tier Adjustment (with ML Reinforcement) ───
       this._frameCount++;
       if (time - this._lastFpsTime >= 1000) {
         this.fps = this._frameCount;

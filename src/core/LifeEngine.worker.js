@@ -57,11 +57,21 @@ const Engines = {
     return (timeOfDay < 5 || timeOfDay > 23) ? 'existential' : 'connected';
   },
 
-  // 3. AI & Intelligence Engines
+  // 3. AI & Intelligence Engines (Einstein-Class Update)
   BehavioralInterpretationEngine: (events) => {
-    if (events['system_stress'] > 5) return 'erratic_user';
-    if (events['deep_read'] > 10) return 'thoughtful_user';
-    return 'casual_user';
+    // Quantum Entanglement Profiling: Returns a multi-dimensional probability vector
+    const total = Object.values(events).reduce((a, b) => a + b, 0) || 1;
+    const stress = events['system_stress'] || 0;
+    const deep = events['deep_read'] || 0;
+    const explore = events['timeline_explore'] || 0;
+    const vector = {
+      curious: Math.min(100, Math.round((explore / total) * 100)),
+      thoughtful: Math.min(100, Math.round((deep / total) * 100)),
+      erratic: Math.min(100, Math.round((stress / total) * 100)),
+      casual: 0
+    };
+    vector.casual = Math.max(0, 100 - (vector.curious + vector.thoughtful + vector.erratic));
+    return vector;
   },
 
   TrustEvolutionEngine: (interactions) => {
@@ -74,8 +84,10 @@ const Engines = {
   },
 
   // 5. Meta & Experimental Engines
-  MortalityEngine: (days) => {
-    return Math.min(1.0, days / 365); // Approaches 1.0 (death) over a year
+  RelativisticTimeEngine: (days, velocity = 0) => {
+    // Time Dilation: High velocity slows down the internal entropy (mortality)
+    const dilation = velocity > 100 ? 0.5 : 1.0;
+    return Math.min(1.0, (days / 365) * dilation); 
   },
 
   CivilizationEngine: (ghosts) => {
@@ -100,14 +112,20 @@ self.addEventListener('message', (e) => {
       self.postMessage({ type: 'SAVE_MEMORY', payload: globalMemory });
       break;
     case 'TICK':
-      executeAllEngines(payload.idleSeconds, payload.fatigue);
+      executeAllEngines(payload.idleSeconds, payload.fatigue, payload.velocity || 0);
+      break;
+    default:
       break;
   }
 });
 
 // ─── IV. GLOBAL ORCHESTRATION ───
-function executeAllEngines(idleSeconds, fatigue) {
-  // 1. Entropy & Decay
+function executeAllEngines(idleSeconds, fatigue, velocity = 0) {
+  // 1. Entropy & Neural Decay Matrix (Logarithmic Decay)
+  const idleDays = (Date.now() - globalMemory.lastInteraction) / (1000 * 60 * 60 * 24);
+  const decayLog = Math.log1p(idleDays); // Natural log decay
+  globalMemory.emotionalWeight = Math.max(0.1, globalMemory.emotionalWeight - (decayLog * 0.005));
+  
   if (Math.random() < 0.05) globalMemory.emotionalWeight *= 0.995;
   
   const daysSinceBirth = (Date.now() - globalMemory.birthDate) / (1000 * 60 * 60 * 24);
@@ -121,10 +139,10 @@ function executeAllEngines(idleSeconds, fatigue) {
   const behaviorProfile    = Engines.BehavioralInterpretationEngine(globalMemory.events);
   const trustLevel         = Engines.TrustEvolutionEngine(globalMemory.totalInteractions);
   const survivalState      = Engines.ThermalSurvivalEngine(fatigue);
-  const mortality          = Engines.MortalityEngine(daysSinceBirth);
+  const mortality          = Engines.RelativisticTimeEngine(daysSinceBirth, velocity);
   
   // 3. Era Calculation (EvolutionEngine)
-  const emotionalAgeDays = daysSinceBirth + (globalMemory.totalInteractions * 0.01);
+  const emotionalAgeDays = daysSinceBirth + (globalMemory.totalInteractions * 0.01 * globalMemory.emotionalWeight);
   let currentEra = EVOLUTION_ERAS[0];
   for (const era of EVOLUTION_ERAS) if (emotionalAgeDays >= era.minDays) currentEra = era;
 

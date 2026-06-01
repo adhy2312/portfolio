@@ -267,11 +267,24 @@ export const ConsciousnessProvider = ({ children }) => {
       setDigitalEchoes(prev => {
         const newHeatmap = { ...prev.sectionHeatmap };
         newHeatmap[activeSection] = (newHeatmap[activeSection] || 0) + timeSpent;
+
+        // ─── ML AMPLIFICATION: Persona Classification ───
+        const devScore = (newHeatmap['Skills'] || 0) + (newHeatmap['Projects'] || 0) + (newHeatmap['Timeline'] || 0);
+        const creatorScore = (newHeatmap['Photography'] || 0) + (newHeatmap['About'] || 0) + (newHeatmap['Hero'] || 0);
+        
+        // If they heavily bias towards technical sections vs creative sections
+        if (devScore > 15 && devScore > creatorScore * 1.5) {
+          window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Developer', confidence: (devScore / (devScore+creatorScore)).toFixed(2) } }));
+        } else if (creatorScore > 15 && creatorScore > devScore * 1.5) {
+          window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Creator', confidence: (creatorScore / (devScore+creatorScore)).toFixed(2) } }));
+        }
+
         const newState = { ...prev, sectionHeatmap: newHeatmap };
         try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(newState)); } catch {}
         return newState;
       });
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
 
   // ─── EMOTIONAL TEMPERATURE ENGINE ───

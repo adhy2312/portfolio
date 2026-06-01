@@ -36,7 +36,21 @@ class HapticEngine {
     
     this._unsubscribers.push(() => window.removeEventListener('click', onClick));
 
-    console.log('[HapticEngine] Connected to Nervous System. Physical feedback active.');
+    // V20: Velocity-based spatial haptics (No Audio)
+    let lastScroll = 0;
+    this.ns.register('HapticVelocityTick', (time, delta, mousePos, isMoving) => {
+      if (!this.isEnabled) return;
+      const velocity = Math.abs(this.ns.scrollPos - lastScroll);
+      lastScroll = this.ns.scrollPos;
+
+      if (velocity > 150) {
+        this.trigger('heavy');
+      } else if (velocity > 50 && Math.random() > 0.8) {
+        this.trigger('light');
+      }
+    }, { priority: 'LOW', cooldown: 50 });
+
+    console.log('[HapticEngine] Connected to Nervous System. Physical feedback active (V20).');
   }
 
   trigger(intensity = 'light') {
@@ -72,6 +86,9 @@ class HapticEngine {
   stop() {
     this._unsubscribers.forEach(unsub => unsub());
     this._unsubscribers = [];
+    if (this.ns) {
+      this.ns.unregister('HapticVelocityTick');
+    }
   }
 }
 
