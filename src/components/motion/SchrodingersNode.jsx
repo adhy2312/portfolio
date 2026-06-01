@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import ns from '../core/NervousSystem';
+import ns from '../../core/NervousSystem';
 
 export default function SchrodingersNode({ children, className = '' }) {
   const nodeRef = useRef(null);

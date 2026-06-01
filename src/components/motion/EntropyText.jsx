@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
-import ns from '../core/NervousSystem';
-import pipeline from '../core/WorkerPipeline';
+import ns from '../../core/NervousSystem';
+import pipeline from '../../core/WorkerPipeline';
 
 export default function EntropyText({ text, className = '' }) {
   const [displayedText, setDisplayedText] = useState(text);
@@ -48,7 +48,7 @@ export default function EntropyText({ text, className = '' }) {
     if (containerRef.current) observer.observe(containerRef.current);
 
     return () => {
-      scienceWorker.removeEventListener('message', handleMessage);
+      unsubscribe();
       cancelAnimationFrame(rafRef.current);
       observer.disconnect();
     };

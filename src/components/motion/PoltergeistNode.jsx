@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import ns from '../core/NervousSystem';
+import ns from '../../core/NervousSystem';
 
 export default function PoltergeistNode({ children, radius = 400, strength = 0.5, className = '' }) {
   const nodeRef = useRef(null);
