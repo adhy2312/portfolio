@@ -44,16 +44,24 @@ export default function FluidCanvas() {
       }
     });
 
+    let lastMouseX = -1000;
+    let lastMouseY = -1000;
+
     const loop = () => {
-      // Offload fluid force calculation
-      pipeline.dispatch('science', 'CALC_FLUID_TICK', uuid, {
-        width: canvas.width,
-        height: canvas.height,
-        mouseX: ns.mousePos.x,
-        mouseY: ns.mousePos.y,
-        velocityX: ns.mousePos.vx || 0,
-        velocityY: ns.mousePos.vy || 0
-      });
+      // Offload fluid force calculation ONLY if mouse actually moved
+      if (Math.abs(ns.mousePos.x - lastMouseX) > 1 || Math.abs(ns.mousePos.y - lastMouseY) > 1) {
+        lastMouseX = ns.mousePos.x;
+        lastMouseY = ns.mousePos.y;
+        
+        pipeline.dispatch('science', 'CALC_FLUID_TICK', uuid, {
+          width: canvas.width,
+          height: canvas.height,
+          mouseX: ns.mousePos.x,
+          mouseY: ns.mousePos.y,
+          velocityX: ns.mousePos.vx || 0,
+          velocityY: ns.mousePos.vy || 0
+        });
+      }
       rafId = requestAnimationFrame(loop);
     };
     

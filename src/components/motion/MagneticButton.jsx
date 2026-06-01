@@ -55,11 +55,15 @@ export default function MagneticButton({ children, strength = 0.4, className = '
       currentX = lerp(currentX, targetX, 0.15);
       currentY = lerp(currentY, targetY, 0.15);
       
+      // Calculate realistic Anisotropy angle based on offset
+      const angle = Math.atan2(currentY, currentX) * (180 / Math.PI);
+      
       // 3. Optimization: Only write to DOM if moving
       // (prevents thrashing the GPU when idle)
       if (Math.abs(targetX - currentX) > 0.01 || Math.abs(targetY - currentY) > 0.01) {
         setX(currentX);
         setY(currentY);
+        btn.style.setProperty('--anisotropy-angle', `${angle}deg`);
       }
     };
 
@@ -88,6 +92,7 @@ export default function MagneticButton({ children, strength = 0.4, className = '
       <div 
         ref={buttonRef} 
         style={{ willChange: 'transform' }}
+        className="anisotropic-surface"
       >
         {children}
       </div>

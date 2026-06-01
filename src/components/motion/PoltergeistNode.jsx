@@ -12,6 +12,8 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
     let currentX = 0;
     let currentY = 0;
 
+    let isIdle = true;
+
     const loop = () => {
       // 0 latency read from NervousSystem singleton
       const mx = ns.mousePos.x;
@@ -43,8 +45,10 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
         // Only update DOM if moving to save GPU
         if (Math.abs(currentX) > 0.1 || Math.abs(currentY) > 0.1) {
           el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-        } else {
+          isIdle = false;
+        } else if (!isIdle) {
           el.style.transform = `none`;
+          isIdle = true;
         }
       } else {
         // Fallback or low perf tier
@@ -52,8 +56,10 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
         currentY += (0 - currentY) * 0.1;
         if (Math.abs(currentX) > 0.1 || Math.abs(currentY) > 0.1) {
           el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
-        } else {
+          isIdle = false;
+        } else if (!isIdle) {
           el.style.transform = `none`;
+          isIdle = true;
         }
       }
 

@@ -43,10 +43,9 @@ export default function SchrodingersNode({ children, className = '' }) {
         currentBlur += (targetBlur - currentBlur) * 0.15; // Quantum collapse speed
 
         if (Math.abs(currentBlur - targetBlur) > 0.01) {
-          filterEl.setAttribute('stdDeviation', currentBlur.toFixed(2));
           if (currentBlur > 0.5) {
-            el.style.filter = `url(#${uuid})`;
-            el.style.opacity = (1 - (currentBlur / 15)).toFixed(2);
+            el.style.filter = `blur(${currentBlur.toFixed(2)}px)`;
+            el.style.opacity = (1 - (currentBlur / 25)).toFixed(2);
           } else {
             el.style.filter = 'none';
             el.style.opacity = '1';
@@ -64,19 +63,10 @@ export default function SchrodingersNode({ children, className = '' }) {
     loop();
 
     return () => cancelAnimationFrame(rafId);
-  }, [uuid]);
+  }, []);
 
   return (
     <div className={`schrodingers-wrapper ${className}`} style={{ display: 'inline-block' }}>
-      {/* Invisible SVG filter definition unique to this node */}
-      <svg style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none' }}>
-        <filter id={uuid}>
-          <feGaussianBlur ref={filterRef} in="SourceGraphic" stdDeviation="8" result="blur" />
-          <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-          <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-        </filter>
-      </svg>
-      
       <div ref={nodeRef} style={{ willChange: 'filter, opacity' }}>
         {children}
       </div>
