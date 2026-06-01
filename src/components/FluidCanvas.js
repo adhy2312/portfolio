@@ -9,7 +9,7 @@ export default function FluidCanvas() {
     if (ns.performanceTier < 2) return; // Only run on high-end machines
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    if (!canvas) return;
     
     let rafId;
     const uuid = 'fluid-canvas-1';
@@ -21,38 +21,18 @@ export default function FluidCanvas() {
     window.addEventListener('resize', resize);
     resize();
 
-    const unsubscribe = pipeline.subscribe(uuid, (data) => {
-      if (data.type === 'FLUID_RESULT') {
-        const { field } = data.payload; // Float32Array 16x16
-        
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw the fluid influence field
-        const cellW = canvas.width / 16;
-        const cellH = canvas.height / 16;
-        
-        for (let y = 0; y < 16; y++) {
-          for (let x = 0; x < 16; x++) {
-            const force = field[y * 16 + x];
-            if (force > 0) {
-              const alpha = Math.min(0.15, Math.abs(force) * 0.05); // Very subtle
-              ctx.fillStyle = `rgba(0, 255, 255, ${alpha})`;
-              ctx.fillRect(x * cellW, y * cellH, cellW, cellH);
-            }
-          }
-        }
-      }
-    });
-
+    const offscreen = canvas.transferControlToOffscreen();
+    
+    // Send the offscreen canvas to the worker
+    pipeline.dispatch('science', 'INIT_FLUID_OFFSCREEN', uuid, { canvas: offscreen }, [offscreen]);
+    
     let frame = 0;
 
     const loop = () => {
       frame++;
-      // Dispatch every 2 frames to halve the message passing overhead
-      // while allowing the fluid to diffuse naturally when idle
-      if (frame % 2 === 0) {
-        pipeline.dispatch('science', 'CALC_FLUID_TICK', uuid, {
-          width: canvas.width,
+      if (frame % 2 === 0) { // Throttle state updates to 60Hz, Worker renders at 144Hz
+        pipeline.dispatch('science', 'UPDATE_FLUID_STATE', uuid, {
+          width: canvas.width, 
           height: canvas.height,
           mouseX: ns.mousePos.x,
           mouseY: ns.mousePos.y,
@@ -66,9 +46,8 @@ export default function FluidCanvas() {
     loop();
 
     return () => {
-      window.removeEventListener('resize', resize);
-      unsubscribe();
       cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', resize);
     };
   }, []);
 

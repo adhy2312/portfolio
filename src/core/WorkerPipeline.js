@@ -35,9 +35,9 @@ class WorkerPipeline {
   }
 
   // Pipeline a heavy task to the correct engine
-  dispatch(engine, type, id, payload) {
+  dispatch(engine, type, id, payload, transferables = []) {
     if (!this.workers[engine]) return;
-    this.workers[engine].postMessage({ type, id, payload });
+    this.workers[engine].postMessage({ type, id, payload }, transferables);
   }
 
   // Listen for pipeline results

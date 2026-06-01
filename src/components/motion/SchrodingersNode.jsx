@@ -3,13 +3,10 @@ import ns from '../../core/NervousSystem';
 
 export default function SchrodingersNode({ children, className = '' }) {
   const nodeRef = useRef(null);
-  const [uuid] = useState(() => 'quantum-' + Math.random().toString(36).substr(2, 9));
-  const filterRef = useRef(null);
 
   useEffect(() => {
     const el = nodeRef.current;
-    const filterEl = filterRef.current;
-    if (!el || !filterEl) return;
+    if (!el) return;
 
     let rafId;
     let currentBlur = 8; // Starts blurred
@@ -19,7 +16,23 @@ export default function SchrodingersNode({ children, className = '' }) {
     
     let isAnimating = false;
 
+    let isVisible = false;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        lastScrollY = window.scrollY;
+        rafId = requestAnimationFrame(loop);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+    });
+
+    observer.observe(el);
+
     const loop = () => {
+      if (!isVisible) return;
+      
       // 0 latency read
       const mx = ns.mousePos.x;
       const my = ns.mousePos.y;
@@ -81,9 +94,10 @@ export default function SchrodingersNode({ children, className = '' }) {
       rafId = requestAnimationFrame(loop);
     };
 
-    loop();
-
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      observer.disconnect();
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   return (

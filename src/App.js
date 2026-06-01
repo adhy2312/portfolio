@@ -53,7 +53,6 @@ const dynamicImports = {
   SnakeGame: () => import('./components/SnakeGame'),
   GamesHub: () => import('./components/GamesHub'),
   StackVisualizer: () => import('./components/StackVisualizer'),
-  GravityWell: () => import('./components/GravityWell'),
   DigitalSeed: () => import('./components/DigitalSeed')
 };
 
@@ -80,7 +79,6 @@ const TicTacToe = lazy(dynamicImports.TicTacToe);
 const SnakeGame = lazy(dynamicImports.SnakeGame);
 const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
-const GravityWell = lazy(dynamicImports.GravityWell);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
@@ -385,9 +383,6 @@ function AppContent() {
       <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
       <LazySection name="Footer"><Footer /></LazySection>
 
-      {/* Gravity Well — Scroll Terminus (particles converge + signal decay) */}
-      <LazySection name="GravityWell"><GravityWell /></LazySection>
-      
       {/* The Seed of Life - Redefining digital permanence */}
       <Suspense fallback={null}>
         <DigitalSeed />

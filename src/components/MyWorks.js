@@ -132,10 +132,14 @@ const TiltCard = ({ children, project, index }) => {
       const rect = el.getBoundingClientRect();
       const xPct = (e.clientX - rect.left) / rect.width - 0.5;
       const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+      const relX = e.clientX - rect.left - rect.width / 2;
+      const relY = e.clientY - rect.top - rect.height / 2;
+      const angle = Math.atan2(relY, relX) * (180 / Math.PI);
 
       gsap.to(el, {
         rotateX: yPct * -20,
         rotateY: xPct * 20,
+        '--anisotropy-angle': `${angle}deg`,
         duration: 0.4,
         ease: 'power2.out',
         overwrite: 'auto',
@@ -170,7 +174,7 @@ const TiltCard = ({ children, project, index }) => {
         data-project-title={project.title}
         data-project-desc={project.description}
       >
-        <div className="work-card glass-card" style={{ transform: 'translateZ(50px)' }}>
+        <div className="work-card glass-card anisotropic-surface" style={{ transform: 'translateZ(50px)' }}>
           {showMemory ? (
             <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
               <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>

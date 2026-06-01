@@ -17,7 +17,23 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
     let rectCache = null;
     let lastScrollY = window.scrollY;
 
+    let isVisible = false;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) {
+        lastScrollY = window.scrollY;
+        rafId = requestAnimationFrame(loop);
+      } else {
+        cancelAnimationFrame(rafId);
+      }
+    });
+
+    observer.observe(el);
+
     const loop = () => {
+      if (!isVisible) return;
+      
       // 0 latency read from NervousSystem singleton
       const mx = ns.mousePos.x;
       const my = ns.mousePos.y;
@@ -41,14 +57,16 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
         let targetX = 0;
         let targetY = 0;
 
-        // Inverse distance field (Magnetic Pull)
+        // Magnetic pull physics
         if (dist < radius) {
-          const force = (radius - dist) / radius;
-          targetX = dx * force * strength;
-          targetY = dy * force * strength;
+          const pull = (1 - dist / radius) * strength;
+          targetX = dx * pull;
+          targetY = dy * pull;
+        } else {
+          targetX = 0;
+          targetY = 0;
         }
-
-        // Spring physics interpolation (lerp)
+        
         currentX += (targetX - currentX) * 0.1;
         currentY += (targetY - currentY) * 0.1;
 
@@ -80,9 +98,8 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
       rafId = requestAnimationFrame(loop);
     };
 
-    loop();
-
     return () => {
+      observer.disconnect();
       cancelAnimationFrame(rafId);
     };
   }, [radius, strength]);

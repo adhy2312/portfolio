@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Footer.css';
-import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiHeart, FiMessageCircle } from 'react-icons/fi';
+import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiMessageCircle } from 'react-icons/fi';
 import { client } from '../sanity';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -272,7 +272,7 @@ const Footer = () => {
             </div>
           </div>
           <div className="build-watermark">
-            {footerData?.buildVersion || "v9.0.0"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · GSAP 3 · Three.js · Sanity CMS
+            {footerData?.buildVersion || "v80.0.0 — The Performance Architecture"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · OffscreenCanvas Engine · GSAP
           </div>
         </div>
       </div>
