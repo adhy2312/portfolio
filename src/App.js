@@ -148,54 +148,27 @@ function AppContent() {
 
   useEffect(() => {
     const lenis = new Lenis({
-      lerp: 0.08,           // Premium buttery interpolation
-      wheelMultiplier: 0.8, // Slightly resistant wheel for luxurious feel
-      autoResize: true,
-      syncTouch: true,      // Crucial for mobile touch scroll bug
-      touchMultiplier: 2,   // Improve mobile scroll speed
+      lerp: 0.06,           // Premium Awwwards-style smoothness
+      wheelMultiplier: 1,   // Natural wheel speed
+      smoothWheel: true,
+      smoothTouch: false,   // Use native mobile momentum
+      syncTouch: true, 
+      touchMultiplier: 1.5,
     });
 
-    // Dedicated native RAF loop for flawless 144Hz scrolling unblocked by GSAP autoSleep
     let rafId;
     function raf(time) {
       lenis.raf(time);
       
       // ─── Emotional Bleed (Performance cost: 0) ───
-      // If the system gets tired (fatigue > 50), the UI visually bleeds/desaturates
-      if (ns) {
-        if (ns.performanceTier < 2) {
-          lenis.options.lerp = 0.15; // Snappier scroll to save CPU calculations
+      if (ns && ns.fatigue) {
+        const fatigue = ns.fatigue;
+        if (fatigue > 60) {
+          const desaturation = 1 - ((fatigue - 60) / 80); 
+          document.documentElement.style.setProperty('--global-saturation', Math.max(0.4, desaturation));
         } else {
-          lenis.options.lerp = 0.08; // Buttery smooth for high-end
+          document.documentElement.style.setProperty('--global-saturation', '1');
         }
-
-        if (ns.fatigue) {
-          const fatigue = ns.fatigue;
-          if (fatigue > 60) {
-            const desaturation = 1 - ((fatigue - 60) / 80); 
-            document.documentElement.style.setProperty('--global-saturation', Math.max(0.4, desaturation));
-          } else {
-            document.documentElement.style.setProperty('--global-saturation', '1');
-          }
-        }
-      }
-      
-      // ─── V40: Visual Doppler Shift (Lorentz Contraction) ───
-      // When scrolling incredibly fast, physically skew the UI
-      if (Math.abs(lenis.velocity) > 5) {
-        // Skew caps out at 15 degrees to prevent unreadable UI
-        const skewAmount = Math.max(-15, Math.min(15, lenis.velocity * 0.2));
-        document.documentElement.style.setProperty('--doppler-skew', `${skewAmount}deg`);
-      } else {
-        document.documentElement.style.setProperty('--doppler-skew', `0deg`);
-      }
-      
-      // ─── V60: Dynamic Hardware Accelerator ───
-      // Embed deep into the central scrolling architecture to guarantee 144Hz
-      if (Math.abs(lenis.velocity) > 1) {
-        ns.hardwareAccelerate(document.body, true);
-      } else if (Math.abs(lenis.velocity) === 0) {
-        ns.hardwareAccelerate(document.body, false);
       }
       
       rafId = requestAnimationFrame(raf);

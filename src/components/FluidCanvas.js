@@ -44,15 +44,13 @@ export default function FluidCanvas() {
       }
     });
 
-    let lastMouseX = -1000;
-    let lastMouseY = -1000;
+    let frame = 0;
 
     const loop = () => {
-      // Offload fluid force calculation ONLY if mouse actually moved
-      if (Math.abs(ns.mousePos.x - lastMouseX) > 1 || Math.abs(ns.mousePos.y - lastMouseY) > 1) {
-        lastMouseX = ns.mousePos.x;
-        lastMouseY = ns.mousePos.y;
-        
+      frame++;
+      // Dispatch every 2 frames to halve the message passing overhead
+      // while allowing the fluid to diffuse naturally when idle
+      if (frame % 2 === 0) {
         pipeline.dispatch('science', 'CALC_FLUID_TICK', uuid, {
           width: canvas.width,
           height: canvas.height,
