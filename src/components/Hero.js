@@ -9,6 +9,7 @@ import { motionTokens } from '../core/MotionGovernance';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import EntropyText from './motion/EntropyText';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
@@ -19,10 +20,6 @@ const Hero = () => {
   const heroRef = useRef(null);
   const contentRef = useRef(null);
   const greetingRef = useRef(null);
-  const taglineRef = useRef(null);
-  const spotlightRef = useRef(null);
-
-  const orchestrator = useOrchestrator();
 
   // GSAP Hero Entrance Timeline
   useEffect(() => {
@@ -44,19 +41,6 @@ const Hero = () => {
           duration: 1,
           ease: 'power4.out',
         }, 0.4);
-      }
-
-      // Tagline cinematic TextPlugin typing
-      if (taglineRef.current) {
-        gsap.set(taglineRef.current, { opacity: 1 });
-        tl.to(taglineRef.current, {
-          duration: 2.5,
-          text: {
-            value: heroData?.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER",
-            delimiter: ""
-          },
-          ease: "none"
-        }, 1.5);
       }
 
       // Split Text Reveal for Name using motionTokens
@@ -209,11 +193,8 @@ const Hero = () => {
 
         <LanguageTerminal />
 
-        <div
-          ref={taglineRef}
-          className="hero-tagline-premium"
-        >
-          {/* TextPlugin will type here */}
+        <div className="hero-tagline-premium">
+          <EntropyText text={displayData.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER"} />
         </div>
       </div>
     </section>

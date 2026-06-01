@@ -6,6 +6,8 @@ import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
 import Typography from './motion/Typography';
+import SchrodingersNode from './motion/SchrodingersNode';
+import PoltergeistNode from './motion/PoltergeistNode';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -163,26 +165,29 @@ const About = () => {
         <div className="about-grid">
           {/* Image side */}
           <div className="about-image-col">
-            <div
-              ref={imageWrapperRef}
-              className="about-img-wrapper"
-              style={{
-                transformStyle: "preserve-3d",
-                perspective: 1000
-              }}
-            >
-              <div style={{ overflow: 'hidden', borderRadius: '12px', width: '100%', height: '100%' }}>
-                <img 
-                  src={displayData.profileImage} 
-                  alt="Adhithya Mohan" 
-                  className="about-img" 
-                  style={{ transform: "translateZ(30px)", width: '100%', height: '100%', objectFit: 'cover' }} 
-                  loading="lazy"
-                  decoding="async"
-                />
+            <SchrodingersNode className="about-img-wrapper">
+              <div
+                ref={imageWrapperRef}
+                style={{
+                  transformStyle: "preserve-3d",
+                  perspective: 1000,
+                  width: '100%',
+                  height: '100%'
+                }}
+              >
+                <div style={{ overflow: 'hidden', borderRadius: '12px', width: '100%', height: '100%' }}>
+                  <img 
+                    src={displayData.profileImage} 
+                    alt="Adhithya Mohan" 
+                    className="about-img" 
+                    style={{ transform: "translateZ(30px)", width: '100%', height: '100%', objectFit: 'cover' }} 
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div className="about-img-glow" />
               </div>
-              <div className="about-img-glow" />
-            </div>
+            </SchrodingersNode>
           </div>
 
           {/* Text side */}
@@ -209,12 +214,13 @@ const About = () => {
               <Typography key={i} variant="split" as="p" className="about-p" text={p} />
             ))}
 
-            {/* Stats */}
             <div className="about-stats" ref={statsRef}>
               {displayData.stats.map((s, i) => (
                 <div key={i} className="about-stat">
-                  <span className="stat-value">{s.value}</span>
-                  <span className="stat-label">{s.label}</span>
+                  <PoltergeistNode radius={300} strength={0.25} className="stat-poltergeist">
+                    <span className="stat-value">{s.value}</span>
+                    <span className="stat-label">{s.label}</span>
+                  </PoltergeistNode>
                 </div>
               ))}
             </div>

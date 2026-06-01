@@ -726,9 +726,10 @@ body {
   width: 100%;
   min-height: 100vh;
   position: relative;
-  /* V20 Re-Amplifier: Off-screen aggressive culling */
-  content-visibility: auto;
-  contain-intrinsic-size: auto 1000px;
+  /* V40 Special Relativity (Doppler Skew) */
+  transform: skewY(var(--doppler-skew, 0deg));
+  transition: transform 0.1s linear;
+  will-change: transform;
 }
 .section-divider {
   width: 60px;

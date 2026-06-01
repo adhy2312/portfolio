@@ -5,8 +5,10 @@ import './index.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
+import DreamStateLoader from './components/DreamStateLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
 import DigitalTextures from './components/DigitalTextures';
+import FluidCanvas from './components/FluidCanvas';
 import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
 import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
@@ -18,36 +20,80 @@ import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
 import ns from './core/NervousSystem';
+import pipeline from './core/WorkerPipeline';
+
+// Initialize core pipelining
+pipeline.init();
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 
-// Lazy load below-the-fold components
-const About = lazy(() => import('./components/About'));
-const Skills = lazy(() => import('./components/Skills'));
-const Experience = lazy(() => import('./components/Experience'));
-const NeuralMap = lazy(() => import('./components/NeuralMap'));
-const Timeline = lazy(() => import('./components/Timeline'));
-const DigitalScars = lazy(() => import('./components/DigitalScars'));
-const Photography = lazy(() => import('./components/Photography'));
-const HowIThink = lazy(() => import('./components/HowIThink'));
-const MyWorks = lazy(() => import('./components/MyWorks'));
-const Achievements = lazy(() => import('./components/Achievements'));
-const Testimonials = lazy(() => import('./components/Testimonials'));
-const TrustedBy = lazy(() => import('./components/TrustedBy'));
-const Contact = lazy(() => import('./components/Contact'));
-const Footer = lazy(() => import('./components/Footer'));
-const CallToAction = lazy(() => import('./components/CallToAction'));
-const QuoteCanvas = lazy(() => import('./components/QuoteCanvas'));
-const ScrollProgress = lazy(() => import('./components/ScrollProgress'));
-const ZipGame = lazy(() => import('./components/ZipGame'));
-const TicTacToe = lazy(() => import('./components/TicTacToe'));
-const SnakeGame = lazy(() => import('./components/SnakeGame'));
-const GamesHub = lazy(() => import('./components/GamesHub'));
-const StackVisualizer = lazy(() => import('./components/StackVisualizer'));
-const GravityWell = lazy(() => import('./components/GravityWell'));
-const DigitalSeed = lazy(() => import('./components/DigitalSeed'));
+// Export dictionary of imports for ML Prefetching
+const dynamicImports = {
+  About: () => import('./components/About'),
+  Skills: () => import('./components/Skills'),
+  Experience: () => import('./components/Experience'),
+  NeuralMap: () => import('./components/NeuralMap'),
+  Timeline: () => import('./components/Timeline'),
+  DigitalScars: () => import('./components/DigitalScars'),
+  Photography: () => import('./components/Photography'),
+  HowIThink: () => import('./components/HowIThink'),
+  MyWorks: () => import('./components/MyWorks'),
+  Achievements: () => import('./components/Achievements'),
+  Testimonials: () => import('./components/Testimonials'),
+  TrustedBy: () => import('./components/TrustedBy'),
+  Contact: () => import('./components/Contact'),
+  Footer: () => import('./components/Footer'),
+  CallToAction: () => import('./components/CallToAction'),
+  QuoteCanvas: () => import('./components/QuoteCanvas'),
+  ScrollProgress: () => import('./components/ScrollProgress'),
+  ZipGame: () => import('./components/ZipGame'),
+  TicTacToe: () => import('./components/TicTacToe'),
+  SnakeGame: () => import('./components/SnakeGame'),
+  GamesHub: () => import('./components/GamesHub'),
+  StackVisualizer: () => import('./components/StackVisualizer'),
+  GravityWell: () => import('./components/GravityWell'),
+  DigitalSeed: () => import('./components/DigitalSeed')
+};
+
+// Wrap dictionary into React.lazy
+const About = lazy(dynamicImports.About);
+const Skills = lazy(dynamicImports.Skills);
+const Experience = lazy(dynamicImports.Experience);
+const NeuralMap = lazy(dynamicImports.NeuralMap);
+const Timeline = lazy(dynamicImports.Timeline);
+const DigitalScars = lazy(dynamicImports.DigitalScars);
+const Photography = lazy(dynamicImports.Photography);
+const HowIThink = lazy(dynamicImports.HowIThink);
+const MyWorks = lazy(dynamicImports.MyWorks);
+const Achievements = lazy(dynamicImports.Achievements);
+const Testimonials = lazy(dynamicImports.Testimonials);
+const TrustedBy = lazy(dynamicImports.TrustedBy);
+const Contact = lazy(dynamicImports.Contact);
+const Footer = lazy(dynamicImports.Footer);
+const CallToAction = lazy(dynamicImports.CallToAction);
+const QuoteCanvas = lazy(dynamicImports.QuoteCanvas);
+const ScrollProgress = lazy(dynamicImports.ScrollProgress);
+const ZipGame = lazy(dynamicImports.ZipGame);
+const TicTacToe = lazy(dynamicImports.TicTacToe);
+const SnakeGame = lazy(dynamicImports.SnakeGame);
+const GamesHub = lazy(dynamicImports.GamesHub);
+const StackVisualizer = lazy(dynamicImports.StackVisualizer);
+const GravityWell = lazy(dynamicImports.GravityWell);
+const DigitalSeed = lazy(dynamicImports.DigitalSeed);
+
+// ML Prefetch Listener (Predictive Pre-Computation)
+if (typeof window !== 'undefined') {
+  window.addEventListener('ml-prefetch', (e) => {
+    const target = e.detail?.target;
+    if (target && dynamicImports[target]) {
+      // Proactively call the import() promise to load the bundle 
+      // into browser cache before React Suspense hits it.
+      dynamicImports[target]();
+    }
+  });
+}
 
 function LazySection({ name, children }) {
   const ref = React.useRef();
@@ -83,6 +129,13 @@ function AppContent() {
   useSolarLighting();
   const [activeGame, setActiveGame] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [dreamState, setDreamState] = useState(() => {
+    try {
+      const memory = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+      const last = memory.lastInteraction || Date.now();
+      return (Date.now() - last > 3600000); // 1 hour offline
+    } catch { return false; }
+  });
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
@@ -125,6 +178,16 @@ function AppContent() {
             document.documentElement.style.setProperty('--global-saturation', '1');
           }
         }
+      }
+      
+      // ─── V40: Visual Doppler Shift (Lorentz Contraction) ───
+      // When scrolling incredibly fast, physically skew the UI
+      if (Math.abs(lenis.velocity) > 5) {
+        // Skew caps out at 15 degrees to prevent unreadable UI
+        const skewAmount = Math.max(-15, Math.min(15, lenis.velocity * 0.2));
+        document.documentElement.style.setProperty('--doppler-skew', `${skewAmount}deg`);
+      } else {
+        document.documentElement.style.setProperty('--doppler-skew', `0deg`);
       }
       
       rafId = requestAnimationFrame(raf);
@@ -295,6 +358,7 @@ function AppContent() {
 
   return (
     <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+      {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
 
       {tranceMode && (
         <div className="trance-overlay-container">
@@ -305,6 +369,7 @@ function AppContent() {
 
       <AmbientThoughts />
       <DigitalSoul />
+      <FluidCanvas />
 
       <Suspense fallback={null}>
         <ScrollProgress />

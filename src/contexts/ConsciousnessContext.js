@@ -240,6 +240,14 @@ export const ConsciousnessProvider = ({ children }) => {
         if (!matrix[fromSec]) matrix[fromSec] = {};
         matrix[fromSec][activeSection] = (matrix[fromSec][activeSection] || 0) + 1;
         
+        // ─── EVOLUTION: Normalize to prevent static lock-in (Forget ancient history) ───
+        const totalConnections = Object.values(matrix[fromSec]).reduce((a,b) => a+b, 0);
+        if (totalConnections > 50) { // Keep history tight to adapt quickly
+          for (const key in matrix[fromSec]) {
+            matrix[fromSec][key] = Math.max(1, Math.floor(matrix[fromSec][key] * 0.5));
+          }
+        }
+        
         // Predict NEXT move based on new activeSection
         const nextTransitions = matrix[activeSection];
         if (nextTransitions) {
@@ -267,6 +275,11 @@ export const ConsciousnessProvider = ({ children }) => {
       setDigitalEchoes(prev => {
         const newHeatmap = { ...prev.sectionHeatmap };
         newHeatmap[activeSection] = (newHeatmap[activeSection] || 0) + timeSpent;
+        
+        // ─── EVOLUTION: Decay Heatmap (Continuous Adaptation) ───
+        for (const key in newHeatmap) {
+          if (key !== activeSection) newHeatmap[key] *= 0.99; // Forget old sections
+        }
 
         // ─── ML AMPLIFICATION: Persona Classification ───
         const devScore = (newHeatmap['Skills'] || 0) + (newHeatmap['Projects'] || 0) + (newHeatmap['Timeline'] || 0);

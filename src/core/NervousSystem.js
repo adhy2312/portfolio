@@ -133,6 +133,7 @@ class NervousSystem {
     // ─── INPUT STATE ─────────────────────────────────────
     this.mousePos  = { x: -1000, y: -1000 };
     this.scrollPos = 0;
+    this.gravity   = { x: 0, y: 0 }; // V30 Biometric Gravity Engine
     this.isMoving  = false;
     this._idleMovTimer = null;
 
@@ -250,6 +251,17 @@ class NervousSystem {
     if (this._isRunning) return;
     this._isRunning = true;
 
+    // V30 Biometric Gravity Engine
+    if (typeof window !== 'undefined' && window.DeviceOrientationEvent) {
+      window.addEventListener('deviceorientation', (e) => {
+        // Clamp and normalize beta (x-tilt) and gamma (y-tilt)
+        const beta = e.beta ? Math.max(-45, Math.min(45, e.beta)) : 0;
+        const gamma = e.gamma ? Math.max(-45, Math.min(45, e.gamma)) : 0;
+        this.gravity.x = gamma / 45; // -1 to 1
+        this.gravity.y = beta / 45;  // -1 to 1
+      }, { passive: true });
+    }
+
     this._lastFpsTime = performance.now();
     this._lastTime    = performance.now();
 
@@ -326,6 +338,12 @@ class NervousSystem {
       const hbSpeed = this.performanceTier >= 2 ? 0.001 : 0.0005;
       this.state._heartbeatPhase += delta * hbSpeed * Math.max(0.2, 1 - this.fatigue / 100);
       this.state.heartbeatValue   = Math.sin(this.state._heartbeatPhase);
+
+      // ─── Biometric Gravity Flush ───
+      if (this.gravity.x !== 0 || this.gravity.y !== 0) {
+        document.documentElement.style.setProperty('--gravity-x', this.gravity.x);
+        document.documentElement.style.setProperty('--gravity-y', this.gravity.y);
+      }
 
       if (this.isMoving && time - this._lastMoveTime > 2000) {
         this.isMoving = false;

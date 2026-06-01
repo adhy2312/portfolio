@@ -47,8 +47,14 @@ const LocalRainCanvas = () => {
           return;
         }
         this.wobble += this.wobbleS;
-        this.x += Math.sin(this.wobble) * this.wobbleA;
-        this.y += this.vy;
+        
+        // V30 Biometric Gravity Integration
+        const gx = ns.gravity ? ns.gravity.x * 2.5 : 0;
+        const gy = ns.gravity ? ns.gravity.y * 2.5 : 0;
+        
+        this.x += (Math.sin(this.wobble) * this.wobbleA) + gx;
+        this.y += this.vy + gy;
+        
         this.x = Math.max(this.r, Math.min(canvas.width - this.r, this.x));
         if (this.y >= canvas.height - this.r - 3) {
           this.y = canvas.height - this.r - 3;

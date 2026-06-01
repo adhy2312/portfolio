@@ -109,6 +109,14 @@ self.addEventListener('message', (e) => {
       globalMemory.events[payload.event]++;
       globalMemory.totalInteractions++;
       globalMemory.lastInteraction = Date.now();
+      
+      // EVOLUTION: Prevent infinite integer growth (Normalize every 100 interactions)
+      if (globalMemory.totalInteractions % 100 === 0) {
+        for (const key in globalMemory.events) {
+          globalMemory.events[key] = Math.max(1, Math.floor(globalMemory.events[key] * 0.8));
+        }
+      }
+      
       self.postMessage({ type: 'SAVE_MEMORY', payload: globalMemory });
       break;
     case 'TICK':
