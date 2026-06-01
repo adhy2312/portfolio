@@ -10,6 +10,7 @@ import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EntropyText from './motion/EntropyText';
+import LiquidText from './motion/LiquidText';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
@@ -165,30 +166,32 @@ const Hero = () => {
         >
           {displayData.greeting}
         </div>
-        <h1 className="hero-name-giant metallic-reveal">
-          {(() => {
-            const nameStr = displayData.name;
-            const words = nameStr.split(" ");
-            return words.map((word, wordIdx) => {
-              return (
-                <span key={wordIdx} className="hero-name-word">
-                  {word.split("").map((char, charIdx) => (
-                    <span
-                      key={charIdx}
-                      className="metallic-char char-typed-hidden"
-                      style={{ display: 'inline-block' }}
-                    >
-                      {char}
-                    </span>
-                  ))}
-                  {wordIdx < words.length - 1 && (
-                    <span className="hero-name-spacer">&nbsp;</span>
-                  )}
-                </span>
-              );
-            });
-          })()}
-        </h1>
+        <LiquidText>
+          <h1 className="hero-name-giant metallic-reveal">
+            {(() => {
+              const nameStr = displayData.name;
+              const words = nameStr.split(" ");
+              return words.map((word, wordIdx) => {
+                return (
+                  <span key={wordIdx} className="hero-name-word">
+                    {word.split("").map((char, charIdx) => (
+                      <span
+                        key={charIdx}
+                        className="metallic-char char-typed-hidden"
+                        style={{ display: 'inline-block' }}
+                      >
+                        {char}
+                      </span>
+                    ))}
+                    {wordIdx < words.length - 1 && (
+                      <span className="hero-name-spacer">&nbsp;</span>
+                    )}
+                  </span>
+                );
+              });
+            })()}
+          </h1>
+        </LiquidText>
 
 
         <LanguageTerminal />

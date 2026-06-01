@@ -343,35 +343,15 @@ const DigitalSoul = () => {
       whisperState.current.cooldown = 10000;
     };
     window.addEventListener('system-boot', handleBoot);
-    
-    const handlePersona = (e) => {
-      if (!whisperRef.current) return;
-      const { persona } = e.detail || {};
-      let msg = "";
-      if (persona === 'Developer') msg = "ah, a fellow developer...";
-      else if (persona === 'Recruiter') msg = "seeking talent...";
-      else if (persona === 'Creator') msg = "an eye for design...";
-      else return;
-
-      whisperRef.current.textContent = msg;
-      whisperRef.current.classList.add('whisper-visible');
-      whisperState.current.timer = 5000;
-      whisperState.current.visible = true;
-      whisperState.current.cooldown = 10000;
-    };
-    window.addEventListener('persona-shift', handlePersona);
 
     return () => {
       window.removeEventListener('system-boot', handleBoot);
-      window.removeEventListener('persona-shift', handlePersona);
     };
   }, []);
 
   return (
     <div ref={soulRef} className="digital-soul">
       <div className="soul-core" />
-      <div className="soul-aura" />
-      <div className="soul-aura-outer" />
       <div className="soul-whisper" ref={whisperRef} />
     </div>
   );

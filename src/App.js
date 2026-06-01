@@ -14,6 +14,7 @@ import { ConsciousnessProvider, useConsciousness } from './contexts/Consciousnes
 import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
 import AmbientThoughts from './components/AmbientThoughts';
 import DigitalSoul from './components/DigitalSoul';
+import LiquidFilterDef from './components/motion/LiquidFilterDef';
 import { useSolarLighting } from './hooks/useSolarLighting';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
@@ -46,14 +47,15 @@ const dynamicImports = {
   Contact: () => import('./components/Contact'),
   Footer: () => import('./components/Footer'),
   CallToAction: () => import('./components/CallToAction'),
-  QuoteCanvas: () => import('./components/QuoteCanvas'),
   ScrollProgress: () => import('./components/ScrollProgress'),
   ZipGame: () => import('./components/ZipGame'),
   TicTacToe: () => import('./components/TicTacToe'),
   SnakeGame: () => import('./components/SnakeGame'),
   GamesHub: () => import('./components/GamesHub'),
   StackVisualizer: () => import('./components/StackVisualizer'),
-  DigitalSeed: () => import('./components/DigitalSeed')
+  DigitalSeed: () => import('./components/DigitalSeed'),
+  KineticMarquee: () => import('./components/motion/KineticMarquee'),
+  CustomCursor: () => import('./components/motion/CustomCursor')
 };
 
 // Wrap dictionary into React.lazy
@@ -72,7 +74,6 @@ const TrustedBy = lazy(dynamicImports.TrustedBy);
 const Contact = lazy(dynamicImports.Contact);
 const Footer = lazy(dynamicImports.Footer);
 const CallToAction = lazy(dynamicImports.CallToAction);
-const QuoteCanvas = lazy(dynamicImports.QuoteCanvas);
 const ScrollProgress = lazy(dynamicImports.ScrollProgress);
 const ZipGame = lazy(dynamicImports.ZipGame);
 const TicTacToe = lazy(dynamicImports.TicTacToe);
@@ -80,6 +81,8 @@ const SnakeGame = lazy(dynamicImports.SnakeGame);
 const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
+const KineticMarquee = lazy(dynamicImports.KineticMarquee);
+const CustomCursor = lazy(dynamicImports.CustomCursor);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
 if (typeof window !== 'undefined') {
@@ -337,6 +340,7 @@ function AppContent() {
 
   return (
     <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+      <LiquidFilterDef />
       {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
 
       {tranceMode && (
@@ -379,8 +383,8 @@ function AppContent() {
       <LazySection name="DigitalScars"><DigitalScars /></LazySection>
       <LazySection name="CallToAction"><CallToAction /></LazySection>
       <LazySection name="Contact"><Contact /></LazySection>
-      <LazySection name="QuoteCanvas"><QuoteCanvas /></LazySection>
       <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
+      <LazySection name="KineticMarquee"><KineticMarquee /></LazySection>
       <LazySection name="Footer"><Footer /></LazySection>
 
       {/* The Seed of Life - Redefining digital permanence */}
