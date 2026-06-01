@@ -143,6 +143,29 @@ class NervousSystem {
   }
 
   // ════════════════════════════════════════
+  // HARDWARE ACCELERATOR
+  // ════════════════════════════════════════
+  
+  /**
+   * Dynamically promotes DOM elements to a dedicated GPU layer.
+   * Toggle isAnimating to 'false' when idle to prevent VRAM exhaustion.
+   */
+  hardwareAccelerate(element, isAnimating = true) {
+    if (!element || !element.style) return;
+    if (isAnimating) {
+      element.style.willChange = 'transform, opacity, filter';
+      element.style.backfaceVisibility = 'hidden';
+      // Force hardware compositing without overwriting existing transforms
+      if (!element.style.transform.includes('translateZ')) {
+         element.style.transform += ' translateZ(0px)';
+      }
+    } else {
+      element.style.willChange = 'auto';
+      element.style.transform = element.style.transform.replace(' translateZ(0px)', '');
+    }
+  }
+
+  // ════════════════════════════════════════
   // EVENT BUS API (backward-compatible with NeuralEventBus)
   // ════════════════════════════════════════
 

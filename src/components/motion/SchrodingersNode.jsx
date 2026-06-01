@@ -14,17 +14,27 @@ export default function SchrodingersNode({ children, className = '' }) {
     let rafId;
     let currentBlur = 8; // Starts blurred
     
+    let rectCache = null;
+    let lastScrollY = window.scrollY;
+    
+    let isAnimating = false;
+
     const loop = () => {
       // 0 latency read
       const mx = ns.mousePos.x;
       const my = ns.mousePos.y;
 
+      if (Math.abs(window.scrollY - lastScrollY) > 5) {
+        rectCache = null;
+        lastScrollY = window.scrollY;
+      }
+
       if (mx !== -1000 && ns.performanceTier >= 2) {
-        const rect = el.getBoundingClientRect();
+        if (!rectCache) rectCache = el.getBoundingClientRect();
         
         // Check if cursor is directly observing it (hovering or nearby)
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        const centerX = rectCache.left + rectCache.width / 2;
+        const centerY = rectCache.top + rectCache.height / 2;
         const dx = mx - centerX;
         const dy = my - centerY;
         const dist = Math.sqrt(dx * dx + dy * dy);
@@ -43,6 +53,10 @@ export default function SchrodingersNode({ children, className = '' }) {
         currentBlur += (targetBlur - currentBlur) * 0.15; // Quantum collapse speed
 
         if (Math.abs(currentBlur - targetBlur) > 0.01) {
+          if (!isAnimating) {
+            ns.hardwareAccelerate(el, true);
+            isAnimating = true;
+          }
           if (currentBlur > 0.5) {
             el.style.filter = `blur(${currentBlur.toFixed(2)}px)`;
             el.style.opacity = (1 - (currentBlur / 25)).toFixed(2);
@@ -50,11 +64,18 @@ export default function SchrodingersNode({ children, className = '' }) {
             el.style.filter = 'none';
             el.style.opacity = '1';
           }
+        } else if (isAnimating) {
+          ns.hardwareAccelerate(el, false);
+          isAnimating = false;
         }
       } else {
         // Fallback for low perf
         el.style.filter = 'none';
         el.style.opacity = '1';
+        if (isAnimating) {
+          ns.hardwareAccelerate(el, false);
+          isAnimating = false;
+        }
       }
 
       rafId = requestAnimationFrame(loop);

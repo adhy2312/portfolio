@@ -14,15 +14,25 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
 
     let isIdle = true;
 
+    let rectCache = null;
+    let lastScrollY = window.scrollY;
+
     const loop = () => {
       // 0 latency read from NervousSystem singleton
       const mx = ns.mousePos.x;
       const my = ns.mousePos.y;
 
+      // Invalidate cache on scroll to prevent layout thrashing
+      if (Math.abs(window.scrollY - lastScrollY) > 5) {
+        rectCache = null;
+        lastScrollY = window.scrollY;
+      }
+
       if (mx !== -1000 && ns.performanceTier >= 2) {
-        const rect = el.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.top + rect.height / 2;
+        if (!rectCache) rectCache = el.getBoundingClientRect();
+        
+        const centerX = rectCache.left + rectCache.width / 2;
+        const centerY = rectCache.top + rectCache.height / 2;
 
         const dx = mx - centerX;
         const dy = my - centerY;
@@ -44,10 +54,12 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
 
         // Only update DOM if moving to save GPU
         if (Math.abs(currentX) > 0.1 || Math.abs(currentY) > 0.1) {
+          if (isIdle) ns.hardwareAccelerate(el, true);
           el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
           isIdle = false;
         } else if (!isIdle) {
           el.style.transform = `none`;
+          ns.hardwareAccelerate(el, false);
           isIdle = true;
         }
       } else {
@@ -55,10 +67,12 @@ export default function PoltergeistNode({ children, radius = 400, strength = 0.5
         currentX += (0 - currentX) * 0.1;
         currentY += (0 - currentY) * 0.1;
         if (Math.abs(currentX) > 0.1 || Math.abs(currentY) > 0.1) {
+          if (isIdle) ns.hardwareAccelerate(el, true);
           el.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
           isIdle = false;
         } else if (!isIdle) {
           el.style.transform = `none`;
+          ns.hardwareAccelerate(el, false);
           isIdle = true;
         }
       }

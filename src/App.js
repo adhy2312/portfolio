@@ -190,6 +190,14 @@ function AppContent() {
         document.documentElement.style.setProperty('--doppler-skew', `0deg`);
       }
       
+      // ─── V60: Dynamic Hardware Accelerator ───
+      // Embed deep into the central scrolling architecture to guarantee 144Hz
+      if (Math.abs(lenis.velocity) > 1) {
+        ns.hardwareAccelerate(document.body, true);
+      } else if (Math.abs(lenis.velocity) === 0) {
+        ns.hardwareAccelerate(document.body, false);
+      }
+      
       rafId = requestAnimationFrame(raf);
     }
     rafId = requestAnimationFrame(raf);
