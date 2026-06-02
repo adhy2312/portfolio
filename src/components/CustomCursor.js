@@ -27,6 +27,8 @@ const CustomCursor = () => {
   const isExpRef = useRef(isExperimental);
   const visibleRef = useRef(visible);
   const stateRef = useRef(cursorState);
+  // Cache last hovered element to skip redundant state computation
+  const lastHoverTarget = useRef(null);
   
   useEffect(() => { isExpRef.current = isExperimental; }, [isExperimental]);
   useEffect(() => { visibleRef.current = visible; }, [visible]);
@@ -88,6 +90,9 @@ const CustomCursor = () => {
 
     const onOver = (e) => {
       const el = e.target;
+      // Skip re-computation if still on the same element
+      if (el === lastHoverTarget.current) return;
+      lastHoverTarget.current = el;
       
       // Check for AI Project Hover
       const aiProject = el.closest('[data-cursor-ai="true"]');
@@ -112,7 +117,10 @@ const CustomCursor = () => {
       else if (isHover) next = 'hover';
       else if (isText) next = 'text';
 
-      setCursorState(prev => prev !== next ? next : prev);
+      // Only call setState when state genuinely changes
+      if (stateRef.current !== next) {
+        setCursorState(next);
+      }
     };
 
     const onMouseDown = () => {

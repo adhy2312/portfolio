@@ -288,18 +288,16 @@ export function useMagneticHover(strength = 0.3) {
     if (!ref.current || isMobile() || prefersReducedMotion()) return;
 
     const el = ref.current;
+    // quickTo avoids creating a new tween object on every mousemove
+    const xTo = gsap.quickTo(el, 'x', { duration: motionTokens.duration.fast, ease: 'power2.out' });
+    const yTo = gsap.quickTo(el, 'y', { duration: motionTokens.duration.fast, ease: 'power2.out' });
 
     const handleMouseMove = (e) => {
       const rect = el.getBoundingClientRect();
       const x = e.clientX - rect.left - rect.width / 2;
       const y = e.clientY - rect.top - rect.height / 2;
-
-      gsap.to(el, {
-        x: x * strength,
-        y: y * strength,
-        duration: motionTokens.duration.fast,
-        ease: 'power2.out',
-      });
+      xTo(x * strength);
+      yTo(y * strength);
     };
 
     const handleMouseLeave = () => {

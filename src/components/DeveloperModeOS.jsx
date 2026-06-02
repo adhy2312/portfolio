@@ -24,7 +24,6 @@ const FrequencyCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
-    let raf;
     let particles = Array.from({ length: 50 }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
@@ -40,7 +39,8 @@ const FrequencyCanvas = () => {
     resize();
     window.addEventListener('resize', resize);
 
-    const draw = () => {
+    // Register into the unified NervousSystem loop instead of running a competing rAF
+    ns.register('frequency-canvas', () => {
       ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
       
@@ -67,13 +67,11 @@ const FrequencyCanvas = () => {
           ctx.stroke();
         }
       });
-      raf = requestAnimationFrame(draw);
-    };
-    draw();
+    }, { priority: 'LOW' }); // LOW priority so it drops when system is fatigued
 
     return () => {
       window.removeEventListener('resize', resize);
-      cancelAnimationFrame(raf);
+      ns.unregister('frequency-canvas');
     };
   }, []);
 

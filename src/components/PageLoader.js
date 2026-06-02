@@ -41,7 +41,7 @@ const PageLoader = ({ onDone }) => {
     // Pure GSAP timeline — zero React state updates, zero setTimeouts, zero re-renders.
     const tl = gsap.timeline();
     const totalLangs = LANG_NAMES.length;
-    const perLang = 0.18; // seconds per language step
+    const perLang = 0.35; // seconds per language step - slower to feel the essence
 
     LANG_NAMES.forEach((item, i) => {
       const progress = Math.min(100, Math.floor((i / (totalLangs - 1)) * 100));
@@ -69,15 +69,15 @@ const PageLoader = ({ onDone }) => {
     });
 
     // Short pause on final "ADHY"
-    tl.to({}, { duration: 0.15 });
+    tl.to({}, { duration: 0.8 });
 
     // 1. Stagger exit the text content
     if (contentRef.current) {
       tl.to(contentRef.current.children, {
         y: -30,
         opacity: 0,
-        stagger: 0.05,
-        duration: 0.35,
+        stagger: 0.1,
+        duration: 0.5,
         ease: 'power2.in'
       });
     }
@@ -86,10 +86,10 @@ const PageLoader = ({ onDone }) => {
     if (loaderRef.current) {
       tl.to(loaderRef.current, {
         yPercent: -100,
-        duration: 0.7,
+        duration: 1.2,
         ease: 'power4.inOut',
         onComplete: onDone,
-      }, "-=0.08");
+      }, "-=0.1");
     }
 
     return () => tl.kill();
