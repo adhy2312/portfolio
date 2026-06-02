@@ -91,6 +91,8 @@ html, body {
   background-size: 40px 40px;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 
@@ -105,7 +107,6 @@ html, body {
 }
 
 html {
-  scroll-behavior: smooth;
   font-size: 16px;
   max-width: 100vw;
   overflow-x: hidden;
@@ -360,13 +361,14 @@ body.darkroom-active {
 .glass-card {
   position: relative;
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* Removed heavy backdrop-filter blur for massive scroll perf boost */
   border: var(--border-brutal);
   border-radius: var(--border-radius-bento);
   box-shadow: var(--shadow-brutal);
   transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth);
   overflow: hidden;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 @media (max-width: 768px) {
@@ -469,6 +471,8 @@ body.darkroom-active {
   background-size: 60px 60px;
   pointer-events: none;
   z-index: 0;
+  will-change: transform;
+  transform: translateZ(0);
 }
 /* Mobile: keep but make it even more subtle */
 @media (max-width: 768px) {
