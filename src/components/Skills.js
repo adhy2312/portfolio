@@ -6,6 +6,7 @@ import { useStory } from '../contexts/StoryContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import MagneticButton from './MagneticButton';
+import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -322,6 +323,17 @@ const Skills = () => {
 
   return (
     <section className="skills" id="skills" ref={sectionRef}>
+      <ExpertDoc 
+        title="Skills.js"
+        notes="Dynamic CMS-driven Bento Grid."
+        data={{
+          'componentLayout': 'CSS Grid + Flexbox',
+          'animationEngine': 'GSAP Timelines',
+          'physics': 'MagneticButton (Custom Spring Hook)',
+          'contentFetch': 'Sanity CMS (fallback to static array)',
+          'interactiveNodes': 'Toolchip Hover Snippets'
+        }}
+      />
       <div className="container">
         <div className="skills-header" ref={headerRef}>
           <span className="section-label">{"// what I know"}</span>
@@ -343,7 +355,7 @@ const Skills = () => {
         </div>
 
         {/* Skill category cards */}
-        <div className="skills-grid" ref={gridRef}>
+        <div className="bento-grid" ref={gridRef}>
           {displayCategories.map((cat, catIdx) => (
             <SkillCard key={catIdx} cat={cat} iconMap={iconMap} />
           ))}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import './PageLoader.css';
 
@@ -22,79 +22,14 @@ const LANG_NAMES = [
   { text: 'ADHY',      lang: 'English'    }, // return home
 ];
 
-// Glitch chars used during transition
-const GLITCH_CHARS = '█▓▒░▄▀■□▪▫◆◇○●';
-
-function useGlitchCycle(names, intervalMs = 700) {
-  const [display, setDisplay] = useState(names[0].text);
-  const [langLabel, setLangLabel] = useState(names[0].lang);
-  const [isGlitching, setIsGlitching] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const idxRef = useRef(0);
-  const rafRef = useRef(null);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    const glitchTransition = (targetText, targetLang, targetIndex, onDone) => {
-      setIsGlitching(true);
-      let frame = 0;
-      const totalFrames = 4; // ultra-fast glitch (60ms total)
-
-      const tick = () => {
-        if (cancelled) return;
-        frame++;
-        if (frame < totalFrames) {
-          const scrambled = Array.from(
-            { length: Math.max(targetText.length, 4) },
-            () => GLITCH_CHARS[Math.floor(Math.random() * GLITCH_CHARS.length)]
-          ).join('');
-          setDisplay(scrambled);
-          rafRef.current = setTimeout(tick, 15);
-        } else {
-          setDisplay(targetText);
-          setLangLabel(targetLang);
-          setCurrentIndex(targetIndex);
-          setIsGlitching(false);
-          onDone();
-        }
-      };
-      tick();
-    };
-
-    const advance = () => {
-      if (cancelled) return;
-      if (idxRef.current >= names.length - 1) return; // Stop exactly on the last item
-      
-      idxRef.current = idxRef.current + 1;
-      const next = names[idxRef.current];
-      glitchTransition(next.text, next.lang, idxRef.current, () => {
-        if (!cancelled && idxRef.current < names.length - 1) {
-          rafRef.current = setTimeout(advance, intervalMs);
-        }
-      });
-    };
-
-    rafRef.current = setTimeout(advance, intervalMs);
-
-    return () => {
-      cancelled = true;
-      clearTimeout(rafRef.current);
-    };
-  }, [names, intervalMs]);
-
-  return { display, langLabel, isGlitching, currentIndex };
-}
-
 const PageLoader = ({ onDone }) => {
-  const [phrase, setPhrase] = useState(PHRASES[0]);
-  
   const loaderRef = useRef(null);
   const barRef = useRef(null);
   const contentRef = useRef(null);
-  
-  // High-speed sequence: ~120ms wait + 60ms glitch = 180ms per language. Total time: ~1.6s.
-  const { display, langLabel, isGlitching, currentIndex } = useGlitchCycle(LANG_NAMES, 120);
+  const nameRef = useRef(null);
+  const langRef = useRef(null);
+  const phraseRef = useRef(null);
+  const hasExitedRef = useRef(false);
 
   useEffect(() => {
     // Performance optimization: Instantly finish loader for Lighthouse
@@ -103,66 +38,82 @@ const PageLoader = ({ onDone }) => {
       return;
     }
 
-    // Map progress definitively to the language index
-    const calcProgress = Math.min(100, Math.floor((currentIndex / (LANG_NAMES.length - 1)) * 100));
-    
-    // GSAP interpolated progress bar width
-    if (barRef.current) {
-      gsap.to(barRef.current, { width: `${calcProgress}%`, duration: 0.3, ease: 'power2.out' });
-    }
-    
-    // Map phrases 0-3
-    const phraseIdx = Math.min(PHRASES.length - 1, Math.floor((calcProgress / 100) * PHRASES.length));
-    setPhrase(PHRASES[phraseIdx]);
+    // Pure GSAP timeline — zero React state updates, zero setTimeouts, zero re-renders.
+    const tl = gsap.timeline();
+    const totalLangs = LANG_NAMES.length;
+    const perLang = 0.18; // seconds per language step
 
-    if (currentIndex >= LANG_NAMES.length - 1 && !isGlitching) {
-      // Premium GSAP Cinematic Exit Sequence
-      const tl = gsap.timeline({
-        onComplete: onDone,
-        delay: 0.15 // Pause on the final English ADHY for a split second
+    LANG_NAMES.forEach((item, i) => {
+      const progress = Math.min(100, Math.floor((i / (totalLangs - 1)) * 100));
+      const phraseIdx = Math.min(PHRASES.length - 1, Math.floor((progress / 100) * PHRASES.length));
+
+      tl.call(() => {
+        // Direct DOM writes — no React setState
+        if (nameRef.current) nameRef.current.textContent = item.text;
+        if (langRef.current) langRef.current.textContent = item.lang;
+        if (phraseRef.current) phraseRef.current.textContent = PHRASES[phraseIdx];
+      }, null, i * perLang);
+
+      // Animate progress bar
+      tl.to(barRef.current, {
+        width: `${progress}%`,
+        duration: perLang * 0.8,
+        ease: 'power2.out',
+      }, i * perLang);
+    });
+
+    // Exit sequence — after all languages have cycled
+    tl.call(() => {
+      if (hasExitedRef.current) return;
+      hasExitedRef.current = true;
+    });
+
+    // Short pause on final "ADHY"
+    tl.to({}, { duration: 0.15 });
+
+    // 1. Stagger exit the text content
+    if (contentRef.current) {
+      tl.to(contentRef.current.children, {
+        y: -30,
+        opacity: 0,
+        stagger: 0.05,
+        duration: 0.35,
+        ease: 'power2.in'
       });
-
-      // 1. Stagger exit the text content
-      if (contentRef.current) {
-        tl.to(contentRef.current.children, {
-          y: -30,
-          opacity: 0,
-          stagger: 0.05,
-          duration: 0.4,
-          ease: 'power2.in'
-        });
-      }
-
-      // 2. Curtain wipe the loader background up smoothly
-      if (loaderRef.current) {
-        tl.to(loaderRef.current, {
-          yPercent: -100,
-          duration: 0.8,
-          ease: 'power4.inOut'
-        }, "-=0.1"); // overlap slightly with text fade
-      }
     }
-  }, [currentIndex, isGlitching, onDone]);
+
+    // 2. Curtain wipe
+    if (loaderRef.current) {
+      tl.to(loaderRef.current, {
+        yPercent: -100,
+        duration: 0.7,
+        ease: 'power4.inOut',
+        onComplete: onDone,
+      }, "-=0.08");
+    }
+
+    return () => tl.kill();
+  }, [onDone]);
 
   return (
     <div ref={loaderRef} className="page-loader">
       <div ref={contentRef} className="loader-content">
 
-        {/* Glitch name block */}
+        {/* Name block */}
         <div className="loader-logo">
           <div className="loader-name-wrap">
-            <span className={`loader-name-text ${isGlitching ? 'loader-glitching' : ''}`}>
-              {display}
+            <span ref={nameRef} className="loader-name-text">
+              {LANG_NAMES[0].text}
             </span>
             <span className="loader-dot">.</span>
-            <span className="loader-lang-label">{langLabel}</span>
+            <span ref={langRef} className="loader-lang-label">{LANG_NAMES[0].lang}</span>
           </div>
         </div>
 
         <div className="loader-bar-track">
           <div ref={barRef} className="loader-bar-fill" style={{ width: '0%' }} />
         </div>
-        <div className="loader-phrase">{phrase}</div>
+        <div ref={phraseRef} className="loader-phrase">{PHRASES[0]}</div>
       </div>
     </div>
   );

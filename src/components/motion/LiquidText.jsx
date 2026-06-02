@@ -5,7 +5,20 @@ import ns from '../../core/NervousSystem';
 export default function LiquidText({ children, className = '' }) {
   const containerRef = useRef(null);
 
+  const [isMobile, setIsMobile] = React.useState(false);
+
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+
     const el = containerRef.current;
     if (!el) return;
 
@@ -57,8 +70,9 @@ export default function LiquidText({ children, className = '' }) {
     return () => {
       el.removeEventListener('mouseenter', onMouseEnter);
       el.removeEventListener('mouseleave', onMouseLeave);
+      el.style.filter = 'none'; // cleanup
     };
-  }, []);
+  }, [isMobile]);
 
   return (
     <div 

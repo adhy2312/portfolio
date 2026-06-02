@@ -1,7 +1,10 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import Lenis from 'lenis';
-import { initGSAPScrollProxy, ScrollTrigger, applyGlobalEluteEffect } from './hooks/useGSAPAnimations';
+import { initGSAPScrollProxy, ScrollTrigger } from './hooks/useGSAPAnimations';
 import './index.css';
+import './modes/RecruiterMode.css';
+import './modes/ExperimentalMode.css';
+import './modes/ExpertMode.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
@@ -14,7 +17,7 @@ import { ConsciousnessProvider, useConsciousness } from './contexts/Consciousnes
 import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
 import AmbientThoughts from './components/AmbientThoughts';
 import DigitalSoul from './components/DigitalSoul';
-import LiquidFilterDef from './components/motion/LiquidFilterDef';
+// LiquidFilterDef removed — SVG displacement map was causing global hover distortion & GPU drain
 import { useSolarLighting } from './hooks/useSolarLighting';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
@@ -22,6 +25,7 @@ import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
 import ns from './core/NervousSystem';
 import pipeline from './core/WorkerPipeline';
+import { useHybridMotion } from './hooks/useHybridMotion';
 
 // Initialize core pipelining
 pipeline.init();
@@ -96,7 +100,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function LazySection({ name, children }) {
+function LazySection({ name, className = "section-container", children }) {
   const ref = React.useRef();
   const { setActiveSection } = useConsciousness();
   const { isSectionVisible } = useSiteMode();
@@ -118,7 +122,7 @@ function LazySection({ name, children }) {
   if (!isSectionVisible(name)) return null;
 
   return (
-    <div ref={ref} className="section-container" data-xray="[SYSTEM: RENDERED]">
+    <div ref={ref} className={className} data-xray="[SYSTEM: RENDERED]">
       <Suspense fallback={<div className="lazy-loading-skeleton" style={{ height: '100vh' }} />}>
         {children}
       </Suspense>
@@ -143,44 +147,16 @@ function AppContent() {
   const [tranceMode, setTranceMode] = useState(false);
   const [devConsoleOpen, setDevConsoleOpen] = useState(false);
 
+  // Initialize unified physics engine
+  useHybridMotion();
+
   // Late Night Loneliness Mode
   const hour = new Date().getHours();
   const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
-    const lenis = new Lenis({
-      lerp: 0.06,           // Premium Awwwards-style smoothness
-      wheelMultiplier: 1,   // Natural wheel speed
-      smoothWheel: true,
-      smoothTouch: false,   // Use native mobile momentum
-      syncTouch: true, 
-      touchMultiplier: 1.5,
-    });
-
-    let rafId;
-    function raf(time) {
-      lenis.raf(time);
-      
-      // ─── Emotional Bleed (Performance cost: 0) ───
-      if (ns && ns.fatigue) {
-        const fatigue = ns.fatigue;
-        if (fatigue > 60) {
-          const desaturation = 1 - ((fatigue - 60) / 80); 
-          document.documentElement.style.setProperty('--global-saturation', Math.max(0.4, desaturation));
-        } else {
-          document.documentElement.style.setProperty('--global-saturation', '1');
-        }
-      }
-      
-      rafId = requestAnimationFrame(raf);
-    }
-    rafId = requestAnimationFrame(raf);
-
-    // GSAP + Lenis Synchronization
-    initGSAPScrollProxy(lenis);
-
-    // Apply the requested strong GSAP Elute Effect globally across the website
-    const eluteEffectKiller = applyGlobalEluteEffect();
+    // applyGlobalEluteEffect removed — was causing layout thrash and SVG filter GPU drain
+    const eluteEffectKiller = null;
 
     // Spotlight Engine: Removed for performance. 
     // Global document.body.style.setProperty triggers massive layout thrashing.
@@ -311,8 +287,6 @@ function AppContent() {
     }, 3500);
 
     return () => {
-      cancelAnimationFrame(rafId);
-      lenis.destroy();
       clearTimeout(widgetTimer);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
@@ -340,7 +314,6 @@ function AppContent() {
 
   return (
     <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
-      <LiquidFilterDef />
       {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
 
       {tranceMode && (
@@ -376,7 +349,7 @@ function AppContent() {
       <LazySection name="Skills"><Skills /></LazySection>
       <LazySection name="NeuralMap"><NeuralMap /></LazySection>
       <LazySection name="Experience"><Experience /></LazySection>
-      <LazySection name="MyWorks"><ZAxisTunnel depth={1500}><MyWorks /></ZAxisTunnel></LazySection>
+      <LazySection name="MyWorks"><MyWorks /></LazySection>
       <LazySection name="Timeline"><Timeline /></LazySection>
       <LazySection name="Photography"><Photography /></LazySection>
       <LazySection name="Achievements"><Achievements /></LazySection>
@@ -386,8 +359,8 @@ function AppContent() {
       <LazySection name="CallToAction"><CallToAction /></LazySection>
       <LazySection name="Contact"><Contact /></LazySection>
       <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
-      <LazySection name="KineticMarquee"><KineticMarquee /></LazySection>
-      <LazySection name="Footer"><Footer /></LazySection>
+      <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
+      <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
 
       {/* The Seed of Life - Redefining digital permanence */}
       <Suspense fallback={null}>

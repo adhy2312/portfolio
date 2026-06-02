@@ -10,6 +10,7 @@ import SchrodingersNode from './motion/SchrodingersNode';
 import PoltergeistNode from './motion/PoltergeistNode';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -161,6 +162,17 @@ const About = () => {
 
   return (
     <section className="about" id="about" ref={sectionRef}>
+      <ExpertDoc 
+        title="About.js"
+        notes="Responsive layout with 3D Poltergeist Nodes."
+        data={{
+          'componentLayout': 'Flex/Grid Hybrid',
+          'parallaxEngine': 'GSAP ScrollTrigger',
+          'tiltEffect': 'Custom pointer math (no Framer Motion)',
+          'storyContext': 'Context API + Sanity',
+          'interactiveNodes': 'SchrodingersNode, PoltergeistNode'
+        }}
+      />
       <div className="container">
         <div className="about-grid">
           {/* Image side */}

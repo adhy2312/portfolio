@@ -7,41 +7,50 @@
   left: 0;
   right: 0;
   z-index: 1050;
-  padding: 1.5rem 0;
+  padding: 1rem 0;
   transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-scrolled {
-  padding: 0.8rem 0;
+  padding: 0.5rem 0;
 }
 
-/* Extra contrast when navbar floats over light/white page sections */
 .navbar-scrolled .navbar-inner {
-  box-shadow:
-    0 1px 0 rgba(255,255,255,0.9) inset,
-    0 -1px 0 rgba(0,0,0,0.06) inset,
-    0 4px 24px rgba(0,0,0,0.14),
-    0 1px 4px rgba(0,0,0,0.08);
-  border-color: rgba(0,0,0,0.14);
-  background: rgba(255,255,255,0.88);
+  box-shadow: var(--shadow-brutal);
+  border: var(--border-heavy);
+  background: var(--bg-card);
 }
 
 .navbar-inner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  background: rgba(10, 10, 10, 0.95);
-  border-radius: 100px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 0.6rem 2rem;
-  box-shadow: 
-    0 20px 40px rgba(0, 0, 0, 0.5),
-    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  gap: 0;
+  max-width: 1240px;
+  margin: 0 1.5rem;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-bento);
+  border: var(--border-heavy);
+  padding: 0.45rem 1.25rem;
+  box-shadow: var(--shadow-brutal-deep);
   position: relative;
   z-index: 100;
   transition: all var(--transition-bounce);
+}
+
+@media (min-width: 1280px) {
+  .navbar-inner {
+    margin: 0 auto;
+    max-width: 1200px;
+  }
+}
+
+/* Left cluster: logo + weather + xray */
+.navbar-left-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
 }
 
 /* All direct children of navbar-inner sit above the rain canvas (z-index: 2) */
@@ -54,11 +63,12 @@
 .nav-logo {
   text-decoration: none;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 500;
-  letter-spacing: 4px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: 3px;
   transition: all 0.2s ease;
   user-select: none;
+  flex-shrink: 0;
 }
 
 .nav-logo-glow .logo-text {
@@ -85,22 +95,24 @@
 .desktop-nav-links {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.15rem;
   list-style: none;
   margin: 0;
   padding: 0;
+  flex-shrink: 0;
 }
 
 .nav-link {
   color: rgba(0, 0, 0, 0.6);
   text-decoration: none;
   font-size: 0.8rem;
-  font-weight: 500;
-  padding: 8px 16px;
+  font-weight: 600;
+  padding: 6px 12px;
   border-radius: 50px;
   transition: all 0.3s ease;
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   position: relative;
+  white-space: nowrap;
 }
 
 .nav-link::after {
@@ -119,21 +131,26 @@
 .nav-link:hover::after { width: 50%; }
 
 .nav-resume-btn {
-  padding: 8px 20px;
-  background: var(--gradient-primary);
-  color: #fff;
-  font-weight: 600;
-  border-radius: 50px;
+  padding: 7px 16px;
+  background: var(--accent-brutal-yellow);
+  color: #000;
+  font-weight: 900;
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  border-radius: 4px;
+  border: var(--border-brutal);
   text-decoration: none;
-  font-size: 0.8rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 16px var(--glow-primary);
+  font-size: 0.78rem;
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
   letter-spacing: 0.5px;
+  white-space: nowrap;
 }
 
 .nav-resume-btn:hover {
-  transform: translateY(-2px) scale(1.03);
-  box-shadow: 0 8px 24px var(--glow-primary);
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px #000;
+  background: var(--accent-brutal-pink);
 }
 
 /* ═══════════════════════════════════════════
@@ -442,12 +459,9 @@
 
 /* Base Ambient Wrapper around Navbar */
 .ambient-clear-day .navbar-inner {
-  box-shadow:
-    0 10px 60px -5px rgba(255, 191, 0, 0.55),
-    0 4px 20px rgba(255, 210, 0, 0.3),
-    0 8px 32px rgba(0,0,0,0.1) !important;
-  border-bottom: 1px solid rgba(255, 200, 0, 0.6) !important;
-  background: rgba(255, 252, 230, 0.72) !important;
+  box-shadow: 12px 12px 0px rgba(255, 191, 0, 1) !important;
+  border: 4px solid rgba(255, 200, 0, 1) !important;
+  background: rgba(255, 252, 230, 1) !important;
 }
 
 /* Sunlight corona above the navbar */
@@ -503,15 +517,11 @@
 
 /* ─── RAIN AMBIENT ─────────────────────────────────────────── */
 .ambient-rain .navbar-inner {
-  background: rgba(8, 22, 38, 0.68) !important;
+  background: rgba(8, 22, 38, 0.95) !important;
   backdrop-filter: blur(8px) saturate(1.2) !important;
   -webkit-backdrop-filter: blur(8px) saturate(1.2) !important;
-  box-shadow:
-    0 0 0 1px rgba(80, 180, 255, 0.2),
-    0 8px 40px -4px rgba(0, 120, 220, 0.35),
-    inset 0 1px 0 rgba(180, 230, 255, 0.15),
-    inset 0 -1px 12px rgba(0, 160, 255, 0.1) !important;
-  border: 1px solid rgba(80, 190, 255, 0.3) !important;
+  box-shadow: 12px 12px 0px rgba(0, 120, 220, 1) !important;
+  border: 4px solid rgba(80, 190, 255, 1) !important;
   position: relative;
   overflow: hidden;
 }
@@ -573,14 +583,14 @@
 }
 
 .ambient-snow .navbar-inner {
-  box-shadow: 0 10px 50px -5px rgba(230, 245, 255, 0.6), 0 8px 32px rgba(0,0,0,0.1) !important;
-  border-bottom: 1px solid rgba(230, 245, 255, 0.6) !important;
+  box-shadow: 12px 12px 0px rgba(230, 245, 255, 1) !important;
+  border: 4px solid rgba(230, 245, 255, 1) !important;
 }
-.ambient-snow .logo-text { color: #ffffff; text-shadow: 0 0 15px rgba(255,255,255,0.8); }
+.ambient-snow .logo-text { color: #ffffff; text-shadow: 2px 2px 0px #000; }
 
 .ambient-thunderstorm .navbar-inner {
-  box-shadow: 0 10px 50px -5px rgba(150, 0, 255, 0.5), 0 8px 32px rgba(0,0,0,0.1) !important;
-  border-bottom: 1px solid rgba(150, 0, 255, 0.5) !important;
+  box-shadow: 12px 12px 0px rgba(150, 0, 255, 1) !important;
+  border: 4px solid rgba(150, 0, 255, 1) !important;
   animation: lightning-flash 5s infinite;
 }
 .ambient-thunderstorm .logo-text { color: #d9a0ff; text-shadow: 0 0 10px rgba(150,0,255,0.6); }
@@ -592,21 +602,47 @@
   99% { box-shadow: 0 10px 70px 5px rgba(255, 255, 255, 0.9), 0 8px 32px rgba(0,0,0,0.1); border-bottom-color: rgba(255,255,255,0.9); }
 }
 
+/* ─── XRay Toggle ─── */
+.xray-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  background: none;
+  border: var(--border-brutal);
+  border-radius: 4px;
+  color: #000;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  box-shadow: 2px 2px 0px #000;
+  flex-shrink: 0;
+}
+
+.xray-toggle-btn:hover {
+  background: #000;
+  color: #fff;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
 /* Weather Indicator */
 .weather-indicator {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #888;
-  padding: 4px 10px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s ease;
-  margin-left: 15px;
+  gap: 6px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #000;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: var(--accent-brutal-yellow);
+  border: var(--border-brutal);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .weather-icon {
@@ -615,36 +651,32 @@
 
 @media (max-width: 768px) {
   .navbar-inner {
-    padding: 0.5rem 1rem;
+    padding: 0.4rem 0.75rem;
+    margin: 0 0.75rem;
     gap: 6px;
   }
   .nav-logo {
-    margin-right: auto;
     letter-spacing: 2px;
+    font-size: 1rem;
+  }
+  .navbar-left-cluster {
+    gap: 0.4rem;
   }
   .weather-indicator {
     padding: 2px 6px;
-    font-size: 0.8rem;
-    margin: 0 8px 0 auto !important;
+    font-size: 0.72rem;
     background: transparent;
     border: none;
-    gap: 4px;
-    white-space: nowrap;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-  }
-  .weather-indicator span {
-    display: inline-block !important;
-    white-space: nowrap;
+    box-shadow: none;
+    gap: 3px;
   }
   .xray-toggle-btn {
-    margin: 0 !important;
-    width: 32px !important;
-    height: 32px !important;
+    width: 28px !important;
+    height: 28px !important;
+    box-shadow: 1px 1px 0px #000;
   }
   .hamburger {
-    margin-left: 4px;
+    margin-left: 2px;
   }
 }
 

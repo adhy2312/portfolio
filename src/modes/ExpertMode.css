@@ -1,0 +1,117 @@
+/* ══════════════════════════════════════════
+   EXPERT MODE — The Technical Decode
+   ══════════════════════════════════════════ */
+
+/* ─── ARCHITECTURAL GRID BACKGROUND ─── */
+body.mode-expert {
+  background-color: #0d1117 !important; /* GitHub dark theme background */
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
+  background-size: 40px 40px !important;
+  background-position: center center !important;
+  color: #c9d1d9 !important;
+}
+
+body.mode-expert .App {
+  /* Give the body a subtle technical glow */
+  box-shadow: inset 0 0 100px rgba(88, 166, 255, 0.05);
+}
+
+/* De-emphasize standard brutalist borders to highlight the docs */
+body.mode-expert .bento-cell,
+body.mode-expert .marquee-card {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  box-shadow: none !important;
+  background: rgba(13, 17, 23, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ─── EXPERT DOC COMPONENT ─── */
+.expert-doc-container {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 100;
+  max-width: 320px;
+  background: rgba(13, 17, 23, 0.95);
+  border: 1px solid #30363d;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  color: #c9d1d9;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  animation: docFadeIn 0.3s ease-out;
+}
+
+@keyframes docFadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.expert-doc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 12px;
+  background: #161b22;
+  border-bottom: 1px solid #30363d;
+  font-weight: bold;
+  color: #8b949e;
+  font-size: 0.7rem;
+}
+
+.expert-doc-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.expert-doc-title svg {
+  color: #58a6ff;
+}
+
+.expert-doc-body {
+  padding: 12px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.expert-doc-body::-webkit-scrollbar {
+  width: 6px;
+}
+.expert-doc-body::-webkit-scrollbar-thumb {
+  background: #30363d;
+  border-radius: 3px;
+}
+
+.expert-doc-line {
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.expert-doc-key {
+  color: #79c0ff;
+}
+.expert-doc-value {
+  color: #a5d6ff;
+}
+.expert-doc-value.string {
+  color: #a5d6ff;
+}
+.expert-doc-value.boolean {
+  color: #ff7b72;
+}
+.expert-doc-value.number {
+  color: #79c0ff;
+}
+.expert-doc-comment {
+  color: #8b949e;
+  font-style: italic;
+  display: block;
+  margin-top: 4px;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 2px solid #30363d;
+}

@@ -10,6 +10,7 @@ import photo2 from '../assets/photo2.jpg';
 import photo3 from '../assets/photo3.jpg';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -112,7 +113,7 @@ const MarqueeCard = ({ photo, onClick }) => {
 
   return (
     <div
-      className="marquee-card"
+      className="marquee-card viewfinder-target"
       onClick={onClick}
       onMouseEnter={handleEnter}
       onMouseLeave={() => setHovered(false)}
@@ -336,12 +337,69 @@ const Photography = () => {
           { opacity: 1, y: 0, duration: 0.6, delay: 0.3, ease: 'power2.out', scrollTrigger: { trigger: ctaRef.current, start: 'top 90%', once: true } }
         );
       }
+      
+      // The Darkroom Cinematic Scroll Effect
+      ScrollTrigger.create({
+        trigger: sectionRef.current,
+        start: "top 40%",
+        end: "bottom 60%",
+        onEnter: () => document.body.classList.add('darkroom-active'),
+        onLeave: () => document.body.classList.remove('darkroom-active'),
+        onEnterBack: () => document.body.classList.add('darkroom-active'),
+        onLeaveBack: () => document.body.classList.remove('darkroom-active'),
+      });
     }, sectionRef);
     return () => ctx.revert();
   }, []);
 
+  // Dominant color extraction for Lightbox
+  const [lightboxGlow, setLightboxGlow] = useState('rgba(0,0,0,0.5)');
+
+  useEffect(() => {
+    if (!lightbox) {
+      setLightboxGlow('rgba(0,0,0,0.5)');
+      return;
+    }
+    
+    // Tiny fast color extractor
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = lightbox.src;
+    img.onload = () => {
+      try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 10;
+        canvas.height = 10;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, 10, 10);
+        const data = ctx.getImageData(0, 0, 10, 10).data;
+        let r = 0, g = 0, b = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          r += data[i];
+          g += data[i + 1];
+          b += data[i + 2];
+        }
+        const pixels = data.length / 4;
+        setLightboxGlow(`rgba(${~~(r / pixels)}, ${~~(g / pixels)}, ${~~(b / pixels)}, 0.4)`);
+      } catch (e) {
+        setLightboxGlow('rgba(0,0,0,0.5)');
+      }
+    };
+  }, [lightbox]);
+
   return (
     <section className="photography" id="photography" ref={sectionRef}>
+      <ExpertDoc 
+        title="Photography.js"
+        notes="Cinematic visual rendering engine."
+        data={{
+          'componentLayout': 'Neo-Brutalist CSS Grid',
+          'exifEngine': 'exifr (lazy loaded)',
+          'colorExtraction': 'Custom Canvas Pixel Averaging',
+          'scrollFX': 'GSAP Darkroom Vignette',
+          'performance': 'CSS Transforms + Auto-throttling'
+        }}
+      />
       <div className="container">
         <div className="photo-header" ref={headerRef}>
           <span className="section-label">{"// visual & creative"}</span>
@@ -395,8 +453,9 @@ const Photography = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setLightbox(null)}
+              style={{ '--lightbox-glow': lightboxGlow }}
             >
-              <div className="lightbox-content">
+              <div className="lightbox-content viewfinder-target">
                 <motion.img
                   src={lightbox.src}
                   alt={lightbox.alt}

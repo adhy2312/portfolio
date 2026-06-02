@@ -28,7 +28,7 @@ export default function FluidCanvas() {
     
     let frame = 0;
 
-    const loop = () => {
+    const tick = () => {
       frame++;
       if (frame % 2 === 0) { // Throttle state updates to 60Hz, Worker renders at 144Hz
         pipeline.dispatch('science', 'UPDATE_FLUID_STATE', uuid, {
@@ -40,13 +40,13 @@ export default function FluidCanvas() {
           velocityY: ns.mousePos.vy || 0
         });
       }
-      rafId = requestAnimationFrame(loop);
     };
     
-    loop();
+    // Bind into the central brain instead of isolated RAF
+    ns.register(uuid, tick, { priority: 'NORMAL' });
 
     return () => {
-      cancelAnimationFrame(rafId);
+      ns.unregister(uuid);
       window.removeEventListener('resize', resize);
     };
   }, []);

@@ -131,7 +131,7 @@ class NervousSystem {
     this.isSleeping    = false;
 
     // ─── INPUT STATE ─────────────────────────────────────
-    this.mousePos  = { x: -1000, y: -1000 };
+    this.mousePos  = { x: -1000, y: -1000, vx: 0, vy: 0 };
     this.scrollPos = 0;
     this.gravity   = { x: 0, y: 0 }; // V30 Biometric Gravity Engine
     this.isMoving  = false;
@@ -362,15 +362,47 @@ class NervousSystem {
       this.state._heartbeatPhase += delta * hbSpeed * Math.max(0.2, 1 - this.fatigue / 100);
       this.state.heartbeatValue   = Math.sin(this.state._heartbeatPhase);
 
+      // ─── Emotional Bleed (Fatigue Desaturation) ───
+      const targetSat = this.fatigue > 60 ? Math.max(0.4, 1 - ((this.fatigue - 60) / 80)) : 1;
+      if (this._lastSat !== targetSat) {
+        document.documentElement.style.setProperty('--global-saturation', targetSat);
+        this._lastSat = targetSat;
+      }
+
       // ─── Biometric Gravity Flush ───
       if (this.gravity.x !== 0 || this.gravity.y !== 0) {
-        document.documentElement.style.setProperty('--gravity-x', this.gravity.x);
-        document.documentElement.style.setProperty('--gravity-y', this.gravity.y);
+        if (this._lastGravX !== this.gravity.x || this._lastGravY !== this.gravity.y) {
+          document.documentElement.style.setProperty('--gravity-x', this.gravity.x);
+          document.documentElement.style.setProperty('--gravity-y', this.gravity.y);
+          this._lastGravX = this.gravity.x;
+          this._lastGravY = this.gravity.y;
+        }
+      }
+
+      // ─── Experimental Mode 3D Distortion ───
+      if (this.mousePos.x !== -1000) {
+        // Calculate rotation based on mouse position relative to screen center
+        // Max rotation is roughly +/- 4 degrees to avoid complete illegibility
+        const cx = window.innerWidth / 2;
+        const cy = window.innerHeight / 2;
+        const rotX = (((this.mousePos.y - cy) / cy) * -4).toFixed(2);
+        const rotY = (((this.mousePos.x - cx) / cx) * 4).toFixed(2);
+        
+        if (this._lastRotX !== rotX || this._lastRotY !== rotY) {
+          document.documentElement.style.setProperty('--exp-rot-x', `${rotX}deg`);
+          document.documentElement.style.setProperty('--exp-rot-y', `${rotY}deg`);
+          this._lastRotX = rotX;
+          this._lastRotY = rotY;
+        }
       }
 
       if (this.isMoving && time - this._lastMoveTime > 2000) {
         this.isMoving = false;
       }
+      
+      // Decay velocity
+      this.mousePos.vx *= 0.8;
+      this.mousePos.vy *= 0.8;
 
       // ─── Process Soul Reaction Queue ───
       const now = Date.now();
@@ -426,7 +458,11 @@ class NervousSystem {
     const onMove = (e) => {
       const clientX = e.touches ? e.touches[0].clientX : e.clientX;
       const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-      this.mousePos  = { x: clientX, y: clientY };
+      
+      const vx = this.mousePos.x !== -1000 ? clientX - this.mousePos.x : 0;
+      const vy = this.mousePos.y !== -1000 ? clientY - this.mousePos.y : 0;
+
+      this.mousePos  = { x: clientX, y: clientY, vx, vy };
       this.isMoving  = true;
       this._lastMoveTime = performance.now();
     };

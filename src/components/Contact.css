@@ -1,36 +1,11 @@
 /* ═══════════════════════════════
-   CONTACT SECTION — RETRO CONSOLE
+   CONTACT SECTION — BRUTAL BENTO
 ═══════════════════════════════ */
 .contact {
   padding: var(--section-padding);
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
+  background: var(--bg-secondary);
   position: relative;
   z-index: 1;
-}
-
-/* Crosshatch engineering texture */
-.contact::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.02;
-  z-index: 0;
-  background-image: 
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 12px,
-      rgba(var(--accent-primary-rgb), 0.4) 12px,
-      rgba(var(--accent-primary-rgb), 0.4) 13px
-    ),
-    repeating-linear-gradient(
-      -45deg,
-      transparent,
-      transparent 12px,
-      rgba(var(--accent-primary-rgb), 0.4) 12px,
-      rgba(var(--accent-primary-rgb), 0.4) 13px
-    );
 }
 
 .contact-header {
@@ -45,24 +20,29 @@
   align-items: start;
 }
 
-/* ── Retro Info Panel ── */
+/* ── Brutalist Info Panel ── */
 .contact-info-card {
   padding: 2rem;
   height: 100%;
-  background: linear-gradient(145deg, var(--panel-grad-start), var(--panel-grad-end)) !important;
-  border: 2px solid rgba(255,255,255,0.04) !important;
-  box-shadow: 
-    6px 6px 16px rgba(0,0,0,0.6),
-    -3px -3px 8px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06) !important;
+  background: var(--bg-card) !important;
+  border: var(--border-brutal) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  border-radius: 0 !important;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.contact-info-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-brutal-deep) !important;
 }
 
 .contact-info-title {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #000;
   margin-bottom: 0.8rem;
+  text-transform: uppercase;
 }
 
 .contact-info-text {
@@ -70,6 +50,7 @@
   color: var(--text-secondary);
   line-height: 1.7;
   margin-bottom: 2rem;
+  font-weight: 500;
 }
 
 .contact-info-list {
@@ -91,16 +72,11 @@
   justify-content: center;
   width: 38px;
   height: 38px;
-  border-radius: 50%;
-  background-color: var(--skeuo-bg-primary);
-  background-image: var(--skeuo-noise), var(--skeuo-gradient-primary);
-  border: 1px solid #1a1a1a;
-  box-shadow: 
-    0 4px 8px rgba(0,0,0,0.4),
-    0 2px 4px rgba(0,0,0,0.3),
-    inset 0 2px 3px rgba(255,255,255,0.15),
-    inset 0 -3px 6px rgba(0,0,0,0.5);
-  color: #fff;
+  border-radius: 0;
+  background-color: var(--accent-brutal-blue);
+  border: var(--border-brutal);
+  box-shadow: 2px 2px 0px #000;
+  color: #000;
   font-size: 1rem;
   flex-shrink: 0;
 }
@@ -108,28 +84,31 @@
 .contact-info-label {
   display: block;
   font-size: 0.72rem;
-  color: var(--text-muted);
-  font-family: 'Fira Code', monospace;
+  color: #000;
+  font-family: var(--font-mono);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-bottom: 3px;
+  font-weight: 700;
 }
 
 .contact-info-value {
   display: block;
   font-size: 0.88rem;
   color: var(--text-secondary);
-  font-family: 'DM Sans', sans-serif;
+  font-family: var(--font-body);
+  font-weight: 600;
 }
 
 .contact-info-value.link {
   text-decoration: none;
-  color: var(--accent-secondary);
-  transition: color 0.2s ease;
+  color: #000;
+  border-bottom: 2px solid #000;
+  transition: all 0.2s ease;
 }
 
 .contact-info-value.link:hover {
-  color: var(--accent-primary);
+  background: var(--accent-brutal-yellow);
 }
 
 /* ── Click-to-copy Email Button ── */
@@ -149,17 +128,20 @@
 .copy-email-text {
   display: block;
   font-size: 0.88rem;
-  color: var(--accent-secondary);
-  font-family: 'DM Sans', sans-serif;
-  transition: color 0.2s ease;
+  color: #000;
+  border-bottom: 2px solid #000;
+  font-family: var(--font-body);
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
 
 .copy-email-btn:hover .copy-email-text {
-  color: var(--accent-primary);
+  background: var(--accent-brutal-yellow);
 }
 
 .copy-email-btn--copied .copy-email-text {
-  color: #39ff14;
+  background: var(--accent-brutal-green);
+  color: #000;
 }
 
 .copy-email-hint {
@@ -167,14 +149,15 @@
   align-items: center;
   gap: 4px;
   font-size: 0.65rem;
-  font-family: 'Fira Code', monospace;
+  font-family: var(--font-mono);
   letter-spacing: 0.04em;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   opacity: 0;
   transform: translateY(-4px);
   transition: opacity 0.2s ease, transform 0.2s ease;
   pointer-events: none;
   white-space: nowrap;
+  font-weight: 600;
 }
 
 .copy-email-btn:hover .copy-email-hint,
@@ -184,87 +167,20 @@
 }
 
 .copy-email-btn--copied .copy-email-hint {
-  color: #39ff14;
-  animation: copy-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  color: var(--accent-brutal-green);
 }
 
-@keyframes copy-pop {
-  0%   { transform: scale(0.8) translateY(0); }
-  60%  { transform: scale(1.15) translateY(0); }
-  100% { transform: scale(1) translateY(0); }
-}
-
-/* Retro LED availability indicator */
-.contact-availability {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.82rem;
-  color: #39ff14;
-  font-family: 'Fira Code', monospace;
-  padding: 12px 16px;
-  background: #080810;
-  border: 1px solid rgba(0,0,0,0.4);
-  border-radius: 8px;
-  box-shadow: 
-    inset 3px 3px 6px rgba(0,0,0,0.6),
-    inset -1px -1px 3px rgba(255,255,255,0.02);
-  text-shadow: 0 0 8px rgba(57, 255, 20, 0.4);
-}
-
-.avail-dot {
-  width: 10px;
-  height: 10px;
-  background: #39ff14;
-  border-radius: 50%;
-  box-shadow: 
-    0 0 4px #39ff14,
-    0 0 12px #39ff14,
-    inset 0 -1px 2px rgba(0,0,0,0.3);
-  animation: ledPulse 2s ease-in-out infinite;
-}
-
-@keyframes ledPulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* ═══════════════════════════════
-   RETRO TERMINAL FORM
-═══════════════════════════════ */
+/* ── Brutalist Form ── */
 .contact-form {
   padding: 2.2rem;
   display: flex;
   flex-direction: column;
   gap: 1.2rem;
-  /* Retro equipment panel */
-  background: linear-gradient(145deg, var(--panel-grad-start), var(--panel-grad-end)) !important;
-  border: 2px solid rgba(255,255,255,0.04) !important;
-  box-shadow: 
-    6px 6px 16px rgba(0,0,0,0.6),
-    -3px -3px 8px rgba(255,255,255,0.02),
-    inset 0 1px 0 rgba(255,255,255,0.06) !important;
-  border-radius: 20px !important;
+  background: var(--bg-card) !important;
+  border: var(--border-heavy) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
+  border-radius: 0 !important;
   position: relative;
-}
-
-/* Status LED strip on top of form */
-.contact-form::before {
-  content: '';
-  position: absolute;
-  top: 12px;
-  right: 20px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #39ff14;
-  box-shadow: 
-    0 0 4px #39ff14,
-    0 0 10px rgba(57, 255, 20, 0.3),
-    -16px 0 0 0 #ffbf00,
-    -16px 0 4px rgba(255, 191, 0, 0.3),
-    -32px 0 0 0 #ff3131,
-    -32px 0 4px rgba(255, 49, 49, 0.2);
 }
 
 .form-row {
@@ -280,83 +196,81 @@
 }
 
 .form-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  font-family: 'Fira Code', monospace;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #000;
+  font-family: var(--font-mono);
   text-transform: uppercase;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
-/* Retro inset input fields */
+/* Brutalist input fields */
 .form-input {
   width: 100%;
   padding: 14px 16px;
-  background: #080810;
-  border: 1px solid rgba(0,0,0,0.4);
-  border-radius: 8px;
-  color: #39ff14;
-  font-family: 'Fira Code', monospace;
+  background: #fff;
+  border: var(--border-brutal);
+  border-radius: 0;
+  color: #000;
+  font-family: var(--font-mono);
   font-size: 0.88rem;
+  font-weight: 600;
   outline: none;
-  transition: all 0.25s ease;
-  box-shadow: 
-    inset 3px 3px 6px rgba(0,0,0,0.6),
-    inset -1px -1px 3px rgba(255,255,255,0.02);
-  letter-spacing: 0.5px;
+  transition: all 0.2s ease;
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.1) inset;
 }
 
 .form-input::placeholder {
-  color: rgba(57, 255, 20, 0.2);
-  font-family: 'Fira Code', monospace;
+  color: #999;
+  font-weight: 500;
 }
 
 .form-input:focus {
-  border-color: rgba(57, 255, 20, 0.3);
-  box-shadow: 
-    inset 3px 3px 6px rgba(0,0,0,0.6),
-    inset -1px -1px 3px rgba(255,255,255,0.02),
-    0 0 12px rgba(57, 255, 20, 0.1);
-  color: #39ff14;
-  text-shadow: 0 0 4px rgba(57, 255, 20, 0.3);
+  border-color: #000;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.1) inset, 0 0 0 2px var(--accent-brutal-yellow);
+  background: #ffffe0;
 }
 
 .form-textarea {
   resize: vertical;
   min-height: 120px;
-  font-family: 'Fira Code', monospace;
 }
 
-/* Retro push-button submit */
+/* Brutalist Button */
 .form-submit {
   width: 100%;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
+  font-weight: 800;
   padding: 16px;
-  font-family: 'Fira Code', monospace;
-  letter-spacing: 2px;
+  font-family: var(--font-heading);
+  letter-spacing: 1px;
   text-transform: uppercase;
-  border-radius: 10px;
+  border-radius: 0;
+  background: var(--accent-brutal-pink);
+  color: #000;
+  border: var(--border-heavy);
+  box-shadow: var(--shadow-brutal);
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.form-submit:hover:not(:disabled) {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-brutal-deep);
+  background: var(--accent-brutal-yellow);
+}
+
+.form-submit:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 #000;
 }
 
 .submitting {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-/* Spinner */
-.spinner {
-  display: inline-block;
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top-color: #fff;
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 #000;
 }
 
 /* ── Responsive ── */
@@ -373,5 +287,6 @@
 
   .contact-form {
     padding: 1.5rem;
+    box-shadow: var(--shadow-brutal) !important;
   }
 }

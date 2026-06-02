@@ -441,7 +441,7 @@ const MiniAdhy = () => {
   const isArAnsweringRef = useRef(false);
   useEffect(() => { isArAnsweringRef.current = isArAnswering; }, [isArAnswering]);
   const [loading,      setLoading]      = useState(false);
-  const [noKey,        setNoKey]        = useState(false); // Can be removed later, keeping for now so state works
+  const [noKey]                 = useState(false); // Can be removed later, keeping for now so state works
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
@@ -570,7 +570,7 @@ const MiniAdhy = () => {
       consciousness.triggerThought("Reality stability compromised. Reducing visual chaos for render stability...");
     }
     
-  }, [consciousness?.activeSection, consciousness?.idleState, consciousness?.performanceState]);
+  }, [consciousness?.activeSection, consciousness?.idleState, consciousness?.performanceState, consciousness, open]);
 
   /* Debounce guard — prevents rapid-fire sends that trigger rate limits */
   const lastSentRef = useRef(0);
@@ -937,6 +937,7 @@ const MiniAdhy = () => {
         onClick={() => setOpen(o => !o)}
         aria-label="Open Mini-Adhy chatbot"
         title="Chat with Mini-Adhy 🤖"
+        style={{ display: open ? 'none' : 'flex' }}
       >
         <svg viewBox="0 0 36 36" fill="none" width="18" height="18">
           <circle cx="18" cy="18" r="18" fill="url(#dockGrad)" />

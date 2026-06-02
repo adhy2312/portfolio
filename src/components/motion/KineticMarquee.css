@@ -2,12 +2,9 @@
   overflow: hidden;
   white-space: nowrap;
   display: flex;
-  width: 100vw;
+  width: 100%;
   position: relative;
-  left: 50%;
-  right: 50%;
-  margin-left: -50vw;
-  margin-right: -50vw;
+  margin: 0;
   padding: 2rem 0;
   border-top: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);

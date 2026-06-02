@@ -64,3 +64,21 @@
     transparent 4px
   ) !important;
 }
+
+/* ════════════════════════════════════════════════════════
+   MOBILE PERFORMANCE OVERRIDES
+════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  .raytraced-glass {
+    /* Significantly reduce heavy GPU blur on mobile */
+    backdrop-filter: blur(8px) !important;
+    -webkit-backdrop-filter: blur(8px) !important;
+    /* Remove expensive box-shadows */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  }
+  
+  .raytraced-glass::before {
+    /* Disable the animated specular highlight on mobile */
+    display: none !important;
+  }
+}

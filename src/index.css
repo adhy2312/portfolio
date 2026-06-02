@@ -1,4 +1,5 @@
 /* Fonts are loaded in index.html to avoid duplicate requests. Only @font-face overrides here. */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 
 @font-face {
   font-family: 'Sterion';
@@ -9,296 +10,85 @@
 /* ═══════════════════════════════════════════
    DESIGN TOKENS
 ═══════════════════════════════════════════ */
-:root {
-  /* Core Palette - LIGHT THEME */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f5f5f7;
-  --bg-tertiary: #e5e5ea;
-  --panel-grad-start: #f8f8f8;
-  --panel-grad-end: #e8e8e8;
-  --bg-card: rgba(0, 0, 0, 0.02);
-  --bg-card-hover: rgba(0, 0, 0, 0.05);
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
 
-  /* Accent Colors (Mixed with Grayscale) */
+:root {
+  /* Core Palette - BRUTAL BENTO */
+  --bg-primary: #e8e8e5; /* Slightly warm brutalist gray */
+  --bg-secondary: #dcdcd9;
+  --bg-tertiary: #c8c8c5;
+  --bg-card: rgba(255, 255, 255, 0.6); /* Glassy card */
+  --bg-card-hover: rgba(255, 255, 255, 0.9);
+
+  /* Accent Colors (High Saturation for Neo-Brutalism) */
   --accent-primary: #000000;
-  --accent-secondary: #555555;
   --accent-primary-rgb: 0, 0, 0;
-  --accent-gold: #c28a0e;
-  --accent-green: #248f1d;
-  --accent-cyan: #008fa1;
-  --accent-magenta: #a100a1;
+  --accent-brutal-yellow: #f4d03f;
+  --accent-brutal-blue: #3498db;
+  --accent-brutal-pink: #ff6b6b;
+  --accent-brutal-green: #2ecc71;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #000000 0%, #555555 100%);
-  --gradient-gold: linear-gradient(135deg, #c28a0e 0%, #e6ac00 100%);
-  --gradient-dark: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%);
-  --gradient-card: linear-gradient(135deg, rgba(0,0,0,0.03) 0%, rgba(0,0,0,0.01) 100%);
-
+  --gradient-primary: linear-gradient(135deg, #000000 0%, #333333 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
+  
   /* Text */
   --text-primary: #000000;
-  --text-secondary: #4a4a4a;
-  --text-muted: #8e8e93;
+  --text-secondary: #333333;
+  --text-muted: #666666;
 
-  /* Border */
-  --border-subtle: rgba(0, 0, 0, 0.1);
-  --border-accent: rgba(0, 0, 0, 0.2);
-
-  /* Glow (Subtle shadows instead for light mode) */
-  --glow-primary: rgba(0, 0, 0, 0.1);
-  --glow-secondary: rgba(0, 0, 0, 0.05);
-  --glow-gold: rgba(194, 138, 14, 0.2);
+  /* Borders & Shadows (The core of Brutal Bento) */
+  --border-subtle: 1px solid #000000;
+  --border-brutal: 2px solid #000000;
+  --border-heavy: 4px solid #000000;
+  --border-radius-bento: 16px;
+  
+  --shadow-brutal: 6px 6px 0px #000000;
+  --shadow-brutal-hover: 2px 2px 0px #000000;
+  --shadow-brutal-deep: 12px 12px 0px #000000;
 
   /* Spacing */
   --section-padding: 120px 0;
   --container-width: 1200px;
+  --bento-gap: 24px;
 
-  /* Digital Heartbeat Rhythm */
-  --heartbeat-duration: 0.8s; /* Fallback resting heart rate */
-  
-  /* Digital Subconscious Engine */
-  --subconscious-pace: 0.4s;
-  --subconscious-restraint: 0;
-  --subconscious-atmosphere: 0.8;
-  --bio-rhythm: 1s; /* Dynamic heartbeat */
-  
-  /* Soul coordinates */
-  --soul-x: 50vw;
-  --soul-y: 50vh;
-  
-  /* Transitions - Tied directly to the Subconscious Engine's pacing */
-  --transition-fast: calc(var(--subconscious-pace) * 0.4) cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: var(--subconscious-pace) cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-slow: calc(var(--subconscious-pace) * 1.5) cubic-bezier(0.16, 1, 0.3, 1);
+  /* Transitions */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-bounce: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 
-  /* Skeuomorphic Shadows - INVERTED for light mode */
-  --skeuo-shadow-dark: rgba(0, 0, 0, 0.15);
-  --skeuo-shadow-light: rgba(255, 255, 255, 0.8);
+  /* Typography Scale */
+  --font-heading: 'Space Grotesk', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'Fira Code', monospace;
+  --font-editorial: 'Playfair Display', serif;
 
-  /* Real-Time Solar Lighting */
+  /* Real-Time Solar Lighting (Keeping the hook functional but minimal visual impact) */
   --solar-x: 0px;
   --solar-y: 10px;
   --solar-blur: 20px;
-  --solar-opacity: 0.15;
+  --solar-opacity: 0.05;
   --solar-shadow: var(--solar-x) var(--solar-y) var(--solar-blur) rgba(0,0,0,var(--solar-opacity));
 
   /* Dynamic Font */
-  --dynamic-weight: 700;
+  --dynamic-weight: 800;
   --dynamic-slant: 0deg;
-
-  /* Premium Skeuomorphic Carbon Tokens */
-  --skeuo-carbon-bg: #141414;
-  --skeuo-carbon-pattern: 
-    repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 3px),
-    repeating-linear-gradient(-45deg, rgba(255,255,255,0.02) 0, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 3px);
-  --skeuo-carbon-gradient: linear-gradient(180deg, #2a2a2a 0%, #111111 100%);
-  --skeuo-carbon-shadow: 
-    0 8px 16px rgba(0,0,0,0.6),
-    0 4px 6px rgba(0,0,0,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.15),
-    inset 0 -2px 4px rgba(0,0,0,0.6),
-    inset 0 0 8px rgba(0,0,0,0.5);
-  --skeuo-carbon-active:
-    0 2px 3px rgba(0,0,0,0.4),
-    inset 0 4px 8px rgba(0,0,0,0.8),
-    inset 0 -1px 1px rgba(255,255,255,0.05);
 }
 
 /* ═══════════════════════════════════════════
-   EXTREME SITE MODES VISUAL TRANSFORMATIONS
-═══════════════════════════════════════════ */
-
-/* 1. RECRUITER MODE - Pure, Minimal, Print-like */
-body.mode-recruiter .App {
-  background: #ffffff !important;
-}
-body.mode-recruiter section, body.mode-recruiter .hero-minimal {
-  background: #ffffff !important;
-}
-body.mode-recruiter .glass-card, body.mode-recruiter .timeline-item, body.mode-recruiter .project-card, body.mode-recruiter .skill-card {
-  background: #ffffff !important;
-  border: 1px solid #e2e8f0 !important;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
-  border-radius: 4px !important;
-}
-body.mode-recruiter h1, body.mode-recruiter h2, body.mode-recruiter h3, body.mode-recruiter p, body.mode-recruiter span, body.mode-recruiter .nav-link, body.mode-recruiter .section-label {
-  color: #0f172a !important;
-  font-family: 'Inter', sans-serif !important;
-}
-body.mode-recruiter .metallic-char, body.mode-recruiter .section-title span, body.mode-recruiter .hero-name-giant {
-  -webkit-text-fill-color: #0f172a !important;
-  text-shadow: none !important;
-}
-body.mode-recruiter {
-  display: none !important; /* Remove distractions */
-}
-
-/* 2. EXPERT MODE - Matrix / Hacker Terminal */
-body.mode-expert .App {
-  background-color: #050505 !important;
-  background-image: 
-    linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px) !important;
-  background-size: 30px 30px !important;
-}
-body.mode-expert section, body.mode-expert .hero-minimal, body.mode-expert .glass-card, body.mode-expert .timeline-item, body.mode-expert .project-card, body.mode-expert .skill-card, body.mode-expert .navbar-inner {
-  background: rgba(0, 10, 0, 0.8) !important;
-  border: 1px solid #00ff41 !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-}
-body.mode-expert h1, body.mode-expert h2, body.mode-expert h3, body.mode-expert p, body.mode-expert span, body.mode-expert a, body.mode-expert .section-label {
-  color: #00ff41 !important;
-  font-family: 'Fira Code', monospace !important;
-  -webkit-text-fill-color: #00ff41 !important;
-  text-shadow: none !important;
-  text-transform: lowercase !important;
-}
-body.mode-expert img, body.mode-expert video {
-  filter: grayscale(100%) sepia(100%) hue-rotate(70deg) contrast(1.5) !important;
-  border: 1px solid #00ff41 !important;
-}
-body.mode-expert .particle-network {
-  display: none !important;
-}
-
-/* 3. EXPERIMENTAL MODE - Biological Lifeform / Heartbeat */
-body.mode-experimental .App {
-  background-color: #0d0612 !important;
-  background-image: radial-gradient(circle at 50% 50%, rgba(20, 5, 25, 0.8) 0%, #0d0612 100%) !important;
-  color: #e0d5e6 !important;
-}
-
-/* Lifeform Breathing Animation & Liquid Glass Rain Integration (Discarded Effect #1 & #3) */
-body.mode-experimental section, body.mode-experimental .hero-minimal, body.mode-experimental .glass-card, body.mode-experimental .timeline-item, body.mode-experimental .project-card, body.mode-experimental .skill-card, body.mode-experimental .navbar-inner {
-  background: rgba(25, 10, 30, 0.4) !important;
-  border: 1px solid rgba(255, 100, 150, 0.15) !important;
-  border-radius: 20px !important;
-  box-shadow: inset 0 0 20px rgba(255, 50, 100, 0.05), 0 10px 30px rgba(0, 0, 0, 0.4) !important;
-  animation: lifeform-breathe 8s ease-in-out infinite alternate !important;
-  transition: border-radius 0.3s ease !important;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Rain Effect integration on Glass Cards */
-body.mode-experimental .glass-card::before, body.mode-experimental .project-card::before {
-  content: '';
-  position: absolute;
-  top: -100%; left: 0; right: 0; bottom: 0;
-  background-image: 
-    radial-gradient(1px 4px at 10% 10%, rgba(255,255,255,0.4) 1px, transparent 1px),
-    radial-gradient(1.5px 5px at 30% 40%, rgba(255,255,255,0.5) 1px, transparent 1px),
-    radial-gradient(1px 3px at 50% 20%, rgba(255,255,255,0.3) 1px, transparent 1px),
-    radial-gradient(2px 6px at 70% 60%, rgba(255,255,255,0.6) 1px, transparent 1px),
-    radial-gradient(1px 4px at 90% 30%, rgba(255,255,255,0.4) 1px, transparent 1px);
-  background-size: 100% 100%;
-  animation: rain-droplets-fall 3s linear infinite;
-  pointer-events: none;
-  opacity: 0.3;
-  z-index: 1;
-}
-
-@keyframes rain-droplets-fall {
-  0% { transform: translateY(0) scaleY(1); opacity: 0; }
-  10% { opacity: 0.3; }
-  90% { opacity: 0.3; }
-  100% { transform: translateY(100%) scaleY(1.5); opacity: 0; }
-}
-
-@keyframes lifeform-breathe {
-  0% { transform: scale(1) translateY(0); box-shadow: inset 0 0 10px rgba(255, 50, 100, 0.02); }
-  100% { transform: scale(1.01) translateY(-3px); box-shadow: inset 0 0 40px rgba(255, 50, 100, 0.12); }
-}
-
-/* Adrenaline Pulse on Hover */
-body.mode-experimental .glass-card:hover, body.mode-experimental .project-card:hover, body.mode-experimental .skill-card:hover {
-  animation: adrenaline-shake 0.3s cubic-bezier(.36,.07,.19,.97) both !important;
-  border-color: rgba(255, 50, 80, 0.6) !important;
-  box-shadow: 0 0 50px rgba(255, 20, 60, 0.3) !important;
-  border-radius: 12px !important; /* Sharpens on tension */
-}
-
-@keyframes adrenaline-shake {
-  10%, 90% { transform: translate3d(-1px, 0, 0) scale(1.02); }
-  20%, 80% { transform: translate3d(2px, 0, 0) scale(1.02); }
-  30%, 50%, 70% { transform: translate3d(-3px, 3px, 0) scale(1.02); }
-  40%, 60% { transform: translate3d(3px, -3px, 0) scale(1.02); }
-}
-
-/* Core Heartbeat Global Overlay & Massive SVG feTurbulence Sensor Grain (Discarded Effect #2) */
-body.mode-experimental .App::after {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background: 
-    radial-gradient(circle at center, transparent 40%, rgba(255, 0, 40, 0.06) 100%),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
-  animation: heartbeat-pulse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
-  z-index: 9999;
-}
-
-@keyframes heartbeat-pulse {
-  0% { opacity: 0.1; transform: scale(1); }
-  15% { opacity: 0.8; transform: scale(1.02); }
-  30% { opacity: 0.1; transform: scale(1); }
-  45% { opacity: 0.5; transform: scale(1.01); }
-  100% { opacity: 0.1; transform: scale(1); }
-}
-
-body.mode-experimental h1, body.mode-experimental h2, body.mode-experimental h3, body.mode-experimental h4 {
-  color: #ffb3c6 !important;
-  font-family: 'Inter', sans-serif !important;
-  -webkit-text-fill-color: #ffb3c6 !important;
-  text-shadow: 0 0 15px rgba(255, 50, 100, 0.4) !important;
-  letter-spacing: 1px !important;
-}
-
-body.mode-experimental p, body.mode-experimental span, body.mode-experimental a {
-  color: #f8e5ee !important;
-}
-
-body.mode-experimental img {
-  filter: sepia(0.5) hue-rotate(320deg) saturate(1.5) !important;
-}
-
-/* ═══════════════════════════════════════════
-   LOW-POWER SYMBIOSIS MODE
-   (Triggers if user laptop battery < 20%)
-═══════════════════════════════════════════ */
-html.low-power-symbiosis body {
-  background-color: #020202 !important;
-  color: #666 !important;
-}
-html.low-power-symbiosis * {
-  box-shadow: none !important;
-  text-shadow: none !important;
-}
-html.low-power-symbiosis .performance-breathing-overlay,
-html.low-power-symbiosis .soul-aura-outer,
-html.low-power-symbiosis .particle-network {
-  display: none !important;
-}
-html.low-power-symbiosis img {
-  filter: brightness(0.6) grayscale(100%) !important;
-}
-html.low-power-symbiosis .glass-card {
-  background: rgba(10, 10, 10, 0.95) !important;
-  border-color: #111 !important;
-}
-
-/* ═══════════════════════════════════════════
-   GLOBAL SOUL ILLUMINATION
-   (Casts a subtle light across the entire site following the Digital Soul)
+   GLOBAL SOUL ILLUMINATION (Subtle Grid)
 ═══════════════════════════════════════════ */
 .App::before {
   content: '';
   position: fixed; 
   inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
   pointer-events: none;
   z-index: 0;
 }
@@ -332,6 +122,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  transition: background-color 0.8s ease, color 0.8s ease;
+}
+
+body.darkroom-active {
+  background-color: #0a0a0a;
+  color: #f0f0f0;
 }
 
 .App {
@@ -563,32 +359,26 @@ body {
 
 .glass-card {
   position: relative;
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  border-radius: 24px;
-  box-shadow: 
-    0 4px 20px -2px rgba(0, 0, 0, 0.02),
-    inset 0 1px 0 rgba(255, 255, 255, 0.9);
-  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth), border-color var(--transition-smooth), background-color var(--transition-smooth);
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: var(--border-brutal);
+  border-radius: var(--border-radius-bento);
+  box-shadow: var(--shadow-brutal);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth);
   overflow: hidden;
 }
 
 @media (max-width: 768px) {
   .glass-card {
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.75);
   }
 }
 
 .glass-card:hover {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(255, 255, 255, 1);
-  transform: translateY(-4px) scale(1.01);
-  box-shadow: 
-    0 24px 48px -8px rgba(0, 0, 0, 0.06),
-    0 8px 16px -4px rgba(0, 0, 0, 0.03),
-    inset 0 1px 0 rgba(255, 255, 255, 1);
+  background: var(--bg-card-hover);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
 }
 
 /* ═══════════════════════════════════════════
@@ -599,51 +389,32 @@ body {
   align-items: center;
   gap: 8px;
   padding: 14px 32px;
-  background-color: var(--skeuo-carbon-bg);
-  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
+  background-color: var(--accent-primary);
   color: #fff;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  font-family: var(--font-heading);
+  font-weight: 700;
   font-size: 0.95rem;
-  border: 1px solid #000;
-  border-radius: 8px; /* Sharper radius for carbon hardware feel */
+  border: var(--border-brutal);
+  border-radius: var(--border-radius-bento);
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
-  box-shadow: var(--skeuo-carbon-shadow);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
   position: relative;
   overflow: hidden;
-  text-shadow: 0 -1px 2px rgba(0,0,0,1);
-}
-
-.btn-primary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent);
-  opacity: 0;
-  transition: opacity var(--transition-fast);
-  border-radius: inherit;
-  pointer-events: none;
+  text-transform: uppercase;
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 
-    0 12px 24px rgba(0,0,0,0.8),
-    0 6px 12px rgba(0,0,0,0.6),
-    inset 0 2px 3px rgba(255,255,255,0.2),
-    inset 0 -3px 6px rgba(0,0,0,0.8),
-    inset 0 0 15px rgba(0,0,0,0.7);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
+  background-color: var(--accent-brutal-blue);
+  color: #000;
 }
 
 .btn-primary:active {
-  transform: translateY(4px);
-  box-shadow: var(--skeuo-carbon-active);
-}
-
-.btn-primary:hover::before {
-  opacity: 1;
+  transform: translate(6px, 6px);
+  box-shadow: none;
 }
 
 .btn-outline {
@@ -651,42 +422,31 @@ body {
   align-items: center;
   gap: 8px;
   padding: 13px 32px;
-  background-color: var(--skeuo-carbon-bg);
-  background-image: var(--skeuo-carbon-pattern), var(--skeuo-carbon-gradient);
-  color: #a8a8a8; /* Lighter grey for outline button contrast */
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 600;
+  background-color: var(--bg-card);
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-weight: 700;
   font-size: 0.95rem;
-  border: 1px solid #0a0a0a;
-  border-radius: 8px;
+  border: var(--border-brutal);
+  border-radius: var(--border-radius-bento);
   text-decoration: none;
   cursor: pointer;
-  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease, color 0.3s ease;
-  box-shadow: var(--skeuo-carbon-shadow);
-  text-shadow: 0 -1px 2px rgba(0,0,0,1);
-}
-
-.App {
-  position: relative;
-  overflow-x: hidden;
-  background: var(--bg-primary);
-  /* Removed global filter to restore buttery smooth 60fps scrolling */
-  transition: background var(--transition-smooth);
+  transition: all var(--transition-fast);
+  box-shadow: var(--shadow-brutal);
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
 }
 
 .btn-outline:hover {
-  transform: translateY(-2px);
-  color: #fff;
-  box-shadow: 
-    0 10px 20px rgba(0,0,0,0.8),
-    0 4px 8px rgba(0,0,0,0.6),
-    inset 0 2px 3px rgba(255,255,255,0.1),
-    inset 0 -3px 5px rgba(0,0,0,0.7);
+  transform: translate(2px, 2px);
+  box-shadow: var(--shadow-brutal-hover);
+  background-color: var(--accent-brutal-yellow);
+  color: #000;
 }
 
 .btn-outline:active {
-  transform: translateY(4px);
-  box-shadow: var(--skeuo-carbon-active);
+  transform: translate(6px, 6px);
+  box-shadow: none;
 }
 
 /* ═══════════════════════════════════════════
@@ -726,10 +486,17 @@ body {
   width: 100%;
   min-height: 100vh;
   position: relative;
-  /* V40 Special Relativity (Doppler Skew) */
+  /* Doppler skew — only active when --doppler-skew is set by JS */
   transform: skewY(var(--doppler-skew, 0deg));
   transition: transform 0.1s linear;
-  will-change: transform;
+  /* PERF: No permanent will-change here — promoted per-frame only when skew is nonzero */
+}
+
+/* Used for sections like Footer/KineticMarquee that should auto-size */
+.lazy-section-auto {
+  width: 100%;
+  position: relative;
+  /* No min-height: 100vh — collapses to content height */
 }
 
 /* ─── V60 Anisotropic Metallic Surfaces ─── */
@@ -1485,4 +1252,33 @@ section {
 
 .glass-card {
   will-change: transform;
+}
+
+/* ═══════════════════════════════════════════
+   BENTO BOX GRID SYSTEM (BRUTAL BENTO)
+═══════════════════════════════════════════ */
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--bento-gap);
+  width: 100%;
+}
+
+.bento-item-span-2 {
+  grid-column: span 2;
+}
+
+.bento-item-span-3 {
+  grid-column: span 3;
+}
+
+.bento-item-row-2 {
+  grid-row: span 2;
+}
+
+@media (max-width: 768px) {
+  .bento-item-span-2,
+  .bento-item-span-3 {
+    grid-column: span 1; /* Stack on mobile */
+  }
 }

@@ -12,7 +12,7 @@
 }
 
 /* ── Marquee ── */
-.marquee-container {
+.testi-marquee-container {
   width: 100vw;
   max-width: 100%;
   overflow: hidden;
@@ -36,18 +36,18 @@
   );
 }
 
-.marquee-track {
+.testi-marquee-track {
   display: flex;
   width: max-content;
   animation: scrollMarquee 35s linear infinite;
   will-change: transform;
 }
 
-.marquee-track:hover {
+.testi-marquee-track:hover {
   animation-play-state: paused;
 }
 
-.marquee-content {
+.testi-marquee-content {
   display: flex;
   gap: 2rem;
   padding-right: 2rem;
@@ -70,13 +70,17 @@
   position: relative;
   flex-shrink: 0;
   white-space: normal;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  /* prevent each card triggering layout recalculations on its siblings */
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  background: var(--bg-card);
+  border: var(--border-brutal);
+  border-radius: 0;
+  box-shadow: var(--shadow-brutal);
   contain: layout style;
 }
 
 .testimonial-card:hover {
-  transform: translateY(-6px);
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-brutal-deep);
 }
 
 @media (max-width: 768px) {

@@ -1,167 +1,199 @@
+/* ═══════════════════════════════
+   HERO — DECONSTRUCTED GLITCH (Concept 3)
+   Pure CSS, 60fps, hardware-accelerated
+═══════════════════════════════ */
 .hero-minimal {
   min-height: 100vh;
   width: 100%;
   position: relative;
   overflow: hidden;
-  /* Hardcoded dark background to keep it separate from the light theme site */
-  background: radial-gradient(circle at center, #0a0f1e 0%, #04060f 100%);
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 100px 1.5rem 60px;
-}
-
-/* Radial glow overlay */
-.hero-minimal::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle at 20% 50%, rgba(100, 110, 255, 0.12) 0%, transparent 60%),
-              radial-gradient(circle at 80% 80%, rgba(255, 140, 100, 0.08) 0%, transparent 60%);
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Retro vignette */
-.hero-minimal::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.4) 100%);
-  z-index: 2;
-  pointer-events: none;
+  background-color: transparent;
 }
 
 #tsparticles {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 0;
+  display: none;
 }
 
+/* ── Content wrapper ── */
 .hero-minimal-content {
   position: relative;
   z-index: 3;
   text-align: center;
+  width: 100%;
+  max-width: var(--container-width);
 }
 
-/* Time-aware greeting — premium, restrained typographic treatment */
+/* ── Greeting badge — tilted brutalist stamp ── */
 .hero-greeting {
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: clamp(0.7rem, 1.5vw, 0.85rem);
-  font-weight: 400;
-  font-style: normal;
-  letter-spacing: 0.35em;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 3px;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.38);
-  margin-bottom: 2rem;
-  position: relative;
+  color: #000;
+  background-color: var(--accent-brutal-yellow);
+  border: var(--border-heavy);
+  border-radius: 0;
+  padding: 10px 24px;
+  box-shadow: 6px 6px 0px #000;
+  margin-bottom: 2.5rem;
   display: inline-block;
+  transform: rotate(-2deg);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-/* Flanking ruled lines — a premium typographic device */
-.hero-greeting::before,
-.hero-greeting::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  width: 40px;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.18);
-}
-.hero-greeting::before { right: calc(100% + 14px); }
-.hero-greeting::after  { left:  calc(100% + 14px); }
-
-@media (max-width: 768px) {
-  .hero-greeting::before,
-  .hero-greeting::after { width: 20px; }
+.hero-greeting:hover {
+  transform: rotate(0deg) translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #000;
 }
 
+/* ── Giant Name — massive brutalist typography ── */
 .hero-name-giant {
-  font-family: 'Bodoni Moda', 'Playfair Display', 'Cormorant Garamond', serif;
-  font-size: clamp(4rem, 15vw, 11rem);
-  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: clamp(4rem, 14vw, 11rem);
+  font-weight: 900;
   margin: 0;
   display: flex;
   justify-content: center;
   flex-wrap: wrap;
-  perspective: 1000px; /* Enable 3D space */
+  line-height: 0.85;
+  text-transform: uppercase;
+  position: relative;
 }
 
 .hero-name-word {
   display: inline-block;
   white-space: nowrap;
-  margin: 0 12px;
-}
-.hero-name-word:last-child {
-  margin-right: 0;
+  margin: 0 8px;
 }
 
+/* ── Each character — thick stroke + solid offset shadow for POP ── */
 .metallic-char {
   display: inline-block;
-  background-image: 
-    linear-gradient(
-      180deg,
-      #ffffff 0%,
-      #fdf7e3 40%,
-      #d4af37 80%,
-      #ffffff 100%
-    );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--bg-primary);
+  -webkit-text-stroke: 3px #000;
+  text-shadow:
+    6px 6px 0px #000,
+    -2px -2px 0px var(--accent-brutal-pink);
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
   padding: 0;
-  padding-bottom: 0.15em;
   position: relative;
-  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
-  text-shadow: 0px 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform var(--transition-fast), text-shadow var(--transition-fast);
+  cursor: default;
+}
+
+.metallic-char:hover {
+  color: var(--accent-brutal-yellow);
+  transform: translate(-4px, -6px) !important;
+  text-shadow:
+    10px 10px 0px #000,
+    -3px -3px 0px var(--accent-brutal-blue);
+}
+
+/* ── CSS Glitch effect on name (pseudo-elements, clip-path driven) ── */
+.hero-name-giant::before,
+.hero-name-giant::after {
+  content: attr(data-text);
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-transform: inherit;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  opacity: 0;
+}
+
+.hero-name-giant:hover::before {
+  opacity: 0.6;
+  color: var(--accent-brutal-pink);
+  -webkit-text-stroke: 2px var(--accent-brutal-pink);
+  animation: glitch-shift-1 0.3s steps(2) infinite;
+}
+
+.hero-name-giant:hover::after {
+  opacity: 0.6;
+  color: var(--accent-brutal-blue);
+  -webkit-text-stroke: 2px var(--accent-brutal-blue);
+  animation: glitch-shift-2 0.3s steps(2) infinite;
+}
+
+@keyframes glitch-shift-1 {
+  0%   { clip-path: inset(20% 0 60% 0); transform: translate(-4px, 2px); }
+  25%  { clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px); }
+  50%  { clip-path: inset(40% 0 30% 0); transform: translate(-2px, 3px); }
+  75%  { clip-path: inset(10% 0 70% 0); transform: translate(4px, -2px); }
+  100% { clip-path: inset(50% 0 20% 0); transform: translate(-3px, 1px); }
+}
+
+@keyframes glitch-shift-2 {
+  0%   { clip-path: inset(50% 0 20% 0); transform: translate(4px, -2px); }
+  25%  { clip-path: inset(10% 0 70% 0); transform: translate(-3px, 1px); }
+  50%  { clip-path: inset(30% 0 40% 0); transform: translate(2px, -3px); }
+  75%  { clip-path: inset(70% 0 5% 0);  transform: translate(-4px, 2px); }
+  100% { clip-path: inset(20% 0 60% 0); transform: translate(3px, -1px); }
 }
 
 .metallic-reveal {
-  /* Ensure the container doesn't clip the 3D popout */
   overflow: visible;
 }
 
+/* ── Tagline — brutalist code-style badge ── */
 .hero-tagline-premium {
-  font-family: 'Fira Code', monospace;
-  font-size: 0.75rem;
-  font-weight: 400;
-  color: #fff;
-  margin-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #000;
+  background: #fff;
+  border: var(--border-heavy);
+  border-radius: 0;
+  box-shadow: 6px 6px 0px #000;
+  margin-top: 3rem;
   text-transform: uppercase;
-  letter-spacing: 8px;
+  letter-spacing: 3px;
   position: relative;
-  padding: 12px 0;
+  padding: 14px 28px;
+  display: inline-block;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
-/* Typewriter Cursors */
+.hero-tagline-premium:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #000;
+}
+
+/* ── Typewriter Cursors ── */
 .typewriter-cursor-active {
   display: inline-block;
-  color: rgba(0, 240, 255, 0.8);
-  font-weight: 200;
+  color: var(--accent-brutal-pink);
+  font-weight: 800;
   animation: cursor-flicker 0.15s infinite alternate;
-  text-shadow: 0 0 5px rgba(0, 240, 255, 0.4);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-mono);
   vertical-align: baseline;
-  pointer-events: none;
-  margin-left: 4px;
+  margin-left: 8px;
 }
 
 .typewriter-cursor-complete {
   display: inline-block;
-  color: rgba(255, 255, 255, 0.35);
-  font-weight: 100;
+  color: #000;
+  font-weight: 800;
   animation: cursor-blink 1.2s step-end infinite;
-  text-shadow: 0 0 5px rgba(255, 255, 255, 0.15);
-  font-family: 'Space Grotesk', sans-serif;
+  font-family: var(--font-mono);
   vertical-align: baseline;
-  margin-left: 4px;
-  pointer-events: none;
+  margin-left: 8px;
 }
 
 @keyframes cursor-blink {
@@ -174,54 +206,49 @@
   100% { opacity: 1; }
 }
 
-.hero-tagline-premium::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 80px;
-  height: 1px;
-  background: repeating-linear-gradient(
-    90deg,
-    rgba(var(--accent-primary-rgb), 0.5) 0px,
-    rgba(var(--accent-primary-rgb), 0.5) 4px,
-    transparent 4px,
-    transparent 8px
-  );
-}
-
-/* Responsive */
+/* ── Responsive ── */
 @media (max-width: 768px) {
+  .hero-minimal {
+    padding: 80px 1rem 40px;
+  }
   .hero-name-giant {
     font-size: clamp(3rem, 14vw, 4.5rem);
-    line-height: 1.25; /* Increased from 1.1 to give 'y' room to breathe */
     flex-direction: column;
     align-items: center;
-    gap: 0px;
-  }
-  .hero-name-word {
-    margin: 0; /* use flex gap instead */
+    gap: 10px;
   }
   .metallic-char {
-    padding: 0 4px; /* Give side room */
-    padding-bottom: 0.2em; /* explicitly protect descenders like 'y' on mobile */
-    filter: drop-shadow(2px 2px 6px rgba(0,0,0,0.5));
-    -webkit-text-stroke: 0px;
+    -webkit-text-stroke: 2px #000;
+    text-shadow:
+      4px 4px 0px #000,
+      -1px -1px 0px var(--accent-brutal-pink);
     transform: none !important;
   }
   .metallic-char:hover {
-    transform: scale(1.02) !important;
+    transform: translate(-2px, -3px) !important;
+    text-shadow:
+      6px 6px 0px #000,
+      -2px -2px 0px var(--accent-brutal-blue);
   }
   .hero-tagline-premium {
-    letter-spacing: 4px !important;
+    letter-spacing: 1px !important;
     font-size: 0.7rem;
-    padding: 0 16px;
-    line-height: 1.6;
+    padding: 10px 18px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .hero-greeting {
+    font-size: 0.75rem;
+    padding: 8px 16px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  /* Disable glitch pseudo-elements on mobile for performance */
+  .hero-name-giant::before,
+  .hero-name-giant::after {
+    display: none;
   }
 }
 
-/* High-Performance CSS Particles */
+/* ── High-Performance CSS Particles (Brutalist floating shapes) ── */
 .hero-css-particles {
   position: absolute;
   inset: 0;
@@ -234,15 +261,26 @@
   position: absolute;
   top: var(--top);
   left: var(--left);
-  width: 2px;
-  height: 2px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0.15;
-  animation: floatStar var(--dur) ease-in-out var(--delay) infinite alternate;
+  width: 18px;
+  height: 18px;
+  background: var(--accent-brutal-pink);
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  opacity: 0.25;
+  animation: floatShape var(--dur) ease-in-out var(--delay) infinite alternate;
 }
 
-@keyframes floatStar {
-  0% { transform: translateY(0) scale(1); opacity: 0.1; }
-  100% { transform: translateY(-20px) scale(1.5); opacity: 0.4; }
+.css-star:nth-child(even) {
+  background: var(--accent-brutal-blue);
+  border-radius: 50%;
+}
+.css-star:nth-child(3n) {
+  background: var(--accent-brutal-yellow);
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+@keyframes floatShape {
+  0% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
+  100% { transform: translateY(-35px) rotate(180deg); opacity: 0.4; }
 }

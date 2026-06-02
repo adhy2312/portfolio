@@ -40,20 +40,53 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="error-boundary-os">
-          <div className="error-content">
-            <h1 className="glitch" data-text="Windows">Windows</h1>
-            <p className="error-msg">
-              A fatal exception 0E has occurred at 0028:C0011E36 in UXD AdhyOS(01) + 00001614.<br />
-              The current application will be terminated.<br /><br />
-              *  Press ESC or click the link below to terminate the current application.<br />
-              *  Press CTRL+ALT+DEL again to restart your computer. You will lose any unsaved information in all applications.
+        <div style={{
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: '2rem',
+          background: '#fff',
+          fontFamily: 'var(--font-mono, monospace)'
+        }}>
+          <div style={{
+            background: 'var(--accent-brutal-pink, #f472b6)',
+            border: 'var(--border-heavy, 4px solid #000)',
+            boxShadow: '8px 8px 0px #000',
+            padding: '2rem',
+            maxWidth: '600px',
+            width: '100%'
+          }}>
+            <h1 style={{ fontSize: '2rem', textTransform: 'uppercase', marginBottom: '1rem', color: '#000' }}>System Error</h1>
+            <p style={{ fontSize: '1rem', color: '#000', fontWeight: 'bold', marginBottom: '2rem' }}>
+              Something went wrong. The application has crashed.
             </p>
-            <div className="error-log">
-              Fatal Error: {this.state.error && this.state.error.toString()}
+            <div style={{
+              background: '#fff',
+              border: '2px solid #000',
+              padding: '1rem',
+              marginBottom: '2rem',
+              overflowX: 'auto',
+              color: '#000',
+              fontSize: '0.85rem'
+            }}>
+              {this.state.error && this.state.error.toString()}
             </div>
-            <button className="reboot-btn" onClick={this.handleReboot}>
-              Press ESC or click here to continue _
+            <button 
+              onClick={this.handleReboot}
+              style={{
+                background: 'var(--accent-brutal-blue, #38bdf8)',
+                border: '2px solid #000',
+                padding: '10px 20px',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                boxShadow: '4px 4px 0px #000',
+                textTransform: 'uppercase'
+              }}
+            >
+              Reboot System
             </button>
           </div>
         </div>

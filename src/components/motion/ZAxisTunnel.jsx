@@ -12,8 +12,20 @@ gsap.registerPlugin(ScrollTrigger);
 export default function ZAxisTunnel({ children, depth = 2000, className = "" }) {
   const containerRef = useRef(null);
   const contentRef = useRef(null);
+  const [isMobile, setIsMobile] = React.useState(false);
 
   useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+
     const el = containerRef.current;
     const content = contentRef.current;
     if (!el || !content) return;
@@ -53,7 +65,11 @@ export default function ZAxisTunnel({ children, depth = 2000, className = "" }) 
     }, el);
 
     return () => ctx.revert();
-  }, [depth]);
+  }, [depth, isMobile]);
+
+  if (isMobile) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <div 

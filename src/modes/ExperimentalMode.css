@@ -1,0 +1,74 @@
+/* ══════════════════════════════════════════
+   EXPERIMENTAL MODE — Performance-Aware Chaos
+   ══════════════════════════════════════════ */
+
+/* ─── 3D DOM DISTORTION ─── */
+body.mode-experimental {
+  /* Set perspective on the body so the App container can rotate in 3D space */
+  perspective: 1200px;
+  perspective-origin: center center;
+  overflow-x: hidden;
+  background: #000;
+}
+
+body.mode-experimental .App {
+  /* The rotation variables will be driven by NervousSystem / App JS */
+  transform: rotateX(var(--exp-rot-x, 0deg)) rotateY(var(--exp-rot-y, 0deg)) translateZ(var(--exp-tz, 0px));
+  transition: transform 0.1s linear; /* Fast linear transition for smooth 60fps tracking */
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+/* Make sections float off the page in 3D */
+body.mode-experimental .section-container {
+  transform: translateZ(30px);
+  transform-style: preserve-3d;
+}
+
+body.mode-experimental .bento-cell,
+body.mode-experimental .marquee-card,
+body.mode-experimental .glass-panel {
+  transform: translateZ(50px);
+  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+body.mode-experimental .bento-cell:hover,
+body.mode-experimental .marquee-card:hover {
+  transform: translateZ(80px) scale(1.05) !important;
+  box-shadow: 20px 20px 0px var(--accent-primary) !important;
+}
+
+/* ─── SCRAMBLED TEXT GLITCH ─── */
+body.mode-experimental h1,
+body.mode-experimental h2,
+body.mode-experimental .section-title {
+  position: relative;
+}
+
+body.mode-experimental h1:hover,
+body.mode-experimental h2:hover,
+body.mode-experimental .section-title:hover {
+  animation: txtGlitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+  color: var(--accent-brutal-yellow, #f4d03f);
+  text-shadow: 4px 4px 0px #ff003c, -4px -4px 0px #00e5ff;
+}
+
+@keyframes txtGlitch {
+  0% { transform: translate(0) }
+  20% { transform: translate(-3px, 3px) }
+  40% { transform: translate(-3px, -3px) }
+  60% { transform: translate(3px, 3px) }
+  80% { transform: translate(3px, -3px) }
+  100% { transform: translate(0) }
+}
+
+/* ─── OVERCLOCKED CANVAS & COLORS ─── */
+/* Give the noise a crazy blend mode */
+body.mode-experimental .noise-overlay {
+  mix-blend-mode: color-dodge;
+  opacity: 0.15;
+}
+
+body.mode-experimental .digital-soul {
+  filter: hue-rotate(90deg) saturate(200%);
+}

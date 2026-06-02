@@ -186,6 +186,150 @@ const ArchitectureConstellation = () => {
   return <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block', cursor: 'crosshair' }} />;
 };
 
+const SystemObservatory = () => {
+  const canvasRef = useRef(null);
+  const [domNodes, setDomNodes] = useState(0);
+  const [uptime, setUptime] = useState(0);
+
+  useEffect(() => {
+    // Live metric polling
+    const domInterval = setInterval(() => {
+      // Throttle heavy DOM counting to 5 seconds to prevent performance regressions
+      setDomNodes(document.getElementsByTagName('*').length);
+    }, 5000);
+    
+    const timeInterval = setInterval(() => {
+      setUptime(prev => prev + 1);
+    }, 1000);
+
+    return () => {
+      clearInterval(domInterval);
+      clearInterval(timeInterval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    let time = 0;
+
+    const resize = () => {
+      canvas.width = canvas.parentElement.clientWidth;
+      canvas.height = canvas.parentElement.clientHeight;
+    };
+    resize();
+    window.addEventListener('resize', resize);
+
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = Math.min(cx, cy) * 0.8;
+      
+      time += 0.02;
+
+      // Draw radar sweep
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(time);
+      
+      const gradient = ctx.createConicGradient(0, 0, 0);
+      gradient.addColorStop(0, 'rgba(0, 255, 255, 0)');
+      gradient.addColorStop(0.8, 'rgba(0, 255, 255, 0)');
+      gradient.addColorStop(1, 'rgba(0, 255, 255, 0.5)');
+      
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.arc(0, 0, radius, 0, Math.PI * 2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      // Radar line
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(radius, 0);
+      ctx.strokeStyle = '#0ff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.restore();
+
+      // Draw grid circles
+      ctx.strokeStyle = 'rgba(0, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      [0.3, 0.6, 1].forEach(scale => {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * scale, 0, Math.PI * 2);
+        ctx.stroke();
+      });
+
+      // Draw active data points
+      const points = [
+        { x: Math.sin(time * 0.5) * 0.5, y: Math.cos(time * 0.3) * 0.5 },
+        { x: Math.sin(time * -0.7) * 0.8, y: Math.cos(time * 0.8) * 0.8 },
+        { x: Math.sin(time * 1.2) * 0.4, y: Math.cos(time * -1.5) * 0.4 }
+      ];
+
+      points.forEach(p => {
+        const px = cx + p.x * radius;
+        const py = cy + p.y * radius;
+        
+        ctx.beginPath();
+        ctx.arc(px, py, 4, 0, Math.PI * 2);
+        ctx.fillStyle = '#0ff';
+        ctx.fill();
+        
+        // ping ripple
+        ctx.beginPath();
+        ctx.arc(px, py, 10 + Math.sin(time * 5) * 5, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(0, 255, 255, ${0.5 - Math.sin(time * 5) * 0.5})`;
+        ctx.stroke();
+      });
+
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return (
+    <div className="dev-observatory-wrapper" style={{ display: 'flex', gap: '2rem', height: '100%' }}>
+      <div className="obs-radar-container" style={{ flex: 1, position: 'relative', border: '1px solid rgba(0, 255, 255, 0.2)', borderRadius: '8px', overflow: 'hidden' }}>
+        <canvas ref={canvasRef} style={{ width: '100%', height: '100%', display: 'block' }} />
+        <div style={{ position: 'absolute', top: 10, left: 10, color: '#0ff', fontFamily: 'monospace', fontSize: '0.8rem' }}>SYS.RADAR_ACTIVE</div>
+      </div>
+      
+      <div className="obs-metrics-panel" style={{ width: '300px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="obs-metric-card" style={{ padding: '1rem', background: 'rgba(0, 255, 255, 0.05)', border: '1px solid rgba(0, 255, 255, 0.1)', borderRadius: '4px' }}>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>TOTAL DOM NODES</div>
+          <div style={{ fontSize: '1.5rem', color: '#0ff', fontFamily: 'monospace' }}>{domNodes}</div>
+        </div>
+        
+        <div className="obs-metric-card" style={{ padding: '1rem', background: 'rgba(0, 255, 255, 0.05)', border: '1px solid rgba(0, 255, 255, 0.1)', borderRadius: '4px' }}>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>SESSION UPTIME</div>
+          <div style={{ fontSize: '1.5rem', color: '#00e676', fontFamily: 'monospace' }}>{Math.floor(uptime / 60)}m {uptime % 60}s</div>
+        </div>
+        
+        <div className="obs-metric-card" style={{ padding: '1rem', background: 'rgba(0, 255, 255, 0.05)', border: '1px solid rgba(0, 255, 255, 0.1)', borderRadius: '4px' }}>
+          <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)', marginBottom: '0.5rem' }}>DATA STREAM</div>
+          <div style={{ fontSize: '0.9rem', color: '#e040fb', fontFamily: 'monospace', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span>TX: {Math.floor(Math.random() * 1000)} kb/s</span>
+            <span>RX: {Math.floor(Math.random() * 5000)} kb/s</span>
+            <span>PING: {Math.floor(12 + Math.random() * 5)}ms</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export default function DeveloperModeOS({ onClose, onLaunchGame }) {
   const [osState, setOsState] = useState({
     cursorMode: 'hybrid',
@@ -506,6 +650,16 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
             </div>
           </div>
         );
+      case '[OBSERVATORY]':
+        return (
+          <div className="dev-observatory-tab" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h3 className="dev-section-title">SYSTEM OBSERVATORY</h3>
+            <p className="dev-desc" style={{marginBottom: '1rem', color: 'rgba(255,255,255,0.6)'}}>Live telemetry array and spatial radar.</p>
+            <div style={{ flex: 1 }}>
+               <SystemObservatory />
+            </div>
+          </div>
+        );
       case 'Performance':
         return (
           <div className="perf-tab-wrapper">
@@ -699,7 +853,7 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
           <p>NervousSystem Engine</p>
         </div>
         <nav className="dev-os-nav">
-          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', '[ML_CORE]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
+          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', '[OBSERVATORY]', '[ML_CORE]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
             <button 
               key={tab} 
               className={`dev-os-tab-btn ${activeTab === tab ? 'active' : ''}`}

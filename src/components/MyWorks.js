@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
-import './motion/OpticGlass.css';
 import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
@@ -93,97 +92,48 @@ const filters = [
 
 const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
 
-const TiltCard = ({ children, project, index }) => {
+// Simplified BrutalCard — pure CSS hover, no JS 3D tracking, no GPU-heavy transforms
+const BrutalCard = ({ children, project, index, className }) => {
   const ref = useRef(null);
-  const cardRef = useRef(null);
   const [showMemory, setShowMemory] = useState(false);
 
-  // GSAP scroll-scrubbed entrance
+  // Lightweight GSAP scroll entrance only
   useEffect(() => {
     if (!ref.current) return;
-
-    const ctx = gsap.context(() => {
-      gsap.fromTo(ref.current,
-        { y: 80, opacity: 0, scale: 0.9, rotateX: 15 },
-        {
-          y: 0, opacity: 1, scale: 1, rotateX: 0,
-          duration: 1,
-          ease: 'power4.out',
-          scrollTrigger: {
-            trigger: ref.current,
-            start: 'top 90%',
-            end: 'top 50%',
-            toggleActions: 'play none none none',
-            once: true,
-          }
+    const el = ref.current;
+    gsap.fromTo(el,
+      { y: 60, opacity: 0 },
+      {
+        y: 0, opacity: 1,
+        duration: 0.7,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: el,
+          start: 'top 90%',
+          toggleActions: 'play none none none',
+          once: true,
         }
-      );
-    }, ref);
-
-    return () => ctx.revert();
-  }, []);
-
-  // GSAP 3D tilt on hover (desktop only)
-  useEffect(() => {
-    if (!cardRef.current || isTouchDevice) return;
-
-    const el = cardRef.current;
-
-    const handleMouseMove = (e) => {
-      const rect = el.getBoundingClientRect();
-      const xPct = (e.clientX - rect.left) / rect.width - 0.5;
-      const yPct = (e.clientY - rect.top) / rect.height - 0.5;
-      const relX = e.clientX - rect.left - rect.width / 2;
-      const relY = e.clientY - rect.top - rect.height / 2;
-      const angle = Math.atan2(relY, relX) * (180 / Math.PI);
-
-      gsap.to(el, {
-        rotateX: yPct * -20,
-        rotateY: xPct * 20,
-        '--anisotropy-angle': `${angle}deg`,
-        duration: 0.4,
-        ease: 'power2.out',
-        overwrite: 'auto',
-      });
-    };
-
-    const handleMouseLeave = () => {
-      gsap.to(el, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 0.8,
-        ease: 'elastic.out(1, 0.5)',
-      });
-    };
-
-    el.addEventListener('mousemove', handleMouseMove);
-    el.addEventListener('mouseleave', handleMouseLeave);
-
-    return () => {
-      el.removeEventListener('mousemove', handleMouseMove);
-      el.removeEventListener('mouseleave', handleMouseLeave);
-    };
+      }
+    );
   }, []);
 
   return (
-    <div ref={ref} className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''}`}>
+    <div ref={ref} className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''} ${className || ''}`}>
       <div
-        ref={cardRef}
         className="work-card-wrapper"
-        style={{ transformStyle: 'preserve-3d', '--card-accent': project.accent }}
+        style={{ '--card-accent': project.accent }}
         data-cursor-ai="true"
         data-project-title={project.title}
         data-project-desc={project.description}
       >
-        <div className="work-card raytraced-glass anisotropic-surface" style={{ transform: 'translateZ(50px)' }}>
+        <div className="work-card">
           {showMemory ? (
-            <div className="digital-memory-overlay" style={{ transform: "translateZ(40px)" }}>
+            <div className="digital-memory-overlay">
               <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>
               <div className="memory-header">
                 <span className="memory-icon">🧠</span>
                 <h4>Digital Memory</h4>
               </div>
-              
               <div className="memory-content">
                 {project.buildTime && (
                   <div className="memory-item">
@@ -212,10 +162,9 @@ const TiltCard = ({ children, project, index }) => {
             <>
               {children}
               {(project.buildTime || project.soundtrack || project.emotionalNote) && (
-                <button 
-                  className="reveal-memory-btn" 
+                <button
+                  className="reveal-memory-btn"
                   onClick={(e) => { e.stopPropagation(); setShowMemory(true); }}
-                  style={{ transform: "translateZ(30px)" }}
                   title="View Digital Memory"
                 >
                   ✦
@@ -325,10 +274,17 @@ const MyWorks = () => {
         </div>
 
         {/* Project cards */}
-        <div className="works-grid" key={activeFilter}>
-          {filtered.map((project, index) => (
-            <TiltCard key={project.title} project={project} index={index}>
-              <div className="work-card-top" style={{ transform: "translateZ(30px)" }}>
+        <div className="bento-grid" key={activeFilter}>
+          {filtered.map((project, index) => {
+            let spanClass = '';
+            if (activeFilter === 'all') {
+              if (index === 0 || index === 3) spanClass = 'bento-item-span-2';
+              else if (index === 5) spanClass = 'bento-item-span-3';
+            }
+
+            return (
+            <BrutalCard key={project.title} project={project} index={index} className={spanClass}>
+              <div className="work-card-top">
                 <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
                 <div className="work-card-links">
                   {(project.githubLink || project.github) && (
@@ -344,10 +300,10 @@ const MyWorks = () => {
                 </div>
               </div>
 
-              <h3 className="work-title" style={{ transform: "translateZ(40px)" }}>{project.title}</h3>
-              <p className="work-desc" style={{ transform: "translateZ(20px)" }}>{project.description}</p>
+              <h3 className="work-title">{project.title}</h3>
+              <p className="work-desc">{project.description}</p>
 
-              <div className="work-tags" style={{ transform: "translateZ(25px)" }}>
+              <div className="work-tags">
                 {project.tags.map((tag) => (
                   <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>
                     {tag}
@@ -355,7 +311,7 @@ const MyWorks = () => {
                 ))}
               </div>
 
-              <div className="work-card-footer" style={{ transform: "translateZ(35px)" }}>
+              <div className="work-card-footer">
                 {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
                   <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
                     View Project <FiArrowRight size={14} />
@@ -366,8 +322,8 @@ const MyWorks = () => {
                   </span>
                 )}
               </div>
-            </TiltCard>
-          ))}
+            </BrutalCard>
+          )})}
         </div>
       </div>
     </section>

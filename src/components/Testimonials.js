@@ -124,12 +124,12 @@ const Testimonials = () => {
       </div>
 
       {/* Full-width marquee outside the container so it can bleed edge-to-edge */}
-      <div className="marquee-container">
-        <div className="marquee-track">
-          <div className="marquee-content">
+      <div className="testi-marquee-container">
+        <div className="testi-marquee-track">
+          <div className="testi-marquee-content">
             {loop.map((item, i) => <TestimonialCard key={`a-${i}`} item={item} />)}
           </div>
-          <div className="marquee-content" aria-hidden="true">
+          <div className="testi-marquee-content" aria-hidden="true">
             {loop.map((item, i) => <TestimonialCard key={`b-${i}`} item={item} />)}
           </div>
         </div>

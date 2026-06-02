@@ -1,0 +1,91 @@
+/* ══════════════════════════════════════════
+   RECRUITER MODE — The Professional Sandbox
+   ══════════════════════════════════════════ */
+
+/* Soften all brutalist variables back to a clean SaaS look */
+body.mode-recruiter {
+  /* Override brutalist CSS variables if they exist in :root */
+  --border-heavy: 1px solid rgba(0,0,0,0.1);
+  --border-medium: 1px solid rgba(0,0,0,0.08);
+  --brutal-shadow: 0 10px 30px rgba(0,0,0,0.08);
+  --brutal-shadow-hover: 0 15px 40px rgba(0,0,0,0.12);
+  --brutal-radius: 16px;
+  --brutal-radius-lg: 24px;
+}
+
+/* Force rounded corners and soft shadows on key brutalist elements */
+body.mode-recruiter .bento-cell,
+body.mode-recruiter .marquee-card,
+body.mode-recruiter .glass-panel,
+body.mode-recruiter .glass-card,
+body.mode-recruiter .btn-primary,
+body.mode-recruiter .btn-outline,
+body.mode-recruiter .glass-toggle,
+body.mode-recruiter .np-widget,
+body.mode-recruiter .np-dock,
+body.mode-recruiter .np-progress-track,
+body.mode-recruiter .np-progress-fill,
+body.mode-recruiter .np-art,
+body.mode-recruiter .loader-bar-track,
+body.mode-recruiter .loader-bar-fill,
+body.mode-recruiter .custom-cursor-ring.viewfinder,
+body.mode-recruiter .custom-cursor-ring.viewfinder::before,
+body.mode-recruiter .custom-cursor-ring.viewfinder::after,
+body.mode-recruiter .about-image-wrapper {
+  border-radius: var(--brutal-radius) !important;
+  border: var(--border-medium) !important;
+  box-shadow: var(--brutal-shadow) !important;
+}
+
+body.mode-recruiter .btn-primary,
+body.mode-recruiter .btn-outline {
+  border-radius: 100px !important;
+}
+
+body.mode-recruiter .bento-cell:hover,
+body.mode-recruiter .marquee-card:hover {
+  box-shadow: var(--brutal-shadow-hover) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* Fix specific brutalist overrides */
+body.mode-recruiter .bento-cell::after,
+body.mode-recruiter .btn-primary::after,
+body.mode-recruiter .btn-outline::after {
+  display: none !important; /* Hide brutalist pseudo-element shadows */
+}
+
+/* Clean up Typography */
+body.mode-recruiter .loader-name-text,
+body.mode-recruiter .loader-dot,
+body.mode-recruiter h1,
+body.mode-recruiter h2,
+body.mode-recruiter h3 {
+  text-shadow: none !important;
+}
+
+/* Disable Viewfinder Cursor visual hackery */
+body.mode-recruiter .custom-cursor-ring.viewfinder {
+  border-radius: 50% !important;
+  border: 1px solid rgba(0,0,0,0.5) !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+body.mode-recruiter .custom-cursor-ring.viewfinder::before,
+body.mode-recruiter .custom-cursor-ring.viewfinder::after {
+  display: none !important;
+}
+
+/* Ensure background noise is gone */
+body.mode-recruiter .noise-overlay {
+  opacity: 0.02 !important;
+}
+
+/* Disable the darkroom effect in recruiter mode */
+body.mode-recruiter.darkroom-active {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+body.mode-recruiter .marquee-card img {
+  filter: none !important;
+}

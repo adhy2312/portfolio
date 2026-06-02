@@ -4,13 +4,14 @@ import './Hero.css';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { client, urlFor } from '../sanity';
 import LanguageTerminal from './LanguageTerminal';
-import { useOrchestrator } from '../contexts/SystemOrchestrator';
+
 import { motionTokens } from '../core/MotionGovernance';
 import gsap from 'gsap';
 import { TextPlugin } from 'gsap/TextPlugin';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EntropyText from './motion/EntropyText';
 import LiquidText from './motion/LiquidText';
+import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
@@ -33,14 +34,17 @@ const Hero = () => {
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ delay: 0.3 });
 
-      // Greeting slide-in
+      // Greeting slide-in + Typewriter
       if (greetingRef.current) {
-        gsap.set(greetingRef.current, { opacity: 0, y: -20 });
+        const fullText = greetingRef.current.getAttribute('data-text');
+        gsap.set(greetingRef.current, { opacity: 1, y: 0, text: "" });
         tl.to(greetingRef.current, {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          ease: 'power4.out',
+          text: {
+            value: fullText,
+            delimiter: ""
+          },
+          duration: Math.max(1.2, fullText.length * 0.05),
+          ease: 'none',
         }, 0.4);
       }
 
@@ -71,19 +75,18 @@ const Hero = () => {
 
       // 3D tilt on experimental mode (GSAP-powered)
       if (isExperimental && contentRef.current) {
+        // Use quickTo for high-performance mouse tracking instead of parsing a new tween every frame
+        const xTo = gsap.quickTo(contentRef.current, "rotateY", { duration: 0.8, ease: "power2.out" });
+        const yTo = gsap.quickTo(contentRef.current, "rotateX", { duration: 0.8, ease: "power2.out" });
+
         handleMouseMove = (e) => {
           const rect = el?.getBoundingClientRect();
           if (!rect) return;
           const xPct = (e.clientX - rect.left) / rect.width - 0.5;
           const yPct = (e.clientY - rect.top) / rect.height - 0.5;
 
-          gsap.to(contentRef.current, {
-            rotateX: yPct * -10,
-            rotateY: xPct * 10,
-            duration: 0.8,
-            ease: 'power2.out',
-            overwrite: 'auto',
-          });
+          xTo(xPct * 10);
+          yTo(yPct * -10);
         };
 
         handleMouseLeave = () => {
@@ -142,6 +145,18 @@ const Hero = () => {
       data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: GSAP ScrollTrigger + springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount"
       style={isExperimental ? { perspective: "1500px" } : {}}
     >
+      <ExpertDoc 
+        title="Hero.js"
+        notes="High-performance entrance layer."
+        data={{
+          'rendering': 'Client Side',
+          'animationEngine': 'GSAP ScrollTrigger',
+          'particles': 'Pure CSS (No WebGL)',
+          'contentFetch': 'Sanity CMS (Deferred)',
+          'motionTokens': 'useGSAPAnimations()',
+          '3dDistortion': isExperimental
+        }}
+      />
       
       {/* Pure CSS High-Performance Floating Stars (Replaces heavy WebGL tsparticles) */}
       <div className="hero-css-particles">
@@ -160,11 +175,16 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        <div
-          ref={greetingRef}
-          className="hero-greeting"
-        >
-          {displayData.greeting}
+        <div className="hero-greeting-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2.5rem' }}>
+          <div
+            ref={greetingRef}
+            className="hero-greeting"
+            data-text={displayData.greeting}
+            style={{ marginBottom: 0 }}
+          >
+            {/* Initially empty, GSAP will fill it */}
+          </div>
+          <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.2rem', color: 'var(--accent-brutal-pink)' }}>_</span>
         </div>
         <LiquidText>
           <h1 className="hero-name-giant metallic-reveal">

@@ -255,26 +255,30 @@ const Navbar = () => {
       <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`} data-xray="[COMPONENT: NAVBAR]&#10;API: OpenWeatherMap&#10;Logic: Dynamic ambient classes&#10;Listener: passive true">
         <div className={`navbar-inner ${ambientClass}`}>
           {ambientClass === 'ambient-rain' && <RainDroplets />}
-          <a
-            className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
-            href="#hero"
-            onClick={handleLogoClick}
-            title="Try clicking me 3 times... ✨"
-          >
-            <span className="logo-text">ADHY</span>
-            <span className="logo-dot">.</span>
-          </a>
 
-          {weatherData && (
-            <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>
-              {renderWeatherIcon()}
-              <span>{weatherData.temp}°C</span>
-            </div>
-          )}
+          {/* Left cluster: logo + weather + xray toggle */}
+          <div className="navbar-left-cluster">
+            <a
+              className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
+              href="#hero"
+              onClick={handleLogoClick}
+              title="Try clicking me 3 times... ✨"
+            >
+              <span className="logo-text">ADHY</span>
+              <span className="logo-dot">.</span>
+            </a>
 
-          <button className="xray-toggle-btn" onClick={toggleXray} title="Toggle X-Ray / Developer Mode">
-            <FiActivity />
-          </button>
+            {weatherData && (
+              <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>
+                {renderWeatherIcon()}
+                <span>{weatherData.temp}°C</span>
+              </div>
+            )}
+
+            <button className="xray-toggle-btn" onClick={toggleXray} title="Toggle X-Ray / Developer Mode">
+              <FiActivity />
+            </button>
+          </div>
 
           {/* Desktop Nav Links */}
           <ul className="desktop-nav-links" onMouseLeave={handlePillLeave} style={{ position: 'relative' }}>

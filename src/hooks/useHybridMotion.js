@@ -25,7 +25,7 @@ export function useHybridMotion() {
       lerp: 0.1, 
       wheelMultiplier: 0.8,
       smoothWheel: true,
-      syncTouch: true
+      syncTouch: false
     });
     lenisRef.current = lenis;
 
