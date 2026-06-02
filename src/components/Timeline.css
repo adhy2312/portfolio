@@ -37,6 +37,8 @@
   padding: 60px 0 80px 0;
   cursor: grab;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .timeline-scroll-wrapper:active {

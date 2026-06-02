@@ -267,7 +267,7 @@ const Timeline = () => {
         </div>
       </div>
 
-      <div className="timeline-scroll-wrapper" ref={containerRef}>
+      <div className="timeline-scroll-wrapper" ref={containerRef} data-lenis-prevent="true">
         <div className="timeline-track-container" ref={trackRef}>
           
           {/* Central Track Lines */}
