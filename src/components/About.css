@@ -14,13 +14,44 @@
 
 .about-img-wrapper {
   position: relative;
-  background: var(--accent-brutal-yellow);
-  padding: 16px;
-  border-radius: var(--border-radius-bento);
+  background: var(--accent-brutalist-cream, #FFF8E7); /* Cream paper */
+  padding: 16px 16px 70px 16px; /* Classic Polaroid bottom padding */
+  border-radius: 0; /* Square edges */
   border: var(--border-heavy);
   box-shadow: var(--shadow-brutal-deep);
   transform: rotate(-2deg);
   transition: transform var(--transition-bounce), box-shadow var(--transition-bounce);
+}
+
+/* Handwritten Polaroid caption */
+.about-img-wrapper::after {
+  content: 'Adhithya, 2024';
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-2deg);
+  font-family: 'Caveat', 'Playfair Display', cursive, serif;
+  font-size: 1.5rem;
+  color: rgba(0,0,0,0.8);
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* Scotch tape piece */
+.about-img-wrapper::before {
+  content: '';
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%) rotate(-5deg);
+  width: 110px;
+  height: 35px;
+  background: rgba(255,255,255,0.5);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  z-index: 10;
+  backdrop-filter: blur(2px);
+  border-left: 2px dashed rgba(255,255,255,0.8);
+  border-right: 2px dashed rgba(255,255,255,0.8);
 }
 
 .about-img-wrapper:hover {
@@ -30,7 +61,7 @@
 
 .about-img {
   width: 100%;
-  border-radius: 8px;
+  border-radius: 0;
   display: block;
   filter: grayscale(100%) contrast(1.2);
   border: var(--border-brutal);

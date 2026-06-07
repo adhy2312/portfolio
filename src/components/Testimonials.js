@@ -24,10 +24,7 @@ const TestimonialCard = memo(({ item }) => {
         {Array.from({ length: stars }).map((_, i) => (
           <span key={i} className="star">★</span>
         ))}
-        <span className="testimonial-verified" style={{ marginLeft: '8px' }}>
-          <span className="testimonial-verified-dot" />
-          Verified
-        </span>
+
       </div>
 
       <p className="testimonial-quote">"{item.quote}"</p>

@@ -11,20 +11,22 @@ export default function FluidCanvas() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
-    let rafId;
     const uuid = 'fluid-canvas-1';
 
-    const resize = () => {
+    // In React 18 Strict Mode, useEffect runs twice. 
+    // We cannot transfer control to offscreen twice on the same canvas element.
+    if (!canvas.dataset.offscreenTransferred) {
+      canvas.dataset.offscreenTransferred = 'true';
+      
+      // Set initial size
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', resize);
-    resize();
 
-    const offscreen = canvas.transferControlToOffscreen();
-    
-    // Send the offscreen canvas to the worker
-    pipeline.dispatch('science', 'INIT_FLUID_OFFSCREEN', uuid, { canvas: offscreen }, [offscreen]);
+      const offscreen = canvas.transferControlToOffscreen();
+      
+      // Send the offscreen canvas to the worker
+      pipeline.dispatch('science', 'INIT_FLUID_OFFSCREEN', uuid, { canvas: offscreen }, [offscreen]);
+    }
     
     let frame = 0;
 
@@ -32,8 +34,8 @@ export default function FluidCanvas() {
       frame++;
       if (frame % 2 === 0) { // Throttle state updates to 60Hz, Worker renders at 144Hz
         pipeline.dispatch('science', 'UPDATE_FLUID_STATE', uuid, {
-          width: canvas.width, 
-          height: canvas.height,
+          width: window.innerWidth, 
+          height: window.innerHeight,
           mouseX: ns.mousePos.x,
           mouseY: ns.mousePos.y,
           velocityX: ns.mousePos.vx || 0,
@@ -47,7 +49,6 @@ export default function FluidCanvas() {
 
     return () => {
       ns.unregister(uuid);
-      window.removeEventListener('resize', resize);
     };
   }, []);
 

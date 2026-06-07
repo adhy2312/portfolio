@@ -323,12 +323,7 @@ function AppContent() {
         </div>
       )}
 
-      <AmbientThoughts />
-      <Suspense fallback={null}>
-        <CustomCursor />
-      </Suspense>
-      <DigitalSoul />
-      <FluidCanvas />
+      {/* Heavy performance drains removed (AmbientThoughts, CustomCursor, DigitalSoul, FluidCanvas) */}
 
       <Suspense fallback={null}>
         <ScrollProgress />
@@ -338,8 +333,7 @@ function AppContent() {
 
       {/* High-Performance Breathing Overlay Removed for Performance */}
 
-      {/* Ultra-lightweight digital textures (noise, scanlines, chromatic aberration) */}
-      <DigitalTextures />
+      {/* DigitalTextures removed for performance */}
 
       <Navbar />
       <Hero />

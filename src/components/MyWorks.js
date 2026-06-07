@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
-import { FiExternalLink, FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
+import { FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
@@ -90,96 +90,10 @@ const filters = [
   { label: 'Photography', value: 'photography' },
 ];
 
-const isTouchDevice = typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
-
-// Simplified BrutalCard — pure CSS hover, no JS 3D tracking, no GPU-heavy transforms
-const BrutalCard = ({ children, project, index, className }) => {
-  const ref = useRef(null);
-  const [showMemory, setShowMemory] = useState(false);
-
-  // Lightweight GSAP scroll entrance only
-  useEffect(() => {
-    if (!ref.current) return;
-    const el = ref.current;
-    gsap.fromTo(el,
-      { y: 60, opacity: 0 },
-      {
-        y: 0, opacity: 1,
-        duration: 0.7,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: el,
-          start: 'top 90%',
-          toggleActions: 'play none none none',
-          once: true,
-        }
-      }
-    );
-  }, []);
-
-  return (
-    <div ref={ref} className={`work-card-scroll-wrapper ${showMemory ? 'memory-active' : ''} ${className || ''}`}>
-      <div
-        className="work-card-wrapper"
-        style={{ '--card-accent': project.accent }}
-        data-cursor-ai="true"
-        data-project-title={project.title}
-        data-project-desc={project.description}
-      >
-        <div className="work-card">
-          {showMemory ? (
-            <div className="digital-memory-overlay">
-              <button className="close-memory-btn" onClick={() => setShowMemory(false)}>✕</button>
-              <div className="memory-header">
-                <span className="memory-icon">🧠</span>
-                <h4>Digital Memory</h4>
-              </div>
-              <div className="memory-content">
-                {project.buildTime && (
-                  <div className="memory-item">
-                    <span className="memory-label">TIMELINE</span>
-                    <p>{project.buildTime}</p>
-                  </div>
-                )}
-                {project.soundtrack && (
-                  <div className="memory-item">
-                    <span className="memory-label">SOUNDTRACK</span>
-                    <p>{project.soundtrack}</p>
-                  </div>
-                )}
-                {project.emotionalNote && (
-                  <div className="memory-item">
-                    <span className="memory-label">PROCESS NOTE</span>
-                    <p>{project.emotionalNote}</p>
-                  </div>
-                )}
-                {!project.buildTime && !project.soundtrack && !project.emotionalNote && (
-                  <p className="memory-empty">Memory fragment corrupted or not recorded for this project.</p>
-                )}
-              </div>
-            </div>
-          ) : (
-            <>
-              {children}
-              {(project.buildTime || project.soundtrack || project.emotionalNote) && (
-                <button
-                  className="reveal-memory-btn"
-                  onClick={(e) => { e.stopPropagation(); setShowMemory(true); }}
-                  title="View Digital Memory"
-                >
-                  ✦
-                </button>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
+  const [activeIndex, setActiveIndex] = useState(0);
   const [fetchedProjects, setFetchedProjects] = useState([]);
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
@@ -239,6 +153,12 @@ const MyWorks = () => {
       ? currentProjects
       : currentProjects.filter((p) => p.category === activeFilter);
 
+  // Reset active index when filter changes
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [activeFilter]);
+
+
   return (
     <section className="myworks" id="works" ref={sectionRef} data-xray="[SECTION: PROJECTS]&#10;Data Source: Sanity.io CMS&#10;Cards: 3D Tilt via GSAP&#10;Images: @sanity/image-url (Optimized CDN)&#10;Performance: GSAP ScrollTrigger for entrance">
       <div className="container">
@@ -273,57 +193,61 @@ const MyWorks = () => {
           ))}
         </div>
 
-        {/* Project cards */}
-        <div className="bento-grid" key={activeFilter}>
+        {/* Accordion Stacked Layout */}
+        <div className="projects-accordion" key={activeFilter}>
           {filtered.map((project, index) => {
-            let spanClass = '';
-            if (activeFilter === 'all') {
-              if (index === 0 || index === 3) spanClass = 'bento-item-span-2';
-              else if (index === 5) spanClass = 'bento-item-span-3';
-            }
-
+            const isActive = index === activeIndex;
             return (
-            <BrutalCard key={project.title} project={project} index={index} className={spanClass}>
-              <div className="work-card-top">
-                <span className="work-emoji" style={{ color: project.accent }}>{project.icon}</span>
-                <div className="work-card-links">
-                  {(project.githubLink || project.github) && (
-                    <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub">
-                      <FiGithub size={16} />
-                    </a>
-                  )}
-                  {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' && (
-                    <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="Live">
-                      <FiExternalLink size={16} />
-                    </a>
-                  )}
+              <div 
+                key={project.title}
+                className={`accordion-card ${isActive ? 'active-accordion-card' : ''}`}
+                onClick={() => setActiveIndex(isActive ? -1 : index)}
+                style={{ 
+                  '--card-accent': project.accent,
+                  zIndex: filtered.length - index 
+                }}
+              >
+                <div className="accordion-header">
+                  <div className="accordion-header-left">
+                    <span className="accordion-emoji" style={{ color: project.accent }}>{project.icon}</span>
+                    <h3 className="accordion-title">{project.title}</h3>
+                  </div>
+                  <div className="accordion-icon">
+                    {isActive ? '−' : '+'}
+                  </div>
+                </div>
+                
+                <div className={`accordion-body ${isActive ? 'expanded' : ''}`}>
+                  <div className="accordion-content">
+                    <p className="work-desc">{project.description}</p>
+                    <div className="work-tags">
+                      {project.tags.map((tag) => (
+                        <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>{tag}</span>
+                      ))}
+                    </div>
+                    
+                    <div className="accordion-footer">
+                      <div className="work-card-links">
+                        {(project.githubLink || project.github) && (
+                          <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub" onClick={e => e.stopPropagation()}>
+                            <FiGithub size={18} />
+                          </a>
+                        )}
+                      </div>
+                      
+                      {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
+                        <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link" onClick={e => e.stopPropagation()}>
+                          View Project <FiArrowRight size={16} />
+                        </a>
+                      ) : (
+                        <span className="work-view-link work-view-link-disabled">Development Ongoing</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              <h3 className="work-title">{project.title}</h3>
-              <p className="work-desc">{project.description}</p>
-
-              <div className="work-tags">
-                {project.tags.map((tag) => (
-                  <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="work-card-footer">
-                {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
-                  <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link">
-                    View Project <FiArrowRight size={14} />
-                  </a>
-                ) : (
-                  <span className="work-view-link work-view-link-disabled">
-                    Coming Soon
-                  </span>
-                )}
-              </div>
-            </BrutalCard>
-          )})}
+            );
+          })}
         </div>
       </div>
     </section>

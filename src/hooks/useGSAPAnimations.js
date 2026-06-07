@@ -22,7 +22,7 @@ gsap.registerPlugin(ScrollTrigger);
 // ─── 144Hz Performance Optimization Engine ──────────────────
 gsap.config({
   force3D: true,        // Force GPU acceleration for all transforms
-  autoSleep: 60,        // Put inactive animations to sleep to save CPU
+  autoSleep: false,     // Disabled: GSAP autoSleep causes Lenis physics to freeze
   nullTargetWarn: false // Suppress warnings for missing DOM nodes on fast navigations
 });
 gsap.defaults({

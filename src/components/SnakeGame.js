@@ -291,14 +291,12 @@ export default function SnakeGame({ onClose }) {
       });
 
       // Draw Food (Classic diamond/cross bug shape)
-      if (Math.floor(timestamp / 300) % 2 === 0) {
-        ctx.fillStyle = '#1a2214';
-        const fx = Math.floor(s.food.x * cellSize);
-        const fy = Math.floor(s.food.y * cellSize);
-        const cs = Math.ceil(cellSize);
-        ctx.fillRect(fx + cs/2 - 2, fy + 2, 4, cs - 4);
-        ctx.fillRect(fx + 2, fy + cs/2 - 2, cs - 4, 4);
-      }
+      ctx.fillStyle = '#1a2214';
+      const fx = Math.floor(s.food.x * cellSize);
+      const fy = Math.floor(s.food.y * cellSize);
+      const cs = Math.ceil(cellSize);
+      ctx.fillRect(fx + cs/2 - 2, fy + 2, 4, cs - 4);
+      ctx.fillRect(fx + 2, fy + cs/2 - 2, cs - 4, 4);
     };
 
     rafRef.current = requestAnimationFrame(gameLoop);

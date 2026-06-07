@@ -88,5 +88,13 @@ self.addEventListener('message', (e) => {
 
   if (type === 'UPDATE_FLUID_STATE') {
     self.fluidState = payload;
+    if (self.offscreenCanvas) {
+      if (self.offscreenCanvas.width !== payload.width) {
+        self.offscreenCanvas.width = payload.width;
+      }
+      if (self.offscreenCanvas.height !== payload.height) {
+        self.offscreenCanvas.height = payload.height;
+      }
+    }
   }
 });

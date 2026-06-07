@@ -354,7 +354,6 @@ const Timeline = () => {
       <div
         className="timeline-scroll-wrapper"
         ref={containerRef}
-        data-lenis-prevent="true"
       >
         {/* Bottom progress bar */}
         <div className="timeline-progress-bar" ref={progressRef} />

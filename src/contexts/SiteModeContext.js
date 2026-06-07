@@ -49,11 +49,7 @@ export function SiteModeProvider({ children }) {
     try {
       const saved = localStorage.getItem('portfolio-dark-mode');
       if (saved !== null) return JSON.parse(saved);
-      // Auto-detect system preference
-      if (typeof window !== 'undefined') {
-        return window.matchMedia('(prefers-color-scheme: dark)').matches;
-      }
-      return false;
+      return false; // Force light mode as the default aesthetic
     } catch { return false; }
   });
 
@@ -107,7 +103,7 @@ export function SiteModeProvider({ children }) {
   const isSectionVisible = useCallback((sectionName) => {
     // All sections remain visible across modes; the aesthetic is handled via global CSS overrides.
     return true;
-  }, [mode]);
+  }, []);
 
   const value = {
     mode,

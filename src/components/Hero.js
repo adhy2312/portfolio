@@ -203,8 +203,8 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        {/* V200 — Top status row: greeting + availability + clock */}
-        <div className="hero-top-row">
+        {/* V200 — Top status row: greeting only */}
+        <div className="hero-top-row" style={{ justifyContent: 'center' }}>
           <div className="hero-greeting-wrapper">
             <div
               ref={greetingRef}
@@ -214,13 +214,6 @@ const Hero = () => {
               {/* Initially empty, GSAP will fill it */}
             </div>
             <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-brutal-pink)' }}>_</span>
-          </div>
-          <div className="hero-status-row">
-            <div className="hero-availability-badge">
-              <span className="avail-pulse-dot" />
-              <span>Available for Work</span>
-            </div>
-            <KeralaTime />
           </div>
         </div>
         <LiquidText>

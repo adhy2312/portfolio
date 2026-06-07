@@ -11,8 +11,8 @@ import './SiteModeSwitcher.css';
 const COLOR_THEMES = [
   {
     key: 'default',
-    label: 'Default',
-    swatch: '#000000',
+    label: 'Yellow (Default)',
+    swatch: '#f4d03f',
     vars: null, // null = restore index.css :root defaults
   },
   {
@@ -39,6 +39,7 @@ const COLOR_THEMES = [
       '--glow-secondary': 'rgba(181,42,28,0.08)',
       '--panel-grad-start': '#fff5f5',
       '--panel-grad-end': '#fdeaea',
+      '--button-text': '#ffffff',
     },
   },
   {
@@ -65,6 +66,7 @@ const COLOR_THEMES = [
       '--glow-secondary': 'rgba(26,122,64,0.08)',
       '--panel-grad-start': '#f2fff5',
       '--panel-grad-end': '#e2f7e9',
+      '--button-text': '#ffffff',
     },
   },
   {
@@ -91,6 +93,7 @@ const COLOR_THEMES = [
       '--glow-secondary': 'rgba(26,68,194,0.08)',
       '--panel-grad-start': '#f0f4ff',
       '--panel-grad-end': '#e2eaff',
+      '--button-text': '#ffffff',
     },
   },
   {
@@ -117,6 +120,7 @@ const COLOR_THEMES = [
       '--glow-secondary': 'rgba(0,130,143,0.08)',
       '--panel-grad-start': '#f0fdfd',
       '--panel-grad-end': '#dcf8f8',
+      '--button-text': '#ffffff',
     },
   },
   {
@@ -143,6 +147,7 @@ const COLOR_THEMES = [
       '--glow-secondary': 'rgba(10,93,97,0.08)',
       '--panel-grad-start': '#f0faf8',
       '--panel-grad-end': '#d8f0ec',
+      '--button-text': '#ffffff',
     },
   },
 ];
