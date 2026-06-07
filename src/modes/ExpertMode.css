@@ -11,6 +11,12 @@ body.mode-expert {
   background-size: 40px 40px !important;
   background-position: center center !important;
   color: #c9d1d9 !important;
+  
+  /* Enforce dark mode variables for components */
+  --bg-primary: #0d1117;
+  --bg-card: rgba(13, 17, 23, 0.8);
+  --text-primary: #c9d1d9;
+  --text-secondary: #8b949e;
 }
 
 body.mode-expert .App {

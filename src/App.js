@@ -330,17 +330,8 @@ function AppContent() {
   };
 
   return (
-    <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+    <>
       {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
-
-      {tranceMode && (
-        <div className="trance-overlay-container">
-          <div className="trance-channel trance-red" />
-          <div className="trance-channel trance-cyan" />
-        </div>
-      )}
-
-      {/* Heavy performance drains removed (AmbientThoughts, CustomCursor, DigitalSoul, FluidCanvas) */}
 
       <Suspense fallback={null}>
         <ScrollProgress />
@@ -348,35 +339,41 @@ function AppContent() {
       <SiteModeSwitcher />
       {loading && <PageLoader onDone={() => setLoading(false)} />}
 
-      {/* High-Performance Breathing Overlay Removed for Performance */}
-
-      {/* DigitalTextures removed for performance */}
-
       <Navbar />
-      <Hero />
 
-      {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
-      <LazySection name="About"><About /></LazySection>
-      <LazySection name="Skills"><Skills /></LazySection>
-      <LazySection name="NeuralMap"><NeuralMap /></LazySection>
-      <LazySection name="Experience"><Experience /></LazySection>
-      <LazySection name="MyWorks"><MyWorks /></LazySection>
-      <LazySection name="Timeline"><Timeline /></LazySection>
-      <LazySection name="Photography"><Photography /></LazySection>
-      <LazySection name="Achievements"><Achievements /></LazySection>
-      <LazySection name="TrustedBy"><TrustedBy /></LazySection>
-      <LazySection name="Testimonials"><Testimonials /></LazySection>
-      <LazySection name="DigitalScars"><DigitalScars /></LazySection>
-      <LazySection name="CallToAction"><CallToAction /></LazySection>
-      <LazySection name="Contact"><Contact /></LazySection>
-      <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
-      <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
-      <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
+      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
+        {tranceMode && (
+          <div className="trance-overlay-container">
+            <div className="trance-channel trance-red" />
+            <div className="trance-channel trance-cyan" />
+          </div>
+        )}
 
-      {/* The Seed of Life - Redefining digital permanence */}
-      <Suspense fallback={null}>
-        <DigitalSeed />
-      </Suspense>
+        <Hero />
+
+        {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
+        <LazySection name="About"><About /></LazySection>
+        <LazySection name="Skills"><Skills /></LazySection>
+        <LazySection name="NeuralMap"><NeuralMap /></LazySection>
+        <LazySection name="Experience"><Experience /></LazySection>
+        <LazySection name="MyWorks"><MyWorks /></LazySection>
+        <LazySection name="Timeline"><Timeline /></LazySection>
+        <LazySection name="Photography"><Photography /></LazySection>
+        <LazySection name="Achievements"><Achievements /></LazySection>
+        <LazySection name="TrustedBy"><TrustedBy /></LazySection>
+        <LazySection name="Testimonials"><Testimonials /></LazySection>
+        <LazySection name="DigitalScars"><DigitalScars /></LazySection>
+        <LazySection name="CallToAction"><CallToAction /></LazySection>
+        <LazySection name="Contact"><Contact /></LazySection>
+        <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
+        <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
+        <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
+
+        {/* The Seed of Life - Redefining digital permanence */}
+        <Suspense fallback={null}>
+          <DigitalSeed />
+        </Suspense>
+      </div>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
@@ -391,7 +388,11 @@ function AppContent() {
 
       {devConsoleOpen && (
         <Suspense fallback={null}>
-          <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} />
+          <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} onLaunchGame={(game) => {
+            if (game === 'tictactoe' && isMobile) return;
+            if (game === 'zip' && !isMobile) return;
+            setActiveGame(game);
+          }} />
         </Suspense>
       )}
 
@@ -407,14 +408,7 @@ function AppContent() {
       {activeGame === 'zip' && isMobile && <ZipGame onClose={() => setActiveGame(null)} />}
       {activeGame === 'snake' && <SnakeGame onClose={() => setActiveGame(null)} />}
 
-      {devConsoleOpen && <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} onLaunchGame={(game) => {
-        // Enforce device constraints
-        if (game === 'tictactoe' && isMobile) return;
-        if (game === 'zip' && !isMobile) return;
-        setActiveGame(game);
-      }} />}
-
-    </div>
+    </>
   );
 }
 
