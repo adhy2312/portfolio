@@ -155,6 +155,11 @@ function AppContent() {
     // Spotlight Engine: Removed for performance. 
     // Global document.body.style.setProperty triggers massive layout thrashing.
 
+    const ro = new ResizeObserver(() => {
+      ScrollTrigger.refresh();
+    });
+    ro.observe(document.body);
+
     const handleResize = () => setIsMobile(window.innerWidth <= 768);
     window.addEventListener('resize', handleResize);
 
@@ -297,6 +302,7 @@ function AppContent() {
     }, 3500);
 
     return () => {
+      ro.disconnect();
       clearTimeout(widgetTimer);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);

@@ -62,7 +62,7 @@
 .snake-screen {
   background-color: #879a73; /* Classic Nokia Olive Green */
   width: 300px;
-  height: 300px;
+  height: 330px;
   position: relative;
   overflow: hidden;
   border: 2px solid #3c4b31; /* Dark green border */
@@ -73,7 +73,7 @@
 /* Canvas */
 .snake-canvas {
   width: 100%;
-  height: 100%;
+  height: 300px;
   display: block;
   image-rendering: pixelated; /* Crisp rendering */
 }
@@ -115,10 +115,11 @@
   bottom: 0;
   left: 0;
   width: 100%;
+  height: 30px;
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  padding: 4px 6px;
+  align-items: center;
+  padding: 0 8px;
   box-sizing: border-box;
   pointer-events: none;
   border-top: 2px solid #1a2214;

@@ -24,6 +24,7 @@ export default function SnakeGame({ onClose }) {
   const stateRef = useRef({
     snake: [...INITIAL_SNAKE],
     direction: { ...INITIAL_DIRECTION },
+    lastTickDirection: { ...INITIAL_DIRECTION },
     food: { x: 5, y: 5 },
     lastTick: 0,
     hasStarted: false,
@@ -108,6 +109,7 @@ export default function SnakeGame({ onClose }) {
   const resetGame = () => {
     stateRef.current.snake = [...INITIAL_SNAKE];
     stateRef.current.direction = { ...INITIAL_DIRECTION };
+    stateRef.current.lastTickDirection = { ...INITIAL_DIRECTION };
     stateRef.current.score = 0;
     stateRef.current.gameOver = false;
     stateRef.current.hasStarted = true;
@@ -156,7 +158,7 @@ export default function SnakeGame({ onClose }) {
         return;
       }
 
-      const currDir = s.direction;
+      const currDir = s.lastTickDirection;
       switch (e.key) {
         case 'ArrowUp':
         case 'w':
@@ -210,6 +212,7 @@ export default function SnakeGame({ onClose }) {
         s.lastTick = timestamp;
         
         if (s.hasStarted && !s.isPaused && !s.gameOver) {
+          s.lastTickDirection = { ...s.direction };
           const head = s.snake[0];
           let newHead = {
             x: head.x + s.direction.x,
@@ -307,7 +310,7 @@ export default function SnakeGame({ onClose }) {
   const handleDPad = (dx, dy) => {
     const s = stateRef.current;
     if (s.gameOver || s.isPaused || !s.hasStarted) return;
-    const currDir = s.direction;
+    const currDir = s.lastTickDirection;
     if (dx !== 0 && currDir.x === 0) s.direction = { x: dx, y: 0 };
     if (dy !== 0 && currDir.y === 0) s.direction = { x: 0, y: dy };
   };
