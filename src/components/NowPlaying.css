@@ -282,6 +282,22 @@
 }
 
 /* ── Mobile ── */
+@media (max-width: 768px) {
+  .np-widget {
+    bottom: 16px;
+    left: 16px;
+    max-width: calc(100vw - 80px);
+    padding: 8px 12px 8px 8px;
+  }
+  .np-art { width: 36px; height: 36px; }
+  /* Keep dock accessible but shift it up to avoid clashing with content */
+  .np-dock {
+    bottom: 70px;
+    /* Smaller pad on mobile */
+    padding: 8px 6px;
+  }
+}
+
 @media (max-width: 480px) {
   .np-widget {
     bottom: 16px;
@@ -290,5 +306,9 @@
     padding: 8px 12px 8px 8px;
   }
   .np-art { width: 36px; height: 36px; }
-  .np-dock { bottom: 80px; }
+  .np-dock {
+    bottom: 60px;
+    /* Shrink dock label on tiny screens */
+    padding: 6px 5px;
+  }
 }

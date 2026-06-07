@@ -1,5 +1,5 @@
 /* ═══════════════════════════════
-   CONTACT SECTION — BRUTAL BENTO
+   CONTACT V200 — BRUTAL BENTO
 ═══════════════════════════════ */
 .contact {
   padding: var(--section-padding);
@@ -8,9 +8,75 @@
   z-index: 1;
 }
 
-.contact-header {
-  margin-bottom: 3.5rem;
+.contact-header { margin-bottom: 3.5rem; }
+
+/* ── V200: Local time strip ── */
+.contact-time-strip {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.08);
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.08em;
 }
+
+.contact-time-strip-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3498db;
+  flex-shrink: 0;
+}
+
+.contact-time-strip-label {
+  opacity: 0.55;
+}
+
+.contact-time-strip-value {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+/* ── Response time badge ── */
+.contact-response-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: #1a7a3a;
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: 8px;
+  padding: 7px 14px;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+.contact-response-badge::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  flex-shrink: 0;
+}
+
+@keyframes avail-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46,204,113,0.5); }
+  70%  { box-shadow: 0 0 0 7px rgba(46,204,113,0); }
+  100% { box-shadow: 0 0 0 0 rgba(46,204,113,0); }
+}
+
 
 /* ── Grid Layout ── */
 .contact-grid {
@@ -273,20 +339,42 @@
   box-shadow: 0 0 0 #000;
 }
 
+/* ── Spinner ── */
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2.5px solid rgba(0,0,0,0.15);
+  border-top-color: #000;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Availability dot ── */
+.avail-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2.5s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .contact-grid {
-    grid-template-columns: 1fr;
-  }
+  .contact-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 560px) {
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
+  .form-row { grid-template-columns: 1fr; }
   .contact-form {
     padding: 1.5rem;
     box-shadow: var(--shadow-brutal) !important;
   }
+  .contact-time-strip { display: none; }
 }

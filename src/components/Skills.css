@@ -235,12 +235,21 @@
 }
 
 @media (max-width: 768px) {
+  .skills {
+    padding: 4rem 0;
+  }
+  .skills-header {
+    margin-bottom: 3rem;
+  }
   .skills-grid {
     grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .tools-section {
+    margin-top: 3rem;
+    padding: 3rem 1.5rem;
   }
   .chip-tooltip { display: none; }
   .tools-chip { padding: 8px 16px; font-size: 0.85rem; }
-  .tools-section {
-    padding: 3rem 1.5rem;
-  }
+  .tools-title { font-size: 1.8rem; margin-bottom: 2rem; }
 }

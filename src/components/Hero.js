@@ -1,4 +1,4 @@
-// src/components/Hero.js
+// src/components/Hero.js — V200
 import React, { useEffect, useState, useRef } from 'react';
 import './Hero.css';
 import { useSiteMode } from '../contexts/SiteModeContext';
@@ -14,6 +14,33 @@ import LiquidText from './motion/LiquidText';
 import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
+
+/* ── Live Kerala Clock (IST = UTC+5:30) ── */
+const KeralaTime = () => {
+  const [time, setTime] = useState('');
+
+  useEffect(() => {
+    const format = () => {
+      const now = new Date();
+      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const h = ist.getHours().toString().padStart(2, '0');
+      const m = ist.getMinutes().toString().padStart(2, '0');
+      const s = ist.getSeconds().toString().padStart(2, '0');
+      setTime(`${h}:${m}:${s}`);
+    };
+    format();
+    const id = setInterval(format, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  return (
+    <div className="hero-time-badge">
+      <span className="hero-time-dot" />
+      <span className="hero-time-text">Kerala, IST</span>
+      <span className="hero-time-clock">{time}</span>
+    </div>
+  );
+};
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
@@ -158,14 +185,15 @@ const Hero = () => {
         }}
       />
       
-      {/* Pure CSS High-Performance Floating Stars (Replaces heavy WebGL tsparticles) */}
+      {/* V200: Richer CSS Particles — mix of brutalist shapes */}
       <div className="hero-css-particles">
-        {Array.from({ length: 15 }).map((_, i) => (
+        {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="css-star" style={{
-            '--top': `${Math.random() * 100}%`,
-            '--left': `${Math.random() * 100}%`,
-            '--dur': `${4 + Math.random() * 4}s`,
-            '--delay': `${Math.random() * 2}s`,
+            '--top':   `${Math.random() * 100}%`,
+            '--left':  `${Math.random() * 100}%`,
+            '--dur':   `${5 + Math.random() * 6}s`,
+            '--delay': `${Math.random() * 3}s`,
+            '--size':  `${10 + Math.random() * 14}px`,
           }} />
         ))}
       </div>
@@ -175,16 +203,25 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        <div className="hero-greeting-wrapper" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '2.5rem' }}>
-          <div
-            ref={greetingRef}
-            className="hero-greeting"
-            data-text={displayData.greeting}
-            style={{ marginBottom: 0 }}
-          >
-            {/* Initially empty, GSAP will fill it */}
+        {/* V200 — Top status row: greeting + availability + clock */}
+        <div className="hero-top-row">
+          <div className="hero-greeting-wrapper">
+            <div
+              ref={greetingRef}
+              className="hero-greeting"
+              data-text={displayData.greeting}
+            >
+              {/* Initially empty, GSAP will fill it */}
+            </div>
+            <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-brutal-pink)' }}>_</span>
           </div>
-          <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.2rem', color: 'var(--accent-brutal-pink)' }}>_</span>
+          <div className="hero-status-row">
+            <div className="hero-availability-badge">
+              <span className="avail-pulse-dot" />
+              <span>Available for Work</span>
+            </div>
+            <KeralaTime />
+          </div>
         </div>
         <LiquidText>
           <h1 className="hero-name-giant metallic-reveal">

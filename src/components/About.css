@@ -101,50 +101,94 @@
 .about-stat:nth-child(3) { background-color: var(--accent-brutal-green); }
 
 .about-stat:hover {
-  transform: translate(2px, 2px);
-  box-shadow: var(--shadow-brutal-hover);
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px #000;
+}
+
+/* V200: Stat top accent stripe */
+.about-stat::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #000, rgba(0,0,0,0.3));
+  border-radius: 2px 2px 0 0;
 }
 
 .stat-value {
   display: block;
   font-family: var(--font-heading);
-  font-size: 2.2rem;
+  font-size: 2.4rem;
   font-weight: 900;
   color: #000;
   margin-bottom: 5px;
+  line-height: 1;
 }
 
 .stat-label {
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   text-transform: uppercase;
   color: #000;
   font-weight: 700;
+  opacity: 0.75;
+  line-height: 1.4;
 }
 
-.about-cta {
-  margin-top: 1rem;
+/* V200: Inline tech tokens in bio text */
+.tech-token {
+  display: inline-block;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82em;
+  padding: 1px 7px;
+  background: rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.12);
+  border-radius: 5px;
+  font-weight: 600;
+  vertical-align: middle;
+  transition: background 0.2s ease;
 }
+
+.tech-token:hover {
+  background: var(--accent-brutal-yellow);
+}
+
+/* V200: Enhanced image glow */
+.about-img-glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 18px;
+  background: radial-gradient(ellipse at 30% 50%, rgba(244,208,63,0.2) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  z-index: -1;
+}
+
+.about-img-wrapper:hover .about-img-glow {
+  opacity: 1;
+}
+
+.about-cta { margin-top: 1rem; }
 
 @media (max-width: 991px) {
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: 4rem;
+  .about {
+    padding: 5rem 0;
   }
-  .about-image-col {
-    max-width: 80%;
-    margin: 0 auto;
-  }
-  .about-title {
-    text-shadow: 3px 3px 0px var(--accent-brutal-pink);
-  }
+  .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+  .about-image-col { max-width: 80%; margin: 0 auto; }
+  .about-title { text-shadow: 3px 3px 0px var(--accent-brutal-pink); }
 }
 
 @media (max-width: 768px) {
-  .about-stats {
-    grid-template-columns: 1fr; /* Stack stats on mobile */
+  .about {
+    padding: 4rem 0;
   }
-  .about-image-col {
-    max-width: 100%;
-  }
+  .about-grid { gap: 2.5rem; }
+  .about-stats { grid-template-columns: 1fr; }
+  .about-image-col { max-width: 100%; }
+  .about-p { font-size: 1rem; }
+  .stat-value { font-size: 2rem; }
 }

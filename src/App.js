@@ -123,7 +123,7 @@ function LazySection({ name, className = "section-container", children }) {
 
   return (
     <div ref={ref} className={className} data-xray="[SYSTEM: RENDERED]">
-      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ height: '100vh' }} />}>
+      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '200px', height: 'auto' }} />}>
         {children}
       </Suspense>
     </div>

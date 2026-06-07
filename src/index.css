@@ -79,6 +79,35 @@ html, body {
 }
 
 /* ═══════════════════════════════════════════
+   DARK MODE OVERRIDES
+═══════════════════════════════════════════ */
+body.dark-mode {
+  --bg-primary: #0a0a0c;
+  --bg-secondary: #121216;
+  --bg-tertiary: #1a1a20;
+  --bg-card: rgba(20, 20, 25, 0.6);
+  --bg-card-hover: rgba(30, 30, 35, 0.9);
+
+  --accent-primary: #ffffff;
+  --accent-primary-rgb: 255, 255, 255;
+
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(30,30,35,0.7) 0%, rgba(30,30,35,0.3) 100%);
+  
+  --text-primary: #ffffff;
+  --text-secondary: #cccccc;
+  --text-muted: #999999;
+
+  --border-subtle: 1px solid rgba(255,255,255,0.2);
+  --border-brutal: 2px solid rgba(255,255,255,0.8);
+  --border-heavy: 4px solid #ffffff;
+  
+  --shadow-brutal: 6px 6px 0px rgba(255,255,255,0.8);
+  --shadow-brutal-hover: 2px 2px 0px rgba(255,255,255,0.8);
+  --shadow-brutal-deep: 12px 12px 0px rgba(255,255,255,0.8);
+}
+
+/* ═══════════════════════════════════════════
    GLOBAL SOUL ILLUMINATION (Subtle Grid)
 ═══════════════════════════════════════════ */
 .App::before {
@@ -93,6 +122,12 @@ html, body {
   z-index: 0;
   will-change: transform;
   transform: translateZ(0);
+}
+
+body.dark-mode .App::before {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
 }
 
 
@@ -488,7 +523,7 @@ body.darkroom-active {
 ═══════════════════════════════════════════ */
 .section-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: auto; /* was 100vh — was causing massive blank sections on mobile */
   position: relative;
   /* Doppler skew — only active when --doppler-skew is set by JS */
   transform: skewY(var(--doppler-skew, 0deg));
@@ -500,7 +535,7 @@ body.darkroom-active {
 .lazy-section-auto {
   width: 100%;
   position: relative;
-  /* No min-height: 100vh — collapses to content height */
+  /* No min-height — collapses to content height */
 }
 
 /* ─── V60 Anisotropic Metallic Surfaces ─── */
@@ -1219,7 +1254,6 @@ html:not(.dream-state) .App {
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
 
-
   /* Disable breathing and heavy overlays on mobile */
   .performance-breathing-overlay { display: none !important; }
   .digital-texture-overlay { opacity: 0.3 !important; }
@@ -1236,6 +1270,12 @@ html:not(.dream-state) .App {
   
   /* Improve scroll wrapper on mobile */
   .timeline-scroll-wrapper { padding: 30px 0 40px 0 !important; }
+
+  /* Fix section-container blocking scrollable experience */
+  .section-container { min-height: auto !important; }
+
+  /* Ensure no horizontal overflow from bento cards */
+  .bento-grid { overflow: hidden; }
 }
 
 @media (max-width: 480px) {
@@ -1249,9 +1289,9 @@ html:not(.dream-state) .App {
 /* ═══════════════════════════════════════════
    PERFORMANCE ENHANCEMENTS
 ═══════════════════════════════════════════ */
+/* content-visibility: auto removed — was causing blank white sections on scroll in mobile/some browsers */
 section {
-  content-visibility: auto;
-  contain-intrinsic-size: 1000px;
+  contain-intrinsic-size: auto 600px;
 }
 
 .glass-card {
@@ -1285,4 +1325,123 @@ section {
   .bento-item-span-3 {
     grid-column: span 1; /* Stack on mobile */
   }
+}
+
+/* ═══════════════════════════════════════════
+   V200 GLOBAL ADDITIONS
+   New keyframes, tokens, and utilities
+═══════════════════════════════════════════ */
+
+/* ── V200 Extended Design Tokens ── */
+:root {
+  /* Accent greens for availability indicators */
+  --accent-brutal-green: #2ecc71;
+  --accent-brutal-green-rgb: 46, 204, 113;
+  --accent-cyan: #4FC3F7;
+  --accent-gold: #F5A623;
+  --accent-magenta: #E040FB;
+
+  /* Retro LED colors */
+  --retro-led-green: #39FF14;
+  --retro-led-amber: #FFB300;
+
+  /* Retro panel */
+  --retro-bezel: #1e1e2e;
+  --retro-outset: 3px 3px 6px rgba(0,0,0,0.5), -1px -1px 4px rgba(255,255,255,0.02);
+  --retro-inset: inset 2px 2px 4px rgba(0,0,0,0.5), inset -1px -1px 3px rgba(255,255,255,0.02);
+
+  /* Performance tier gates */
+  --tier-shadows: 1;
+  --tier-blur: 1;
+  --tier-animations: 1;
+}
+
+/* ── neuralPulse — used for living indicators ── */
+@keyframes neuralPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(108,99,255,0.5), 0 0 0 0 rgba(108,99,255,0.2); }
+  50%  { box-shadow: 0 0 0 8px rgba(108,99,255,0), 0 0 0 16px rgba(108,99,255,0); }
+  100% { box-shadow: 0 0 0 0 rgba(108,99,255,0), 0 0 0 0 rgba(108,99,255,0); }
+}
+
+/* ── textGlitch — for DigitalScars titles ── */
+@keyframes textGlitch {
+  0%   { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px);  }
+  20%  { clip-path: inset(92% 0 1%  0); transform: translate(1px,  -1px); }
+  40%  { clip-path: inset(43% 0 44% 0); transform: translate(-1px, 3px);  }
+  60%  { clip-path: inset(25% 0 58% 0); transform: translate(3px,  1px);  }
+  80%  { clip-path: inset(54% 0 7%  0); transform: translate(-3px, -2px); }
+  100% { clip-path: inset(58% 0 43% 0); transform: translate(2px,  -3px); }
+}
+
+/* ── scanlineFlicker — for terminal / dark section vibes ── */
+@keyframes scanlineFlicker {
+  0%, 100% { opacity: 0.015; }
+  25%       { opacity: 0.03;  }
+  50%       { opacity: 0.01;  }
+  75%       { opacity: 0.025; }
+}
+
+/* ── bloomPulse — used for glowing elements ── */
+@keyframes bloomPulse {
+  0%, 100% { filter: brightness(1)   drop-shadow(0 0 4px  currentColor); }
+  50%      { filter: brightness(1.2) drop-shadow(0 0 12px currentColor); }
+}
+
+/* ── V200 shimmer utility — for skill bars etc. ── */
+@keyframes shimmerSweep {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.shimmer-active {
+  background: linear-gradient(
+    90deg,
+    transparent 25%,
+    rgba(255,255,255,0.3) 50%,
+    transparent 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 1.8s ease-in-out infinite;
+}
+
+/* ── V200 glass-dark utility ── */
+.glass-dark {
+  background: rgba(10, 11, 30, 0.6);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ── V200 glass-frosted utility ── */
+.glass-frosted {
+  background: rgba(255,255,255,0.55);
+  backdrop-filter: blur(10px) saturate(180%);
+  -webkit-backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+/* ── V200: contact-availability (used in Contact.js) ── */
+.contact-availability {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #1a7a3a;
+  letter-spacing: 0.08em;
+  margin-top: 1.5rem;
+  padding: 10px 14px;
+  background: rgba(46, 204, 113, 0.06);
+  border: 1px solid rgba(46, 204, 113, 0.15);
+  border-radius: 8px;
+}
+
+/* ── V200: section label text override for dark sections ── */
+.digital-scars-section .section-title span,
+.digital-scars-section .section-title {
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
+  background: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
 }

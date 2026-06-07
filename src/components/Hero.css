@@ -1,5 +1,5 @@
 /* ═══════════════════════════════
-   HERO — DECONSTRUCTED GLITCH (Concept 3)
+   HERO V200 — DECONSTRUCTED GLITCH
    Pure CSS, 60fps, hardware-accelerated
 ═══════════════════════════════ */
 .hero-minimal {
@@ -14,8 +14,97 @@
   background-color: transparent;
 }
 
-#tsparticles {
-  display: none;
+#tsparticles { display: none; }
+
+/* ── Top row: greeting left, status right ── */
+.hero-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+
+.hero-greeting-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+/* ── Status row (availability + clock) ── */
+.hero-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+/* ── Availability badge ── */
+.hero-availability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #1a7a3a;
+  background: rgba(46, 204, 113, 0.1);
+  border: 1.5px solid rgba(46, 204, 113, 0.3);
+  border-radius: 50px;
+  padding: 6px 14px 6px 10px;
+}
+
+.avail-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2ecc71;
+  display: inline-block;
+  animation: avail-pulse 2s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
+  flex-shrink: 0;
+}
+
+@keyframes avail-pulse {
+  0%   { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.5); }
+  70%  { box-shadow: 0 0 0 8px rgba(46, 204, 113, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0); }
+}
+
+/* ── Kerala time badge ── */
+.hero-time-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  color: rgba(0,0,0,0.4);
+  background: rgba(0,0,0,0.04);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 50px;
+  padding: 6px 14px;
+}
+
+.hero-time-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3498db;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.hero-time-text {
+  opacity: 0.55;
+}
+
+.hero-time-clock {
+  font-weight: 700;
+  color: rgba(0,0,0,0.65);
+  letter-spacing: 1.5px;
 }
 
 /* ── Content wrapper ── */
@@ -81,6 +170,7 @@
     -2px -2px 0px var(--accent-brutal-pink);
   background: none;
   -webkit-background-clip: unset;
+  background-clip: unset; /* standard property alongside webkit for compatibility */
   -webkit-text-fill-color: unset;
   padding: 0;
   position: relative;
@@ -209,7 +299,8 @@
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .hero-minimal {
-    padding: 80px 1rem 40px;
+    /* 80px = navbar height on mobile (~60px) + 20px breathing room */
+    padding: 88px 1rem 40px;
   }
   .hero-name-giant {
     font-size: clamp(3rem, 14vw, 4.5rem);
@@ -248,7 +339,7 @@
   }
 }
 
-/* ── High-Performance CSS Particles (Brutalist floating shapes) ── */
+/* ── High-Performance CSS Particles (V200 — variable size) ── */
 .hero-css-particles {
   position: absolute;
   inset: 0;
@@ -261,26 +352,71 @@
   position: absolute;
   top: var(--top);
   left: var(--left);
-  width: 18px;
-  height: 18px;
+  width: var(--size, 16px);
+  height: var(--size, 16px);
   background: var(--accent-brutal-pink);
   border: 2px solid #000;
   box-shadow: 3px 3px 0px #000;
-  opacity: 0.25;
+  opacity: 0.2;
   animation: floatShape var(--dur) ease-in-out var(--delay) infinite alternate;
 }
 
-.css-star:nth-child(even) {
+.css-star:nth-child(3n+1) {
+  background: var(--accent-brutal-pink);
+  border-radius: 0;
+}
+.css-star:nth-child(3n+2) {
   background: var(--accent-brutal-blue);
   border-radius: 50%;
+  opacity: 0.15;
 }
 .css-star:nth-child(3n) {
   background: var(--accent-brutal-yellow);
   border-radius: 0;
   transform: rotate(45deg);
+  opacity: 0.18;
+}
+.css-star:nth-child(5n) {
+  background: var(--accent-brutal-green, #2ecc71);
+  border-radius: 3px;
+  opacity: 0.12;
 }
 
 @keyframes floatShape {
-  0% { transform: translateY(0) rotate(0deg); opacity: 0.15; }
-  100% { transform: translateY(-35px) rotate(180deg); opacity: 0.4; }
+  0%   { transform: translateY(0) rotate(0deg);    opacity: 0.1; }
+  100% { transform: translateY(-40px) rotate(200deg); opacity: 0.35; }
 }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  /* Note: padding-top in first block (88px) applies — this block refines other styles */
+  .hero-minimal { padding: 88px 1rem 80px; } /* extra bottom padding prevents dock overlap */
+  .hero-top-row { flex-direction: column; gap: 0.75rem; }
+  .hero-status-row { flex-direction: column; gap: 8px; }
+  .hero-time-badge { display: none; } /* Clock hidden on mobile for clean layout */
+  .hero-name-giant {
+    font-size: clamp(3rem, 14vw, 4.5rem);
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  .metallic-char {
+    -webkit-text-stroke: 2px #000;
+    text-shadow: 4px 4px 0px #000, -1px -1px 0px var(--accent-brutal-pink);
+    transform: none !important;
+  }
+  .metallic-char:hover {
+    transform: translate(-2px, -3px) !important;
+    text-shadow: 6px 6px 0px #000, -2px -2px 0px var(--accent-brutal-blue);
+  }
+  .hero-tagline-premium {
+    letter-spacing: 1px !important;
+    font-size: 0.7rem;
+    padding: 10px 18px;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .hero-greeting { font-size: 0.75rem; padding: 8px 16px; box-shadow: 4px 4px 0px #000; }
+  /* Disable glitch pseudo-elements on mobile */
+  .hero-name-giant::before, .hero-name-giant::after { display: none; }
+}
+

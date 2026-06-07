@@ -4,3 +4,28 @@
   overflow-x: hidden;
   min-height: 100vh;
 }
+
+/* Compact loading skeleton — shown while React.lazy bundles load */
+.lazy-loading-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-secondary, #dcdcd9) 0%,
+    var(--bg-primary, #e8e8e5) 50%,
+    var(--bg-secondary, #dcdcd9) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.8s ease-in-out infinite;
+  border-radius: 4px;
+  width: 100%;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@media (max-width: 768px) {
+  .lazy-loading-skeleton {
+    min-height: 120px !important;
+  }
+}

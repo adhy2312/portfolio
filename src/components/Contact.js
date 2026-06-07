@@ -1,4 +1,4 @@
-// src/components/Contact.js
+// src/components/Contact.js — V200
 import React, { useRef, useState, useEffect } from 'react';
 import './Contact.css';
 import emailjs from 'emailjs-com';
@@ -9,6 +9,24 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 gsap.registerPlugin(ScrollTrigger);
+
+/* ── Live Kerala Clock ── */
+const useKeralaTime = () => {
+  const [time, setTime] = useState('');
+  useEffect(() => {
+    const fmt = () => {
+      const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const h = ist.getHours().toString().padStart(2,'0');
+      const m = ist.getMinutes().toString().padStart(2,'0');
+      setTime(`${h}:${m} IST`);
+    };
+    fmt();
+    const id = setInterval(fmt, 30000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+};
+
 
 // ── Click-to-copy email component ──────────────────
 const CopyEmail = ({ email }) => {
@@ -62,10 +80,11 @@ const defaultContactInfo = [
 const Contact = () => {
   const form = useRef();
   const [status, setStatus] = useState('idle'); // idle | sending | success | error
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const infoRef = useRef(null);
+  const sectionRef  = useRef(null);
+  const headerRef   = useRef(null);
+  const infoRef     = useRef(null);
   const formWrapRef = useRef(null);
+  const keralaTime  = useKeralaTime();
   
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('contact');
@@ -159,7 +178,7 @@ const Contact = () => {
     <section id="contact" className="contact" ref={sectionRef}>
       <div className="container">
         <div className="contact-header" ref={headerRef}>
-          <span className="section-label">// say hello</span>
+          <span className="section-label">{'// say hello'}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Get in Touch">
               <span className="section-title-inner">Let's <span>Connect</span></span>
@@ -181,11 +200,25 @@ const Contact = () => {
           {/* Info panel */}
           <div className="contact-info" ref={infoRef}>
             <div className="contact-info-card glass-card">
+              {/* V200: Local time strip */}
+              {keralaTime && (
+                <div className="contact-time-strip">
+                  <span className="contact-time-strip-dot" />
+                  <span className="contact-time-strip-label">My local time —</span>
+                  <span className="contact-time-strip-value">{keralaTime}, Kerala, India</span>
+                </div>
+              )}
+
               <h3 className="contact-info-title">Get in touch</h3>
               <p className="contact-info-text">
                 I'm currently open to full-time roles, freelance projects, and interesting
                 collaborations. Let's build something great together.
               </p>
+
+              {/* V200: Response time promise */}
+              <div className="contact-response-badge">
+                Usually replies within 24 hours
+              </div>
 
               <div className="contact-info-list">
                 {(contactData?.contactMethods || defaultContactInfo).map((item, i) => (

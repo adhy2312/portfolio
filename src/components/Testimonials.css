@@ -62,7 +62,7 @@
 
 /* ── Card ── */
 .testimonial-card {
-  width: 380px;
+  width: 400px;
   padding: 2rem 2rem 1.75rem;
   display: flex;
   flex-direction: column;
@@ -73,7 +73,7 @@
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   background: var(--bg-card);
   border: var(--border-brutal);
-  border-radius: 0;
+  border-radius: 14px;
   box-shadow: var(--shadow-brutal);
   contain: layout style;
 }
@@ -81,6 +81,42 @@
 .testimonial-card:hover {
   transform: translate(-4px, -4px);
   box-shadow: var(--shadow-brutal-deep);
+}
+
+/* ── Star Rating ── */
+.testimonial-stars {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.star {
+  color: var(--accent-brutal-yellow);
+  font-size: 0.9rem;
+  filter: drop-shadow(0 0 2px rgba(244,208,63,0.4));
+}
+
+/* ── Verified badge ── */
+.testimonial-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  color: #1a7a3a;
+  background: rgba(46, 204, 113, 0.08);
+  border: 1px solid rgba(46, 204, 113, 0.2);
+  border-radius: 20px;
+  padding: 2px 8px;
+  margin-left: auto;
+}
+
+.testimonial-verified-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #2ecc71;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {

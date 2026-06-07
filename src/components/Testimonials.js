@@ -12,37 +12,52 @@ gsap.registerPlugin(ScrollTrigger);
 const getInitials = (name = '') =>
   name.split(' ').slice(0, 2).map((w) => w[0] || '').join('').toUpperCase();
 
-/* Memoized card so marquee re-render doesn't repaint every card */
-const TestimonialCard = memo(({ item }) => (
-  <div className="testimonial-card glass-card">
-    <FiMessageCircle className="quote-icon" />
-    <p className="testimonial-quote">"{item.quote}"</p>
+/* Memoized card — V200 with stars + verified badge */
+const TestimonialCard = memo(({ item }) => {
+  const stars = item.stars || 5;
+  return (
+    <div className="testimonial-card glass-card">
+      <FiMessageCircle className="quote-icon" />
 
-    <div className="testimonial-user">
-      <div className="avatar-wrapper">
-        {item.imgUrl ? (
-          <img
-            src={item.imgUrl}
-            alt={item.name}
-            className="user-img"
-            loading="lazy"
-            decoding="async"
-          />
-        ) : (
-          <div className="user-avatar-placeholder">
-            {getInitials(item.name)}
-          </div>
-        )}
-        <span className="avatar-ring" />
+      {/* V200: Star rating row */}
+      <div className="testimonial-stars" aria-label={`${stars} out of 5 stars`}>
+        {Array.from({ length: stars }).map((_, i) => (
+          <span key={i} className="star">★</span>
+        ))}
+        <span className="testimonial-verified" style={{ marginLeft: '8px' }}>
+          <span className="testimonial-verified-dot" />
+          Verified
+        </span>
       </div>
 
-      <div className="user-info">
-        <h4 className="user-name">{item.name}</h4>
-        <p className="user-role">{item.designation || item.role}</p>
+      <p className="testimonial-quote">"{item.quote}"</p>
+
+      <div className="testimonial-user">
+        <div className="avatar-wrapper">
+          {item.imgUrl ? (
+            <img
+              src={item.imgUrl}
+              alt={item.name}
+              className="user-img"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <div className="user-avatar-placeholder">
+              {getInitials(item.name)}
+            </div>
+          )}
+          <span className="avatar-ring" />
+        </div>
+
+        <div className="user-info">
+          <h4 className="user-name">{item.name}</h4>
+          <p className="user-role">{item.designation || item.role}</p>
+        </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 const defaultQuotes = [
   { name: 'Placeholder Client', role: 'CEO, Tech Corp', quote: 'Adhithya is a phenomenal developer who brings engineering precision to every project. Highly recommended!' },

@@ -45,17 +45,36 @@ export function SiteModeProvider({ children }) {
     } catch { return { ...DEFAULT_A11Y }; }
   });
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('portfolio-dark-mode');
+      if (saved !== null) return JSON.parse(saved);
+      // Auto-detect system preference
+      if (typeof window !== 'undefined') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches;
+      }
+      return false;
+    } catch { return false; }
+  });
+
   // Persist mode
   const setMode = useCallback((m) => {
     setModeState(m);
     try { localStorage.setItem('portfolio-mode', m); } catch {}
   }, []);
 
-  // Toggle a single a11y flag
   const toggleA11y = useCallback((flag) => {
     setA11yState(prev => {
       const next = { ...prev, [flag]: !prev[flag] };
       try { localStorage.setItem('portfolio-a11y', JSON.stringify(next)); } catch {}
+      return next;
+    });
+  }, []);
+
+  const toggleDarkMode = useCallback(() => {
+    setIsDarkMode(prev => {
+      const next = !prev;
+      try { localStorage.setItem('portfolio-dark-mode', JSON.stringify(next)); } catch {}
       return next;
     });
   }, []);
@@ -79,7 +98,10 @@ export function SiteModeProvider({ children }) {
     } else {
       document.documentElement.style.removeProperty('--transition-speed');
     }
-  }, [mode, a11y]);
+
+    // Dark mode class
+    cl.toggle('dark-mode', isDarkMode);
+  }, [mode, a11y, isDarkMode]);
 
   // Section visibility based on mode
   const isSectionVisible = useCallback((sectionName) => {
@@ -92,6 +114,8 @@ export function SiteModeProvider({ children }) {
     setMode,
     a11y,
     toggleA11y,
+    isDarkMode,
+    toggleDarkMode,
     isSectionVisible,
     isRecruiter: mode === MODES.RECRUITER,
     isExpert: mode === MODES.EXPERT,

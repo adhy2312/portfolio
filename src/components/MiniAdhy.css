@@ -356,6 +356,19 @@
 }
 
 /* ── Mobile ── */
+@media (max-width: 768px) {
+  .ma-window {
+    left: 12px;
+    bottom: 12px;
+    width: calc(100vw - 24px);
+    height: 420px;
+  }
+  .ma-dock {
+    bottom: 150px; /* sits above .np-dock which shifts to 70px on mobile */
+    padding: 8px 6px;
+  }
+}
+
 @media (max-width: 480px) {
   .ma-window {
     left: 12px;
@@ -364,7 +377,8 @@
     height: 420px;
   }
   .ma-dock {
-    bottom: 180px;
+    bottom: 130px; /* sits above .np-dock at 60px */
+    padding: 6px 5px;
   }
 }
 

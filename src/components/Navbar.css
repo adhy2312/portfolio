@@ -650,10 +650,19 @@
 }
 
 @media (max-width: 768px) {
+  .navbar {
+    /* Respect notch / safe area on iOS */
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0.5rem));
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
   .navbar-inner {
     padding: 0.4rem 0.75rem;
     margin: 0 0.75rem;
     gap: 6px;
+    /* Prevent inner pill from overflowing screen */
+    width: calc(100% - 1.5rem);
+    box-sizing: border-box;
   }
   .nav-logo {
     letter-spacing: 2px;
@@ -661,6 +670,8 @@
   }
   .navbar-left-cluster {
     gap: 0.4rem;
+    flex-shrink: 1;
+    min-width: 0;
   }
   .weather-indicator {
     padding: 2px 6px;
@@ -676,7 +687,7 @@
     box-shadow: 1px 1px 0px #000;
   }
   .hamburger {
-    margin-left: 2px;
+    margin-left: auto;
   }
 }
 

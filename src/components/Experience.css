@@ -187,6 +187,16 @@
 }
 
 @media (max-width: 768px) {
+  .experience-section {
+    padding: 4rem 1.2rem;
+  }
+  .experience-header {
+    margin-bottom: 2.5rem;
+  }
+  .experience-list {
+    gap: 2rem;
+    margin-top: 1.5rem;
+  }
   .experience-card {
     padding: 1.5rem;
   }
@@ -223,3 +233,4 @@
     padding: 1rem;
   }
 }
+
