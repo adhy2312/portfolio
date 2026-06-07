@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './DeveloperModeOS.css';
 import ns from '../core/NervousSystem';
 import gsap from 'gsap';
+import DevHUD from './DevHUD';
 
 // Upgraded Achievement Data with Rarity Tiers
 const INITIAL_ACHIEVEMENTS = [
@@ -820,6 +821,16 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
              </div>
           </div>
         );
+      case '[SPACESHIP_HUD]':
+        return (
+          <div className="dev-spaceship-hud-tab" style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <h3 className="dev-section-title">SPACESHIP TELEMETRY HUD</h3>
+            <p className="dev-desc" style={{marginBottom: '1rem', color: 'rgba(255,255,255,0.6)'}}>Advanced real-time metrics and intent prediction engine.</p>
+            <div style={{ flex: 1, position: 'relative' }}>
+               <DevHUD embedded={true} />
+            </div>
+          </div>
+        );
       default: return null;
     }
   };
@@ -851,7 +862,7 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
           <p>NervousSystem Engine</p>
         </div>
         <nav className="dev-os-nav">
-          {['Terminal', '[SOUL_LINK]', '[FREQUENCY]', '[OBSERVATORY]', '[ML_CORE]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
+          {['Terminal', '[SPACESHIP_HUD]', '[SOUL_LINK]', '[FREQUENCY]', '[OBSERVATORY]', '[ML_CORE]', 'Performance', 'Achievements', 'Architecture', 'Stats', 'System', 'History'].map(tab => (
             <button 
               key={tab} 
               className={`dev-os-tab-btn ${activeTab === tab ? 'active' : ''}`}

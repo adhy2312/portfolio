@@ -1,6 +1,5 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import Lenis from 'lenis';
-import { initGSAPScrollProxy, ScrollTrigger } from './hooks/useGSAPAnimations';
+import { ScrollTrigger } from './hooks/useGSAPAnimations';
 import './index.css';
 import './modes/RecruiterMode.css';
 import './modes/ExperimentalMode.css';
@@ -10,20 +9,15 @@ import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
 import DreamStateLoader from './components/DreamStateLoader';
 import EasterEggOverlay from './components/EasterEggOverlay';
-import DigitalTextures from './components/DigitalTextures';
-import FluidCanvas from './components/FluidCanvas';
 import { StoryProvider } from './contexts/StoryContext';
 import { ConsciousnessProvider, useConsciousness } from './contexts/ConsciousnessContext';
 import { SiteModeProvider, useSiteMode } from './contexts/SiteModeContext';
-import AmbientThoughts from './components/AmbientThoughts';
-import DigitalSoul from './components/DigitalSoul';
 // LiquidFilterDef removed — SVG displacement map was causing global hover distortion & GPU drain
 import { useSolarLighting } from './hooks/useSolarLighting';
 import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
-import ns from './core/NervousSystem';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
 
@@ -33,6 +27,7 @@ pipeline.init();
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
+const DevHUD = lazy(() => import('./components/DevHUD'));
 
 // Export dictionary of imports for ML Prefetching
 const dynamicImports = {
@@ -85,8 +80,6 @@ const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
-const CustomCursor = lazy(dynamicImports.CustomCursor);
-const ZAxisTunnel = lazy(dynamicImports.ZAxisTunnel);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
 if (typeof window !== 'undefined') {
@@ -146,6 +139,7 @@ function AppContent() {
   const [loadWidgets, setLoadWidgets] = useState(false);
   const [tranceMode, setTranceMode] = useState(false);
   const [devConsoleOpen, setDevConsoleOpen] = useState(false);
+  const [devHudOpen, setDevHudOpen] = useState(false);
 
   // Initialize unified physics engine
   useHybridMotion();
@@ -245,6 +239,22 @@ function AppContent() {
     };
     window.addEventListener('keydown', adhyHandler);
 
+    // Secret 'hud' trigger for Spaceship Dev HUD
+    let hudKeyIndex = 0;
+    const hudSequence = ['h', 'u', 'd'];
+    const hudHandler = (e) => {
+      if (e.key.toLowerCase() === hudSequence[hudKeyIndex]) {
+        hudKeyIndex++;
+        if (hudKeyIndex === hudSequence.length) {
+          setDevHudOpen(prev => !prev);
+          hudKeyIndex = 0;
+        }
+      } else {
+        hudKeyIndex = 0;
+      }
+    };
+    window.addEventListener('keydown', hudHandler);
+
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
       const name = e.detail?.name ?? e.detail;
@@ -291,10 +301,11 @@ function AppContent() {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
+      window.removeEventListener('keydown', adhyHandler);
+      window.removeEventListener('keydown', hudHandler);
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-trance', tranceHandler);
       window.removeEventListener('trigger-dev-console', devConsoleHandler);
-      window.removeEventListener('keydown', adhyHandler);
       eluteEffectKiller && eluteEffectKiller();
       ScrollTrigger.getAll().forEach(t => t.kill());
     };
@@ -372,13 +383,24 @@ function AppContent() {
         </Suspense>
       )}
 
+      {devConsoleOpen && (
+        <Suspense fallback={null}>
+          <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} />
+        </Suspense>
+      )}
+
+      {devHudOpen && (
+        <Suspense fallback={null}>
+          <DevHUD onClose={() => setDevHudOpen(false)} />
+        </Suspense>
+      )}
+
       {/* Easter egg games — outside Suspense */}
       {activeGame === 'gameshub' && <GamesHub onClose={() => setActiveGame(null)} />}
       {activeGame === 'tictactoe' && !isMobile && <TicTacToe onClose={() => setActiveGame(null)} />}
       {activeGame === 'zip' && isMobile && <ZipGame onClose={() => setActiveGame(null)} />}
       {activeGame === 'snake' && <SnakeGame onClose={() => setActiveGame(null)} />}
 
-      {/* Developer Mode OS (Zero overhead when closed) */}
       {devConsoleOpen && <DeveloperModeOS onClose={() => setDevConsoleOpen(false)} onLaunchGame={(game) => {
         // Enforce device constraints
         if (game === 'tictactoe' && isMobile) return;

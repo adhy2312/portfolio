@@ -362,39 +362,7 @@ class NervousSystem {
       this.state._heartbeatPhase += delta * hbSpeed * Math.max(0.2, 1 - this.fatigue / 100);
       this.state.heartbeatValue   = Math.sin(this.state._heartbeatPhase);
 
-      // ─── Emotional Bleed (Fatigue Desaturation) ───
-      const targetSat = this.fatigue > 60 ? Math.max(0.4, 1 - ((this.fatigue - 60) / 80)) : 1;
-      if (this._lastSat !== targetSat) {
-        document.documentElement.style.setProperty('--global-saturation', targetSat);
-        this._lastSat = targetSat;
-      }
-
-      // ─── Biometric Gravity Flush ───
-      if (this.gravity.x !== 0 || this.gravity.y !== 0) {
-        if (this._lastGravX !== this.gravity.x || this._lastGravY !== this.gravity.y) {
-          document.documentElement.style.setProperty('--gravity-x', this.gravity.x);
-          document.documentElement.style.setProperty('--gravity-y', this.gravity.y);
-          this._lastGravX = this.gravity.x;
-          this._lastGravY = this.gravity.y;
-        }
-      }
-
-      // ─── Experimental Mode 3D Distortion ───
-      if (this.mousePos.x !== -1000) {
-        // Calculate rotation based on mouse position relative to screen center
-        // Max rotation is roughly +/- 4 degrees to avoid complete illegibility
-        const cx = window.innerWidth / 2;
-        const cy = window.innerHeight / 2;
-        const rotX = (((this.mousePos.y - cy) / cy) * -4).toFixed(2);
-        const rotY = (((this.mousePos.x - cx) / cx) * 4).toFixed(2);
-        
-        if (this._lastRotX !== rotX || this._lastRotY !== rotY) {
-          document.documentElement.style.setProperty('--exp-rot-x', `${rotX}deg`);
-          document.documentElement.style.setProperty('--exp-rot-y', `${rotY}deg`);
-          this._lastRotX = rotX;
-          this._lastRotY = rotY;
-        }
-      }
+      // ─── Heavy Root Variable Updates Removed for Peak Performance ───
 
       if (this.isMoving && time - this._lastMoveTime > 2000) {
         this.isMoving = false;
@@ -403,6 +371,14 @@ class NervousSystem {
       // Decay velocity
       this.mousePos.vx *= 0.8;
       this.mousePos.vy *= 0.8;
+
+      // ─── AI Predictive Intent ───
+      // If mouse is moving violently towards bottom/top, emit prefetch intent
+      if (Math.abs(this.mousePos.vy) > 150 && !this._intentFired) {
+         this.emit('INTENT_FAST_MOVEMENT', { direction: this.mousePos.vy > 0 ? 'down' : 'up' });
+         this._intentFired = true;
+         setTimeout(() => { this._intentFired = false; }, 1000);
+      }
 
       // ─── Process Soul Reaction Queue ───
       const now = Date.now();

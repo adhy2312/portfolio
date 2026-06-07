@@ -22,11 +22,12 @@ export function useHybridMotion() {
   useEffect(() => {
     // 1. Initialize High-Performance Lenis
     const lenis = new Lenis({
-      lerp: 0.1, 
-      wheelMultiplier: 0.8,
-      smoothWheel: true,
-      syncTouch: true,
-      smoothTouch: true
+      lerp: 0.08,             // Smooth but responsive
+      wheelMultiplier: 1.0,   // Standard speed to avoid trackpad hypersensitivity
+      smoothWheel: true,      // Smooths out chunky mouse wheels
+      syncTouch: false,       // MUST BE FALSE for native mobile touch scrolling
+      smoothTouch: false,     // MUST BE FALSE for native mobile touch physics
+      normalizeWheel: false,  // MUST BE FALSE so trackpad 2-finger gestures work properly
     });
     lenisRef.current = lenis;
 
