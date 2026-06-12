@@ -3,8 +3,6 @@ import './StatsBento.css';
 import { client } from '../sanity';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Matter from 'matter-js';
-import ns from '../core/NervousSystem';
 import { FiGithub, FiCamera, FiFigma, FiMap, FiAward, FiBookOpen, FiTerminal, FiZap } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
 
@@ -15,9 +13,6 @@ const StatsBento = () => {
   const sectionRef = useRef(null);
   const [sanityData, setSanityData] = useState(null);
   const [liveGithubData, setLiveGithubData] = useState({ repos: null, contributions: null });
-  const [gravityEnabled, setGravityEnabled] = useState(false);
-  const engineRef = useRef(null);
-  const bodiesRef = useRef([]);
 
   useEffect(() => {
     client.fetch('*[_type == "statsBento"][0]')
@@ -73,152 +68,11 @@ const StatsBento = () => {
     }, sectionRef);
     
     return () => ctx.revert();
-  }, [gravityEnabled]); // Re-run if gravity disables, but generally we just run once.
-
-  // --- GRAVITY PHYSICS ENGINE ---
-  useEffect(() => {
-    if (!gravityEnabled || !sectionRef.current) return;
-
-    const { Engine, World, Bodies, Mouse, MouseConstraint } = Matter;
-    const engine = Engine.create();
-    engineRef.current = engine;
-    
-    // Default gravity
-    engine.world.gravity.y = 1;
-    engine.world.gravity.x = 0;
-
-    const section = sectionRef.current;
-    const parentRect = section.getBoundingClientRect();
-    const cards = Array.from(section.querySelectorAll('.bento-card'));
-    
-    // We must fix height of the grid container so it doesn't collapse when children become absolute
-    const gridContainer = section.querySelector('.stats-bento-grid');
-    gridContainer.style.height = `${gridContainer.offsetHeight}px`;
-
-    const newBodies = [];
-
-    cards.forEach((card) => {
-      // Get position before absolute
-      const rect = card.getBoundingClientRect();
-      const localX = rect.left - parentRect.left;
-      const localY = rect.top - parentRect.top;
-      
-      // Lock dimensions and position
-      card.style.width = `${rect.width}px`;
-      card.style.height = `${rect.height}px`;
-      card.style.position = 'absolute';
-      card.style.left = '0px';
-      card.style.top = '0px';
-      card.style.margin = '0px';
-      card.style.transition = 'none'; // Disable CSS transitions for physics
-      card.style.zIndex = '50';
-
-      const body = Bodies.rectangle(
-        localX + rect.width / 2,
-        localY + rect.height / 2,
-        rect.width,
-        rect.height,
-        {
-          restitution: 0.6, // Bounciness
-          friction: 0.1,
-          frictionAir: 0.02,
-          density: 0.05
-        }
-      );
-      
-      newBodies.push({ element: card, body, width: rect.width, height: rect.height });
-      World.add(engine.world, body);
-    });
-
-    bodiesRef.current = newBodies;
-
-    // Add boundaries so they don't fall off the screen
-    const wallOptions = { isStatic: true, restitution: 0.4 };
-    const w = parentRect.width;
-    const h = parentRect.height;
-    const thickness = 100;
-    
-    World.add(engine.world, [
-      Bodies.rectangle(w/2, -thickness/2, w + thickness*2, thickness, wallOptions), // Top
-      Bodies.rectangle(w/2, h + thickness/2, w + thickness*2, thickness, wallOptions), // Bottom
-      Bodies.rectangle(-thickness/2, h/2, thickness, h + thickness*2, wallOptions), // Left
-      Bodies.rectangle(w + thickness/2, h/2, thickness, h + thickness*2, wallOptions), // Right
-    ]);
-
-    // Mouse Interaction
-    const mouse = Mouse.create(section);
-    const mouseConstraint = MouseConstraint.create(engine, {
-      mouse: mouse,
-      constraint: { stiffness: 0.2, render: { visible: false } }
-    });
-    World.add(engine.world, mouseConstraint);
-
-    // Device Orientation Hook
-    const handleOrientation = (e) => {
-      if (!engineRef.current) return;
-      // Gamma is left-to-right (-90 to 90). Beta is front-to-back (-180 to 180).
-      const gravity = engineRef.current.world.gravity;
-      gravity.x = Math.max(-1, Math.min(1, (e.gamma || 0) / 45));
-      gravity.y = Math.max(-1, Math.min(1, (e.beta || 0) / 45));
-    };
-    window.addEventListener('deviceorientation', handleOrientation);
-
-    // NervousSystem RAF hook
-    const tick = (time) => {
-      // Step the physics engine (fixed timestep)
-      Engine.update(engine, 1000 / 60);
-
-      // Sync DOM elements
-      bodiesRef.current.forEach(({ element, body, width, height }) => {
-        element.style.transform = `translate3d(${body.position.x - width / 2}px, ${body.position.y - height / 2}px, 0) rotate(${body.angle}rad)`;
-      });
-    };
-
-    ns.register('bento-gravity', tick, { priority: 'NORMAL', cooldown: 0 });
-
-    return () => {
-      window.removeEventListener('deviceorientation', handleOrientation);
-      ns.unregister('bento-gravity');
-      World.clear(engine.world);
-      Engine.clear(engine);
-    };
-  }, [gravityEnabled]);
-
-  const toggleGravity = async () => {
-    if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-      try {
-        const permission = await DeviceOrientationEvent.requestPermission();
-        if (permission === 'granted') {
-          setGravityEnabled(true);
-        } else {
-          alert('Gyroscope permission denied. Mouse drag is still enabled!');
-          setGravityEnabled(true);
-        }
-      } catch (err) {
-        console.error(err);
-        setGravityEnabled(true);
-      }
-    } else {
-      // Non-iOS 13+ devices or desktop
-      setGravityEnabled(true);
-    }
-  };
+  }, []);
 
   return (
     <section className="stats-bento-section" ref={sectionRef} style={{ position: 'relative' }}>
       <div className="container">
-        
-        {/* GRAVITY TOGGLE */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '1rem' }}>
-          <button 
-            className={`retro-btn ${gravityEnabled ? 'active' : ''}`}
-            onClick={toggleGravity}
-            style={{ fontSize: '0.8rem', padding: '8px 16px', zIndex: 100, position: 'relative' }}
-          >
-            {gravityEnabled ? '[ GRAVITY: OFF ]' : 'ENABLE GRAVITY'}
-          </button>
-        </div>
-
         <div className="stats-bento-grid" style={{ position: 'relative' }}>
           
           {/* GitHub Activity Bento */}
