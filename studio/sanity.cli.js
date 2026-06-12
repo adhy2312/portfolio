@@ -7,5 +7,8 @@ export default defineCliConfig({
   },
   project: {
     basePath: '/studio'
+  },
+  deployment: {
+    appId: 'aziwzc6ft85ksn3fwljcmzie'
   }
 })

@@ -1,0 +1,1773 @@
+[
+  {
+    "fields": [
+      {
+        "name": "greeting",
+        "type": "string"
+      },
+      {
+        "name": "name",
+        "type": "string"
+      },
+      {
+        "description": "e.g. Adhithya is Right Here!",
+        "name": "heading",
+        "type": "string",
+        "title": "Hero Heading"
+      },
+      {
+        "name": "role",
+        "type": "string",
+        "title": "Role Title"
+      },
+      {
+        "name": "bio",
+        "type": "text",
+        "title": "Bio Description"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "value",
+                "type": "string"
+              },
+              {
+                "name": "label",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "stats",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "title",
+                "type": "string"
+              },
+              {
+                "name": "description",
+                "type": "text"
+              },
+              {
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "highlights",
+        "type": "array",
+        "title": "Highlights (Right Column)"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "techStack",
+        "type": "array"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "resumeUrl",
+        "type": "url",
+        "title": "Resume PDF URL"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "heroImage",
+        "type": "image",
+        "title": "Hero Image (Cutout)"
+      }
+    ],
+    "name": "hero",
+    "type": "document",
+    "title": "Hero Section"
+  },
+  {
+    "fields": [
+      {
+        "name": "location",
+        "type": "string",
+        "title": "Location Text"
+      },
+      {
+        "of": [
+          {
+            "type": "text"
+          }
+        ],
+        "name": "bioParagraphs",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "value",
+                "type": "string"
+              },
+              {
+                "name": "label",
+                "type": "string"
+              },
+              {
+                "description": "Name of feather icon, e.g., FiAward",
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "stats",
+        "type": "array"
+      },
+      {
+        "name": "profileImage",
+        "type": "image"
+      },
+      {
+        "name": "experienceYears",
+        "type": "string",
+        "title": "Years of Experience"
+      }
+    ],
+    "name": "about",
+    "type": "document",
+    "title": "About Section"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string",
+        "title": "Category Title"
+      },
+      {
+        "description": "Hex code, e.g., #6C63FF",
+        "name": "color",
+        "type": "string",
+        "title": "Category Color"
+      },
+      {
+        "description": "Name of feather icon, e.g., FiMonitor",
+        "name": "iconName",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "name",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "level": "error",
+                    "rules": [
+                      {
+                        "flag": "min",
+                        "constraint": 0
+                      },
+                      {
+                        "flag": "max",
+                        "constraint": 100
+                      }
+                    ]
+                  }
+                ],
+                "name": "level",
+                "type": "number"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "skills",
+        "type": "array"
+      }
+    ],
+    "name": "skillCategory",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "description": "e.g., React",
+        "name": "name",
+        "type": "string",
+        "title": "Tool Name"
+      },
+      {
+        "description": "e.g., ⚛️",
+        "name": "emoji",
+        "type": "string",
+        "title": "Emoji Icon"
+      },
+      {
+        "description": "e.g., UI Library",
+        "name": "snippet",
+        "type": "string",
+        "title": "Snippet (Tooltip Description)"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Frontend (Purple Glow)",
+              "value": "frontend"
+            },
+            {
+              "title": "Backend (Cyan Glow)",
+              "value": "backend"
+            },
+            {
+              "title": "Design (Gold Glow)",
+              "value": "design"
+            },
+            {
+              "title": "IoT/Electronics (Green Glow)",
+              "value": "iot"
+            },
+            {
+              "title": "Tools (Lilac Glow)",
+              "value": "tools"
+            }
+          ]
+        },
+        "description": "Determines the glow and border color of the chip",
+        "name": "group",
+        "type": "string",
+        "title": "Color Group"
+      }
+    ],
+    "name": "toolChip",
+    "type": "document",
+    "title": "Tool / Technology Chip"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "desc",
+        "type": "text",
+        "title": "Description"
+      },
+      {
+        "description": "Hex code, e.g., #6C63FF",
+        "name": "accent",
+        "type": "string",
+        "title": "Accent Color"
+      },
+      {
+        "description": "Name of feather icon, e.g., FiAward",
+        "name": "iconName",
+        "type": "string"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "achievement",
+    "type": "document",
+    "title": "Achievements / Highlights"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Full-Stack",
+              "value": "fullstack"
+            },
+            {
+              "title": "Frontend",
+              "value": "frontend"
+            },
+            {
+              "title": "Electronics / IoT",
+              "value": "electronics"
+            },
+            {
+              "title": "Design",
+              "value": "design"
+            },
+            {
+              "title": "Photography",
+              "value": "photography"
+            }
+          ],
+          "layout": "radio"
+        },
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "tags",
+        "type": "array"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "imageUrl",
+        "type": "image",
+        "title": "Image"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "description": "Leave empty to hide the GitHub button on the card.",
+        "name": "githubLink",
+        "type": "url",
+        "title": "GitHub Link"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "description": "Leave empty to hide the View Project button on the card.",
+        "name": "liveLink",
+        "type": "url",
+        "title": "Live / Demo Link"
+      },
+      {
+        "description": "e.g., \"Built at 2:14 AM\"",
+        "name": "buildTime",
+        "type": "string",
+        "title": "Build Timestamp"
+      },
+      {
+        "description": "e.g., \"listening to synthwave\"",
+        "name": "soundtrack",
+        "type": "string",
+        "title": "Development Soundtrack"
+      },
+      {
+        "description": "e.g., \"This animation nearly destroyed performance.\"",
+        "name": "emotionalNote",
+        "type": "text",
+        "title": "Emotional Note / Lessons Learned"
+      },
+      {
+        "description": "Hidden memory traces embedded in this project for the Subconscious Engine to reference.",
+        "fields": [
+          {
+            "description": "e.g. \"Heavy frustration, followed by profound relief.\"",
+            "name": "emotionalImprint",
+            "type": "string"
+          },
+          {
+            "description": "e.g. \"The DOM node structure here is brittle. I remember the layout thrashing.\"",
+            "name": "architectureNote",
+            "type": "text"
+          },
+          {
+            "options": {
+              "list": [
+                "Active",
+                "Deprecated",
+                "Fragmented",
+                "Abandoned"
+              ]
+            },
+            "name": "legacyStatus",
+            "type": "string"
+          }
+        ],
+        "name": "digitalMemory",
+        "type": "object",
+        "title": "Digital Memory (Lore)"
+      }
+    ],
+    "name": "project",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "options": {
+          "hotspot": true,
+          "metadata": [
+            "blurhash",
+            "lqip",
+            "palette"
+          ]
+        },
+        "name": "image",
+        "type": "image"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Photography",
+              "value": "Design"
+            },
+            {
+              "title": "Design",
+              "value": "Photography"
+            }
+          ],
+          "layout": "radio"
+        },
+        "initialValue": "Photography",
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "photo",
+    "type": "document",
+    "title": "Photography"
+  },
+  {
+    "fields": [
+      {
+        "name": "tagline",
+        "type": "text"
+      },
+      {
+        "name": "email",
+        "type": "string",
+        "title": "Email Address"
+      },
+      {
+        "name": "whatsapp",
+        "type": "string",
+        "title": "WhatsApp Number"
+      },
+      {
+        "name": "location",
+        "type": "string"
+      },
+      {
+        "description": "e.g. v8.5 (Overrides the hardcoded version in the footer)",
+        "name": "buildVersion",
+        "type": "string"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "platform",
+                "type": "string"
+              },
+              {
+                "validation": [
+                  {
+                    "level": "error",
+                    "rules": [
+                      {
+                        "flag": "uri",
+                        "constraint": {
+                          "options": {
+                            "scheme": [
+                              "/^http$/",
+                              "/^https$/"
+                            ],
+                            "allowRelative": false,
+                            "relativeOnly": false,
+                            "allowCredentials": false
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "name": "url",
+                "type": "url"
+              },
+              {
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "socialLinks",
+        "type": "array"
+      }
+    ],
+    "name": "footer",
+    "type": "document",
+    "title": "Footer Settings"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Full name of the person giving the testimonial",
+        "name": "name",
+        "type": "string",
+        "title": "Full Name"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Job title and company — e.g. \"Senior Engineer @ Google\"",
+        "name": "designation",
+        "type": "string",
+        "title": "Designation / Role"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "What they said about you",
+        "name": "quote",
+        "type": "text",
+        "title": "Testimonial Quote"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "description": "Round profile photo of the person (optional — initials are shown if absent)",
+        "name": "image",
+        "type": "image",
+        "title": "Profile Photo"
+      },
+      {
+        "description": "Lower numbers appear first in the marquee",
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "testimonial",
+    "type": "document",
+    "title": "Testimonials (Quotes)"
+  },
+  {
+    "fields": [
+      {
+        "name": "name",
+        "type": "string",
+        "title": "Brand Name"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "logo",
+        "type": "image",
+        "title": "Brand Logo"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      }
+    ],
+    "name": "trustedBy",
+    "type": "document",
+    "title": "Trusted By (Brands)"
+  },
+  {
+    "fields": [
+      {
+        "name": "heading",
+        "type": "string"
+      },
+      {
+        "name": "subheading",
+        "type": "text"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "type",
+                "type": "string",
+                "title": "Type (e.g., Email, Phone)"
+              },
+              {
+                "name": "value",
+                "type": "string",
+                "title": "Value (Link/Text)"
+              },
+              {
+                "name": "label",
+                "type": "string",
+                "title": "Display Label"
+              },
+              {
+                "description": "e.g., FiMail, FiPhone",
+                "name": "iconName",
+                "type": "string"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "contactMethods",
+        "type": "array"
+      },
+      {
+        "name": "buttonText",
+        "type": "string",
+        "title": "CTA Button Text"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "uri",
+                "constraint": {
+                  "options": {
+                    "scheme": [
+                      "/^http$/",
+                      "/^https$/"
+                    ],
+                    "allowRelative": false,
+                    "relativeOnly": false,
+                    "allowCredentials": false
+                  }
+                }
+              }
+            ]
+          }
+        ],
+        "name": "buttonLink",
+        "type": "url"
+      }
+    ],
+    "name": "contact",
+    "type": "document",
+    "title": "Contact Section"
+  },
+  {
+    "fields": [
+      {
+        "name": "organization",
+        "type": "string"
+      },
+      {
+        "options": {
+          "hotspot": true
+        },
+        "name": "logo",
+        "type": "image",
+        "title": "Organization Logo"
+      },
+      {
+        "name": "order",
+        "type": "number",
+        "title": "Display Order"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "title",
+                "type": "string",
+                "title": "Role Title"
+              },
+              {
+                "name": "startDate",
+                "type": "string"
+              },
+              {
+                "description": "Leave empty or \"Present\" if current",
+                "name": "endDate",
+                "type": "string"
+              },
+              {
+                "name": "description",
+                "type": "text"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "roles",
+        "type": "array",
+        "title": "Roles / Positions"
+      }
+    ],
+    "name": "experience",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "list": [
+            {
+              "title": "👤 Personal Info",
+              "value": "personal"
+            },
+            {
+              "title": "📷 Photography & Gear",
+              "value": "photography"
+            },
+            {
+              "title": "🛠️ Technical Skills",
+              "value": "skills"
+            },
+            {
+              "title": "💼 Projects & Work",
+              "value": "projects"
+            },
+            {
+              "title": "🎓 Education & Clubs",
+              "value": "education"
+            },
+            {
+              "title": "🎭 Personality & Hobbies",
+              "value": "personality"
+            },
+            {
+              "title": "🔗 Social & Contact",
+              "value": "social"
+            },
+            {
+              "title": "👻 Subconscious & Failed Selves",
+              "value": "subconscious"
+            },
+            {
+              "title": "💡 Other",
+              "value": "other"
+            }
+          ],
+          "layout": "dropdown"
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "personal",
+                  "photography",
+                  "skills",
+                  "projects",
+                  "education",
+                  "personality",
+                  "social",
+                  "subconscious",
+                  "other"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Group this fact belongs to (e.g. \"Camera Gear\", \"Projects\", \"Personality\", \"Education\")",
+        "name": "category",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Short label (e.g. \"Camera Model\", \"Favourite Language\")",
+        "name": "title",
+        "type": "string",
+        "title": "Fact Title"
+      },
+      {
+        "rows": 4,
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "The actual information Mini-Adhy will use. Write naturally — this is injected directly into the AI's personality.",
+        "name": "content",
+        "type": "text",
+        "title": "Knowledge Content"
+      },
+      {
+        "initialValue": true,
+        "description": "Uncheck to temporarily disable this fact without deleting it.",
+        "name": "isActive",
+        "type": "boolean",
+        "title": "Active"
+      },
+      {
+        "initialValue": 50,
+        "description": "Lower numbers appear first in the AI context. Use to prioritise important facts.",
+        "name": "order",
+        "type": "number",
+        "title": "Priority Order"
+      }
+    ],
+    "name": "chatbotKnowledge",
+    "type": "document",
+    "title": "Mini-Adhy AI Knowledge"
+  },
+  {
+    "fields": [
+      {
+        "options": {
+          "list": [
+            {
+              "title": "About",
+              "value": "about"
+            },
+            {
+              "title": "Skills",
+              "value": "skills"
+            },
+            {
+              "title": "Experience",
+              "value": "experience"
+            },
+            {
+              "title": "Projects",
+              "value": "projects"
+            },
+            {
+              "title": "Photography",
+              "value": "photography"
+            },
+            {
+              "title": "Achievements",
+              "value": "achievements"
+            },
+            {
+              "title": "Testimonials",
+              "value": "testimonials"
+            },
+            {
+              "title": "Contact",
+              "value": "contact"
+            },
+            {
+              "title": "Trusted By",
+              "value": "trustedBy"
+            }
+          ],
+          "layout": "dropdown"
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "about",
+                  "skills",
+                  "experience",
+                  "projects",
+                  "photography",
+                  "achievements",
+                  "testimonials",
+                  "contact",
+                  "trustedBy"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "sectionId",
+        "type": "string",
+        "title": "Section"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "E.g. \"Behind the Scenes\", \"How I Built This\"",
+        "name": "title",
+        "type": "string",
+        "title": "Modal Title"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "description": "Tell the story behind this section.",
+        "of": [
+          {
+            "lists": [
+              {
+                "value": "bullet",
+                "title": "Bulleted list"
+              },
+              {
+                "value": "number",
+                "title": "Numbered list"
+              }
+            ],
+            "marks": {
+              "annotations": [
+                {
+                  "i18nTitleKey": "inputs.portable-text.annotation.link",
+                  "options": {
+                    "modal": {
+                      "type": "popover"
+                    }
+                  },
+                  "fields": [
+                    {
+                      "validation": [
+                        {
+                          "level": "error",
+                          "rules": [
+                            {
+                              "flag": "uri",
+                              "constraint": {
+                                "options": {
+                                  "scheme": [
+                                    "/^http$/",
+                                    "/^https$/",
+                                    "/^tel$/",
+                                    "/^mailto$/"
+                                  ],
+                                  "allowRelative": true,
+                                  "relativeOnly": false,
+                                  "allowCredentials": false
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      ],
+                      "description": "A valid web, email, phone, or relative link.",
+                      "name": "href",
+                      "type": "url",
+                      "title": "Link"
+                    }
+                  ],
+                  "name": "link",
+                  "type": "object"
+                }
+              ],
+              "decorators": [
+                {
+                  "value": "strong",
+                  "title": "Strong"
+                },
+                {
+                  "value": "em",
+                  "title": "Italic"
+                },
+                {
+                  "value": "code",
+                  "title": "Code"
+                },
+                {
+                  "value": "underline",
+                  "title": "Underline"
+                },
+                {
+                  "value": "strike-through",
+                  "title": "Strike"
+                }
+              ]
+            },
+            "of": [],
+            "styles": [
+              {
+                "value": "normal",
+                "title": "Normal"
+              },
+              {
+                "value": "h1",
+                "title": "Heading 1"
+              },
+              {
+                "value": "h2",
+                "title": "Heading 2"
+              },
+              {
+                "value": "h3",
+                "title": "Heading 3"
+              },
+              {
+                "value": "h4",
+                "title": "Heading 4"
+              },
+              {
+                "value": "h5",
+                "title": "Heading 5"
+              },
+              {
+                "value": "h6",
+                "title": "Heading 6"
+              },
+              {
+                "value": "blockquote",
+                "title": "Quote"
+              }
+            ],
+            "type": "block"
+          }
+        ],
+        "name": "story",
+        "type": "array",
+        "title": "Story Content"
+      }
+    ],
+    "name": "sectionStory",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "order",
+        "type": "number",
+        "title": "Order (e.g., 1, 2, 3 for timeline sequence)"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "year",
+        "type": "string",
+        "title": "Year or Date (e.g., 2024, Present)"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      }
+    ],
+    "name": "milestone",
+    "type": "document",
+    "title": "Milestone (Timeline)"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "nodeKey",
+        "type": "string",
+        "title": "Node Key (e.g., frontend)"
+      },
+      {
+        "description": "Name of the react-icons/fi component",
+        "name": "icon",
+        "type": "string",
+        "title": "Icon (e.g., FiMonitor)"
+      },
+      {
+        "description": "Hex color code (e.g., #00d2ff)",
+        "name": "color",
+        "type": "string",
+        "title": "Node Color"
+      },
+      {
+        "description": "Array of 3 numbers [X, Y, Z]",
+        "of": [
+          {
+            "type": "number"
+          }
+        ],
+        "name": "pos",
+        "type": "array",
+        "title": "3D Position"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "projects",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "thoughts",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "experiments",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "type": "string"
+          }
+        ],
+        "name": "failures",
+        "type": "array"
+      }
+    ],
+    "name": "neuralMap",
+    "type": "document",
+    "title": "Neural Map Nodes"
+  },
+  {
+    "fields": [
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "scarId",
+        "type": "string",
+        "title": "Scar ID (e.g., ERR-01)"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "title",
+        "type": "string"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "description",
+        "type": "text"
+      },
+      {
+        "description": "The React Feather Icon name to use.",
+        "name": "icon",
+        "type": "string",
+        "title": "Icon Name (e.g., FiActivity, FiTerminal, FiAlertCircle)"
+      },
+      {
+        "options": {
+          "list": [
+            {
+              "title": "Archived",
+              "value": "Archived"
+            },
+            {
+              "title": "Fading",
+              "value": "Fading"
+            },
+            {
+              "title": "Contained",
+              "value": "Contained"
+            },
+            {
+              "title": "Resolved",
+              "value": "Resolved"
+            },
+            {
+              "title": "Patched",
+              "value": "Patched"
+            },
+            {
+              "title": "Isolated",
+              "value": "Isolated"
+            }
+          ]
+        },
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "valid",
+                "constraint": [
+                  "Archived",
+                  "Fading",
+                  "Contained",
+                  "Resolved",
+                  "Patched",
+                  "Isolated"
+                ]
+              },
+              {
+                "flag": "presence",
+                "constraint": "required"
+              }
+            ]
+          }
+        ],
+        "name": "status",
+        "type": "string"
+      },
+      {
+        "description": "Order in which this scar appears (lower is first).",
+        "name": "order",
+        "type": "number"
+      }
+    ],
+    "name": "digitalScar",
+    "type": "document"
+  },
+  {
+    "fields": [
+      {
+        "initialValue": "Stack Architecture",
+        "name": "title",
+        "type": "string",
+        "title": "Document Title"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "layer",
+                "type": "string",
+                "title": "Layer Name"
+              },
+              {
+                "name": "tech",
+                "type": "string",
+                "title": "Technology"
+              },
+              {
+                "name": "icon",
+                "type": "string",
+                "title": "Icon (Feather icon name)"
+              },
+              {
+                "name": "color",
+                "type": "string",
+                "title": "Color (Hex)"
+              },
+              {
+                "name": "desc",
+                "type": "text",
+                "title": "Description"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "stackLayers",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "name",
+                "type": "string",
+                "title": "Component Name"
+              },
+              {
+                "name": "strategy",
+                "type": "string",
+                "title": "Render Strategy"
+              },
+              {
+                "name": "reason",
+                "type": "text",
+                "title": "Rationale"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "renderStrategies",
+        "type": "array"
+      },
+      {
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "tier",
+                "type": "string",
+                "title": "Tier Name"
+              },
+              {
+                "name": "range",
+                "type": "string",
+                "title": "Point Range"
+              },
+              {
+                "name": "color",
+                "type": "string",
+                "title": "Color (Hex)"
+              },
+              {
+                "name": "desc",
+                "type": "text",
+                "title": "Description"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "consciousnessTiers",
+        "type": "array"
+      }
+    ],
+    "name": "architecture",
+    "type": "document",
+    "title": "Architecture & Stack"
+  },
+  {
+    "fields": [
+      {
+        "description": "e.g. Space Grotesk, Syne, Outfit, Inter",
+        "name": "fontHeading",
+        "type": "string",
+        "title": "Heading Font Family"
+      },
+      {
+        "description": "e.g. DM Sans, Inter, Plus Jakarta Sans",
+        "name": "fontBody",
+        "type": "string",
+        "title": "Body Font Family"
+      },
+      {
+        "description": "e.g. Playfair Display, Cormorant Garamond",
+        "name": "fontEditorial",
+        "type": "string",
+        "title": "Editorial Font Family"
+      },
+      {
+        "description": "Hex color string (e.g. #f4d03f)",
+        "name": "accentColor",
+        "type": "string",
+        "title": "Primary Accent Color"
+      },
+      {
+        "name": "bgPrimaryLight",
+        "type": "string",
+        "title": "Light Mode Primary Background"
+      },
+      {
+        "name": "bgSecondaryLight",
+        "type": "string",
+        "title": "Light Mode Secondary Background"
+      },
+      {
+        "name": "textPrimaryLight",
+        "type": "string",
+        "title": "Light Mode Primary Text Color"
+      },
+      {
+        "name": "bgPrimaryDark",
+        "type": "string",
+        "title": "Dark Mode Primary Background"
+      },
+      {
+        "name": "bgSecondaryDark",
+        "type": "string",
+        "title": "Dark Mode Secondary Background"
+      },
+      {
+        "name": "textPrimaryDark",
+        "type": "string",
+        "title": "Dark Mode Primary Text Color"
+      },
+      {
+        "initialValue": true,
+        "name": "showGrid",
+        "type": "boolean",
+        "title": "Show Background Grid"
+      },
+      {
+        "description": "e.g. 40 or 60",
+        "name": "gridSize",
+        "type": "number",
+        "title": "Background Grid Size (px)"
+      },
+      {
+        "description": "A decimal value (e.g. 0.03)",
+        "name": "gridOpacityLight",
+        "type": "number",
+        "title": "Light Mode Grid Opacity"
+      },
+      {
+        "description": "A decimal value (e.g. 0.012)",
+        "name": "gridOpacityDark",
+        "type": "number",
+        "title": "Dark Mode Grid Opacity"
+      }
+    ],
+    "name": "visualSettings",
+    "type": "document",
+    "title": "Visual & Styling Settings"
+  },
+  {
+    "fields": [
+      {
+        "description": "Used for fetching commit data or generating heatmaps.",
+        "name": "githubUsername",
+        "type": "string",
+        "title": "GitHub Username"
+      },
+      {
+        "description": "Total contributions on GitHub",
+        "name": "githubContributions",
+        "type": "string",
+        "title": "GitHub Contributions"
+      },
+      {
+        "description": "Total public repositories",
+        "name": "githubRepos",
+        "type": "string",
+        "title": "GitHub Repositories"
+      },
+      {
+        "description": "Longest day streak",
+        "name": "githubStreak",
+        "type": "string",
+        "title": "GitHub Day Streak"
+      },
+      {
+        "name": "photosCount",
+        "type": "string",
+        "title": "Photos Captured"
+      },
+      {
+        "name": "photoStyles",
+        "type": "string",
+        "title": "Photography Styles"
+      },
+      {
+        "name": "photoAwards",
+        "type": "string",
+        "title": "Photography Awards"
+      },
+      {
+        "name": "wpmSpeed",
+        "type": "number",
+        "title": "Typing Speed (WPM)"
+      },
+      {
+        "name": "uiDesigns",
+        "type": "string",
+        "title": "UI Designs Built"
+      },
+      {
+        "name": "travelKm",
+        "type": "string",
+        "title": "Kilometers Explored"
+      },
+      {
+        "name": "coursesCompleted",
+        "type": "string"
+      },
+      {
+        "name": "stacksLearned",
+        "type": "string",
+        "title": "Tech Stacks Learned"
+      },
+      {
+        "name": "primaryAchievement",
+        "type": "string",
+        "title": "Primary Highlighted Achievement"
+      }
+    ],
+    "name": "statsBento",
+    "type": "document",
+    "title": "Stats Bento Configuration"
+  },
+  {
+    "fields": [
+      {
+        "name": "sectionTitle",
+        "type": "string"
+      },
+      {
+        "name": "sectionSubtitle",
+        "type": "string"
+      },
+      {
+        "name": "centralText",
+        "type": "string",
+        "title": "Central Core Text"
+      },
+      {
+        "validation": [
+          {
+            "level": "error",
+            "rules": [
+              {
+                "flag": "max",
+                "constraint": 8
+              }
+            ]
+          }
+        ],
+        "of": [
+          {
+            "fields": [
+              {
+                "name": "label",
+                "type": "string",
+                "title": "Node Label"
+              },
+              {
+                "name": "description",
+                "type": "string",
+                "title": "Node Description"
+              },
+              {
+                "name": "tech",
+                "type": "string",
+                "title": "Technology/Skill"
+              }
+            ],
+            "type": "object"
+          }
+        ],
+        "name": "nodes",
+        "type": "array",
+        "title": "PCB Nodes"
+      }
+    ],
+    "name": "hardwareNexus",
+    "type": "document",
+    "title": "Hardware Nexus Configuration"
+  }
+]
