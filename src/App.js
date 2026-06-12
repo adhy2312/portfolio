@@ -30,7 +30,7 @@ const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 const DevHUD = lazy(() => import('./components/DevHUD'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
-const HardwareNexus = lazy(() => import('./components/HardwareNexus'));
+
 const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
 // Export dictionary of imports for ML Prefetching
@@ -57,7 +57,7 @@ const dynamicImports = {
   StackVisualizer: () => import('./components/StackVisualizer'),
   DigitalSeed: () => import('./components/DigitalSeed'),
   StatsBento: () => import('./components/StatsBento'),
-  HardwareNexus: () => import('./components/HardwareNexus'),
+
   CreativeLab: () => import('./components/CreativeLab'),
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
   CustomCursor: () => import('./components/motion/CustomCursor'),
@@ -362,7 +362,7 @@ function AppContent() {
         <LazySection name="About"><About /></LazySection>
         <LazySection name="Skills"><Skills /></LazySection>
         <LazySection name="StatsBento"><StatsBento /></LazySection>
-        <LazySection name="HardwareNexus"><HardwareNexus /></LazySection>
+
         <LazySection name="NeuralMap"><NeuralMap /></LazySection>
         <LazySection name="Experience"><Experience /></LazySection>
         <LazySection name="MyWorks"><MyWorks /></LazySection>

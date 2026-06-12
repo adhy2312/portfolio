@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './CreativeLab.css';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiSettings, FiMaximize2, FiActivity } from 'react-icons/fi';
+import { FiSettings } from 'react-icons/fi';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -64,8 +64,8 @@ const CreativeLab = () => {
       draw() {
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
-        // Uses the CSS variable for accent color to stay in theme
-        ctx.fillStyle = `rgba(244, 208, 63, 0.8)`; 
+        // Neon Cyan Particles
+        ctx.fillStyle = `rgba(0, 255, 255, 0.8)`; 
         ctx.fill();
       }
       
@@ -126,7 +126,8 @@ const CreativeLab = () => {
             + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
           if (distance < (params.connectionDistance * params.connectionDistance)) {
             opacity = 1 - (distance / (params.connectionDistance * params.connectionDistance));
-            ctx.strokeStyle = `rgba(244, 208, 63, ${opacity * 0.5})`; // Theme aware yellow/accent
+            // Neon Magenta Connections
+            ctx.strokeStyle = `rgba(255, 0, 255, ${opacity * 0.5})`; 
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(particlesArray[a].x, particlesArray[a].y);

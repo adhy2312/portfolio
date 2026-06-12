@@ -218,18 +218,18 @@ const DigitalSoul = () => {
       targetRef.current = { x: tx, y: ty };
 
       // ─── 4. INTERPOLATION — tier-aware ease ───────────────────────────────
-      let ease = 0.02;
-      if (cTier === 'SUBCONSCIOUS')    ease = 0.012;
-      else if (cTier === 'SUPER_CONSCIOUS') ease = 0.035;
-      else if (cTier === 'HYPER_CONSCIOUS') ease = 0.055;
-      if (isReturning) ease *= 1.3;       // Ghost warmth — faster bond
-      if (isLateNight) ease *= 0.6;       // Slower drift at night
-      if (soul.emotion === 'dormant')  ease  = 0.005;
-      if (soul.emotion === 'curious')  ease *= 1.5;
-      if (soul.emotion === 'exhausted') ease = 0.008;
-      if (soul.emotion === 'overclocked') ease = 0.08;
-      if (soul.emotion === 'analyzing') ease = 0.06;
-      if (soul.emotion === 'melancholic') ease = 0.006;
+      let ease = 0.015;
+      if (cTier === 'SUBCONSCIOUS')    ease = 0.01;
+      if (cTier === 'SUPER_CONSCIOUS') ease = 0.025;
+      if (cTier === 'HYPER_CONSCIOUS') ease = 0.04;
+      if (isReturning) ease *= 1.2;       
+      if (isLateNight) ease *= 0.5;       
+      if (soul.emotion === 'dormant')  ease  = 0.003;
+      if (soul.emotion === 'curious')  ease *= 1.3;
+      if (soul.emotion === 'exhausted') ease = 0.005;
+      if (soul.emotion === 'overclocked') ease = 0.05;
+      if (soul.emotion === 'analyzing') ease = 0.04;
+      if (soul.emotion === 'melancholic') ease = 0.004;
 
       posRef.current.x += (targetRef.current.x - posRef.current.x) * ease;
       posRef.current.y += (targetRef.current.y - posRef.current.y) * ease;
@@ -312,11 +312,11 @@ const DigitalSoul = () => {
       }
       if (soul.isClicked) { sx *= 1.5; sy *= 1.5; }
 
-      const hbPulse = 1 + (heartbeatValue * 0.05);
+      const hbPulse = 1 + (heartbeatValue * 0.03);
       sx *= hbPulse;
       sy *= hbPulse;
 
-      soulRef.current.style.opacity   = '1';
+      soulRef.current.style.opacity   = '0.7';
       soulRef.current.style.transform =
         `translate3d(${posRef.current.x.toFixed(2)}px, ${posRef.current.y.toFixed(2)}px, 0) scaleX(${sx.toFixed(3)}) scaleY(${sy.toFixed(3)})`;
     };

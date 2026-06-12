@@ -207,7 +207,7 @@ const About = () => {
             <span className="section-label">{"// who I am"}</span>
             <div className="section-title-wrapper">
               <Typography as="h2" variant="mask" className="section-title about-title" data-hover="Adhithya Mohan">
-                <span className="section-title-inner"><DecryptedText text="About" /> <span><DecryptedText text="Me" speed={50} /></span></span>
+                <span className="section-title-inner"><DecryptedText text="About" speed={15} /> <span><DecryptedText text="Me" speed={15} /></span></span>
               </Typography>
               {hasStory && (
                 <button className="story-btn" onClick={() => openStory('about')} aria-label="Read story behind this section">

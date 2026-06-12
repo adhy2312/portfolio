@@ -222,4 +222,9 @@
   .about-image-col { max-width: 100%; }
   .about-p { font-size: 1rem; }
   .stat-value { font-size: 2rem; }
+  
+  .about-img-wrapper::after {
+    font-size: 1.1rem;
+    bottom: 15px;
+  }
 }

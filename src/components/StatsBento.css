@@ -10,47 +10,48 @@
 .stats-bento-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  grid-template-rows: repeat(4, minmax(200px, auto));
+  grid-auto-rows: minmax(200px, auto);
   gap: var(--bento-gap, 24px);
   width: 100%;
 }
 
-/* Individual Bento Cards */
+/* Individual Bento Cards - Claymorphism */
 .bento-card {
   position: relative;
   background: var(--bg-card);
-  border: var(--border-brutal);
-  border-radius: 0;
-  box-shadow: var(--shadow-brutal);
+  border: none;
+  border-radius: 32px;
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.7),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.05),
+    8px 8px 20px rgba(0, 0, 0, 0.08);
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  transition: transform var(--transition-fast), box-shadow var(--transition-fast), background-color var(--transition-smooth);
+  transition: transform var(--transition-smooth), box-shadow var(--transition-smooth);
   overflow: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+body.dark-mode .bento-card {
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.05),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.2),
+    8px 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .bento-card:hover {
-  background: var(--bg-card-hover);
-  transform: translate(-4px, -4px);
-  box-shadow: var(--shadow-brutal-deep);
+  transform: translateY(-6px);
+  box-shadow: 
+    inset 4px 4px 10px rgba(255, 255, 255, 0.8),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.08),
+    12px 12px 25px rgba(0, 0, 0, 0.12);
 }
 
+/* Remove brutalist crosshatch */
 .bento-card::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  opacity: 0.03;
-  z-index: 0;
-  background-image: 
-    repeating-linear-gradient(45deg, transparent, transparent 10px, #000 10px, #000 11px),
-    repeating-linear-gradient(-45deg, transparent, transparent 10px, #000 10px, #000 11px);
-}
-
-body.dark-mode .bento-card::before {
-  background-image: 
-    repeating-linear-gradient(45deg, transparent, transparent 10px, #fff 10px, #fff 11px),
-    repeating-linear-gradient(-45deg, transparent, transparent 10px, #fff 10px, #fff 11px);
+  display: none;
 }
 
 /* Grid Cell Placement */
@@ -252,8 +253,10 @@ body.dark-mode .bento-card::before {
 @media (max-width: 600px) {
   .stats-bento-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
-  .bento-github, .bento-status, .bento-counter {
-    grid-column: span 1;
+  .bento-card {
+    grid-column: 1 !important;
+    grid-row: auto !important;
   }
 }

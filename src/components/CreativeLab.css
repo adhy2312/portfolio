@@ -16,14 +16,23 @@
   width: 100%;
   height: 70vh;
   min-height: 500px;
-  background: #050505; /* Deep dark background so particles pop */
-  border: var(--border-heavy);
-  box-shadow: 8px 8px 0px rgba(0,0,0,1);
+  background: rgba(10, 10, 15, 0.5); /* Glassy dark */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 24px;
+  box-shadow: 
+    inset 0 0 40px rgba(255,255,255,0.02),
+    0 20px 40px rgba(0,0,0,0.5),
+    0 0 80px rgba(var(--accent-primary-rgb), 0.1);
   overflow: hidden;
 }
 
 body.dark-mode .lab-container {
-  box-shadow: 8px 8px 0px rgba(255,255,255,0.1);
+  box-shadow: 
+    inset 0 0 40px rgba(255,255,255,0.02),
+    0 20px 40px rgba(0,0,0,0.8),
+    0 0 80px rgba(var(--accent-primary-rgb), 0.05);
 }
 
 .lab-canvas {
@@ -37,15 +46,16 @@ body.dark-mode .lab-container {
   position: absolute;
   bottom: 24px;
   right: 24px;
-  background: rgba(15, 15, 15, 0.6);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 10, 15, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
   padding: 1.5rem;
   width: 320px;
   color: #fff;
   z-index: 10;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .lab-control-header {
@@ -84,6 +94,7 @@ body.dark-mode .lab-container {
 .slider-group input[type=range] {
   width: 100%;
   -webkit-appearance: none;
+  appearance: none;
   background: rgba(255, 255, 255, 0.2);
   height: 2px;
   border-radius: 2px;
@@ -92,6 +103,7 @@ body.dark-mode .lab-container {
 
 .slider-group input[type=range]::-webkit-slider-thumb {
   -webkit-appearance: none;
+  appearance: none;
   width: 14px;
   height: 14px;
   border-radius: 0; /* Brutal square thumb */

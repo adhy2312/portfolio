@@ -10,8 +10,7 @@
 /* ═══════════════════════════════════════════
    DESIGN TOKENS
 ═══════════════════════════════════════════ */
-html, body {
-}
+
 
 :root {
   /* Core Palette - BRUTAL BENTO */
@@ -408,6 +407,8 @@ body.darkroom-active {
   overflow: hidden;
   will-change: transform;
   transform: translateZ(0);
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 /* Interior crosshatch texture for cards */
@@ -510,6 +511,12 @@ body.darkroom-active {
   max-width: var(--container-width);
   margin: 0 auto;
   padding: 0 2rem;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1.2rem;
+  }
 }
 
 /* Grid overlay styling moved and consolidated above */
