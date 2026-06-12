@@ -16,6 +16,9 @@ import milestone from './milestone'
 import neuralMap from './neuralMap'
 import digitalScar from './digitalScar'
 import architecture from './architecture'
+import visualSettings from './visualSettings'
+import statsBento from './statsBento'
+import hardwareNexus from './hardwareNexus'
 
 export const schemaTypes = [
   hero,
@@ -35,5 +38,8 @@ export const schemaTypes = [
   milestone,
   neuralMap,
   digitalScar,
-  architecture
+  architecture,
+  visualSettings,
+  statsBento,
+  hardwareNexus
 ]

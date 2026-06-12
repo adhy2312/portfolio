@@ -20,6 +20,7 @@ import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
+import DigitalSoul from './components/DigitalSoul';
 
 // Initialize core pipelining
 pipeline.init();
@@ -28,6 +29,9 @@ pipeline.init();
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 const DevHUD = lazy(() => import('./components/DevHUD'));
+const StatsBento = lazy(() => import('./components/StatsBento'));
+const HardwareNexus = lazy(() => import('./components/HardwareNexus'));
+const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
 // Export dictionary of imports for ML Prefetching
 const dynamicImports = {
@@ -52,6 +56,9 @@ const dynamicImports = {
   GamesHub: () => import('./components/GamesHub'),
   StackVisualizer: () => import('./components/StackVisualizer'),
   DigitalSeed: () => import('./components/DigitalSeed'),
+  StatsBento: () => import('./components/StatsBento'),
+  HardwareNexus: () => import('./components/HardwareNexus'),
+  CreativeLab: () => import('./components/CreativeLab'),
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
   CustomCursor: () => import('./components/motion/CustomCursor'),
   ZAxisTunnel: () => import('./components/motion/ZAxisTunnel')
@@ -354,11 +361,14 @@ function AppContent() {
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
         <LazySection name="About"><About /></LazySection>
         <LazySection name="Skills"><Skills /></LazySection>
+        <LazySection name="StatsBento"><StatsBento /></LazySection>
+        <LazySection name="HardwareNexus"><HardwareNexus /></LazySection>
         <LazySection name="NeuralMap"><NeuralMap /></LazySection>
         <LazySection name="Experience"><Experience /></LazySection>
         <LazySection name="MyWorks"><MyWorks /></LazySection>
         <LazySection name="Timeline"><Timeline /></LazySection>
         <LazySection name="Photography"><Photography /></LazySection>
+        <LazySection name="CreativeLab"><CreativeLab /></LazySection>
         <LazySection name="Achievements"><Achievements /></LazySection>
         <LazySection name="TrustedBy"><TrustedBy /></LazySection>
         <LazySection name="Testimonials"><Testimonials /></LazySection>
@@ -373,6 +383,9 @@ function AppContent() {
         <Suspense fallback={null}>
           <DigitalSeed />
         </Suspense>
+
+        {/* The Observer Pet */}
+        <DigitalSoul />
       </div>
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}

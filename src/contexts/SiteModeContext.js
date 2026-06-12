@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
+import { client } from '../sanity';
 
 const SiteModeContext = createContext();
 
@@ -19,6 +20,16 @@ const DEFAULT_A11Y = {
 };
 
 export function SiteModeProvider({ children }) {
+  const [visualSettings, setVisualSettings] = useState(null);
+
+  useEffect(() => {
+    client.fetch('*[_type == "visualSettings"][0]')
+      .then(data => {
+        if (data) setVisualSettings(data);
+      })
+      .catch(err => console.error('Failed to fetch visual settings:', err));
+  }, []);
+
   const [mode, setModeState] = useState(() => {
     try { return localStorage.getItem('portfolio-mode') || MODES.NORMAL; }
     catch { return MODES.NORMAL; }
@@ -97,7 +108,70 @@ export function SiteModeProvider({ children }) {
 
     // Dark mode class
     cl.toggle('dark-mode', isDarkMode);
-  }, [mode, a11y, isDarkMode]);
+
+    // Apply Sanity visual settings if available
+    if (visualSettings) {
+      const {
+        fontHeading, fontBody, fontEditorial, accentColor,
+        bgPrimaryLight, bgPrimaryDark, bgSecondaryLight, bgSecondaryDark,
+        bgTertiaryLight, bgTertiaryDark, textPrimaryLight, textPrimaryDark,
+        textSecondaryLight, textSecondaryDark, showGrid, gridSize,
+        gridOpacityLight, gridOpacityDark
+      } = visualSettings;
+
+      const rootStyle = document.documentElement.style;
+
+      const loadGoogleFont = (fontName) => {
+        if (!fontName) return;
+        const formattedName = fontName.trim().replace(/\s+/g, '+');
+        const linkId = `google-font-${formattedName.toLowerCase()}`;
+        if (!document.getElementById(linkId)) {
+          const link = document.createElement('link');
+          link.id = linkId;
+          link.rel = 'stylesheet';
+          link.href = `https://fonts.googleapis.com/css2?family=${formattedName}:wght@300;400;500;600;700;800;900&display=swap`;
+          document.head.appendChild(link);
+        }
+      };
+
+      if (fontHeading) { loadGoogleFont(fontHeading); rootStyle.setProperty('--font-heading', `'${fontHeading}', sans-serif`); }
+      if (fontBody) { loadGoogleFont(fontBody); rootStyle.setProperty('--font-body', `'${fontBody}', sans-serif`); }
+      if (fontEditorial) { loadGoogleFont(fontEditorial); rootStyle.setProperty('--font-editorial', `'${fontEditorial}', serif`); }
+
+      if (accentColor) {
+        rootStyle.setProperty('--accent-primary', accentColor);
+        if (accentColor.startsWith('#')) {
+          const hex = accentColor.replace('#', '');
+          let r = 0, g = 0, b = 0;
+          if (hex.length === 3) {
+            r = parseInt(hex[0] + hex[0], 16); g = parseInt(hex[1] + hex[1], 16); b = parseInt(hex[2] + hex[2], 16);
+          } else if (hex.length === 6) {
+            r = parseInt(hex.substring(0, 2), 16); g = parseInt(hex.substring(2, 4), 16); b = parseInt(hex.substring(4, 6), 16);
+          }
+          rootStyle.setProperty('--accent-primary-rgb', `${r}, ${g}, ${b}`);
+        }
+      }
+
+      rootStyle.setProperty('--grid-display', showGrid === false ? 'none' : 'block');
+      if (gridSize) rootStyle.setProperty('--grid-size', `${gridSize}px`);
+
+      if (isDarkMode) {
+        if (bgPrimaryDark) rootStyle.setProperty('--bg-primary', bgPrimaryDark);
+        if (bgSecondaryDark) rootStyle.setProperty('--bg-secondary', bgSecondaryDark);
+        if (bgTertiaryDark) rootStyle.setProperty('--bg-tertiary', bgTertiaryDark);
+        if (textPrimaryDark) rootStyle.setProperty('--text-primary', textPrimaryDark);
+        if (textSecondaryDark) rootStyle.setProperty('--text-secondary', textSecondaryDark);
+        if (gridOpacityDark !== undefined) rootStyle.setProperty('--grid-opacity', gridOpacityDark);
+      } else {
+        if (bgPrimaryLight) rootStyle.setProperty('--bg-primary', bgPrimaryLight);
+        if (bgSecondaryLight) rootStyle.setProperty('--bg-secondary', bgSecondaryLight);
+        if (bgTertiaryLight) rootStyle.setProperty('--bg-tertiary', bgTertiaryLight);
+        if (textPrimaryLight) rootStyle.setProperty('--text-primary', textPrimaryLight);
+        if (textSecondaryLight) rootStyle.setProperty('--text-secondary', textSecondaryLight);
+        if (gridOpacityLight !== undefined) rootStyle.setProperty('--grid-opacity', gridOpacityLight);
+      }
+    }
+  }, [mode, a11y, isDarkMode, visualSettings]);
 
   // Section visibility based on mode
   const isSectionVisible = useCallback((sectionName) => {

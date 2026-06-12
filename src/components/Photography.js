@@ -292,7 +292,8 @@ const Photography = () => {
       .then(data => {
         if (data && data.length > 0) {
           setFetchedPhotos(data.map(item => ({
-            src:      item.image ? urlFor(item.image).url() : photo1,
+            src:      item.image ? urlFor(item.image).width(800).quality(90).auto('format').url() : photo1,
+            fullSrc:  item.image ? urlFor(item.image).width(2000).quality(100).auto('format').url() : photo1,
             alt:      item.title    || 'Photography',
             caption:  item.title    || 'Story',
             category: item.category || 'Visual',
@@ -457,7 +458,7 @@ const Photography = () => {
             >
               <div className="lightbox-content viewfinder-target">
                 <motion.img
-                  src={lightbox.src}
+                  src={lightbox.fullSrc || lightbox.src}
                   alt={lightbox.alt}
                   className="lightbox-img"
                   onClick={e => e.stopPropagation()}

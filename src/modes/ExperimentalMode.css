@@ -11,11 +11,11 @@ body.mode-experimental {
   background: #000;
   
   /* Enforce dark mode variables to avoid invisible text */
-  --bg-primary: #000;
-  --bg-card: rgba(20, 20, 25, 0.6);
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  color: #ffffff;
+  --bg-primary: #000 !important;
+  --bg-card: rgba(20, 20, 25, 0.6) !important;
+  --text-primary: #ffffff !important;
+  --text-secondary: #cccccc !important;
+  color: #ffffff !important;
 }
 
 body.mode-experimental .App {

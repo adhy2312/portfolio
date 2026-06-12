@@ -5,7 +5,7 @@ import { schemaTypes } from './schemas'
 
 // Define which document types should be singletons
 const singletonActions = new Set(["publish", "discardChanges", "restore"])
-const singletonTypes = new Set(["hero", "about", "footer", "contact"])
+const singletonTypes = new Set(["hero", "about", "footer", "contact", "visualSettings", "statsBento", "hardwareNexus"])
 
 export default defineConfig({
   name: 'default',
@@ -53,6 +53,30 @@ export default defineConfig({
                 S.document()
                   .schemaType("footer")
                   .documentId("footer")
+              ),
+            S.listItem()
+              .title("Visual Settings")
+              .id("visualSettings")
+              .child(
+                S.document()
+                  .schemaType("visualSettings")
+                  .documentId("visualSettings")
+              ),
+            S.listItem()
+              .title("Stats Bento")
+              .id("statsBento")
+              .child(
+                S.document()
+                  .schemaType("statsBento")
+                  .documentId("statsBento")
+              ),
+            S.listItem()
+              .title("Hardware Nexus")
+              .id("hardwareNexus")
+              .child(
+                S.document()
+                  .schemaType("hardwareNexus")
+                  .documentId("hardwareNexus")
               ),
             
             S.divider(),

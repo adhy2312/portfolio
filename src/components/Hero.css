@@ -173,6 +173,14 @@
   border-bottom: 8px solid #000; /* Newspaper rule */
   padding-bottom: 2rem;
   margin-bottom: 2rem;
+  animation: hero-title-float 6s ease-in-out infinite;
+  will-change: transform;
+}
+
+@keyframes hero-title-float {
+  0%   { transform: translate3d(0, 0, 0); }
+  50%  { transform: translate3d(0, -10px, 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 .hero-name-word {

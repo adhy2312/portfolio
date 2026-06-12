@@ -114,10 +114,11 @@ body.dark-mode {
   content: '';
   position: fixed; 
   inset: 0;
+  display: var(--grid-display, block);
   background-image:
-    linear-gradient(rgba(0,0,0,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0,0,0,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
+    linear-gradient(rgba(0,0,0,var(--grid-opacity, 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,var(--grid-opacity, 0.03)) 1px, transparent 1px);
+  background-size: var(--grid-size, 40px) var(--grid-size, 40px);
   pointer-events: none;
   z-index: 0;
   will-change: transform;
@@ -126,8 +127,8 @@ body.dark-mode {
 
 body.dark-mode .App::before {
   background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+    linear-gradient(rgba(255,255,255,var(--grid-opacity, 0.03)) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,var(--grid-opacity, 0.03)) 1px, transparent 1px);
 }
 
 
@@ -511,25 +512,11 @@ body.darkroom-active {
   padding: 0 2rem;
 }
 
-/* Grid overlay — absolute avoids scroll repaint */
-.App::before {
-  content: '';
-  position: fixed; /* Fixed instead of absolute saves massive VRAM and fixes scroll lag */
-  inset: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.012) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.012) 1px, transparent 1px);
-  background-size: 60px 60px;
-  pointer-events: none;
-  z-index: 0;
-  will-change: transform;
-  transform: translateZ(0);
-}
+/* Grid overlay styling moved and consolidated above */
 /* Mobile: keep but make it even more subtle */
 @media (max-width: 768px) {
   .App::before {
     opacity: 0.6;
-    background-size: 80px 80px; /* larger grid = fewer lines = cheaper */
   }
 }
 

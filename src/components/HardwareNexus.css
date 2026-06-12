@@ -1,0 +1,180 @@
+/* d:\portfolio\portfolio\src\components\HardwareNexus.css */
+.hardware-nexus-section {
+  padding: 100px 1.5rem;
+  position: relative;
+  overflow: hidden;
+  color: var(--text-primary);
+}
+
+.hardware-nexus-section .container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+}
+
+.nexus-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.nexus-board {
+  position: relative;
+  width: 100%;
+  height: 600px;
+  background: var(--bg-card);
+  border: var(--border-heavy);
+  border-radius: 0; /* Brutalist sharp edges */
+  overflow: hidden;
+  box-shadow: 12px 12px 0px #000;
+}
+
+.nexus-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.nexus-trace-bg {
+  stroke: rgba(0, 0, 0, 0.1);
+  stroke-width: 3;
+  stroke-linejoin: miter;
+}
+
+/* Dark mode adjustment for SVG background trace */
+body[data-theme="dark"] .nexus-trace-bg,
+body.mode-experimental .nexus-trace-bg {
+  stroke: rgba(255, 255, 255, 0.05);
+}
+
+.nexus-trace-active {
+  stroke: var(--accent-brutal-yellow, #f4d03f);
+  stroke-width: 4;
+  stroke-linejoin: miter;
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.nexus-trace-active.glowing {
+  stroke-dashoffset: 0;
+  opacity: 1;
+  filter: drop-shadow(0 0 8px rgba(244, 208, 63, 0.6));
+}
+
+.nexus-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 120px;
+  background: var(--bg-primary);
+  border: 4px solid var(--accent-brutal-pink, #ff003c);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+  box-shadow: 8px 8px 0px #000;
+}
+
+body[data-theme="dark"] .nexus-core,
+body.mode-experimental .nexus-core {
+  box-shadow: 0 0 30px rgba(255, 0, 60, 0.3);
+}
+
+.nexus-core-inner {
+  font-family: var(--font-heading);
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  letter-spacing: 2px;
+}
+
+.nexus-pulse-ring {
+  position: absolute;
+  top: -4px; left: -4px; right: -4px; bottom: -4px;
+  border: 2px solid var(--accent-brutal-pink, #ff003c);
+  animation: cpu-pulse 2s cubic-bezier(0.165, 0.84, 0.44, 1) infinite;
+}
+
+@keyframes cpu-pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.4); opacity: 0; }
+}
+
+.nexus-node {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: crosshair;
+}
+
+.node-dot {
+  width: 20px;
+  height: 20px;
+  background: var(--text-primary);
+  border-radius: 0; /* Brutalist squares instead of circles */
+  border: 3px solid #000;
+  transition: transform 0.3s ease;
+  box-shadow: 4px 4px 0px #000;
+}
+
+.nexus-node:hover .node-dot {
+  transform: scale(1.4) rotate(45deg);
+  background: var(--accent-brutal-yellow, #f4d03f);
+}
+
+.node-content {
+  margin-top: 15px;
+  background: var(--bg-primary);
+  border: 3px solid #000;
+  padding: 12px;
+  min-width: 200px;
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 6px 6px 0px #000;
+  text-align: center;
+}
+
+.nexus-node.active .node-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.node-tech {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-brutal-blue, #00e5ff);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.node-label {
+  font-weight: 900;
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  color: var(--text-primary);
+}
+
+.node-desc {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+@media (max-width: 768px) {
+  .nexus-board { height: 800px; }
+  .nexus-node { text-align: center; }
+  .node-content { min-width: 140px; }
+  .nexus-svg { display: none; } /* Hide complex traces on mobile, let the nodes float cleanly */
+}

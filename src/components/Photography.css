@@ -80,6 +80,8 @@
   gap: 1rem;
   width: max-content;
   animation: marquee-left linear infinite;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
   /* duration injected inline via style prop */
 }
 
@@ -105,6 +107,7 @@
   background: var(--bg-card);
   box-shadow: 6px 6px 0px #000;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
 }
 
 .marquee-card:hover {
