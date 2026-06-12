@@ -58,10 +58,10 @@ const dynamicImports = {
   DigitalSeed: () => import('./components/DigitalSeed'),
   StatsBento: () => import('./components/StatsBento'),
 
-  CreativeLab: () => import('./components/CreativeLab'),
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
   CustomCursor: () => import('./components/motion/CustomCursor'),
-  ZAxisTunnel: () => import('./components/motion/ZAxisTunnel')
+  ZAxisTunnel: () => import('./components/motion/ZAxisTunnel'),
+  TechDNA: () => import('./components/TechDNA')
 };
 
 // Wrap dictionary into React.lazy
@@ -87,6 +87,7 @@ const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
+const TechDNA = lazy(dynamicImports.TechDNA);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
 if (typeof window !== 'undefined') {
@@ -361,6 +362,7 @@ function AppContent() {
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
         <LazySection name="About"><About /></LazySection>
         <LazySection name="Skills"><Skills /></LazySection>
+        <LazySection name="TechDNA"><TechDNA /></LazySection>
         <LazySection name="StatsBento"><StatsBento /></LazySection>
 
         <LazySection name="NeuralMap"><NeuralMap /></LazySection>
@@ -368,7 +370,7 @@ function AppContent() {
         <LazySection name="MyWorks"><MyWorks /></LazySection>
         <LazySection name="Timeline"><Timeline /></LazySection>
         <LazySection name="Photography"><Photography /></LazySection>
-        <LazySection name="CreativeLab"><CreativeLab /></LazySection>
+
         <LazySection name="Achievements"><Achievements /></LazySection>
         <LazySection name="TrustedBy"><TrustedBy /></LazySection>
         <LazySection name="Testimonials"><Testimonials /></LazySection>

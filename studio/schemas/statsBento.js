@@ -9,6 +9,9 @@ const statsBento = {
       type: 'string',
       description: 'Used for fetching commit data or generating heatmaps.' 
     },
+    { name: 'githubContributions', title: 'GitHub Contributions', type: 'string', description: 'Total contributions on GitHub' },
+    { name: 'githubRepos', title: 'GitHub Repositories', type: 'string', description: 'Total public repositories' },
+    { name: 'githubStreak', title: 'GitHub Day Streak', type: 'string', description: 'Longest day streak' },
     { name: 'photosCount', title: 'Photos Captured', type: 'string' },
     { name: 'photoStyles', title: 'Photography Styles', type: 'string' },
     { name: 'photoAwards', title: 'Photography Awards', type: 'string' },

@@ -22,7 +22,7 @@ export function useHybridMotion() {
   useEffect(() => {
     // 1. Initialize High-Performance Lenis
     const lenis = new Lenis({
-      lerp: 0.08,             // Smooth but responsive
+      lerp: 0.12,             // Increased from 0.08 — settles faster, fewer physics frames fired
       wheelMultiplier: 1.0,   // Standard speed to avoid trackpad hypersensitivity
       smoothWheel: true,      // Smooths out chunky mouse wheels
       syncTouch: false,       // MUST BE FALSE for native mobile touch scrolling

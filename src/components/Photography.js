@@ -82,7 +82,8 @@ const parseExif = async (src) => {
 
 /* ─── Single marquee track ─── */
 const MarqueeTrack = ({ photos, reverse = false, onPhotoClick }) => {
-  const tiles = [...photos, ...photos, ...photos, ...photos];
+  // 2x duplication is the minimum needed for seamless loop — was 4x causing 80+ DOM nodes
+  const tiles = [...photos, ...photos];
   return (
     <div className="marquee-viewport">
       <div

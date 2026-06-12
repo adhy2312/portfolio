@@ -4,37 +4,46 @@ import { client } from '../sanity';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiGithub, FiCamera, FiFigma, FiMap, FiAward, FiBookOpen, FiTerminal, FiZap } from 'react-icons/fi';
+import { GitHubCalendar } from 'react-github-calendar';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Helper to generate a dummy heatmap for visual aesthetic
-const generateHeatmap = () => {
-  const weeks = [];
-  for (let w = 0; w < 12; w++) {
-    const days = [];
-    for (let d = 0; d < 7; d++) {
-      const rand = Math.random();
-      let level = 'l0';
-      if (rand > 0.9) level = 'l4';
-      else if (rand > 0.7) level = 'l3';
-      else if (rand > 0.4) level = 'l2';
-      else if (rand > 0.2) level = 'l1';
-      days.push(<div key={`${w}-${d}`} className={`heatmap-day ${level}`} />);
-    }
-    weeks.push(<div key={w} className="heatmap-week">{days}</div>);
-  }
-  return weeks;
-};
 
 const StatsBento = () => {
   const sectionRef = useRef(null);
   const [sanityData, setSanityData] = useState(null);
+  const [liveGithubData, setLiveGithubData] = useState({ repos: null, contributions: null });
 
   useEffect(() => {
     client.fetch('*[_type == "statsBento"][0]')
       .then(data => setSanityData(data))
       .catch(console.error);
   }, []);
+  
+  // Real-time GitHub fetching
+  useEffect(() => {
+    const username = sanityData?.githubUsername || 'adhy2312';
+    
+    // Fetch repositories
+    fetch(`https://api.github.com/users/${username}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.public_repos !== undefined) {
+          setLiveGithubData(prev => ({ ...prev, repos: data.public_repos }));
+        }
+      })
+      .catch(err => console.error("Error fetching repos:", err));
+
+    // Fetch contributions
+    fetch(`https://github-contributions-api.deno.dev/${username}.json`)
+      .then(res => res.json())
+      .then(data => {
+         if (data.totalContributions !== undefined) {
+           setLiveGithubData(prev => ({ ...prev, contributions: data.totalContributions }));
+         }
+      })
+      .catch(err => console.error("Error fetching contributions:", err));
+  }, [sanityData?.githubUsername]);
   
   useEffect(() => {
     if (!sectionRef.current) return;
@@ -72,8 +81,33 @@ const StatsBento = () => {
               <span className="bento-title">Git_Activity <span style={{fontSize:'0.65rem', color:'var(--text-muted)', marginLeft: '8px', letterSpacing: 'normal'}}>@{sanityData?.githubUsername || 'adhy2312'}</span></span>
               <FiGithub className="bento-icon" />
             </div>
-            <div className="github-heatmap">
-              {generateHeatmap()}
+            <div className="github-heatmap-container" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', overflowX: 'auto', paddingBottom: '10px' }}>
+              <div className="github-heatmap" style={{ minWidth: '700px' }}>
+                <GitHubCalendar 
+                  username={sanityData?.githubUsername || 'adhy2312'} 
+                  colorScheme="light"
+                  theme={{
+                    light: ['#ebedf0', '#fbe04d', '#f4d03f', '#e6b800', '#cc9900']
+                  }}
+                  hideTotalCount={true}
+                  hideColorLegend={true}
+                />
+              </div>
+            </div>
+
+            <div className="github-stats-row">
+              <div className="gh-stat">
+                <span className="gh-stat-val">{sanityData?.githubContributions || liveGithubData.contributions || '...'}</span>
+                <span className="gh-stat-label">Contributions</span>
+              </div>
+              <div className="gh-stat">
+                <span className="gh-stat-val">{sanityData?.githubRepos || liveGithubData.repos || '...'}</span>
+                <span className="gh-stat-label">Repositories</span>
+              </div>
+              <div className="gh-stat">
+                <span className="gh-stat-val">{sanityData?.githubStreak || '...'}</span>
+                <span className="gh-stat-label">Day Streak</span>
+              </div>
             </div>
           </div>
           
@@ -113,7 +147,7 @@ const StatsBento = () => {
             <div className="bento-header">
               <FiMap className="bento-icon" />
             </div>
-            <div className="bento-number">{sanityData?.travelKm || '50,000'}<span>km</span></div>
+            <div className="bento-number">{sanityData?.travelKm || '5,000'}<span>km</span></div>
             <div className="bento-subtitle">Explored This Year</div>
           </div>
 

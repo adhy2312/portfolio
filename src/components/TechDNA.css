@@ -1,0 +1,211 @@
+/* ═══════════════════════════════
+   TECH DNA HELIX
+═══════════════════════════════ */
+.tech-dna-section {
+  padding: var(--section-padding) 0;
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+}
+
+.dna-header {
+  margin-bottom: 3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dna-header .section-label {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.dna-header .section-desc {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 500px;
+}
+
+.dna-interactive-zone {
+  position: relative;
+  width: 100%;
+  padding: 4rem 0;
+  cursor: grab;
+  background-color: var(--bg-card);
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center;
+  border-radius: 32px;
+  box-shadow: 
+    inset 0 0 80px rgba(0, 255, 255, 0.03),
+    inset 4px 4px 10px rgba(255, 255, 255, 0.4),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.05),
+    0 20px 40px rgba(0,0,0,0.08);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  overflow: hidden;
+}
+
+body.dark-mode .dna-interactive-zone {
+  box-shadow: 
+    inset 0 0 80px rgba(0, 255, 255, 0.05),
+    inset 4px 4px 10px rgba(255, 255, 255, 0.05),
+    inset -4px -4px 10px rgba(0, 0, 0, 0.2),
+    0 20px 40px rgba(0,0,0,0.3);
+}
+
+.dna-interactive-zone:active {
+  cursor: grabbing;
+}
+
+.dna-hint {
+  position: absolute;
+  top: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 3px;
+  color: var(--accent-primary);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: pulseHint 2s infinite;
+}
+
+@keyframes pulseHint {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.8; }
+}
+
+.dna-helix-container {
+  position: relative;
+  width: 2px; /* Center axis */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.dna-tier {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+/* Links / Rungs */
+.dna-link {
+  position: absolute;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.8));
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
+  pointer-events: none;
+  transform-origin: center;
+  transition: width 0.1s linear, transform 0.1s linear, opacity 0.1s linear;
+}
+
+body.dark-mode .dna-link {
+  background: linear-gradient(90deg, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.8));
+}
+
+/* Primary Nodes */
+.dna-node {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  pointer-events: none;
+  will-change: transform, opacity;
+  transition: transform 0.1s linear, opacity 0.1s linear, z-index 0.1s step-end;
+}
+
+.dna-node-core {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: #555;
+  border: 2px solid var(--bg-primary);
+  flex-shrink: 0;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.dna-node.is-front .dna-node-core {
+  animation: dna-pulse 2s infinite alternate ease-in-out;
+}
+
+@keyframes dna-pulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.15); }
+}
+
+.dna-node-label {
+  font-family: var(--font-heading);
+  white-space: nowrap;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  background: rgba(15, 15, 20, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 8px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.dna-node-label .title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1;
+}
+
+.dna-node-label .desc {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-top: 4px;
+  letter-spacing: 1px;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Front active state */
+.dna-node.is-front .desc {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Secondary Nodes */
+.dna-node-secondary {
+  position: absolute;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.dna-node-core-small {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff00ff;
+  box-shadow: 0 0 12px #ff00ff;
+  opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+  .dna-interactive-zone {
+    padding: 3rem 0;
+    border-radius: 20px;
+  }
+  .dna-node-label .title {
+    font-size: 1.2rem;
+  }
+  .dna-node-core {
+    width: 20px;
+    height: 20px;
+  }
+}
