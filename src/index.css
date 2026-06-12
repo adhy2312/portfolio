@@ -1342,8 +1342,23 @@ html:not(.dream-state) .App {
   /* Fix section-container blocking scrollable experience */
   .section-container { min-height: auto !important; }
 
-  /* Ensure no horizontal overflow from bento cards */
-  .bento-grid { overflow: hidden; }
+  /* Ensure no horizontal overflow from bento cards and standard cards */
+  .bento-grid { 
+    overflow: hidden; 
+    width: 100%;
+  }
+  
+  /* Fix shadow overflow causing horizontal scrolling on mobile */
+  .glass-card {
+    max-width: 100%;
+    box-sizing: border-box;
+    /* Limit shadow width on mobile so it doesn't push the viewport */
+    box-shadow: 2px 2px 0px rgba(0,0,0,0.8), 0 5px 15px rgba(0,0,0,0.1) !important;
+  }
+  
+  body.dark-mode .glass-card {
+    box-shadow: 2px 2px 0px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.4) !important;
+  }
 }
 
 @media (max-width: 480px) {

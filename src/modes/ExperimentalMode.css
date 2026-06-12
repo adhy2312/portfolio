@@ -73,9 +73,41 @@ body.mode-experimental .section-title:hover {
 /* Give the noise a crazy blend mode */
 body.mode-experimental .noise-overlay {
   mix-blend-mode: color-dodge;
-  opacity: 0.15;
+  opacity: 0.2;
+  animation: staticFlicker 0.1s infinite;
+}
+
+@keyframes staticFlicker {
+  0% { opacity: 0.1; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.1; }
 }
 
 body.mode-experimental .digital-soul {
-  filter: hue-rotate(90deg) saturate(200%);
+  filter: hue-rotate(180deg) saturate(300%) contrast(150%);
+  animation: soulGlitch 2s infinite;
+}
+
+@keyframes soulGlitch {
+  0% { transform: scale(1); filter: hue-rotate(0deg); }
+  90% { transform: scale(1); filter: hue-rotate(0deg); }
+  92% { transform: scale(1.5) skew(10deg); filter: hue-rotate(180deg); }
+  95% { transform: scale(0.8) skew(-10deg); filter: hue-rotate(-90deg); }
+  100% { transform: scale(1); filter: hue-rotate(0deg); }
+}
+
+/* ─── EXTREME DISTORTION ─── */
+/* Add a vignette CRT overlay to the whole screen */
+body.mode-experimental::after {
+  content: " ";
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+  z-index: 9999;
+  background-size: 100% 2px, 3px 100%;
+  pointer-events: none;
 }

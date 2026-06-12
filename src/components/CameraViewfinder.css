@@ -1,0 +1,226 @@
+.camera-viewfinder-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  pointer-events: none; /* Let clicks pass through to the site beneath */
+  font-family: 'Share Tech Mono', 'Courier New', Courier, monospace;
+  color: #fff;
+  text-shadow: 0 0 2px #000, 0 0 4px #000;
+  /* Subtle vignette */
+  background: radial-gradient(circle, rgba(0,0,0,0) 60%, rgba(0,0,0,0.6) 100%);
+}
+
+/* White flash animation when taking a photo */
+.viewfinder-flash {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10000;
+  transition: opacity 0.5s ease-out;
+}
+
+.viewfinder-flash.active {
+  opacity: 1;
+  transition: none; /* instant on, fade out */
+}
+
+/* ─── GRID LINES ─── */
+.vf-grid-hz, .vf-grid-vt {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.vf-grid-hz {
+  width: 100%;
+  height: 1px;
+  left: 0;
+}
+.vf-grid-hz-1 { top: 33.33%; }
+.vf-grid-hz-2 { top: 66.66%; }
+
+.vf-grid-vt {
+  height: 100%;
+  width: 1px;
+  top: 0;
+}
+.vf-grid-vt-1 { left: 33.33%; }
+.vf-grid-vt-2 { left: 66.66%; }
+
+/* ─── CENTER AF BRACKET ─── */
+.vf-af-bracket {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 300px;
+  height: 200px;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.vf-af-tl, .vf-af-tr, .vf-af-bl, .vf-af-br {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-color: rgba(255, 255, 255, 0.8);
+  border-style: solid;
+}
+
+.vf-af-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+.vf-af-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+.vf-af-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+.vf-af-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+.vf-af-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 2px;
+  background: #ff0033;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 4px #ff0033;
+}
+
+/* ─── HUD LAYOUT ─── */
+.vf-hud-top {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  right: 40px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+}
+
+.vf-hud-left, .vf-hud-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.vf-rec-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  background: #ff0033;
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 8px #ff0033;
+}
+
+.blink {
+  animation: blinker 1.5s linear infinite;
+}
+.blink-fast {
+  animation: blinker 0.5s linear infinite;
+  color: #ff0033;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
+
+.vf-hud-bottom {
+  position: absolute;
+  bottom: 30px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.vf-hud-stats {
+  display: flex;
+  gap: 30px;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 10px 30px;
+  border-radius: 4px;
+  backdrop-filter: blur(4px);
+}
+
+.vf-hud-stats span {
+  color: #00ffcc;
+  text-shadow: 0 0 5px rgba(0, 255, 204, 0.5);
+}
+
+/* ─── EXPOSURE METER ─── */
+.vf-ev-meter {
+  position: absolute;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vf-ev-scale {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  color: rgba(255,255,255,0.6);
+}
+
+.vf-ev-pointer {
+  color: #00ffcc;
+  font-size: 1.2rem;
+  text-shadow: 0 0 5px rgba(0, 255, 204, 0.8);
+  transition: transform 0.1s linear;
+  position: absolute;
+  left: -20px;
+  top: 0;
+  height: 100%;
+}
+
+/* ─── SHUTTER BUTTON ─── */
+.vf-shutter-btn {
+  position: absolute;
+  bottom: 100px;
+  right: 40px;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  color: #fff;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: auto; /* Clickable! */
+  transition: all 0.2s ease;
+  backdrop-filter: blur(4px);
+}
+
+.vf-shutter-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+.vf-shutter-btn:active {
+  background: #fff;
+  color: #000;
+  transform: scale(0.95);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .vf-hud-stats { gap: 15px; font-size: 0.9rem; padding: 10px 15px; }
+  .vf-ev-meter { right: 10px; }
+  .vf-shutter-btn { bottom: 80px; right: 20px; width: 50px; height: 50px; }
+  .vf-af-bracket { width: 200px; height: 150px; }
+}

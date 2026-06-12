@@ -1,6 +1,6 @@
-/* ═══════════════════════════════
+/* ═══════════════════════════════════════════
    TECH DNA HELIX
-═══════════════════════════════ */
+═══════════════════════════════════════════ */
 .tech-dna-section {
   padding: var(--section-padding) 0;
   position: relative;
@@ -27,9 +27,11 @@
   max-width: 500px;
 }
 
+/* ─── Interactive Zone ─── */
 .dna-interactive-zone {
   position: relative;
   width: 100%;
+  /* Generous padding so 3D nodes have room to breathe without clipping */
   padding: 4rem 0;
   cursor: grab;
   background-color: var(--bg-card);
@@ -47,8 +49,12 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  touch-action: none;
+  /* CRITICAL FIX: allow horizontal pan only for DNA drag, let page scroll happen vertically */
+  touch-action: pan-y;
+  /* Clip nodes that go outside the card */
   overflow: hidden;
+  /* Ensure no horizontal page overflow from shadow/nodes */
+  box-sizing: border-box;
 }
 
 body.dark-mode .dna-interactive-zone {
@@ -63,18 +69,21 @@ body.dark-mode .dna-interactive-zone {
   cursor: grabbing;
 }
 
+/* ─── Hint Label ─── */
 .dna-hint {
   position: absolute;
-  top: 2rem;
+  top: 1.2rem;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   letter-spacing: 3px;
   color: var(--accent-primary);
   opacity: 0.5;
   pointer-events: none;
   animation: pulseHint 2s infinite;
+  white-space: nowrap;
+  z-index: 10;
 }
 
 @keyframes pulseHint {
@@ -82,13 +91,17 @@ body.dark-mode .dna-interactive-zone {
   50% { opacity: 0.8; }
 }
 
+/* ─── 3D Container ─── */
 .dna-helix-container {
   position: relative;
-  width: 2px; /* Center axis */
+  width: 2px; /* Center axis — nodes expand via translate3d */
   transform-style: preserve-3d;
   perspective: 1000px;
+  /* Contain overflow within the clipped zone */
+  overflow: visible;
 }
 
+/* ─── Tier ─── */
 .dna-tier {
   position: absolute;
   top: 0;
@@ -98,7 +111,7 @@ body.dark-mode .dna-interactive-zone {
   transform-style: preserve-3d;
 }
 
-/* Links / Rungs */
+/* ─── Links / Rungs ─── */
 .dna-link {
   position: absolute;
   height: 2px;
@@ -106,27 +119,29 @@ body.dark-mode .dna-interactive-zone {
   box-shadow: 0 0 8px rgba(0, 255, 255, 0.4);
   pointer-events: none;
   transform-origin: center;
-  transition: width 0.1s linear, transform 0.1s linear, opacity 0.1s linear;
+  /* Remove CSS transitions — RAF handles all movement for 0 lag */
+  transition: none;
 }
 
 body.dark-mode .dna-link {
   background: linear-gradient(90deg, rgba(0, 255, 255, 0.8), rgba(255, 0, 255, 0.8));
 }
 
-/* Primary Nodes */
+/* ─── Primary Nodes ─── */
 .dna-node {
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   pointer-events: none;
   will-change: transform, opacity;
-  transition: transform 0.1s linear, opacity 0.1s linear, z-index 0.1s step-end;
+  /* Remove CSS transitions — RAF handles all for buttery smooth 0-lag */
+  transition: none;
 }
 
 .dna-node-core {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: #555;
   border: 2px solid var(--bg-primary);
@@ -143,21 +158,26 @@ body.dark-mode .dna-link {
   100% { transform: scale(1.15); }
 }
 
+/* ─── Label Chip ─── */
 .dna-node-label {
   font-family: var(--font-heading);
   white-space: nowrap;
-  transition: color 0.3s ease, background-color 0.3s ease;
-  background: rgba(15, 15, 20, 0.6);
+  transition: color 0.3s ease;
+  background: rgba(15, 15, 20, 0.75);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  padding: 8px 16px;
-  border-radius: 12px;
+  padding: 6px 12px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  /* Prevent label from overflowing its own bounds */
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .dna-node-label .title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 800;
   text-transform: uppercase;
   line-height: 1;
@@ -165,12 +185,12 @@ body.dark-mode .dna-link {
 
 .dna-node-label .desc {
   font-family: var(--font-mono);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 4px;
+  margin-top: 3px;
   letter-spacing: 1px;
   opacity: 0;
-  transform: translateX(-10px);
+  transform: translateX(-8px);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
@@ -180,11 +200,13 @@ body.dark-mode .dna-link {
   transform: translateX(0);
 }
 
-/* Secondary Nodes */
+/* ─── Secondary Nodes ─── */
 .dna-node-secondary {
   position: absolute;
   pointer-events: none;
   will-change: transform, opacity;
+  /* No CSS transition — RAF handles it */
+  transition: none;
 }
 
 .dna-node-core-small {
@@ -196,16 +218,82 @@ body.dark-mode .dna-link {
   opacity: 0.8;
 }
 
+/* ═══════════════════════════════════════════
+   MOBILE FIXES — Complete overhaul
+═══════════════════════════════════════════ */
 @media (max-width: 768px) {
+  .tech-dna-section {
+    overflow: hidden; /* Prevent section-level bleed */
+  }
+
   .dna-interactive-zone {
-    padding: 3rem 0;
+    padding: 3.5rem 0 3rem 0;
     border-radius: 20px;
+    /* touch-action applied dynamically in JS */
+    /* Clip the 3D overflow within the card */
+    overflow: hidden;
+    /* Extra horizontal padding to contain labels */
+    margin: 0 auto;
+    width: 100%;
+    /* Prevent shadow from overflowing page width */
+    box-shadow:
+      inset 0 0 40px rgba(0, 255, 255, 0.03),
+      0 10px 24px rgba(0,0,0,0.1);
   }
-  .dna-node-label .title {
-    font-size: 1.2rem;
+
+  .dna-hint {
+    font-size: 0.6rem;
+    letter-spacing: 2px;
+    top: 0.8rem;
   }
+
+  /* Smaller core dots on mobile */
   .dna-node-core {
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
+    border-width: 1.5px;
+  }
+
+  /* Compact label chip */
+  .dna-node-label {
+    padding: 4px 8px;
+    border-radius: 8px;
+    max-width: 120px;
+  }
+
+  .dna-node-label .title {
+    font-size: 0.9rem;
+  }
+
+  .dna-node-label .desc {
+    font-size: 0.6rem;
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Compact secondary dots */
+  .dna-node-core-small {
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .dna-interactive-zone {
+    padding: 3rem 0 2.5rem 0;
+    border-radius: 16px;
+  }
+
+  .dna-node-label {
+    padding: 3px 6px;
+    max-width: 100px;
+  }
+
+  .dna-node-label .title {
+    font-size: 0.8rem;
+  }
+
+  .dna-node-label .desc {
+    display: none; /* Too crowded on very small screens */
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteMode, MODES } from '../contexts/SiteModeContext';
-import { FiSettings, FiX, FiBriefcase, FiCpu, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet } from 'react-icons/fi';
+import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet } from 'react-icons/fi';
 import './SiteModeSwitcher.css';
 
 import './SiteModeSwitcher.css';
@@ -155,7 +155,7 @@ const COLOR_THEMES = [
 const THEME_STORAGE_KEY = 'adhy_color_theme';
 
 export const SiteModePanel = ({ inline = false, onClose }) => {
-  const { mode, setMode, a11y, toggleA11y, isExpert } = useSiteMode();
+  const { mode, setMode, a11y, toggleA11y, isPhotographer } = useSiteMode();
 
   const [colorTheme, setColorTheme] = useState(() => {
     try { return localStorage.getItem(THEME_STORAGE_KEY) || 'default'; } catch { return 'default'; }
@@ -191,7 +191,7 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
   const modes = [
     { key: MODES.NORMAL,       icon: <FiSettings size={16} />,   label: 'Default (Original)', desc: 'Standard fast experience' },
     { key: MODES.RECRUITER,    icon: <FiBriefcase size={16} />,  label: 'Recruiter',       desc: 'Focused portfolio view' },
-    { key: MODES.EXPERT,       icon: <FiCpu size={16} />,        label: 'Expert',          desc: 'Full technical depth' },
+    { key: MODES.PHOTOGRAPHER, icon: <FiCamera size={16} />,     label: 'Photographer',    desc: 'Creative direction & lens focus' },
     { key: MODES.EXPERIMENTAL, icon: <FiZap size={16} />,        label: 'Experimental Lab', desc: 'Bleeding-edge effects' },
   ];
 
@@ -207,7 +207,7 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
       <div className="smp-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <span className="smp-label">SITE MODE</span>
-          {isExpert && <span className="smp-badge">EXPERT</span>}
+          {isPhotographer && <span className="smp-badge" style={{background: '#00FF41', color: '#000'}}>PHOTO</span>}
         </div>
         {onClose && (
           <button 

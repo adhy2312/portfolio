@@ -1,0 +1,26 @@
+/* ══════════════════════════════════════════
+   PHOTOGRAPHER MODE — Creative Direction & Lens Focus
+   ══════════════════════════════════════════ */
+
+/* De-emphasize standard brutalist borders to highlight imagery */
+body.mode-photographer .bento-cell,
+body.mode-photographer .marquee-card {
+  border-color: rgba(255, 255, 255, 0.05) !important;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+  background: rgba(15, 15, 15, 0.8) !important;
+  backdrop-filter: blur(10px);
+}
+
+/* ─── HIGHLIGHT PHOTOGRAPHY SECTIONS ─── */
+body.mode-photographer .photography-section,
+body.mode-photographer .scroll-canvas-sequence {
+  position: relative;
+  z-index: 10;
+}
+
+/* ─── CAMERA CURSOR ─── */
+body.mode-photographer {
+  cursor: crosshair;
+}
+
+/* Removed: SVG film grain that caused massive scroll lag */

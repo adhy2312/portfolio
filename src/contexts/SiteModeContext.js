@@ -7,7 +7,7 @@ const SiteModeContext = createContext();
 export const MODES = {
   NORMAL: 'normal',
   RECRUITER: 'recruiter',
-  EXPERT: 'expert',
+  PHOTOGRAPHER: 'photographer',
   EXPERIMENTAL: 'experimental',
 };
 
@@ -86,11 +86,21 @@ export function SiteModeProvider({ children }) {
     });
   }, []);
 
+  // Listen for Ghost In The Machine direct mode switches
+  useEffect(() => {
+    const handleDirectSwitch = (e) => {
+      const targetMode = e.detail;
+      setMode(targetMode);
+    };
+    window.addEventListener('switch-mode-direct', handleDirectSwitch);
+    return () => window.removeEventListener('switch-mode-direct', handleDirectSwitch);
+  }, [setMode]);
+
   // Apply body classes reactively
   useEffect(() => {
     const cl = document.body.classList;
     // Remove old mode classes
-    cl.remove('mode-recruiter', 'mode-expert', 'mode-experimental', 'mode-normal', 'mode-default');
+    cl.remove('mode-recruiter', 'mode-photographer', 'mode-experimental', 'mode-normal', 'mode-default');
     cl.add(`mode-${mode}`);
 
     // A11y classes
@@ -175,9 +185,31 @@ export function SiteModeProvider({ children }) {
 
   // Section visibility based on mode
   const isSectionVisible = useCallback((sectionName) => {
-    // All sections remain visible across modes; the aesthetic is handled via global CSS overrides.
+    if (mode === MODES.RECRUITER) {
+      // Streamlined view, hide complex/abstract sections
+      const hiddenInRecruiter = ['TechDNA', 'NeuralMap', 'StackVisualizer', 'Timeline', 'DigitalScars', 'KineticMarquee', 'ScrollCanvasSequence'];
+      return !hiddenInRecruiter.includes(sectionName);
+    }
+    
+    if (mode === MODES.PHOTOGRAPHER) {
+      // Tech-heavy view, hide purely aesthetic sections
+      const hiddenInPhotographer = ['DigitalScars', 'TrustedBy', 'TechDNA', 'Timeline'];
+      return !hiddenInPhotographer.includes(sectionName);
+    }
+    
+    if (mode === MODES.NORMAL) {
+       // Standard view, hide some deep experimental features
+       const hiddenInNormal = ['DigitalScars', 'NeuralMap', 'ScrollCanvasSequence'];
+       return !hiddenInNormal.includes(sectionName);
+    }
+
+    if (mode === MODES.EXPERIMENTAL) {
+      // Show everything, it's the lab!
+      return true;
+    }
+
     return true;
-  }, []);
+  }, [mode]);
 
   const value = {
     mode,
@@ -188,7 +220,7 @@ export function SiteModeProvider({ children }) {
     toggleDarkMode,
     isSectionVisible,
     isRecruiter: mode === MODES.RECRUITER,
-    isExpert: mode === MODES.EXPERT,
+    isPhotographer: mode === MODES.PHOTOGRAPHER,
     isExperimental: mode === MODES.EXPERIMENTAL,
   };
 

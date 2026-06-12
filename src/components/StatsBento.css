@@ -2,7 +2,7 @@
    STATS BENTO GRID SECTION
 ═══════════════════════════════ */
 .stats-bento-section {
-  padding: var(--section-padding) 0;
+  padding: var(--section-padding);
   position: relative;
   z-index: 1;
 }

@@ -89,3 +89,38 @@ body.mode-recruiter.darkroom-active {
 body.mode-recruiter .marquee-card img {
   filter: none !important;
 }
+
+/* ─── Hero Section Simplification ─── */
+body.mode-recruiter .hero-minimal {
+  min-height: 80vh !important;
+  display: flex;
+  align-items: center;
+}
+body.mode-recruiter .hero-css-particles {
+  display: none !important;
+}
+body.mode-recruiter .hero-greeting-wrapper,
+body.mode-recruiter .hero-tagline-premium {
+  opacity: 0.8;
+}
+body.mode-recruiter .hero-name-giant {
+  font-size: clamp(3rem, 8vw, 6rem) !important; /* Slightly smaller name */
+}
+
+/* ─── Layout Optimization ─── */
+body.mode-recruiter .section-container {
+  padding: 40px 0 !important; /* Tighter padding to show more content */
+}
+body.mode-recruiter .bento-grid {
+  gap: 20px !important; /* Tighter grid */
+}
+
+/* ─── Recruiter Specific Badges ─── */
+body.mode-recruiter .role-badge {
+  background: var(--accent-primary) !important;
+  color: #fff !important;
+  border-radius: 4px !important;
+  padding: 4px 8px !important;
+  font-weight: 600 !important;
+}
+

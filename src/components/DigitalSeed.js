@@ -1,10 +1,11 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useOrchestrator } from '../contexts/SystemOrchestrator';
 import './DigitalSeed.css';
 
 const DigitalSeed = () => {
   const { temporalAge, weatherData, idleState } = useConsciousness();
+  const [forceStage, setForceStage] = useState(0);
   const orchestrator = useOrchestrator();
   
   const treeRef = useRef(null);
@@ -56,11 +57,21 @@ const DigitalSeed = () => {
   }, [orchestrator, isLateNight, isRain, idleState]);
 
   // Calculate growth stage based on temporal age (real time)
+  // Adjusted for faster visible progression
   let stage = 0;
-  if (temporalAge >= 1825) stage = 4; // Mature Tree (5 years)
-  else if (temporalAge >= 1095) stage = 3; // Young Tree (3 years)
-  else if (temporalAge >= 365) stage = 2; // Sapling (1 year)
-  else if (temporalAge >= 30) stage = 1; // Sprout (1 month)
+  if (temporalAge >= 365) stage = 4; // Mature Tree (1 year)
+  else if (temporalAge >= 90) stage = 3; // Young Tree (3 months)
+  else if (temporalAge >= 30) stage = 2; // Sapling (1 month)
+  else if (temporalAge >= 10) stage = 1; // Sprout (10 days)
+
+  // AI Override
+  if (forceStage > stage) stage = Math.min(4, forceStage);
+
+  useEffect(() => {
+    const handleForceGrowth = () => setForceStage(prev => Math.min(4, prev + 1));
+    window.addEventListener('force-seed-growth', handleForceGrowth);
+    return () => window.removeEventListener('force-seed-growth', handleForceGrowth);
+  }, []);
 
   const containerClasses = [
     'digital-seed-bedrock',

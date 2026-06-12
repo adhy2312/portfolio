@@ -1,12 +1,11 @@
 import React from 'react';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { FiTerminal } from 'react-icons/fi';
-import '../modes/ExpertMode.css'; // Ensure the styles are loaded
+import '../modes/PhotographerMode.css';
 
 const ExpertDoc = ({ title, data, notes }) => {
-  const { isExpert } = useSiteMode();
-  
-  if (!isExpert) return null;
+  // The user requested to remove traces of Expert mode comments.
+  return null;
 
   return (
     <div className="expert-doc-container">
@@ -18,7 +17,7 @@ const ExpertDoc = ({ title, data, notes }) => {
         <span>_ARCH</span>
       </div>
       <div className="expert-doc-body">
-        {notes && <span className="expert-doc-comment">/* {notes} */</span>}
+        {notes && <span className="expert-doc-comment">{`/* ${notes} */`}</span>}
         {Object.entries(data).map(([key, value], idx) => {
           let valClass = 'string';
           let displayVal = value;

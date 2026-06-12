@@ -32,14 +32,20 @@ const TechDNA = () => {
   const autoSpinRef = useRef(true);
   const lastTimeRef = useRef(performance.now());
 
-  // Responsive Math
+  // Responsive Math - Fix mobile overflow
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-  const radius = isMobile ? 120 : 200;
-  const verticalSpacing = isMobile ? 50 : 60;
+  const [isSmallMobile, setIsSmallMobile] = useState(window.innerWidth < 480);
+  
+  // Radius determines horizontal spread. Must be smaller on mobile to avoid overflow.
+  const radius = isSmallMobile ? 65 : (isMobile ? 90 : 200);
+  const verticalSpacing = isMobile ? 45 : 60;
   const totalHeight = DNA_NODES.length * verticalSpacing;
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsSmallMobile(window.innerWidth < 480);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -133,22 +139,32 @@ const TechDNA = () => {
     return () => ns.unregister('tech-dna');
   }, [radius]);
 
+  const handleWindowMouseMove = (e) => {
+    if (!isDraggingRef.current) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const deltaX = clientX - dragStartXRef.current;
+    rotationRef.current = lastRotationRef.current + deltaX * 0.015;
+  };
+
+  const handleWindowMouseUp = () => {
+    isDraggingRef.current = false;
+    window.removeEventListener('mousemove', handleWindowMouseMove);
+    window.removeEventListener('mouseup', handleWindowMouseUp);
+    window.removeEventListener('touchmove', handleWindowMouseMove);
+    window.removeEventListener('touchend', handleWindowMouseUp);
+  };
+
   const handlePointerDown = (e) => {
     isDraggingRef.current = true;
     autoSpinRef.current = false;
-    dragStartXRef.current = e.clientX || (e.touches && e.touches[0].clientX);
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    dragStartXRef.current = clientX;
     lastRotationRef.current = rotationRef.current;
-  };
-
-  const handlePointerMove = (e) => {
-    if (!isDraggingRef.current) return;
-    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-    const deltaX = clientX - dragStartXRef.current;
-    rotationRef.current = lastRotationRef.current + deltaX * 0.01;
-  };
-
-  const handlePointerUp = () => {
-    isDraggingRef.current = false;
+    
+    window.addEventListener('mousemove', handleWindowMouseMove);
+    window.addEventListener('mouseup', handleWindowMouseUp);
+    window.addEventListener('touchmove', handleWindowMouseMove, { passive: false });
+    window.addEventListener('touchend', handleWindowMouseUp);
   };
 
   useEffect(() => {
@@ -176,13 +192,9 @@ const TechDNA = () => {
 
         <div 
           className="dna-interactive-zone"
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerLeave={handlePointerUp}
+          onMouseDown={handlePointerDown}
           onTouchStart={handlePointerDown}
-          onTouchMove={handlePointerMove}
-          onTouchEnd={handlePointerUp}
+          style={{ touchAction: 'none' }}
         >
           <div className="dna-hint">DRAG TO SPIN</div>
           

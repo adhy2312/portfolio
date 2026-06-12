@@ -3,7 +3,7 @@ import { ScrollTrigger } from './hooks/useGSAPAnimations';
 import './index.css';
 import './modes/RecruiterMode.css';
 import './modes/ExperimentalMode.css';
-import './modes/ExpertMode.css';
+import './modes/PhotographerMode.css';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
@@ -21,17 +21,20 @@ import ErrorBoundary from './components/ErrorBoundary';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
 import DigitalSoul from './components/DigitalSoul';
+import smoothScroll from './core/SmoothScroll'; // <--- ADDED IMPORT
 
-// Initialize core pipelining
+// Initialize core pipelining & smooth scrolling
 pipeline.init();
+smoothScroll.init(); // <--- ADDED INIT
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 const DevHUD = lazy(() => import('./components/DevHUD'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
+const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 
-const CreativeLab = lazy(() => import('./components/CreativeLab'));
+// const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
 // Export dictionary of imports for ML Prefetching
 const dynamicImports = {
@@ -61,7 +64,8 @@ const dynamicImports = {
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
   CustomCursor: () => import('./components/motion/CustomCursor'),
   ZAxisTunnel: () => import('./components/motion/ZAxisTunnel'),
-  TechDNA: () => import('./components/TechDNA')
+  TechDNA: () => import('./components/TechDNA'),
+  ScrollCanvasSequence: () => import('./components/ScrollCanvasSequence')
 };
 
 // Wrap dictionary into React.lazy
@@ -88,6 +92,7 @@ const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
 const TechDNA = lazy(dynamicImports.TechDNA);
+// const ScrollCanvasSequence = lazy(dynamicImports.ScrollCanvasSequence);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
 if (typeof window !== 'undefined') {
@@ -132,6 +137,7 @@ function LazySection({ name, className = "section-container", children }) {
 }
 
 function AppContent() {
+  const { mode } = useSiteMode();
   useSolarLighting();
   const [activeGame, setActiveGame] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -221,6 +227,27 @@ function AppContent() {
       console.log(`[ML_ENGINE] Persona identified: ${persona} (Confidence: ${confidence})`);
     };
     window.addEventListener('persona-shift', handlePersona);
+
+    // AI "Ghost in the Machine" Command Execution
+    const handleAiCommand = (e) => {
+      const { type, value } = e.detail || {};
+      console.log(`[Ghost In The Machine] Executing Command: ${type}:${value}`);
+      
+      if (type === 'MODE') {
+        // e.g. [CMD:MODE:expert] -> physically changes the site
+        const modes = ['default', 'recruiter', 'expert', 'photographer', 'experimental'];
+        if (modes.includes(value)) {
+          // Find the mode switcher context or trigger event
+          window.dispatchEvent(new CustomEvent('switch-mode-direct', { detail: value }));
+        }
+      } else if (type === 'SEED') {
+        window.dispatchEvent(new CustomEvent('force-seed-growth'));
+      } else if (type === 'THEME') {
+        if (value === 'dark') document.body.classList.add('dark-theme-override');
+        if (value === 'light') document.body.classList.remove('dark-theme-override');
+      }
+    };
+    window.addEventListener('ai-command', handleAiCommand);
 
     // Konami code → barrel roll
     const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
@@ -370,6 +397,7 @@ function AppContent() {
         <LazySection name="MyWorks"><MyWorks /></LazySection>
         <LazySection name="Timeline"><Timeline /></LazySection>
         <LazySection name="Photography"><Photography /></LazySection>
+        {/* <LazySection name="ScrollCanvasSequence" className=""><ScrollCanvasSequence /></LazySection> - Detached for future upgrade */}
 
         <LazySection name="Achievements"><Achievements /></LazySection>
         <LazySection name="TrustedBy"><TrustedBy /></LazySection>
@@ -389,6 +417,12 @@ function AppContent() {
         {/* The Observer Pet */}
         <DigitalSoul />
       </div>
+
+      {mode === 'photographer' && (
+        <Suspense fallback={null}>
+          <CameraViewfinder />
+        </Suspense>
+      )}
 
       {/* Easter egg overlay — outside Suspense so it is never hidden by a fallback */}
       <EasterEggOverlay egg={activeEgg} />
