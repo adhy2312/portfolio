@@ -152,11 +152,35 @@ const Contact = () => {
     e.preventDefault();
     setStatus('sending');
 
+    const formData = new FormData(form.current);
+    const fromName = formData.get('from_name');
+    const replyTo = formData.get('reply_to');
+    const subject = formData.get('subject') || 'No Subject';
+    const message = formData.get('message');
+
+    // Bundle the sender details directly into the message so you receive them
+    // even if the EmailJS template isn't configured for it.
+    const combinedMessage = `Sender Details:
+Name: ${fromName}
+Email: ${replyTo}
+
+Original Message:
+${message}`;
+
+    const templateParams = {
+      from_name: fromName,
+      user_name: fromName,
+      reply_to: replyTo,
+      user_email: replyTo,
+      subject: subject,
+      message: combinedMessage
+    };
+
     emailjs
-      .sendForm(
+      .send(
         'service_25wh03l',
         'template_hdpyibu',
-        form.current,
+        templateParams,
         'dcGuY9_4lV1xSr5zN'
       )
       .then(
@@ -255,7 +279,7 @@ const Contact = () => {
                   <label className="form-label">Your Name</label>
                   <input
                     type="text"
-                    name="user_name"
+                    name="from_name"
                     placeholder="What's your name?"
                     className="form-input"
                     required
@@ -265,7 +289,7 @@ const Contact = () => {
                   <label className="form-label">Your Email</label>
                   <input
                     type="email"
-                    name="user_email"
+                    name="reply_to"
                     placeholder="john@example.com"
                     className="form-input"
                     required
