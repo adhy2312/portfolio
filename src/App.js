@@ -4,6 +4,7 @@ import './index.css';
 import './modes/RecruiterMode.css';
 import './modes/ExperimentalMode.css';
 import './modes/PhotographerMode.css';
+import { client } from './sanity';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import PageLoader from './components/PageLoader';
@@ -20,12 +21,8 @@ import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
-import DigitalSoul from './components/DigitalSoul';
-import smoothScroll from './core/SmoothScroll'; // <--- ADDED IMPORT
-
 // Initialize core pipelining & smooth scrolling
 pipeline.init();
-smoothScroll.init(); // <--- ADDED INIT
 
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
@@ -58,7 +55,6 @@ const dynamicImports = {
   SnakeGame: () => import('./components/SnakeGame'),
   GamesHub: () => import('./components/GamesHub'),
   StackVisualizer: () => import('./components/StackVisualizer'),
-  DigitalSeed: () => import('./components/DigitalSeed'),
   StatsBento: () => import('./components/StatsBento'),
 
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
@@ -89,7 +85,6 @@ const TicTacToe = lazy(dynamicImports.TicTacToe);
 const SnakeGame = lazy(dynamicImports.SnakeGame);
 const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
-const DigitalSeed = lazy(dynamicImports.DigitalSeed);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
 const TechDNA = lazy(dynamicImports.TechDNA);
 // const ScrollCanvasSequence = lazy(dynamicImports.ScrollCanvasSequence);
@@ -106,7 +101,7 @@ if (typeof window !== 'undefined') {
   });
 }
 
-function LazySection({ name, className = "section-container", children }) {
+function LazySection({ name, className = "section-container", visualOptions = {}, children }) {
   const ref = React.useRef();
   const { setActiveSection } = useConsciousness();
   const { isSectionVisible } = useSiteMode();
@@ -125,10 +120,16 @@ function LazySection({ name, className = "section-container", children }) {
   }, [name, setActiveSection]);
 
   // Mode-aware: hide sections not relevant to current mode
-  if (!isSectionVisible(name)) return null;
+  if (!isSectionVisible(name) || visualOptions?.isHidden) return null;
+
+  const dynamicStyle = {};
+  if (visualOptions?.paddingTop && visualOptions.paddingTop !== 'auto') dynamicStyle.paddingTop = visualOptions.paddingTop;
+  if (visualOptions?.paddingBottom && visualOptions.paddingBottom !== 'auto') dynamicStyle.paddingBottom = visualOptions.paddingBottom;
+  if (visualOptions?.backgroundColor) dynamicStyle.backgroundColor = visualOptions.backgroundColor;
+  if (visualOptions?.contentAlignment) dynamicStyle.textAlign = visualOptions.contentAlignment;
 
   return (
-    <div ref={ref} className={className} data-xray="[SYSTEM: RENDERED]">
+    <div ref={ref} className={className} data-xray="[SYSTEM: RENDERED]" style={dynamicStyle}>
       <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '200px', height: 'auto' }} />}>
         {children}
       </Suspense>
@@ -141,6 +142,29 @@ function AppContent() {
   useSolarLighting();
   const [activeGame, setActiveGame] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pageData, setPageData] = useState(null);
+
+  useEffect(() => {
+    // Fetch Page Builder content
+    const fetchPage = async () => {
+      try {
+        const query = `*[_type == "page" && slug.current == "home"][0]{
+          sections[] {
+            ...,
+            _type == "reference" => @->,
+            _type != "reference" => @
+          }
+        }`;
+        const data = await client.fetch(query);
+        if (data && data.sections) {
+          setPageData(data);
+        }
+      } catch (err) {
+        console.error("Error fetching page builder data", err);
+      }
+    };
+    fetchPage();
+  }, []);
   const [dreamState, setDreamState] = useState(() => {
     try {
       const memory = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
@@ -169,8 +193,12 @@ function AppContent() {
     // Spotlight Engine: Removed for performance. 
     // Global document.body.style.setProperty triggers massive layout thrashing.
 
+    let roTimeout;
     const ro = new ResizeObserver(() => {
-      ScrollTrigger.refresh();
+      clearTimeout(roTimeout);
+      roTimeout = setTimeout(() => {
+        ScrollTrigger.refresh();
+      }, 200);
     });
     ro.observe(document.body);
 
@@ -204,7 +232,6 @@ function AppContent() {
         import('./components/GamesHub');
         import('./components/SnakeGame');
       } else if (target === 'Contact' || target === 'Hero') {
-        import('./components/DigitalSeed');
         import('./components/GravityWell');
       }
     };
@@ -387,35 +414,67 @@ function AppContent() {
         <Hero />
 
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
-        <LazySection name="About"><About /></LazySection>
-        <LazySection name="Skills"><Skills /></LazySection>
-        <LazySection name="TechDNA"><TechDNA /></LazySection>
-        <LazySection name="StatsBento"><StatsBento /></LazySection>
+        {pageData && pageData.sections && pageData.sections.length > 0 ? (
+          pageData.sections.map((section, index) => {
+            const COMPONENT_MAP = {
+              hero: Hero,
+              about: About,
+              skillCategory: Skills,
+              techDNASection: TechDNA,
+              statsBento: StatsBento,
+              neuralMap: NeuralMap,
+              experience: Experience,
+              projectListSection: MyWorks,
+              timelineSection: Timeline,
+              photographySection: Photography,
+              achievementsSection: Achievements,
+              trustedBySection: TrustedBy,
+              testimonialsSection: Testimonials,
+              digitalScarsSection: DigitalScars,
+              callToActionSection: CallToAction,
+              contact: Contact,
+              contactSection: Contact,
+              stackVisualizerSection: StackVisualizer,
+              kineticMarqueeSection: KineticMarquee,
+              footerSection: Footer,
+              architecture: TechDNA // Fallback if architecture referenced directly
+            };
+            const Component = COMPONENT_MAP[section._type];
+            if (!Component) return null;
+            return (
+              <LazySection 
+                key={section._id || index} 
+                name={section._type} 
+                className={section._type === 'kineticMarqueeSection' || section._type === 'footerSection' ? 'lazy-section-auto' : 'section-container'}
+                visualOptions={section.visualOptions}
+              >
+                <Component data={section} />
+              </LazySection>
+            );
+          })
+        ) : (
+          <>
+            <LazySection name="About"><About /></LazySection>
+            <LazySection name="Skills"><Skills /></LazySection>
+            <LazySection name="TechDNA"><TechDNA /></LazySection>
+            <LazySection name="StatsBento"><StatsBento /></LazySection>
+            <LazySection name="NeuralMap"><NeuralMap /></LazySection>
+            <LazySection name="Experience"><Experience /></LazySection>
+            <LazySection name="MyWorks"><MyWorks /></LazySection>
+            <LazySection name="Timeline"><Timeline /></LazySection>
+            <LazySection name="Photography"><Photography /></LazySection>
+            <LazySection name="Achievements"><Achievements /></LazySection>
+            <LazySection name="TrustedBy"><TrustedBy /></LazySection>
+            <LazySection name="Testimonials"><Testimonials /></LazySection>
+            <LazySection name="DigitalScars"><DigitalScars /></LazySection>
+            <LazySection name="CallToAction"><CallToAction /></LazySection>
+            <LazySection name="Contact"><Contact /></LazySection>
+            <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
+            <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
+            <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
+          </>
+        )}
 
-        <LazySection name="NeuralMap"><NeuralMap /></LazySection>
-        <LazySection name="Experience"><Experience /></LazySection>
-        <LazySection name="MyWorks"><MyWorks /></LazySection>
-        <LazySection name="Timeline"><Timeline /></LazySection>
-        <LazySection name="Photography"><Photography /></LazySection>
-        {/* <LazySection name="ScrollCanvasSequence" className=""><ScrollCanvasSequence /></LazySection> - Detached for future upgrade */}
-
-        <LazySection name="Achievements"><Achievements /></LazySection>
-        <LazySection name="TrustedBy"><TrustedBy /></LazySection>
-        <LazySection name="Testimonials"><Testimonials /></LazySection>
-        <LazySection name="DigitalScars"><DigitalScars /></LazySection>
-        <LazySection name="CallToAction"><CallToAction /></LazySection>
-        <LazySection name="Contact"><Contact /></LazySection>
-        <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
-        <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
-        <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
-
-        {/* The Seed of Life - Redefining digital permanence */}
-        <Suspense fallback={null}>
-          <DigitalSeed />
-        </Suspense>
-
-        {/* The Observer Pet */}
-        <DigitalSoul />
       </div>
 
       {mode === 'photographer' && (

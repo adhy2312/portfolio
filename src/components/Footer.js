@@ -26,6 +26,7 @@ const links = [
 
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
   const footerRef = useRef(null);
   const popupRef = useRef(null);
   const mainRowRef = useRef(null);
@@ -269,6 +270,19 @@ const Footer = () => {
             </div>
             <div className="retro-made">
               BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE
+              <div style={{ marginTop: '8px' }}>
+                <button 
+                  onClick={() => setIsPrivacyOpen(true)}
+                  style={{ 
+                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', 
+                    fontSize: '0.65rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.4)'}
+                >
+                  Privacy Policy
+                </button>
+              </div>
             </div>
           </div>
           <div className="build-watermark">
@@ -276,6 +290,52 @@ const Footer = () => {
           </div>
         </div>
       </div>
+
+      {isPrivacyOpen && (
+        <div 
+          className="privacy-modal-overlay" 
+          style={{
+            position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 99999,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            backdropFilter: 'blur(5px)'
+          }}
+          onClick={() => setIsPrivacyOpen(false)}
+        >
+          <div 
+            className="privacy-modal-content"
+            style={{
+              background: '#0a0a0f', border: '1px solid rgba(255, 255, 255, 0.1)',
+              padding: '40px', borderRadius: '12px', maxWidth: '600px', width: '90%',
+              color: 'rgba(255, 255, 255, 0.85)', position: 'relative'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setIsPrivacyOpen(false)}
+              style={{
+                position: 'absolute', top: '15px', right: '15px', background: 'none',
+                border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer'
+              }}
+            >
+              &times;
+            </button>
+            <h2 style={{ marginBottom: '20px', fontFamily: 'Space Grotesk, sans-serif' }}>Privacy Policy</h2>
+            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <strong>1. Data Collection:</strong> This website collects minimal data necessary for functionality. Information submitted via contact forms is used solely to respond to inquiries and is never shared or sold to third parties.
+            </p>
+            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <strong>2. Analytics & Cookies:</strong> We may use basic analytics to understand website traffic and improve user experience. These tools do not collect personally identifiable information.
+            </p>
+            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
+              <strong>3. Security:</strong> All data transmitted through this site is secured using standard encryption protocols. While we strive to protect your personal information, no method of transmission over the Internet is 100% secure.
+            </p>
+            <p style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
+              By continuing to use this website, you acknowledge and agree to these terms.
+            </p>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };

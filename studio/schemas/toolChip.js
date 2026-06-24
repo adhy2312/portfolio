@@ -35,7 +35,8 @@ const toolChip = {
           { title: 'Tools (Lilac Glow)', value: 'tools' }
         ]
       }
-    }
+    },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 };
 export default toolChip;

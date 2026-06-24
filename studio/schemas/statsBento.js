@@ -20,7 +20,8 @@ const statsBento = {
     { name: 'travelKm', title: 'Kilometers Explored', type: 'string' },
     { name: 'coursesCompleted', title: 'Courses Completed', type: 'string' },
     { name: 'stacksLearned', title: 'Tech Stacks Learned', type: 'string' },
-    { name: 'primaryAchievement', title: 'Primary Highlighted Achievement', type: 'string' }
+    { name: 'primaryAchievement', title: 'Primary Highlighted Achievement', type: 'string' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 };
 

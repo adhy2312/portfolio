@@ -22,6 +22,7 @@ export default {
       ] 
     },
     { name: 'buttonText', title: 'CTA Button Text', type: 'string' },
-    { name: 'buttonLink', title: 'Button Link', type: 'url' }
+    { name: 'buttonLink', title: 'Button Link', type: 'url' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

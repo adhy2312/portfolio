@@ -26,7 +26,8 @@ const photoSchema = {
       },
       initialValue: 'Photography'
     },
-    { name: 'order', title: 'Display Order', type: 'number' }
+    { name: 'order', title: 'Display Order', type: 'number' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 };
 

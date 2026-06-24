@@ -33,6 +33,7 @@ const TechDNA = () => {
   const autoSpinRef = useRef(true);
   const lastTimeRef = useRef(performance.now());
   const lastScrollRef = useRef(0);
+  const isVisibleRef = useRef(false);
 
   // Responsive Math - Fix mobile overflow
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -55,6 +56,8 @@ const TechDNA = () => {
   // Register into the NervousSystem unified loop — eliminates competing RAF
   useEffect(() => {
     const tick = (time) => {
+      if (!isVisibleRef.current) return; // Prevent layout thrashing when offscreen
+
       const now = performance.now();
       const delta = now - lastTimeRef.current;
       lastTimeRef.current = now;
@@ -213,6 +216,18 @@ const TechDNA = () => {
 
   useEffect(() => {
     if (!sectionRef.current) return;
+    
+    // Intersection Observer for performance pausing
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          isVisibleRef.current = entry.isIntersecting;
+        });
+      },
+      { rootMargin: '200px' }
+    );
+    observer.observe(sectionRef.current);
+
     gsap.fromTo(sectionRef.current,
       { opacity: 0, y: 50 },
       { 
@@ -223,6 +238,8 @@ const TechDNA = () => {
         scrollTrigger: { trigger: sectionRef.current, start: 'top 85%' }
       }
     );
+    
+    return () => observer.disconnect();
   }, []);
 
   return (

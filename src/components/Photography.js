@@ -7,7 +7,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun, FiPenTool } from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';
-import photo3 from '../assets/photo3.jpg';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import ExpertDoc from './ExpertDoc';
@@ -17,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 const FALLBACK_PHOTOS = [
   { src: photo1, alt: 'Urban Landscape', caption: 'City Geometry', category: 'Photography' },
   { src: photo2, alt: 'Portrait Shot',   caption: 'Golden Portrait', category: 'Photography' },
-  { src: photo3, alt: 'Brand Identity',  caption: 'Minimalist Branding', category: 'Design' },
+  { src: photo1, alt: 'Brand Identity',  caption: 'Minimalist Branding', category: 'Design' },
   { src: photo1, alt: 'App UI',          caption: 'Fintech Dashboard', category: 'UI/UX' },
   { src: photo2, alt: 'Web Design',      caption: 'E-commerce Redesign', category: 'Web Design' },
 ];

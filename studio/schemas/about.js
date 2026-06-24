@@ -21,6 +21,7 @@ export default {
       ] 
     },
     { name: 'profileImage', title: 'Profile Image', type: 'image' },
-    { name: 'experienceYears', title: 'Years of Experience', type: 'string' }
+    { name: 'experienceYears', title: 'Years of Experience', type: 'string' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

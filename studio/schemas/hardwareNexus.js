@@ -21,7 +21,8 @@ const hardwareNexus = {
         }
       ],
       validation: Rule => Rule.max(8)
-    }
+    },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 };
 

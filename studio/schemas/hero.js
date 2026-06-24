@@ -39,6 +39,7 @@ export default {
     },
     { name: 'techStack', title: 'Tech Stack', type: 'array', of: [{ type: 'string' }] },
     { name: 'resumeUrl', title: 'Resume PDF URL', type: 'url' },
-    { name: 'heroImage', title: 'Hero Image (Cutout)', type: 'image', options: { hotspot: true } }
+    { name: 'heroImage', title: 'Hero Image (Cutout)', type: 'image', options: { hotspot: true } },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

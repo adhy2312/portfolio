@@ -5,6 +5,7 @@ export default {
   fields: [
     { name: 'name', title: 'Brand Name', type: 'string' },
     { name: 'logo', title: 'Brand Logo', type: 'image', options: { hotspot: true } },
-    { name: 'order', title: 'Display Order', type: 'number' }
+    { name: 'order', title: 'Display Order', type: 'number' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

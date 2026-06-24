@@ -22,6 +22,28 @@ const projects = [
     icon: <FiGlobe />,
   },
   {
+    title: 'Automated Certificate Gen',
+    description:
+      'A full-stack application designed to automate the generation and distribution of certificates. Features an intuitive dashboard to manage templates, user records, and bulk email delivery.',
+    tags: ['React', 'Node.js', 'Express', 'Automation'],
+    category: 'fullstack',
+    liveLink: null,
+    githubLink: null,
+    accent: 'var(--accent-purple, #b19cd9)',
+    icon: <FiZap />,
+  },
+  {
+    title: 'Odoo - KiCad BOM Sync',
+    description:
+      'A specialized Python cron job that automatically synchronizes KiCad Bill of Materials (BOM) directly into Odoo. Automates sales order generation and manages inventory components seamlessly.',
+    tags: ['Python', 'Odoo ERP', 'KiCad', 'Cron Job'],
+    category: 'electronics',
+    liveLink: null,
+    githubLink: null,
+    accent: 'var(--accent-blue, #6495ED)',
+    icon: <FiZap />,
+  },
+  {
     title: 'Smart Lighting System (IoT)',
     description:
       'An ESP32-based intelligent lighting controller that reacts to ambient light and motion. Features Bluetooth configuration, LDR sensor integration, and real-time PWM dimming.',
@@ -93,7 +115,6 @@ const filters = [
 
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [activeIndex, setActiveIndex] = useState(0);
   const [fetchedProjects, setFetchedProjects] = useState([]);
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
@@ -153,9 +174,9 @@ const MyWorks = () => {
       ? currentProjects
       : currentProjects.filter((p) => p.category === activeFilter);
 
-  // Reset active index when filter changes
+  // No activeIndex to reset
   useEffect(() => {
-    setActiveIndex(0);
+    // any filter change specific actions
   }, [activeFilter]);
 
 
@@ -193,58 +214,56 @@ const MyWorks = () => {
           ))}
         </div>
 
-        {/* Accordion Stacked Layout */}
-        <div className="projects-accordion" key={activeFilter}>
+        {/* Vault Grid Layout */}
+        <div className="projects-vault-grid" key={activeFilter}>
           {filtered.map((project, index) => {
-            const isActive = index === activeIndex;
             return (
               <div 
                 key={project.title}
-                className={`accordion-card ${isActive ? 'active-accordion-card' : ''}`}
-                onClick={() => setActiveIndex(isActive ? -1 : index)}
+                className="vault-card"
                 style={{ 
                   '--card-accent': project.accent,
-                  zIndex: filtered.length - index 
+                  '--animation-order': index
                 }}
               >
-                <div className="accordion-header">
-                  <div className="accordion-header-left">
-                    <span className="accordion-emoji" style={{ color: project.accent }}>{project.icon}</span>
-                    <h3 className="accordion-title">{project.title}</h3>
+                <div className="vault-card-inner">
+                  <div className="vault-header">
+                    <span className="vault-icon" style={{ color: project.accent, textShadow: `0 0 10px ${project.accent}80` }}>{project.icon}</span>
+                    <div className="vault-status">
+                      <span className="status-dot" style={{ backgroundColor: project.accent, boxShadow: `0 0 8px ${project.accent}` }}></span>
+                      <span className="status-text">{project.category}</span>
+                    </div>
                   </div>
-                  <div className="accordion-icon">
-                    {isActive ? '−' : '+'}
-                  </div>
-                </div>
-                
-                <div className={`accordion-body ${isActive ? 'expanded' : ''}`}>
-                  <div className="accordion-content">
-                    <p className="work-desc">{project.description}</p>
-                    <div className="work-tags">
+                  
+                  <div className="vault-body">
+                    <h3 className="vault-title">{project.title}</h3>
+                    <p className="vault-desc">{project.description}</p>
+                    <div className="vault-tags">
                       {project.tags.map((tag) => (
-                        <span key={tag} className="work-tag" style={{ '--tag-color': project.accent }}>{tag}</span>
+                        <span key={tag} className="vault-tag" style={{ borderColor: `${project.accent}40`, color: project.accent }}>{tag}</span>
                       ))}
                     </div>
-                    
-                    <div className="accordion-footer">
-                      <div className="work-card-links">
-                        {(project.githubLink || project.github) && (
-                          <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="work-icon-link" aria-label="GitHub" onClick={e => e.stopPropagation()}>
-                            <FiGithub size={18} />
-                          </a>
-                        )}
-                      </div>
-                      
-                      {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
-                        <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="work-view-link" onClick={e => e.stopPropagation()}>
-                          View Project <FiArrowRight size={16} />
+                  </div>
+                  
+                  <div className="vault-footer">
+                    <div className="vault-links">
+                      {(project.githubLink || project.github) && (
+                        <a href={project.githubLink || project.github} target="_blank" rel="noopener noreferrer" className="vault-icon-link" aria-label="GitHub">
+                          <FiGithub size={18} />
                         </a>
-                      ) : (
-                        <span className="work-view-link work-view-link-disabled">Development Ongoing</span>
                       )}
                     </div>
+                    
+                    {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
+                      <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="vault-action-btn" style={{ background: project.accent, boxShadow: `0 4px 15px ${project.accent}40` }}>
+                        Access Vault <FiArrowRight size={16} />
+                      </a>
+                    ) : (
+                      <span className="vault-action-btn vault-btn-disabled">Locked</span>
+                    )}
                   </div>
                 </div>
+                <div className="vault-glare"></div>
               </div>
             );
           })}

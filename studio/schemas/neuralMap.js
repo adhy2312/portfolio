@@ -51,6 +51,7 @@ export default {
       title: 'Failures',
       type: 'array',
       of: [{ type: 'string' }]
-    }
+    },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

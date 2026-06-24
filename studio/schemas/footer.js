@@ -22,6 +22,7 @@ export default {
           ]
         }
       ] 
-    }
+    },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }

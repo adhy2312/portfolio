@@ -139,6 +139,8 @@ body.dark-mode .App::before {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 html {
@@ -459,6 +461,11 @@ body.dark-mode .section-label {
   background: var(--bg-card-hover);
   transform: translate(2px, 2px);
   box-shadow: var(--shadow-brutal-hover);
+}
+
+.glass-card:active {
+  transform: translate(6px, 6px);
+  box-shadow: none;
 }
 
 /* ═══════════════════════════════════════════
@@ -1192,12 +1199,17 @@ html:not(.dream-state) .App {
 .a11y-high-readability {
   font-size: 120% !important;
 }
-.a11y-high-readability p,
-.a11y-high-readability span,
-.a11y-high-readability li,
-.a11y-high-readability a {
+.a11y-high-readability p:not(.site-mode-panel *),
+.a11y-high-readability span:not(.site-mode-panel *),
+.a11y-high-readability li:not(.site-mode-panel *),
+.a11y-high-readability a:not(.site-mode-panel *) {
   line-height: 1.9 !important;
   letter-spacing: 0.5px !important;
+}
+
+/* Exempt the settings panel from breaking */
+.a11y-high-readability .site-mode-panel {
+  font-size: 16px !important;
 }
 .a11y-high-readability .section-desc,
 .a11y-high-readability .footer-simple-tagline,

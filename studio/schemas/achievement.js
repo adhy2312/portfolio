@@ -7,6 +7,7 @@ export default {
     { name: 'desc', title: 'Description', type: 'text' },
     { name: 'accent', title: 'Accent Color', type: 'string', description: 'Hex code, e.g., #6C63FF' },
     { name: 'iconName', title: 'Icon Name', type: 'string', description: 'Name of feather icon, e.g., FiAward' },
-    { name: 'order', title: 'Display Order', type: 'number' }
+    { name: 'order', title: 'Display Order', type: 'number' },
+    { name: 'visualOptions', title: 'Visual & Layout Options', type: 'visualOptions' }
   ]
 }
