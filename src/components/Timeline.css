@@ -522,3 +522,187 @@
   .timeline-memory { display: none; }
   .timeline-scroll-hint { display: none; }
 }
+
+/* ═══════════════════════════════════════════
+   ♛  CHAIRPERSON MILESTONE — PREMIUM ANIMATION
+   Golden orbital rings, crown badge, shimmer
+   sweep, persistent glow on the node dot.
+═══════════════════════════════════════════ */
+
+/* ── Wider card to accommodate the badge ── */
+.milestone-chairperson {
+  width: 320px;
+}
+
+/* ── Card base override — gold border theme ── */
+.chairperson-card {
+  border-color: #f4d03f !important;
+  border-width: 2.5px !important;
+  box-shadow: 0 0 0 3px #f4d03f, 8px 8px 0px #000, 0 0 40px rgba(244, 208, 63, 0.25) !important;
+  background: linear-gradient(145deg, #fffbe8 0%, #fff 60%) !important;
+  overflow: visible !important;
+}
+
+/* Shimmer sweep on load */
+.chairperson-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    rgba(244, 208, 63, 0.25) 50%,
+    transparent 70%
+  );
+  background-size: 200% 100%;
+  animation: chairperson-shimmer 3s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 14px;
+}
+
+@keyframes chairperson-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Ensure card content sits above the shimmer */
+.chairperson-card > *:not(.chairperson-crown-ring) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Top accent bar override — gold gradient */
+.milestone-chairperson .timeline-content::before {
+  background: linear-gradient(90deg, #f4d03f, #e67e22, #f4d03f) !important;
+  opacity: 1 !important;
+  height: 4px !important;
+  animation: chairperson-bar-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes chairperson-bar-pulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(244, 208, 63, 0.5); }
+  50%       { box-shadow: 0 0 18px rgba(244, 208, 63, 0.9); }
+}
+
+/* ── Crown badge + orbital rings container ── */
+.chairperson-crown-ring {
+  position: absolute;
+  top: -38px;
+  right: 16px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+/* Orbital rings */
+.crown-orbit {
+  position: absolute;
+  border-radius: 50%;
+  border-style: solid;
+  border-color: rgba(244, 208, 63, 0.55);
+  /* start hidden — GSAP animates them in */
+  opacity: 0;
+}
+
+.orbit-1 {
+  width: 56px;
+  height: 56px;
+  border-width: 1.5px;
+  animation: orbit-spin-1 6s linear infinite;
+  border-color: rgba(244, 208, 63, 0.6) transparent rgba(244, 208, 63, 0.3) transparent;
+}
+
+.orbit-2 {
+  width: 44px;
+  height: 44px;
+  border-width: 1px;
+  animation: orbit-spin-2 4s linear infinite reverse;
+  border-color: transparent rgba(230, 126, 34, 0.5) transparent rgba(230, 126, 34, 0.25);
+}
+
+@keyframes orbit-spin-1 {
+  to { transform: rotate(360deg); }
+}
+@keyframes orbit-spin-2 {
+  to { transform: rotate(360deg); }
+}
+
+/* Crown badge ♛ */
+.crown-badge {
+  position: relative;
+  z-index: 3;
+  font-size: 1.45rem;
+  line-height: 1;
+  /* start hidden — GSAP animates it in */
+  opacity: 0;
+  filter: drop-shadow(0 2px 6px rgba(244, 208, 63, 0.8));
+  animation: crown-breathe 3s ease-in-out infinite;
+}
+
+@keyframes crown-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: drop-shadow(0 2px 6px rgba(244,208,63,0.7)); }
+  50%       { transform: translateY(-3px) scale(1.08); filter: drop-shadow(0 4px 14px rgba(244,208,63,1)); }
+}
+
+/* ── Milestone timeline dot — permanently gold ── */
+.milestone-chairperson .timeline-point {
+  background: #f4d03f;
+  border-color: #000;
+  box-shadow: 0 0 0 6px rgba(244, 208, 63, 0.3), 4px 4px 0 #000;
+  transform: translateX(-50%) scale(1.35);
+  animation: milestone-dot-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes milestone-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(244, 208, 63, 0.25), 4px 4px 0 #000; }
+  50%       { box-shadow: 0 0 0 10px rgba(244, 208, 63, 0.08), 4px 4px 0 #000; }
+}
+
+.milestone-chairperson .timeline-point-inner {
+  background: #000;
+  opacity: 1;
+}
+
+/* ── Year badge override — accent orange ── */
+.milestone-chairperson .timeline-year {
+  background: linear-gradient(90deg, #f4d03f, #e67e22);
+  color: #000;
+  font-weight: 900;
+  letter-spacing: 2px;
+  border-color: #000;
+}
+
+/* ── Title override — slightly larger + bolder ── */
+.milestone-chairperson .timeline-title {
+  font-size: 1.05rem;
+  color: #1a1a1a;
+  background: linear-gradient(90deg, #b7950b, #e67e22, #b7950b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% auto;
+  animation: gold-text-flow 4s linear infinite;
+}
+
+@keyframes gold-text-flow {
+  to { background-position: 200% center; }
+}
+
+/* ── Memory fragment — gold left border ── */
+.milestone-chairperson .timeline-memory {
+  border-left-color: #e67e22;
+  background: rgba(244, 208, 63, 0.06);
+  color: #7d6608;
+}
+
+/* ── Audio resonance bars — gold ── */
+.milestone-chairperson .audio-resonance span {
+  background: #e67e22;
+}
+

@@ -18,7 +18,7 @@ const iconMap = {
 };
 
 const defaultAchievements = [
-  { iconName: 'FiAward', title: 'PR & Media Head, ISTE', desc: 'PR and Media Head, and lead web developer for the ISTE MBCET chapter — driving digital presence and building the official portal.', accent: 'var(--accent-primary)' },
+  { iconName: 'FiAward', title: 'Chairperson, ISTE SC MBCET', desc: 'Chairperson of the ISTE Student Chapter at MBCET — leading 300+ members, spearheading events, and building the official web portal.', accent: 'var(--accent-primary)' },
   { iconName: 'FiZap', title: 'IoT Projects', desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.', accent: 'var(--accent-green)' },
   { iconName: 'FiPenTool', title: 'Figma Designer', desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.', accent: 'var(--accent-gold)' },
   { iconName: 'FiCamera', title: 'Photographer', desc: 'Running @zoomout_frames on Instagram — passionate street, portrait, and nature photographer.', accent: 'var(--accent-cyan)' },

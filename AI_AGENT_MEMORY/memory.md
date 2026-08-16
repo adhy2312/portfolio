@@ -4,14 +4,17 @@ This file serves as a persistent memory for the AI agent to track context, tasks
 
 ## Current Context
 - Project: Portfolio Web App
-- Current Focus: Styling and Components (`GravityWell.css`, `ParticlesBackground.css`, etc.)
+- Current Focus: Keeping portfolio content in sync with real-life role changes
+- **Adhithya's Current ISTE Role: Chairperson, ISTE SC MBCET** (upgraded from PR & Media Head in August 2026)
 
 ## Tasks
 - [x] Traverse through the whole directory and eliminate flaws, dead ends, dummy files, and loose connections. 
-  - Ran a custom Python script to identify orphaned React components and CSS files.
-  - Eliminated over 25+ unused components and styling files (Resume, ThemeToggle, Header, AmbientThoughts, DarkModeToggle, DeveloperConsole, DigitalTextures, FluidCanvas, GitHubStats, HardwareNexus, ParticlesBackground, PingPongGame, QuoteCanvas, SmoothScroll, ColorMorphText, ShapeMorph, OpticGlass).
 - [x] Provided strategic suggestions for evolving the website into a Professional Society platform.
-- [x] Designed and integrated `ExecomFlipCard.tsx` client component to provide an elegant 3D flip animation for ExeCom member cards revealing their LinkedIn and Instagram/Portfolio links. The structure and performance hooks of the existing `app/page.tsx` remain preserved.
+- [x] Designed and integrated `ExecomFlipCard.tsx` client component.
+- [x] Updated ISTE role from "PR & Media Head" → "Chairperson, ISTE SC MBCET" across:
+  - `src/components/Achievements.js` (hardcoded fallback card)
+  - `src/components/Timeline.js` (added new Chairperson milestone in 2026, updated "Now" entry)
+  - **Note:** Sanity CMS `achievement` documents should also be manually updated via the Studio dashboard at http://localhost:3333.
 - [ ] Maintain and update this memory file after every interaction.
 - [ ] Review this file before executing any new prompts.
 

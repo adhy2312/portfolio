@@ -71,7 +71,7 @@ const fallbackData = [
     id: 8,
     year: '2025',
     title: 'PR & Media Head at ISTE',
-    description: 'Elevated to PR and Media Head at ISTE SC MBCET. First real leadership role.',
+    description: 'Elevated to PR and Media Head at ISTE SC MBCET. First real leadership role — built the digital voice of the chapter.',
     memory: '"Being a head means your mistakes have a press release now."'
   },
   {
@@ -83,9 +83,16 @@ const fallbackData = [
   },
   {
     id: 10,
+    year: '2026',
+    title: 'Elected Chairperson, ISTE SC MBCET',
+    description: 'Elected Chairperson of the ISTE Student Chapter at MBCET. Leading 300+ members, driving technical events, and shaping the future of the chapter.',
+    memory: '"From writing press releases to signing them. The architecture scales."'
+  },
+  {
+    id: 11,
     year: 'Now',
-    title: 'Learning Full Stack & Design',
-    description: 'Currently mastering Full Stack Development and UI/UX design. Building things that scale beyond the classroom.',
+    title: 'Building & Leading',
+    description: 'Chairperson of ISTE SC MBCET while mastering Full Stack Development and UI/UX design. Building things that scale beyond the classroom.',
     memory: '"Still in beta. Shipping anyway."'
   },
 ];
@@ -232,6 +239,95 @@ const Timeline = () => {
         }
       });
 
+      // 4. Chairperson milestone — premium entrance burst
+      const chairpersonNode = nodesContainerRef.current.querySelector('.milestone-chairperson');
+      if (chairpersonNode) {
+        const card = chairpersonNode.querySelector('.chairperson-card');
+        const badge = chairpersonNode.querySelector('.crown-badge');
+        const orbits = chairpersonNode.querySelectorAll('.crown-orbit');
+        const point = chairpersonNode.querySelector('.timeline-point');
+
+        // Stagger in the orbital rings on scroll reveal
+        gsap.fromTo(orbits,
+          { scale: 0, opacity: 0, rotation: -180 },
+          {
+            scale: 1, opacity: 1, rotation: 0,
+            duration: 1.2,
+            stagger: 0.2,
+            ease: 'back.out(1.7)',
+            scrollTrigger: {
+              trigger: chairpersonNode,
+              scroller: container,
+              horizontal: true,
+              start: 'left 80%',
+              once: true,
+            }
+          }
+        );
+
+        // Crown badge drop-in
+        gsap.fromTo(badge,
+          { y: -40, opacity: 0, scale: 0.4, rotation: -30 },
+          {
+            y: 0, opacity: 1, scale: 1, rotation: 0,
+            duration: 0.9,
+            ease: 'elastic.out(1.1, 0.5)',
+            delay: 0.3,
+            scrollTrigger: {
+              trigger: chairpersonNode,
+              scroller: container,
+              horizontal: true,
+              start: 'left 80%',
+              once: true,
+            }
+          }
+        );
+
+        // Card golden glow flash
+        if (card) {
+          gsap.fromTo(card,
+            { boxShadow: '5px 5px 0px #000', borderColor: '#000' },
+            {
+              boxShadow: '0 0 0 3px #f4d03f, 8px 8px 0px #000, 0 0 40px rgba(244,208,63,0.35)',
+              borderColor: '#f4d03f',
+              duration: 1,
+              delay: 0.5,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: chairpersonNode,
+                scroller: container,
+                horizontal: true,
+                start: 'left 80%',
+                once: true,
+              }
+            }
+          );
+        }
+
+        // Node point burst to gold
+        if (point) {
+          gsap.fromTo(point,
+            {},
+            {
+              backgroundColor: '#f4d03f',
+              borderColor: '#000',
+              boxShadow: '0 0 0 6px rgba(244,208,63,0.3), 4px 4px 0 #000',
+              scale: 1.35,
+              duration: 0.7,
+              delay: 0.6,
+              ease: 'back.out(2)',
+              scrollTrigger: {
+                trigger: chairpersonNode,
+                scroller: container,
+                horizontal: true,
+                start: 'left 80%',
+                once: true,
+              }
+            }
+          );
+        }
+      }
+
       return () => {
         container.removeEventListener('scroll', updateProgress);
       };
@@ -366,16 +462,24 @@ const Timeline = () => {
           <div className="timeline-nodes" ref={nodesContainerRef}>
             {milestones.map((item, index) => {
               const isTop = index % 2 === 0;
+              const isChairperson = item.title?.toLowerCase().includes('chairperson');
               return (
                 <div
                   key={item._id || item.id}
-                  className={`timeline-node-wrapper ${isTop ? 'node-top' : 'node-bottom'}`}
+                  className={`timeline-node-wrapper ${isTop ? 'node-top' : 'node-bottom'} ${isChairperson ? 'milestone-chairperson' : ''}`}
                   onMouseEnter={() => { scrollState.current.hoveredNode = item.title; }}
                   onMouseLeave={() => { scrollState.current.hoveredNode = null; }}
                   onTouchStart={() => { scrollState.current.hoveredNode = item.title; }}
                   onTouchEnd={() => { scrollState.current.hoveredNode = null; }}
                 >
-                  <div className="timeline-content glass-card">
+                  <div className={`timeline-content glass-card ${isChairperson ? 'chairperson-card' : ''}`}>
+                    {isChairperson && (
+                      <div className="chairperson-crown-ring">
+                        <div className="crown-orbit orbit-1" />
+                        <div className="crown-orbit orbit-2" />
+                        <div className="crown-badge">♛</div>
+                      </div>
+                    )}
                     <span className="timeline-year">
                       <DecryptedText text={item.year || ''} speed={60} />
                     </span>
