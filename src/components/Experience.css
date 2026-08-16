@@ -236,3 +236,67 @@
   }
 }
 
+/* ═══════════════════════════════════════════
+   ♛ CHAIRPERSON EXECUTIVE ROLE STYLING
+═══════════════════════════════════════════ */
+.exp-role-title-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.role-crown-icon {
+  color: #e67e22;
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 6px rgba(244, 208, 63, 0.8));
+  animation: crown-breathe 3s ease-in-out infinite;
+}
+
+.chair-badge-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #111;
+  background: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
+  border: 1.5px solid #000;
+  padding: 3px 10px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0px #000;
+  text-transform: uppercase;
+}
+
+.chair-dot {
+  background-color: #f4d03f !important;
+  box-shadow: 0 0 0 4px rgba(244, 208, 63, 0.3), 4px 4px 0px #000 !important;
+  animation: chair-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes chair-dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(244, 208, 63, 0.3), 4px 4px 0px #000; }
+  50% { box-shadow: 0 0 0 8px rgba(244, 208, 63, 0.1), 4px 4px 0px #000; }
+}
+
+.chair-duration-badge {
+  background: linear-gradient(90deg, #f4d03f, #e67e22) !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  letter-spacing: 1.5px !important;
+  border-color: #000 !important;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.chair-role-desc {
+  background: linear-gradient(135deg, rgba(244, 208, 63, 0.08) 0%, rgba(230, 126, 34, 0.03) 100%) !important;
+  border-left: 4px solid #f4d03f !important;
+  color: #1a1a1a !important;
+  font-weight: 600 !important;
+}
+
+body.dark-mode .chair-role-desc {
+  color: #f0f0f0 !important;
+}
+
+
