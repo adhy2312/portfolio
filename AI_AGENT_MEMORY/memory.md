@@ -22,6 +22,8 @@ This file serves as a persistent memory for the AI agent to track context, tasks
 - [x] Injected & updated Sanity CMS database (`uefti8ya` / `production`) directly using Node script with API tokens without losing existing data:
   - Created & re-indexed `milestone` document for Chairperson (Order 13) so it displays as the latest milestone before 202X.
   - Updated `experience` document for ISTE SC MBCET to display `Chairperson` (Aug 2026 – Present) at top with executive gold badges, and `PR & Media Head` (Aug 2025 – Aug 2026) as previous role.
+  - Updated `experience` document for FRAMES MBCET to end `Creative Curator` (Aug 2025 – Aug 2026) and promote to `Lead Photographer` (Aug 2026 – Present), and added corresponding milestone in Sanity.
+  - Updated `skillCategory` document (`skill-backend`) in Sanity CMS setting both `Render` and `Google App Scripts` to **50%** level while preserving all other skills.
 - [x] Fixed Vercel build failure (`spawn react-scripts ENOENT`): added missing `"react-scripts": "5.0.1"` dependency into `package.json`.
 - [ ] Maintain and update this memory file after every interaction.
 - [ ] Review this file before executing any new prompts.

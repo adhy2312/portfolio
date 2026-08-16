@@ -31,14 +31,20 @@ const defaultExperiences = [
   },
   {
     _id: 'exp_frames',
-    organization: 'FRAMES MBCET',
+    organization: 'FRAMES MBCET — Photography Club',
     logo: null,
     roles: [
       {
-        title: 'Creative Curator',
-        startDate: '2025',
+        title: 'Lead Photographer',
+        startDate: 'Aug 2026',
         endDate: 'Present',
-        description: 'Curating visual stories, campus media events, and photography workshops for the official photography club.'
+        description: 'Promoted to Lead Photographer at FRAMES MBCET — leading visual storytelling, directing photography teams, and curating campus media coverage.'
+      },
+      {
+        title: 'Creative Curator',
+        startDate: 'Aug 2025',
+        endDate: 'Aug 2026',
+        description: 'Elevated to Creative Curator at FRAMES MBCET — curating visual stories, directing photography workshops, and managing campus media.'
       }
     ]
   }

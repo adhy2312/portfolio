@@ -37,9 +37,11 @@ const skillCategories = [
     skills: [
       { name: 'Node.js & Express', level: 50 },
       { name: 'REST APIs', level: 40 },
-      { name: 'MongoDB', level: 30 },
+      { name: 'PostgreSQL', level: 50 },
       { name: 'MySQL / SQLite', level: 40 },
       { name: 'Firebase', level: 60 },
+      { name: 'Render', level: 50 },
+      { name: 'Google App Scripts', level: 50 },
     ],
   },
   {
