@@ -15,7 +15,7 @@ import ExpertDoc from './ExpertDoc';
 gsap.registerPlugin(ScrollTrigger);
 
 const defaultStats = [
-  { value: '3+',  label: 'Years Learning',               iconName: 'FiCalendar' },
+  { value: '300+', label: 'Members Led (ISTE)',          iconName: 'FiAward'    },
   { value: '15+', label: 'Projects Built',                iconName: 'FiAward'    },
   { value: '10+', label: 'Designs Done · More on the way',iconName: 'FiPenTool'  },
   { value: '10+', label: 'Tech Stacks',                   iconName: 'FiAward'    },
@@ -41,9 +41,9 @@ const About = () => {
   const displayData = {
     location: aboutData?.location || "Kerala, India · Open to Remote & Relocation",
     bioParagraphs: aboutData?.bioParagraphs || [
-      "I'm Adhithya Mohan, an Electronics and Communication Engineering (ECE) student and full-stack developer passionate about building impactful digital products. I blend engineering precision with creative design — from responsive web apps to embedded electronics systems.",
-      "My skill set spans the full product lifecycle — ideating in Figma, building with React & Node.js, and extending to hardware with ESP32 & Arduino. I also bring a photographer's eye for detail to every UI I design.",
-      "I'm driven by curiosity, constantly exploring new technologies, contributing to open source, and building things that matter."
+      "I'm Adhithya Mohan, Chairperson of the ISTE Student Chapter at MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I lead high-impact technical initiatives while blending engineering precision with creative software design.",
+      "My work spans software, leadership, and hardware — directing chapter operations for 300+ members, prototyping in Figma, building scalable web apps with React & Node.js, and crafting embedded IoT systems with ESP32 & STM32.",
+      "I bring an executive perspective and a photographer's eye to every project, building digital experiences that scale beyond the classroom."
     ],
     stats: aboutData?.stats || defaultStats,
     profileImage: aboutData?.profileImage ? urlFor(aboutData.profileImage).url() : dp,

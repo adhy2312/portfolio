@@ -13,16 +13,16 @@
 
 
 :root {
-  /* Core Palette - BRUTAL BENTO */
-  --bg-primary: #e8e8e5; /* Slightly warm brutalist gray */
-  --bg-secondary: #dcdcd9;
-  --bg-tertiary: #c8c8c5;
-  --bg-card: rgba(255, 255, 255, 0.6); /* Glassy card */
-  --bg-card-hover: rgba(255, 255, 255, 0.9);
+  /* Core Palette - SLEEK EXECUTIVE BENTO */
+  --bg-primary: #f2f2ee; /* Warm executive alabaster */
+  --bg-secondary: #e6e6e2;
+  --bg-tertiary: #dadad6;
+  --bg-card: rgba(255, 255, 255, 0.75); /* Glassy card */
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
 
-  /* Accent Colors (High Saturation for Neo-Brutalism) */
-  --accent-primary: #f4d03f;
-  --accent-primary-rgb: 244, 208, 63;
+  /* Accent Colors (Refined Champagne Gold & Tech Cyan) */
+  --accent-primary: #e5c158;
+  --accent-primary-rgb: 229, 193, 88;
   --button-text: #000000;
   --accent-brutal-yellow: #f4d03f;
   --accent-brutal-blue: #3498db;
@@ -30,23 +30,24 @@
   --accent-brutal-green: #2ecc71;
 
   /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #000000 0%, #333333 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.3) 100%);
+  --gradient-primary: linear-gradient(135deg, #111111 0%, #333333 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0.4) 100%);
+  --gradient-gold: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
   
   /* Text */
-  --text-primary: #000000;
-  --text-secondary: #333333;
-  --text-muted: #666666;
+  --text-primary: #0d0d11;
+  --text-secondary: #2c2c34;
+  --text-muted: #666672;
 
-  /* Borders & Shadows (Adding Realistic Depth) */
-  --border-subtle: 1px solid #000000;
-  --border-brutal: 2px solid #000000;
-  --border-heavy: 4px solid #000000;
-  --border-radius-bento: 16px;
+  /* Borders & Shadows (Refined Depth) */
+  --border-subtle: 1px solid #111111;
+  --border-brutal: 2px solid #111111;
+  --border-heavy: 3px solid #111111;
+  --border-radius-bento: 12px;
   
-  --shadow-brutal: 6px 6px 0px #000000, 0 10px 30px rgba(0,0,0,0.15);
-  --shadow-brutal-hover: 2px 2px 0px #000000, 0 5px 15px rgba(0,0,0,0.2);
-  --shadow-brutal-deep: 12px 12px 0px #000000, 0 20px 40px rgba(0,0,0,0.25);
+  --shadow-brutal: 5px 5px 0px #111111, 0 10px 30px rgba(0,0,0,0.08);
+  --shadow-brutal-hover: 2px 2px 0px #111111, 0 5px 20px rgba(229,193,88,0.2);
+  --shadow-brutal-deep: 10px 10px 0px #111111, 0 20px 40px rgba(0,0,0,0.15);
 
   /* Spacing */
   --section-padding: 120px 0;
@@ -64,7 +65,7 @@
   --font-mono: 'Fira Code', monospace;
   --font-editorial: 'Playfair Display', serif;
 
-  /* Real-Time Solar Lighting (Keeping the hook functional but minimal visual impact) */
+  /* Real-Time Solar Lighting */
   --solar-x: 0px;
   --solar-y: 10px;
   --solar-blur: 20px;
@@ -77,33 +78,33 @@
 }
 
 /* ═══════════════════════════════════════════
-   DARK MODE OVERRIDES
+   DARK MODE OVERRIDES (DEEP OBSIDIAN & GOLD)
 ═══════════════════════════════════════════ */
 body.dark-mode {
-  --bg-primary: #0a0a0c;
-  --bg-secondary: #121216;
-  --bg-tertiary: #1a1a20;
-  --bg-card: rgba(20, 20, 25, 0.6);
-  --bg-card-hover: rgba(30, 30, 35, 0.9);
+  --bg-primary: #0b0c10;
+  --bg-secondary: #12131a;
+  --bg-tertiary: #191b24;
+  --bg-card: rgba(22, 24, 34, 0.75);
+  --bg-card-hover: rgba(30, 33, 48, 0.95);
 
   --accent-primary: #f4d03f;
   --accent-primary-rgb: 244, 208, 63;
   --button-text: #000000;
 
-  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
-  --gradient-glass: linear-gradient(135deg, rgba(30,30,35,0.7) 0%, rgba(30,30,35,0.3) 100%);
+  --gradient-primary: linear-gradient(135deg, #ffffff 0%, #d4af37 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(30,33,48,0.8) 0%, rgba(20,22,32,0.4) 100%);
   
-  --text-primary: #ffffff;
-  --text-secondary: #cccccc;
-  --text-muted: #999999;
+  --text-primary: #f5f5f7;
+  --text-secondary: #c5c5d0;
+  --text-muted: #8e8ea0;
 
-  --border-subtle: 1px solid rgba(255,255,255,0.2);
-  --border-brutal: 2px solid rgba(255,255,255,0.8);
-  --border-heavy: 4px solid #ffffff;
+  --border-subtle: 1px solid rgba(255,255,255,0.15);
+  --border-brutal: 2px solid rgba(255,255,255,0.7);
+  --border-heavy: 3px solid #ffffff;
   
-  --shadow-brutal: 6px 6px 0px rgba(255,255,255,0.8), 0 10px 30px rgba(0,0,0,0.6);
-  --shadow-brutal-hover: 2px 2px 0px rgba(255,255,255,0.8), 0 5px 15px rgba(0,0,0,0.7);
-  --shadow-brutal-deep: 12px 12px 0px rgba(255,255,255,0.8), 0 20px 40px rgba(0,0,0,0.7);
+  --shadow-brutal: 5px 5px 0px rgba(244, 208, 63, 0.7), 0 10px 30px rgba(0,0,0,0.6);
+  --shadow-brutal-hover: 2px 2px 0px rgba(244, 208, 63, 0.9), 0 5px 25px rgba(244,208,63,0.25);
+  --shadow-brutal-deep: 10px 10px 0px rgba(244, 208, 63, 0.8), 0 20px 40px rgba(0,0,0,0.7);
 }
 
 /* ═══════════════════════════════════════════

@@ -155,7 +155,7 @@ const Hero = () => {
     greeting: timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
-    role: heroData?.role || "Electronics Engineer | Web Developer | Photographer",
+    role: heroData?.role || "Chairperson @ ISTE SC MBCET | Full-Stack Architect | ECE Engineer",
     bio: heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks.",
     techStack: heroData?.techStack || ["React", "Node.js", "Python", "STM32", "SupaBase"],
     resumeUrl: heroData?.resumeUrl || "#",
@@ -203,8 +203,12 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        {/* V200 — Top status row: greeting only */}
+        {/* Top status row: Executive Chairperson Badge & greeting */}
         <div className="hero-top-row" style={{ justifyContent: 'center' }}>
+          <div className="hero-executive-badge">
+            <span className="badge-crown">♛</span>
+            <span className="badge-text">CHAIRPERSON @ ISTE SC MBCET</span>
+          </div>
           <div className="hero-greeting-wrapper">
             <div
               ref={greetingRef}
@@ -213,7 +217,7 @@ const Hero = () => {
             >
               {/* Initially empty, GSAP will fill it */}
             </div>
-            <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-brutal-pink)' }}>_</span>
+            <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-primary)' }}>_</span>
           </div>
         </div>
         <LiquidText>

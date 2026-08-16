@@ -256,7 +256,7 @@ const Navbar = () => {
         <div className={`navbar-inner ${ambientClass}`}>
           {ambientClass === 'ambient-rain' && <RainDroplets />}
 
-          {/* Left cluster: logo + weather + xray toggle */}
+          {/* Left cluster: logo + role tag + weather + xray toggle */}
           <div className="navbar-left-cluster">
             <a
               className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
@@ -267,6 +267,11 @@ const Navbar = () => {
               <span className="logo-text">ADHY</span>
               <span className="logo-dot">.</span>
             </a>
+
+            <div className="nav-chairperson-chip" title="Chairperson — ISTE SC MBCET">
+              <span className="chip-crown">♛</span>
+              <span className="chip-text">ISTE CHAIRPERSON</span>
+            </div>
 
             {weatherData && (
               <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>

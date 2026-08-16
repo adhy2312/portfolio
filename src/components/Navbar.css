@@ -51,6 +51,48 @@
   flex-shrink: 0;
 }
 
+/* ─── Executive Chairperson Chip ─── */
+.nav-chairperson-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #111;
+  background: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
+  border: 1px solid #000;
+  padding: 3px 8px;
+  border-radius: 20px;
+  box-shadow: 2px 2px 0px #000;
+  cursor: default;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.dark-mode .nav-chairperson-chip {
+  color: #000000;
+  box-shadow: 2px 2px 0px rgba(244, 208, 63, 0.5);
+}
+
+.nav-chairperson-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0px #000;
+}
+
+.chip-crown {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .nav-chairperson-chip .chip-text {
+    display: none;
+  }
+  .nav-chairperson-chip {
+    padding: 3px 6px;
+  }
+}
+
 /* All direct children of navbar-inner sit above the rain canvas (z-index: 2) */
 .navbar-inner > *:not(canvas) {
   position: relative;

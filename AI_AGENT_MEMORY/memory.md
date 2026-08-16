@@ -13,8 +13,12 @@ This file serves as a persistent memory for the AI agent to track context, tasks
 - [x] Designed and integrated `ExecomFlipCard.tsx` client component.
 - [x] Updated ISTE role from "PR & Media Head" → "Chairperson, ISTE SC MBCET" across:
   - `src/components/Achievements.js` (hardcoded fallback card)
-  - `src/components/Timeline.js` (added new Chairperson milestone in 2026, updated "Now" entry)
-  - **Note:** Sanity CMS `achievement` documents should also be manually updated via the Studio dashboard at http://localhost:3333.
+  - `src/components/Timeline.js` (added new Chairperson milestone in 2026, updated "Now" entry, and added multi-layered golden crown & orbital ring entrance animation)
+  - `src/components/Hero.js` & `src/components/Hero.css` (added executive Chairperson badge chip, golden gradient crown badge, and updated default role)
+  - `src/components/Navbar.js` & `src/components/Navbar.css` (added persistent executive Chairperson badge pill in left cluster)
+  - `src/components/About.js` (updated default stats to 300+ Members Led and bio paragraphs to reflect Chairperson leadership)
+  - `src/index.css` (upgraded design tokens to champagne gold & deep obsidian glass theme)
+  - **Note:** Sanity CMS documents should also be updated via the Studio dashboard at http://localhost:3333 when editing live content.
 - [ ] Maintain and update this memory file after every interaction.
 - [ ] Review this file before executing any new prompts.
 
