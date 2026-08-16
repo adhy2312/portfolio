@@ -19,6 +19,7 @@ This file serves as a persistent memory for the AI agent to track context, tasks
   - `src/components/About.js` (updated default stats to 300+ Members Led and bio paragraphs to reflect Chairperson leadership)
   - `src/index.css` (upgraded design tokens to champagne gold & deep obsidian glass theme)
   - **Note:** Sanity CMS documents should also be updated via the Studio dashboard at http://localhost:3333 when editing live content.
+- [x] Fixed Vercel build failure (`spawn react-scripts ENOENT`): added missing `"react-scripts": "5.0.1"` dependency into `package.json`.
 - [ ] Maintain and update this memory file after every interaction.
 - [ ] Review this file before executing any new prompts.
 
