@@ -60,6 +60,19 @@ const defaultExperiences = [
         description: 'Co-founded the Finance Club at MBCET and serve as Director of External Affairs — building industry partnerships, orchestrating financial literacy workshops, and forging connections between campus talent and the professional world.'
       }
     ]
+  },
+  {
+    _id: 'exp_socius',
+    organization: 'Socius',
+    logo: null,
+    roles: [
+      {
+        title: 'Intern',
+        startDate: 'Jun 2025',
+        endDate: 'Jul 2025',
+        description: 'Completed an internship at Socius, contributing to real-world projects and gaining hands-on industry experience.'
+      }
+    ]
   }
 ];
 
