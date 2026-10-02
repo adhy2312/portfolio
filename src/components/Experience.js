@@ -1,9 +1,22 @@
-import React from 'react';
-import { urlFor } from '../sanity';
+import React, { useState, useEffect } from 'react';
+import { client, urlFor } from '../sanity';
 import './Experience.css';
 import { useStory } from '../contexts/StoryContext';
 
 const defaultExperiences = [
+  {
+    _id: 'exp_finance',
+    organization: 'Finance Club MBCET',
+    logo: null,
+    roles: [
+      {
+        title: 'Co-Founder & Director of External Affairs',
+        startDate: 'Oct 2026',
+        endDate: 'Present',
+        description: 'Co-founded the Finance Club at MBCET and serve as Director of External Affairs — building industry partnerships, orchestrating financial literacy workshops, and forging connections between campus talent and the professional world.'
+      }
+    ]
+  },
   {
     _id: 'exp_iste',
     organization: 'ISTE SC MBCET',
@@ -49,38 +62,41 @@ const defaultExperiences = [
     ]
   },
   {
-    _id: 'exp_finance',
-    organization: 'Finance Club MBCET',
-    logo: null,
-    roles: [
-      {
-        title: 'Co-Founder & Director of External Affairs',
-        startDate: 'Oct 2026',
-        endDate: 'Present',
-        description: 'Co-founded the Finance Club at MBCET and serve as Director of External Affairs — building industry partnerships, orchestrating financial literacy workshops, and forging connections between campus talent and the professional world.'
-      }
-    ]
-  },
-  {
     _id: 'exp_socius',
-    organization: 'Socius',
+    organization: 'Socius Innovative Global Brains',
     logo: null,
     roles: [
       {
         title: 'Intern',
-        startDate: 'Jun 2025',
-        endDate: 'Jul 2025',
-        description: 'Completed an internship at Socius, contributing to real-world projects and gaining hands-on industry experience.'
+        startDate: 'Jun 2026',
+        endDate: 'Jul 2026',
+        description: 'Internship focusing on AI-powered electronics manufacturing, hardware testing, and system implementation.'
       }
     ]
   }
 ];
 
 const Experience = () => {
-  const experiences = defaultExperiences;
+  const [experiences, setExperiences] = useState(defaultExperiences);
 
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('experience');
+
+  useEffect(() => {
+    const fetchExperiences = async () => {
+      try {
+        const query = '*[_type == "experience"] | order(order asc)';
+        const data = await client.fetch(query);
+        if (data && data.length > 0) {
+          setExperiences(data);
+        }
+      } catch (error) {
+        console.error("Error fetching experiences from Sanity:", error);
+      }
+    };
+
+    fetchExperiences();
+  }, []);
 
   if (!experiences || experiences.length === 0) {
     return null;
