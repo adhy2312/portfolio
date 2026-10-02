@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { client, urlFor } from '../sanity';
+import React from 'react';
+import { urlFor } from '../sanity';
 import './Experience.css';
 import { useStory } from '../contexts/StoryContext';
 
@@ -77,17 +77,10 @@ const defaultExperiences = [
 ];
 
 const Experience = () => {
-  const [experiences, setExperiences] = useState(defaultExperiences);
-  const [loading, setLoading] = useState(true);
-  
+  const experiences = defaultExperiences;
+
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('experience');
-
-  useEffect(() => {
-    // NOTE: Sanity fetch temporarily disabled — using hardcoded data.
-    // Update Sanity CMS records to re-enable.
-    setLoading(false);
-  }, []);
 
   if (!experiences || experiences.length === 0) {
     return null;
@@ -97,7 +90,7 @@ const Experience = () => {
     <section id="experience" className="experience-section">
       <div className="experience-container">
         <div className="experience-header" data-aos="fade-up">
-          <span className="section-label">// my journey</span>
+          <span className="section-label">{'// my journey'}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Career Path">
               <span className="section-title-inner">Professional <span>Experience</span></span>
