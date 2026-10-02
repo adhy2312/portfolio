@@ -155,7 +155,7 @@ const Hero = () => {
     greeting: timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
-    role: heroData?.role || "Chairperson @ ISTE SC MBCET | Full-Stack Architect | ECE Engineer",
+    role: heroData?.role || "Co-Founder @ Finance Club MBCET | Full-Stack Architect | ECE Engineer",
     bio: heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks.",
     techStack: heroData?.techStack || ["React", "Node.js", "Python", "STM32", "SupaBase"],
     resumeUrl: heroData?.resumeUrl || "#",
@@ -203,12 +203,8 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        {/* Top status row: Executive Chairperson Badge & greeting */}
+        {/* Top status row: greeting */}
         <div className="hero-top-row" style={{ justifyContent: 'center' }}>
-          <div className="hero-executive-badge">
-            <span className="badge-crown">♛</span>
-            <span className="badge-text">CHAIRPERSON @ ISTE SC MBCET</span>
-          </div>
           <div className="hero-greeting-wrapper">
             <div
               ref={greetingRef}

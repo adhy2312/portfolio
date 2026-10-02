@@ -85,14 +85,21 @@ const fallbackData = [
     id: 10,
     year: '2026',
     title: 'Elected Chairperson, ISTE SC MBCET',
-    description: 'Elected Chairperson of the ISTE Student Chapter at MBCET. Leading 300+ members, driving technical events, and shaping the future of the chapter.',
+    description: 'Elected Chairperson of the ISTE Student Chapter at MBCET. Led 300+ members, drove technical events, and shaped the future of the chapter before stepping down to pursue new ventures.',
     memory: '"From writing press releases to signing them. The architecture scales."'
   },
   {
     id: 11,
     year: 'Now',
+    title: 'Co-Founder & Director of External Affairs, Finance Club MBCET',
+    description: 'Co-founded the Finance Club at MBCET — bridging campus talent with the world of finance. As Director of External Affairs, forging industry partnerships, hosting financial literacy workshops, and building a community that speaks the language of markets.',
+    memory: '"The best investment you can make is in the people around you."'
+  },
+  {
+    id: 12,
+    year: 'Now',
     title: 'Building & Leading',
-    description: 'Chairperson of ISTE SC MBCET while mastering Full Stack Development and UI/UX design. Building things that scale beyond the classroom.',
+    description: 'Full-stack developer, finance club co-founder, and photographer — building things that scale beyond the classroom with code, community, and a camera.',
     memory: '"Still in beta. Shipping anyway."'
   },
 ];

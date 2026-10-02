@@ -268,10 +268,6 @@ const Navbar = () => {
               <span className="logo-dot">.</span>
             </a>
 
-            <div className="nav-chairperson-chip" title="Chairperson — ISTE SC MBCET">
-              <span className="chip-crown">♛</span>
-              <span className="chip-text">ISTE CHAIRPERSON</span>
-            </div>
 
             {weatherData && (
               <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>

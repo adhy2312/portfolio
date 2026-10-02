@@ -12,8 +12,8 @@ const defaultExperiences = [
       {
         title: 'Chairperson',
         startDate: 'Aug 2026',
-        endDate: 'Present',
-        description: 'Elected Chairperson leading 300+ student members, directing technical initiatives, state conventions, and overseeing the official digital portal.'
+        endDate: 'Oct 2026',
+        description: 'Served as Chairperson leading 300+ student members, directing technical initiatives, state conventions, and overseeing the official digital portal.'
       },
       {
         title: 'PR & Media Head',
@@ -45,6 +45,19 @@ const defaultExperiences = [
         startDate: 'Aug 2025',
         endDate: 'Aug 2026',
         description: 'Elevated to Creative Curator at FRAMES MBCET — curating visual stories, directing photography workshops, and managing campus media.'
+      }
+    ]
+  },
+  {
+    _id: 'exp_finance',
+    organization: 'Finance Club MBCET',
+    logo: null,
+    roles: [
+      {
+        title: 'Co-Founder & Director of External Affairs',
+        startDate: 'Oct 2026',
+        endDate: 'Present',
+        description: 'Co-founded the Finance Club at MBCET and serve as Director of External Affairs — building industry partnerships, orchestrating financial literacy workshops, and forging connections between campus talent and the professional world.'
       }
     ]
   }

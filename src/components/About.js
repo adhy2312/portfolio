@@ -41,9 +41,9 @@ const About = () => {
   const displayData = {
     location: aboutData?.location || "Kerala, India · Open to Remote & Relocation",
     bioParagraphs: aboutData?.bioParagraphs || [
-      "I'm Adhithya Mohan, Chairperson of the ISTE Student Chapter at MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I lead high-impact technical initiatives while blending engineering precision with creative software design.",
-      "My work spans software, leadership, and hardware — directing chapter operations for 300+ members, prototyping in Figma, building scalable web apps with React & Node.js, and crafting embedded IoT systems with ESP32 & STM32.",
-      "I bring an executive perspective and a photographer's eye to every project, building digital experiences that scale beyond the classroom."
+      "I'm Adhithya Mohan, Co-Founder & Director of External Affairs at Finance Club MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I drive high-impact financial literacy and technical initiatives while blending engineering precision with creative software design.",
+      "My work spans software, leadership, and hardware — building financial communities, prototyping in Figma, crafting scalable web apps with React & Node.js, and designing embedded IoT systems with ESP32 & STM32.",
+      "I bring a founder's perspective and a photographer's eye to every project, building digital experiences that scale beyond the classroom."
     ],
     stats: aboutData?.stats || defaultStats,
     profileImage: aboutData?.profileImage ? urlFor(aboutData.profileImage).url() : dp,

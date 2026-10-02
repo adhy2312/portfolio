@@ -18,7 +18,7 @@ const iconMap = {
 };
 
 const defaultAchievements = [
-  { iconName: 'FiAward', title: 'Chairperson, ISTE SC MBCET', desc: 'Chairperson of the ISTE Student Chapter at MBCET — leading 300+ members, spearheading events, and building the official web portal.', accent: 'var(--accent-primary)' },
+  { iconName: 'FiAward', title: 'Co-Founder, Finance Club MBCET', desc: 'Co-Founded the Finance Club at MBCET and serving as Director of External Affairs — building financial literacy, forging industry partnerships, and driving campus-wide economic awareness.', accent: 'var(--accent-primary)' },
   { iconName: 'FiZap', title: 'IoT Projects', desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.', accent: 'var(--accent-green)' },
   { iconName: 'FiPenTool', title: 'Figma Designer', desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.', accent: 'var(--accent-gold)' },
   { iconName: 'FiCamera', title: 'Photographer', desc: 'Running @zoomout_frames on Instagram — passionate street, portrait, and nature photographer.', accent: 'var(--accent-cyan)' },

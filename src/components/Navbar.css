@@ -51,7 +51,7 @@
   flex-shrink: 0;
 }
 
-/* ─── Executive Chairperson Chip ─── */
+/* ─── Finance Club Co-Founder Chip ─── */
 .nav-chairperson-chip {
   display: inline-flex;
   align-items: center;
@@ -60,19 +60,19 @@
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 1.5px;
-  color: #111;
-  background: linear-gradient(135deg, #f4d03f 0%, #e67e22 100%);
-  border: 1px solid #000;
+  color: #fff;
+  background: linear-gradient(135deg, #1a7f5a 0%, #0f4c35 100%);
+  border: 1px solid #0a3828;
   padding: 3px 8px;
   border-radius: 20px;
-  box-shadow: 2px 2px 0px #000;
+  box-shadow: 2px 2px 0px #0a3828;
   cursor: default;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 body.dark-mode .nav-chairperson-chip {
-  color: #000000;
-  box-shadow: 2px 2px 0px rgba(244, 208, 63, 0.5);
+  color: #e0ffe8;
+  box-shadow: 2px 2px 0px rgba(26, 127, 90, 0.5);
 }
 
 .nav-chairperson-chip:hover {
