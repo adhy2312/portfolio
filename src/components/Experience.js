@@ -71,21 +71,9 @@ const Experience = () => {
   const hasStory = !!getStoryForSection('experience');
 
   useEffect(() => {
-    const fetchExperiences = async () => {
-      try {
-        const query = '*[_type == "experience"] | order(order asc)';
-        const data = await client.fetch(query);
-        if (data && data.length > 0) {
-          setExperiences(data);
-        }
-      } catch (error) {
-        console.error("Error fetching experiences:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchExperiences();
+    // NOTE: Sanity fetch temporarily disabled — using hardcoded data.
+    // Update Sanity CMS records to re-enable.
+    setLoading(false);
   }, []);
 
   if (!experiences || experiences.length === 0) {

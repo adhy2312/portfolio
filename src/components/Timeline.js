@@ -125,12 +125,8 @@ const Timeline = () => {
 
   // Fetch from Sanity
   useEffect(() => {
-    const query = '*[_type == "milestone"] | order(order asc)';
-    client.fetch(query).then((data) => {
-      if (data && data.length > 0) {
-        setMilestones(data);
-      }
-    }).catch(console.error);
+    // NOTE: Sanity fetch temporarily disabled — using hardcoded data.
+    // Update Sanity CMS records to re-enable.
   }, []);
 
   // GSAP Header Reveal + Horizontal Scroll GSAP
