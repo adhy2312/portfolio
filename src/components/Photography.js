@@ -620,23 +620,6 @@ const Photography = () => {
                     />
                   </motion.div>
                 </AnimatePresence>
-
-                {/* Frame Caption Tag (Floating Glass Label) */}
-                <div className="optical-frame-label">
-                  <span className="label-category">{activeItem.rawCategory || activeItem.category}</span>
-                  <span className="label-title">{activeItem.title}</span>
-                  {activeItem.figmaLink && (
-                    <a
-                      href={activeItem.figmaLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="label-figma-link"
-                      title="Open Live Figma / Prototype"
-                    >
-                      <FiExternalLink /> Live Link
-                    </a>
-                  )}
-                </div>
               </>
             ) : null}
 

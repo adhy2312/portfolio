@@ -84,15 +84,10 @@ const skillCategories = [
       { name: 'Python Automation', level: 92 },
       { name: 'AI Tools', level: 90 },
       { name: 'AI Agents', level: 85 },
-      { name: 'OpenAI API', level: 88 },
       { name: 'YOLOv8', level: 82 },
-      { name: 'TensorFlow', level: 78 },
-      { name: 'RNN', level: 75 },
-      { name: 'Computer Vision', level: 80 },
       { name: 'Prompt Engineering', level: 90 },
       { name: 'Workflow Automation', level: 88 },
-      { name: 'Web Scraping', level: 86 },
-      { name: 'Streamlit', level: 84 }
+      { name: 'Web Scraping', level: 86 }
     ],
   },
   {
@@ -104,7 +99,6 @@ const skillCategories = [
       { name: 'Embedded Systems', level: 88 },
       { name: 'Arduino', level: 92 },
       { name: 'ESP32', level: 90 },
-      { name: 'Sensors & Actuators', level: 86 },
       { name: 'IoT', level: 88 },
       { name: 'PCB Design', level: 84 },
       { name: 'KiCad', level: 86 },
@@ -162,9 +156,7 @@ const skillCategories = [
       { name: 'Vercel', level: 88 },
       { name: 'Firebase', level: 85 },
       { name: 'Figma', level: 92 },
-      { name: 'Framer', level: 80 },
       { name: 'VS Code', level: 94 },
-      { name: 'Linux', level: 82 },
       { name: 'MATLAB', level: 80 },
       { name: 'Simulink', level: 78 },
       { name: 'Wokwi', level: 85 },
@@ -205,7 +197,7 @@ const groupColors = {
 const tools = [
   'React', 'Node.js', 'Figma', 'ESP32', 'Python', 'Git',
   'Firebase', 'Photoshop', 'Lightroom', 'PostgreSQL', 'Odoo ERP',
-  'KiCad', 'MATLAB', 'Simulink', 'TensorFlow', 'OpenAI API', 'Wokwi', 'GSAP',
+  'KiCad', 'MATLAB', 'Simulink', 'Wokwi', 'GSAP',
 ];
 
 const SkillCard = ({ cat, iconMap }) => {
