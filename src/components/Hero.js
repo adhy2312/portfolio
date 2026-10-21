@@ -155,7 +155,7 @@ const Hero = () => {
     greeting: timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
-    role: heroData?.role || "Co-Founder @ Finance Club MBCET | Full-Stack Architect | ECE Engineer",
+    role: heroData?.role || "Media Secretary @ MBCET Senate | Co-Founder @ Finance Club | ECE Engineer",
     bio: heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks.",
     techStack: heroData?.techStack || ["React", "Node.js", "Python", "STM32", "SupaBase"],
     resumeUrl: heroData?.resumeUrl || "#",

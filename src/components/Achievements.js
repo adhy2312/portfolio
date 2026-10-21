@@ -18,6 +18,7 @@ const iconMap = {
 };
 
 const defaultAchievements = [
+  { iconName: 'FiGlobe', title: 'Media Secretary, MBCET Senate', desc: 'Nominated and selected as Media Secretary of the MBCET Senate — one of the highest student governance positions at the college. Responsible for official campus communications, digital media strategy, press coverage, and representing student media at the institutional level.', accent: 'var(--accent-primary)' },
   { iconName: 'FiAward', title: 'Co-Founder, Finance Club MBCET', desc: 'Co-Founded the Finance Club at MBCET and serving as Director of External Affairs — building financial literacy, forging industry partnerships, and driving campus-wide economic awareness.', accent: 'var(--accent-primary)' },
   { iconName: 'FiZap', title: 'IoT Projects', desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.', accent: 'var(--accent-green)' },
   { iconName: 'FiPenTool', title: 'Figma Designer', desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.', accent: 'var(--accent-gold)' },

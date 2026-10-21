@@ -90,7 +90,7 @@ const fallbackData = [
   },
   {
     id: 11,
-    year: 'Now',
+    year: '2026',
     title: 'Co-Founder & Director of External Affairs, Finance Club MBCET',
     description: 'Co-founded the Finance Club at MBCET — bridging campus talent with the world of finance. As Director of External Affairs, forging industry partnerships, hosting financial literacy workshops, and building a community that speaks the language of markets.',
     memory: '"The best investment you can make is in the people around you."'
@@ -98,8 +98,15 @@ const fallbackData = [
   {
     id: 12,
     year: 'Now',
+    title: 'Media Secretary, MBCET Senate',
+    description: 'Nominated and selected as Media Secretary of the MBCET Senate — one of the highest student governance positions at the college. Overseeing official campus communications, digital media strategy, and representing student voices at the institutional level.',
+    memory: '"When the institution trusts you with its voice, you stop speaking for yourself alone."'
+  },
+  {
+    id: 13,
+    year: 'Now',
     title: 'Building & Leading',
-    description: 'Full-stack developer, finance club co-founder, and photographer — building things that scale beyond the classroom with code, community, and a camera.',
+    description: 'Full-stack developer, Senate Media Secretary, finance club co-founder, and photographer — building things that scale beyond the classroom with code, community, and a camera.',
     memory: '"Still in beta. Shipping anyway."'
   },
 ];
@@ -470,21 +477,28 @@ const Timeline = () => {
             {milestones.map((item, index) => {
               const isTop = index % 2 === 0;
               const isChairperson = item.title?.toLowerCase().includes('chairperson');
+              const isSecretary = item.title?.toLowerCase().includes('media secretary') && item.title?.toLowerCase().includes('senate');
               return (
                 <div
                   key={item._id || item.id}
-                  className={`timeline-node-wrapper ${isTop ? 'node-top' : 'node-bottom'} ${isChairperson ? 'milestone-chairperson' : ''}`}
+                  className={`timeline-node-wrapper ${isTop ? 'node-top' : 'node-bottom'} ${isChairperson ? 'milestone-chairperson' : ''} ${isSecretary ? 'milestone-secretary' : ''}`}
                   onMouseEnter={() => { scrollState.current.hoveredNode = item.title; }}
                   onMouseLeave={() => { scrollState.current.hoveredNode = null; }}
                   onTouchStart={() => { scrollState.current.hoveredNode = item.title; }}
                   onTouchEnd={() => { scrollState.current.hoveredNode = null; }}
                 >
-                  <div className={`timeline-content glass-card ${isChairperson ? 'chairperson-card' : ''}`}>
+                  <div className={`timeline-content glass-card ${isChairperson ? 'chairperson-card' : ''} ${isSecretary ? 'secretary-card' : ''}`}>
                     {isChairperson && (
                       <div className="chairperson-crown-ring">
                         <div className="crown-orbit orbit-1" />
                         <div className="crown-orbit orbit-2" />
                         <div className="crown-badge">♛</div>
+                      </div>
+                    )}
+                    {isSecretary && (
+                      <div className="chairperson-crown-ring">
+                        <div className="crown-orbit orbit-1" />
+                        <div className="crown-badge" style={{ fontSize: '1.2rem' }}>📡</div>
                       </div>
                     )}
                     <span className="timeline-year">

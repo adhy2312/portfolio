@@ -706,3 +706,41 @@
   background: #e67e22;
 }
 
+/* ═══════════════════════════════════════════
+   MEDIA SECRETARY (MBCET SENATE) — TEAL/CYAN PREMIUM STYLING
+   Echoes chairperson treatment with a distinct palette
+═══════════════════════════════════════════ */
+
+.secretary-card {
+  border: 2px solid var(--accent-cyan, #00d8ff) !important;
+  background: linear-gradient(
+    135deg,
+    rgba(0, 216, 255, 0.04) 0%,
+    rgba(0, 184, 212, 0.08) 100%
+  ) !important;
+  box-shadow: 5px 5px 0px #000, 0 0 20px rgba(0, 216, 255, 0.15) !important;
+  position: relative;
+}
+
+.milestone-secretary .timeline-year {
+  color: var(--accent-cyan, #00d8ff) !important;
+  font-weight: 800;
+}
+
+.milestone-secretary .timeline-title {
+  color: var(--accent-cyan, #00d8ff) !important;
+}
+
+/* ── Memory fragment — cyan left border ── */
+.milestone-secretary .timeline-memory {
+  border-left-color: #00d8ff;
+  background: rgba(0, 216, 255, 0.06);
+  color: #006272;
+}
+
+/* ── Audio resonance bars — cyan ── */
+.milestone-secretary .audio-resonance span {
+  background: #00d8ff;
+}
+
+

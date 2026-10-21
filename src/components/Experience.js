@@ -5,6 +5,19 @@ import { useStory } from '../contexts/StoryContext';
 
 const defaultExperiences = [
   {
+    _id: 'exp-senate',
+    organization: 'MBCET Senate',
+    logo: null,
+    roles: [
+      {
+        title: 'Media Secretary',
+        startDate: 'Oct 2026',
+        endDate: 'Present',
+        description: 'Nominated and selected as Media Secretary of the MBCET Senate — the apex student governance body of the college. Responsible for official campus communications, institutional press coverage, digital media strategy, and representing student media at the highest academic level.'
+      }
+    ]
+  },
+  {
     _id: 'exp_finance',
     organization: 'Finance Club MBCET',
     logo: null,
@@ -146,11 +159,13 @@ const Experience = () => {
               <div className="exp-timeline">
                 {exp.roles && exp.roles.map((role, rIndex) => {
                   const isChair = role.title?.toLowerCase().includes('chairperson');
+                  const isSecretary = role.title?.toLowerCase().includes('media secretary');
+                  const isHighlight = isChair || isSecretary;
                   return (
-                    <div className={`exp-role-item ${isChair ? 'chairperson-exp-role' : ''}`} key={rIndex}>
+                    <div className={`exp-role-item ${isChair ? 'chairperson-exp-role' : ''} ${isSecretary ? 'chairperson-exp-role' : ''}`} key={rIndex}>
                       <div className="exp-timeline-visual">
-                        <div className={`exp-timeline-dot ${isChair ? 'chair-dot' : ''}`}>
-                          {isChair && <span className="dot-crown-glow" />}
+                        <div className={`exp-timeline-dot ${isHighlight ? 'chair-dot' : ''}`}>
+                          {isHighlight && <span className="dot-crown-glow" />}
                         </div>
                         {rIndex !== exp.roles.length - 1 && <div className="exp-timeline-line"></div>}
                       </div>
@@ -159,14 +174,16 @@ const Experience = () => {
                           <h4 className="exp-role-title">
                             {role.title}
                             {isChair && <span className="role-crown-icon"> ♛</span>}
+                            {isSecretary && <span className="role-crown-icon"> 📡</span>}
                           </h4>
                           {isChair && <span className="chair-badge-tag">EXECUTIVE LEAD</span>}
+                          {isSecretary && <span className="chair-badge-tag">SENATE</span>}
                         </div>
-                        <div className={`exp-role-duration ${isChair ? 'chair-duration-badge' : ''}`}>
+                        <div className={`exp-role-duration ${isHighlight ? 'chair-duration-badge' : ''}`}>
                           {role.startDate} – {role.endDate || 'Present'}
                         </div>
                         {role.description && (
-                          <p className={`exp-role-desc ${isChair ? 'chair-role-desc' : ''}`}>{role.description}</p>
+                          <p className={`exp-role-desc ${isHighlight ? 'chair-role-desc' : ''}`}>{role.description}</p>
                         )}
                       </div>
                     </div>
