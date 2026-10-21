@@ -7,6 +7,19 @@ const POLL_INTERVAL = 30000;
 const LS_KEY = 'np_minimized';
 const CACHE_KEY = 'np_last_track';
 
+// Pre-seeded with Adhithya's actual last played Spotify track
+const INITIAL_TRACK = {
+  isPlaying: false,
+  title: 'Nafrat',
+  artist: 'Darshan Raval',
+  album: 'I Loved You',
+  albumArt: 'https://i.scdn.co/image/ab67616d0000b2730295f44c90127ce4c40d3a60',
+  songUrl: 'https://open.spotify.com/track/0NLOLiHF6Ti0QtX5P7gziI',
+  previewUrl: null,
+  progress: 0,
+  duration: 214264,
+};
+
 const SpotifyIcon = ({ size = 14 }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>
     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.516 17.307a.748.748 0 01-1.03.25c-2.822-1.725-6.376-2.115-10.563-1.159a.748.748 0 11-.334-1.458c4.578-1.047 8.51-.596 11.678 1.339a.748.748 0 01.249 1.028zm1.472-3.275a.936.936 0 01-1.287.308c-3.228-1.983-8.151-2.558-11.974-1.4a.937.937 0 01-.574-1.786c4.365-1.325 9.795-.682 13.527 1.593a.937.937 0 01.308 1.285zm.127-3.407c-3.873-2.3-10.256-2.511-13.95-1.39a1.124 1.124 0 11-.652-2.15c4.244-1.29 11.3-1.04 15.762 1.607a1.124 1.124 0 11-1.16 1.933z" />
@@ -25,13 +38,16 @@ const formatMs = (ms) => {
 };
 
 const NowPlaying = () => {
-  const [track, setTrack]           = useState(() => {
+  const [track, setTrack] = useState(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
-      return cached ? JSON.parse(cached) : null;
-    } catch { return null; }
+      return cached ? JSON.parse(cached) : INITIAL_TRACK;
+    } catch {
+      return INITIAL_TRACK;
+    }
   });
   const [loading, setLoading]       = useState(true);
+  const [imgError, setImgError]     = useState(false);
   const [minimized, setMinimized]   = useState(
     () => localStorage.getItem(LS_KEY) === 'true'
   );
@@ -39,6 +55,11 @@ const NowPlaying = () => {
   const progressRef  = useRef(null);
   const audioRef     = useRef(null);
   const [previewPlaying, setPreviewPlaying] = useState(false);
+
+  // Reset image error state whenever track album art changes
+  useEffect(() => {
+    setImgError(false);
+  }, [track?.albumArt]);
 
   // Sync audio with track changes
   useEffect(() => {
@@ -55,7 +76,7 @@ const NowPlaying = () => {
       audioRef.current.pause();
       setPreviewPlaying(false);
     } else {
-      audioRef.current.volume = 0.4; // not too loud
+      audioRef.current.volume = 0.4;
       audioRef.current.play().then(() => setPreviewPlaying(true)).catch(() => {});
     }
   };
@@ -74,7 +95,7 @@ const NowPlaying = () => {
               localStorage.setItem(CACHE_KEY, JSON.stringify(updated));
               return updated;
             }
-            return data;
+            return prev || INITIAL_TRACK;
           });
         }
       }
@@ -95,8 +116,8 @@ const NowPlaying = () => {
   useEffect(() => {
     if (!track?.isPlaying || !progressRef.current) return;
     let start = null;
-    const startProgress = track.progress;
-    const duration      = track.duration;
+    const startProgress = track.progress || 0;
+    const duration      = track.duration || 1;
 
     const animate = (time) => {
       if (!start) start = time;
@@ -120,10 +141,12 @@ const NowPlaying = () => {
     localStorage.setItem(LS_KEY, String(next));
   };
 
-  if (loading && !track) return null;
+  const currentTrack = track || INITIAL_TRACK;
 
-  const progressPct = track?.duration
-    ? (track.progress / track.duration) * 100
+  if (loading && !currentTrack) return null;
+
+  const progressPct = currentTrack.duration
+    ? ((currentTrack.progress || 0) / currentTrack.duration) * 100
     : 0;
 
   /* ── Docked / minimized state ───────────────────────── */
@@ -136,7 +159,7 @@ const NowPlaying = () => {
         title="Show Now Playing"
       >
         <SpotifyIcon size={16} />
-        <Waveform isPlaying={track?.isPlaying} />
+        <Waveform isPlaying={currentTrack.isPlaying} />
       </button>
     );
   }
@@ -155,24 +178,30 @@ const NowPlaying = () => {
       </button>
 
       {/* Audio Element for Preview */}
-      {track?.previewUrl && (
+      {currentTrack.previewUrl && (
         <audio 
           ref={audioRef} 
-          src={track.previewUrl} 
+          src={currentTrack.previewUrl} 
           onEnded={() => setPreviewPlaying(false)} 
         />
       )}
 
-      {/* Album art */}
-      <div className="np-art-wrap" onClick={track?.previewUrl ? togglePreview : undefined} style={{ cursor: track?.previewUrl ? 'pointer' : 'default' }}>
-        {track?.albumArt ? (
+      {/* Album art of currently playing or last played track */}
+      <div 
+        className="np-art-wrap" 
+        onClick={currentTrack.previewUrl ? togglePreview : undefined} 
+        style={{ cursor: currentTrack.previewUrl ? 'pointer' : 'default' }}
+      >
+        {currentTrack.albumArt && !imgError ? (
           <>
             <img
-              src={track.albumArt}
-              alt={track?.album}
-              className={`np-art ${track?.isPlaying ? 'np-art--spinning' : ''}`}
+              src={currentTrack.albumArt}
+              alt={currentTrack.album || currentTrack.title}
+              className={`np-art ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}
+              onError={() => setImgError(true)}
+              loading="lazy"
             />
-            {track?.previewUrl && (
+            {currentTrack.previewUrl && (
               <div className={`np-play-overlay ${previewPlaying ? 'playing' : ''}`}>
                 {previewPlaying ? (
                   <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
@@ -183,36 +212,36 @@ const NowPlaying = () => {
             )}
           </>
         ) : (
-          <div className="np-art np-art--placeholder">
+          <div className={`np-art np-art--placeholder ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}>
             <SpotifyIcon size={20} />
           </div>
         )}
       </div>
 
-      {/* Info */}
+      {/* Track Info */}
       <div className="np-info">
         <div className="np-label">
           <SpotifyIcon />
-          <span>{track?.isPlaying ? 'Now Playing' : 'Last Played'}</span>
+          <span>{currentTrack.isPlaying ? 'Now Playing' : 'Last Played'}</span>
         </div>
 
-        {track?.songUrl ? (
+        {currentTrack.songUrl ? (
           <a
-            href={track.songUrl}
+            href={currentTrack.songUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="np-title"
-            title={track?.title}
+            title={currentTrack.title}
           >
-            {track?.title || '—'}
+            {currentTrack.title}
           </a>
         ) : (
-          <span className="np-title">{track?.title || '—'}</span>
+          <span className="np-title">{currentTrack.title}</span>
         )}
 
-        <div className="np-artist">{track?.artist || '—'}</div>
+        <div className="np-artist">{currentTrack.artist}</div>
 
-        {track?.duration > 0 && (
+        {currentTrack.duration > 0 && (
           <>
             <div className="np-progress-track">
               <div
@@ -222,8 +251,8 @@ const NowPlaying = () => {
               />
             </div>
             <div className="np-timestamps">
-              <span>{formatMs(track.progress)}</span>
-              <span>{formatMs(track.duration)}</span>
+              <span>{formatMs(currentTrack.progress || 0)}</span>
+              <span>{formatMs(currentTrack.duration)}</span>
             </div>
           </>
         )}
@@ -231,7 +260,7 @@ const NowPlaying = () => {
 
       {/* Waveform */}
       <div className="np-status">
-        <Waveform isPlaying={track?.isPlaying} />
+        <Waveform isPlaying={currentTrack.isPlaying} />
       </div>
     </div>
   );
