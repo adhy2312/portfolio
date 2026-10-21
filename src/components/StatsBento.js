@@ -118,7 +118,7 @@ const StatsBento = () => {
           </div>
           
           {/* Photography Stats */}
-          <div className="bento-card bento-photography" style={{ gridColumn: 'span 2' }}>
+          <div className="bento-card bento-photography bento-span-2">
             <div className="bento-header">
               <FiCamera className="bento-icon" />
             </div>
@@ -149,7 +149,7 @@ const StatsBento = () => {
           </div>
 
           {/* Travel Stats */}
-          <div className="bento-card bento-travel" style={{ gridColumn: 'span 2' }}>
+          <div className="bento-card bento-travel bento-span-2">
             <div className="bento-header">
               <FiMap className="bento-icon" />
             </div>
@@ -176,7 +176,7 @@ const StatsBento = () => {
           </div>
 
           {/* Achievements */}
-          <div className="bento-card bento-status" style={{ gridColumn: 'span 4' }}>
+          <div className="bento-card bento-status bento-span-4">
             <FiAward className="bento-icon" />
             <div className="bento-title" style={{ marginBottom: '0.5rem' }}>Achievements</div>
             <div className="status-text">{sanityData?.primaryAchievement || 'State Level Qualifier — YIP 2025'}</div>

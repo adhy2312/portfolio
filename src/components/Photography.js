@@ -13,8 +13,7 @@ import {
   FiVolumeX, 
   FiInstagram, 
   FiCheck,
-  FiArrowUpRight,
-  FiExternalLink
+  FiArrowUpRight
 } from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';

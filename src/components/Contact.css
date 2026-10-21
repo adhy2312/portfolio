@@ -367,14 +367,30 @@
 
 /* ── Responsive ── */
 @media (max-width: 900px) {
-  .contact-grid { grid-template-columns: 1fr; }
+  .contact {
+    padding: 4rem 1rem 3.5rem;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  .contact-info-card {
+    padding: 1.5rem;
+  }
 }
 
 @media (max-width: 560px) {
-  .form-row { grid-template-columns: 1fr; }
-  .contact-form {
-    padding: 1.5rem;
-    box-shadow: var(--shadow-brutal) !important;
+  .contact {
+    padding: 3.5rem 0.75rem 2.5rem;
   }
-  .contact-time-strip { display: none; }
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  .contact-form {
+    padding: 1.25rem 1rem;
+    box-shadow: 4px 4px 0px #000 !important;
+  }
+  .contact-time-strip {
+    display: none;
+  }
 }

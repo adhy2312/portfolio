@@ -319,8 +319,48 @@ body:not(.dark-mode) .vault-btn-disabled {
 
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
+  .myworks {
+    padding: 4rem 1rem 3rem;
+  }
+  .works-header {
+    margin-bottom: 2rem;
+  }
+  .works-filters {
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .filter-btn {
+    padding: 6px 14px;
+    font-size: 0.75rem;
+    box-shadow: 2px 2px 0px #000;
+  }
   .projects-vault-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
+    gap: 1.25rem;
+    padding-bottom: 2rem;
+  }
+  .vault-card-inner {
+    padding: 1.3rem 1.1rem;
+  }
+  .vault-title {
+    font-size: 1.25rem;
+  }
+  .vault-desc {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+}
+
+@media (max-width: 480px) {
+  .myworks {
+    padding: 3.5rem 0.75rem 2.5rem;
+  }
+  .vault-card-inner {
+    padding: 1.1rem 0.9rem;
+  }
+  .vault-action-btn {
+    padding: 6px 12px;
+    font-size: 0.75rem;
   }
 }

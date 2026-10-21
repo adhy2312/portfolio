@@ -222,3 +222,35 @@
   text-overflow: ellipsis;
   font-weight: 500;
 }
+
+/* ── Mobile Responsive Adaptation ── */
+@media (max-width: 768px) {
+  .testimonials {
+    padding: 4rem 0 3.5rem;
+  }
+  .testimonials-header {
+    padding: 0 1.25rem;
+    margin-bottom: 2.5rem;
+  }
+  .testi-marquee-container {
+    padding: 1rem 0;
+  }
+  .testimonial-card {
+    width: min(300px, 80vw);
+    padding: 1.4rem 1.2rem;
+    gap: 1rem;
+    box-shadow: 4px 4px 0px #000;
+  }
+  .testimonial-text {
+    font-size: 0.88rem;
+    line-height: 1.55;
+  }
+}
+
+@media (max-width: 480px) {
+  .testimonial-card {
+    width: min(270px, 84vw);
+    padding: 1.2rem 1rem;
+  }
+}
+

@@ -445,18 +445,42 @@
 
 /* ── Responsive ── */
 @media (max-width: 768px) {
+  .digital-scars-section {
+    padding: 4rem 1rem 3.5rem;
+  }
+
+  .scars-header {
+    margin-bottom: 2.5rem;
+  }
+
   .scars-grid {
     grid-template-columns: 1fr;
     gap: 1.2rem;
+  }
+
+  .scar-card {
+    padding: 1.3rem 1.1rem;
+    border-radius: 12px;
   }
 
   .scars-counter {
     flex-direction: column;
     text-align: center;
     gap: 6px;
+    padding: 10px 16px;
   }
 
   .scars-counter-num {
     font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .digital-scars-section {
+    padding: 3.5rem 0.75rem 2.5rem;
+  }
+
+  .scar-card {
+    padding: 1.1rem 0.9rem;
   }
 }

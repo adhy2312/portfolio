@@ -238,39 +238,81 @@ body.dark-mode .bento-card {
   text-transform: uppercase;
 }
 
+/* Card Spans */
+.bento-span-2 {
+  grid-column: span 2;
+}
+
+.bento-span-4 {
+  grid-column: span 4;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .stats-bento-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .bento-github {
-    grid-column: span 2;
-  }
-  .bento-status {
+  .bento-github,
+  .bento-status,
+  .bento-span-4 {
     grid-column: span 2;
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
+  .stats-bento-section {
+    padding: 4rem 1rem 3rem;
+  }
   .stats-bento-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    grid-template-columns: 1fr !important;
+    gap: 14px;
   }
   .bento-card {
-    grid-column: 1 !important;
+    grid-column: 1 / -1 !important;
     grid-row: auto !important;
-    padding: 1.25rem;
+    padding: 1.3rem 1.1rem !important;
+    border-radius: 20px;
+  }
+  .bento-span-2,
+  .bento-span-4,
+  .bento-github,
+  .bento-status {
+    grid-column: 1 / -1 !important;
   }
   .bento-number {
-    font-size: 2rem;
+    font-size: 2.2rem;
   }
   .bento-title {
     font-size: 1.1rem;
   }
   .status-text {
-    font-size: 0.9rem;
+    font-size: 0.92rem;
   }
   .bento-subtitle {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
+  }
+  .github-stats-row {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+  }
+  .github-heatmap-container {
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-bento-section {
+    padding: 3.5rem 0.75rem 2.5rem;
+  }
+  .bento-card {
+    padding: 1.1rem 0.9rem !important;
+  }
+  .bento-number {
+    font-size: 1.85rem;
+  }
+  .gh-stat-val {
+    font-size: 1.15rem;
   }
 }

@@ -236,15 +236,26 @@
 
 @media (max-width: 768px) {
   .about {
-    padding: 4rem 0;
+    padding: 4rem 1rem 3.5rem;
   }
 
   .about-grid {
     gap: 2.5rem;
   }
 
+  .about-img-wrapper {
+    transform: none !important;
+    box-shadow: 5px 5px 0px #000 !important;
+  }
+
   .about-stats {
     grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .about-stat {
+    padding: 1.25rem;
   }
 
   .about-image-col {
@@ -252,7 +263,8 @@
   }
 
   .about-p {
-    font-size: 1rem;
+    font-size: 0.95rem;
+    line-height: 1.7;
   }
 
   .stat-value {
@@ -262,5 +274,18 @@
   .about-img-wrapper::after {
     font-size: 1.1rem;
     bottom: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about {
+    padding: 3.5rem 0.75rem 2.5rem;
+  }
+  .about-title {
+    font-size: clamp(2rem, 8vw, 2.8rem);
+  }
+  .about-location {
+    font-size: 0.8rem;
+    padding: 6px 12px;
   }
 }

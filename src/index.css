@@ -170,6 +170,9 @@ body.dark-mode .App::after {
 html {
   font-size: 16px;
   overscroll-behavior: none;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
 }
 
 body {
@@ -180,6 +183,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
+  overflow-x: hidden;
+  max-width: 100%;
+  width: 100%;
   transition: background-color 0.8s ease, color 0.8s ease;
   counter-reset: brutal-section; /* Initialize section counter */
 }
@@ -197,18 +203,9 @@ body.darkroom-active {
 .App {
   overflow-x: hidden;
   max-width: 100vw;
+  width: 100%;
   position: relative;
   backface-visibility: hidden;
-  /* Removed filter constraint as it breaks position: fixed for child elements like Spotify dock */
-}
-
-/* CSS Grain Texture (Removed full-screen SVG filter for massive GPU performance boost) */
-.App::after {
-  display: none;
-}
-/* Mobile: keep grain but reduce further */
-@media (max-width: 768px) {
-  .App::after { opacity: 0.014; }
 }
 
 
@@ -589,8 +586,10 @@ body.dark-mode .section-label {
 ═══════════════════════════════════════════ */
 .section-container {
   width: 100%;
+  max-width: 100%;
   min-height: auto; /* was 100vh — was causing massive blank sections on mobile */
   position: relative;
+  overflow: hidden; /* Contain pseudo-elements and ghost numerals */
   /* Doppler skew — only active when --doppler-skew is set by JS */
   transform: skewY(var(--doppler-skew, 0deg));
   transition: transform 0.1s linear;
@@ -1363,8 +1362,8 @@ html:not(.dream-state) .App {
   .digital-texture-overlay { opacity: 0.3 !important; }
   .App::after { display: none !important; }
   
-  /* Better section padding */
-  section { padding: 60px 0 !important; }
+  /* Better section padding — do not use !important on lateral padding so component CSS controls it */
+  section { padding: 60px 0; }
   
   /* Stack the footer CTA tighter */
   .footer-3d-popup { padding: 2rem !important; margin-bottom: 3rem !important; }
@@ -1376,10 +1375,12 @@ html:not(.dream-state) .App {
   .timeline-scroll-wrapper { padding: 30px 0 40px 0 !important; }
 
   /* Fix section-container blocking scrollable experience */
-  .section-container { min-height: auto !important; }
+  .section-container { min-height: auto !important; max-width: 100% !important; overflow: hidden !important; }
 
   /* Ensure no horizontal overflow from bento cards and standard cards */
   .bento-grid { 
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
     overflow: hidden; 
     width: 100%;
   }
@@ -1422,7 +1423,7 @@ section {
 ═══════════════════════════════════════════ */
 .bento-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: var(--bento-gap);
   width: 100%;
 }
@@ -1440,9 +1441,13 @@ section {
 }
 
 @media (max-width: 768px) {
+  .bento-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1rem !important;
+  }
   .bento-item-span-2,
   .bento-item-span-3 {
-    grid-column: span 1; /* Stack on mobile */
+    grid-column: span 1 !important; /* Stack on mobile */
   }
 }
 

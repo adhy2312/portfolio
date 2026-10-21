@@ -858,64 +858,217 @@
    RESPONSIVENESS / MOBILE ADAPTATION
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .viewfinder-optical-stage {
-    height: 380px;
+  .photography-section {
+    padding: 4rem 1rem 3.5rem;
   }
 
-  .camera-top-bar {
-    padding: 0.65rem 1rem;
-    font-size: 0.72rem;
+  .rangefinder-console {
+    border-radius: 16px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
-  .film-sim-selector {
-    display: none; /* Auto-collapse on small screens */
+  .photo-viewfinder-header .section-desc {
+    padding: 0 1rem;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
   }
 
-  .camera-instrument-cluster {
+  .viewfinder-mode-pills {
+    max-width: 100%;
     flex-wrap: wrap;
-    gap: 1rem;
-    padding: 0.85rem 1rem;
-  }
-
-  .hide-mobile {
-    display: none;
-  }
-
-  .viewfinder-nav-arrow {
-    width: 38px;
-    height: 38px;
-  }
-
-  .viewfinder-nav-arrow.arrow-prev { left: 10px; }
-  .viewfinder-nav-arrow.arrow-next { right: 10px; }
-
-  .optical-frame-label {
-    left: 16px;
-    bottom: 16px;
-    padding: 6px 12px;
-  }
-
-  .optical-frame-label .label-title {
-    font-size: 0.85rem;
+    justify-content: center;
+    gap: 4px;
+    padding: 4px;
   }
 
   .mode-pill {
     padding: 0.5rem 1rem;
+    font-size: 0.82rem;
+    gap: 6px;
+  }
+
+  .camera-top-bar {
+    padding: 0.7rem 0.9rem;
+    font-size: 0.72rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    justify-content: space-between;
+  }
+
+  .camera-brand {
+    gap: 6px;
+    font-size: 0.72rem;
+  }
+
+  .film-sim-selector {
+    display: none; /* Collapse LUT switcher on mobile to avoid overcrowding */
+  }
+
+  .camera-quick-tools {
+    gap: 6px;
+  }
+
+  .tool-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 0.85rem;
+  }
+
+  .design-quick-meta {
+    gap: 4px;
+  }
+
+  .design-badge {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    max-width: 110px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .camera-counter {
+    font-size: 0.72rem;
+  }
+
+  .viewfinder-optical-stage {
+    /* Responsive height that scales beautifully on portrait and landscape screens */
+    height: clamp(320px, 54vh, 460px);
+  }
+
+  .frameline.top-left { top: 12px; left: 12px; width: 20px; height: 20px; }
+  .frameline.top-right { top: 12px; right: 12px; width: 20px; height: 20px; }
+  .frameline.bottom-left { bottom: 12px; left: 12px; width: 20px; height: 20px; }
+  .frameline.bottom-right { bottom: 12px; right: 12px; width: 20px; height: 20px; }
+
+  .viewfinder-nav-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+
+  .viewfinder-nav-arrow.arrow-prev { left: 8px; }
+  .viewfinder-nav-arrow.arrow-next { right: 8px; }
+
+  .camera-instrument-cluster {
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    padding: 0.75rem 0.9rem;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .hide-mobile {
+    display: none !important;
+  }
+
+  .optical-readouts {
+    gap: 1rem;
+    flex: 1;
+    justify-content: space-around;
+  }
+
+  .readout-item {
+    gap: 1px;
+  }
+
+  .readout-key {
+    font-size: 0.58rem;
+  }
+
+  .readout-val {
     font-size: 0.8rem;
+  }
+
+  .design-inspector-cluster {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .inspector-column .readout-val {
+    font-size: 0.78rem;
+    word-break: break-word;
+  }
+
+  .inspector-swatches {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .swatch-chip {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mechanical-shutter-btn {
+    width: 38px;
+    height: 38px;
+  }
+
+  .shutter-inner-crown {
+    width: 12px;
+    height: 12px;
+  }
+
+  .film-contact-strip {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .film-strip-track {
+    gap: 8px;
+    padding: 3px 0;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .film-frame-thumb {
+    width: 68px;
+    height: 48px;
   }
 }
 
 @media (max-width: 480px) {
-  .viewfinder-optical-stage {
-    height: 300px;
+  .photography-section {
+    padding: 3.5rem 0.5rem 2.5rem;
+  }
+
+  .rangefinder-console {
+    border-radius: 14px;
+  }
+
+  .camera-top-bar {
+    padding: 0.6rem 0.75rem;
   }
 
   .brand-text {
-    display: none;
+    display: none; /* Keep the red dot and mode tag visible for sleek Leica look */
+  }
+
+  .shutter-mode-tag {
+    font-size: 0.65rem;
+    padding: 1px 5px;
   }
 
   .exposure-meter-group {
     display: none;
+  }
+
+  .viewfinder-optical-stage {
+    height: clamp(300px, 50vh, 420px);
+  }
+
+  .optical-readouts {
+    gap: 0.6rem;
+  }
+
+  .film-frame-thumb {
+    width: 60px;
+    height: 44px;
   }
 }
 
