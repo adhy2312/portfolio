@@ -285,12 +285,17 @@ const Photography = () => {
     setCurrentIndex(0);
   }, [activeTab]);
 
-  // Auto-scroll active thumbnail into view in the filmstrip
+  // Auto-scroll active thumbnail into view in the filmstrip (strictly container-scoped)
   useEffect(() => {
-    if (!thumbStripRef.current) return;
-    const activeThumb = thumbStripRef.current.querySelector('.active-frame');
+    const container = thumbStripRef.current;
+    if (!container) return;
+    const activeThumb = container.querySelector('.active-frame');
     if (activeThumb) {
-      activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      const scrollTarget = activeThumb.offsetLeft - (container.clientWidth / 2) + (activeThumb.clientWidth / 2);
+      container.scrollTo({
+        left: Math.max(0, scrollTarget),
+        behavior: 'smooth'
+      });
     }
   }, [currentIndex]);
 

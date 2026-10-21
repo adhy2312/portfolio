@@ -187,6 +187,12 @@ function AppContent() {
   const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
+    // Force scroll to top on initial component mount
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    window.scrollTo(0, 0);
+
     // applyGlobalEluteEffect removed — was causing layout thrash and SVG filter GPU drain
     const eluteEffectKiller = null;
 
@@ -381,8 +387,15 @@ function AppContent() {
 
   useEffect(() => {
     if (!loading) {
+      window.scrollTo(0, 0);
       window.dispatchEvent(new CustomEvent('system-boot'));
-      setTimeout(() => ScrollTrigger.refresh(), 100);
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0);
+      });
+      setTimeout(() => {
+        window.scrollTo(0, 0);
+        ScrollTrigger.refresh();
+      }, 100);
     }
   }, [loading]);
 

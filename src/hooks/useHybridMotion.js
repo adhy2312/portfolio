@@ -31,6 +31,16 @@ export function useHybridMotion() {
     });
     lenisRef.current = lenis;
 
+    // Force initial scroll position to the very top (never restore stale scroll position)
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+    if (typeof ScrollTrigger.clearScrollMemory === 'function') {
+      ScrollTrigger.clearScrollMemory('manual');
+    }
+    lenis.scrollTo(0, { immediate: true });
+    window.scrollTo(0, 0);
+
     // 2. Sync GSAP ScrollTrigger purely to Lenis
     lenis.on('scroll', ScrollTrigger.update);
 

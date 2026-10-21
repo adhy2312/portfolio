@@ -32,8 +32,12 @@ const PageLoader = ({ onDone }) => {
   const hasExitedRef = useRef(false);
 
   useEffect(() => {
+    // Keep viewport strictly at top while loader is active
+    window.scrollTo(0, 0);
+
     // Performance optimization: Instantly finish loader for Lighthouse
     if (/Lighthouse|Speed Insights|GTmetrix|Googlebot|PageSpeed/i.test(navigator.userAgent)) {
+      window.scrollTo(0, 0);
       onDone();
       return;
     }
@@ -66,6 +70,7 @@ const PageLoader = ({ onDone }) => {
     tl.call(() => {
       if (hasExitedRef.current) return;
       hasExitedRef.current = true;
+      window.scrollTo(0, 0);
     });
 
     // Short pause on final "ADHY"
@@ -88,7 +93,13 @@ const PageLoader = ({ onDone }) => {
         yPercent: -100,
         duration: 1.2,
         ease: 'power4.inOut',
-        onComplete: onDone,
+        onStart: () => {
+          window.scrollTo(0, 0);
+        },
+        onComplete: () => {
+          window.scrollTo(0, 0);
+          onDone();
+        },
       }, "-=0.1");
     }
 
