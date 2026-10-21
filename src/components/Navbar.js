@@ -17,36 +17,37 @@ const Navbar = () => {
   const linksRef = useRef([]);
 
   const { weatherData } = useConsciousness();
-  const [ambientClass, setAmbientClass] = useState('');
+  
+  const getAmbientClass = (data) => {
+    if (!data) {
+      const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+      const hour = ist.getHours();
+      return (hour >= 6 && hour < 18) ? 'ambient-clear-day' : 'ambient-clear-night';
+    }
+    const { condition, isDay } = data;
+    switch (condition) {
+      case 'Clear':
+        return isDay ? 'ambient-clear-day' : 'ambient-clear-night';
+      case 'Clouds':
+        return isDay ? 'ambient-clouds' : 'ambient-clouds-night';
+      case 'Rain':
+      case 'Drizzle':
+        return 'ambient-rain';
+      case 'Thunderstorm':
+        return 'ambient-thunderstorm';
+      case 'Snow':
+        return 'ambient-snow';
+      default:
+        return isDay ? 'ambient-clear-day' : 'ambient-clear-night';
+    }
+  };
+
+  const [ambientClass, setAmbientClass] = useState(() => getAmbientClass(weatherData));
   const scrolledRef = useRef(false);
 
   // Determine Ambient Class
   useEffect(() => {
-    if (!weatherData) return;
-    const { condition, isDay } = weatherData;
-    let newClass = '';
-    
-    switch (condition) {
-      case 'Clear':
-        newClass = isDay ? 'ambient-clear-day' : 'ambient-clear-night';
-        break;
-      case 'Clouds':
-        newClass = 'ambient-clouds';
-        break;
-      case 'Rain':
-      case 'Drizzle':
-        newClass = 'ambient-rain';
-        break;
-      case 'Thunderstorm':
-        newClass = 'ambient-thunderstorm';
-        break;
-      case 'Snow':
-        newClass = 'ambient-snow';
-        break;
-      default:
-        newClass = 'ambient-clouds'; // Default fallback
-    }
-    setAmbientClass(newClass);
+    setAmbientClass(getAmbientClass(weatherData));
   }, [weatherData]);
 
 
