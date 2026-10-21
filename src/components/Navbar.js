@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiActivity } from 'react-icons/fi';
+import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow } from 'react-icons/fi';
 import gsap from 'gsap';
 import './Navbar.css';
-import './XRayMode.css';
 import MagneticButton from './MagneticButton';
 import { playClickSound } from '../utils/sound';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
@@ -14,14 +13,8 @@ const Navbar = () => {
   const clickCountRef = useRef(0);
   const clickTimerRef = useRef(null);
   const [logoGlow, setLogoGlow] = useState(false);
-  const [xrayActive, setXrayActive] = useState(false);
   const pillRef = useRef(null);
   const linksRef = useRef([]);
-
-  const toggleXray = () => {
-    setXrayActive(!xrayActive);
-    document.body.classList.toggle('xray-mode');
-  };
 
   const { weatherData } = useConsciousness();
   const [ambientClass, setAmbientClass] = useState('');
@@ -252,11 +245,11 @@ const Navbar = () => {
         </ul>
       </div>
 
-      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`} data-xray="[COMPONENT: NAVBAR]&#10;API: OpenWeatherMap&#10;Logic: Dynamic ambient classes&#10;Listener: passive true">
+      <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''} ${ambientClass}`}>
         <div className={`navbar-inner ${ambientClass}`}>
           {ambientClass === 'ambient-rain' && <RainDroplets />}
 
-          {/* Left cluster: logo + role tag + weather + xray toggle */}
+          {/* Left cluster: logo + weather indicator */}
           <div className="navbar-left-cluster">
             <a
               className={`nav-logo ${logoGlow ? 'nav-logo-glow' : ''}`}
@@ -268,17 +261,12 @@ const Navbar = () => {
               <span className="logo-dot">.</span>
             </a>
 
-
             {weatherData && (
               <div className="weather-indicator" title={`${weatherData.condition}, ${weatherData.temp}°C`}>
                 {renderWeatherIcon()}
                 <span>{weatherData.temp}°C</span>
               </div>
             )}
-
-            <button className="xray-toggle-btn" onClick={toggleXray} title="Toggle X-Ray / Developer Mode">
-              <FiActivity />
-            </button>
           </div>
 
           {/* Desktop Nav Links */}

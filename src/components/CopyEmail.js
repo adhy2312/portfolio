@@ -31,8 +31,6 @@ const CopyEmail = ({ email, variant = 'default' }) => {
   return (
     <div 
       className={`copy-email-wrapper copy-email--${variant} ${copied ? 'is-copied' : ''}`}
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
     >
       <button
         type="button"

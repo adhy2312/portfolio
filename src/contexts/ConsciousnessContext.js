@@ -74,14 +74,20 @@ export const ConsciousnessProvider = ({ children }) => {
 
   const [ambientThought, setAmbientThought] = useState(null);
   const [weatherData,    setWeatherData]    = useState(() => {
-    try {
-      const cached = localStorage.getItem('adhy_weather_cache');
-      if (cached) return JSON.parse(cached);
-    } catch {}
     const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
     const hour = ist.getHours();
     const isDay = hour >= 6 && hour < 18;
-    return { condition: 'Clear', temp: isDay ? 29 : 25, isDay };
+
+    try {
+      const cached = localStorage.getItem('adhy_weather_cache');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Date.now() - (parsed._cachedAt || 0) < 30 * 60 * 1000) {
+          return { ...parsed, isDay };
+        }
+      }
+    } catch {}
+    return { condition: 'Clouds', temp: isDay ? 29 : 25, isDay };
   });
   const [temporalAge,    setTemporalAge]    = useState(0);
   const isSystemThinkingRef = useRef(false);
@@ -188,7 +194,7 @@ export const ConsciousnessProvider = ({ children }) => {
     }, 18000 + Math.random() * 4000);
   }, [recalculateConsciousness]);
 
-  // Weather
+  // Weather (Dual provider: OpenWeatherMap primary + Open-Meteo zero-key fallback)
   useEffect(() => {
     const getIstIsDay = () => {
       try {
@@ -201,7 +207,20 @@ export const ConsciousnessProvider = ({ children }) => {
       }
     };
 
+    const mapOpenMeteoCode = (code) => {
+      if (code === 0) return 'Clear';
+      if ([1, 2, 3].includes(code)) return 'Clouds';
+      if ([45, 48].includes(code)) return 'Clouds';
+      if ([51, 53, 55, 61, 63, 65, 80, 81, 82].includes(code)) return 'Rain';
+      if ([71, 73, 75, 85, 86].includes(code)) return 'Snow';
+      if ([95, 96, 99].includes(code)) return 'Thunderstorm';
+      return 'Clouds';
+    };
+
     const fetchWeather = async () => {
+      const isDayCurrent = getIstIsDay();
+
+      // Primary: OpenWeatherMap
       try {
         const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
         const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
@@ -213,29 +232,52 @@ export const ConsciousnessProvider = ({ children }) => {
             condition: cond,
             temp: Math.round(data.main.temp),
             isDay,
-            description: data.weather[0].description
+            description: data.weather[0].description,
+            _cachedAt: Date.now()
           };
           setWeatherData(weatherPayload);
           localStorage.setItem('adhy_weather_cache', JSON.stringify(weatherPayload));
           ns.setWeather(cond);
-        } else {
-          const isDay = getIstIsDay();
-          setWeatherData({ condition: 'Clear', temp: isDay ? 29 : 25, isDay });
-          ns.setWeather('Clear');
+          return;
         }
       } catch {
-        try {
-          const cached = localStorage.getItem('adhy_weather_cache');
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            setWeatherData({ ...parsed, isDay: getIstIsDay() });
-            return;
-          }
-        } catch {}
-        const isDay = getIstIsDay();
-        setWeatherData({ condition: 'Clear', temp: isDay ? 29 : 25, isDay });
+        // Fall through to Open-Meteo
       }
+
+      // Secondary: Open-Meteo (No API key needed, never rate-limited or blocked)
+      try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=8.4833&longitude=76.9167&current_weather=true');
+        const data = await res.json();
+        if (data?.current_weather) {
+          const cond = mapOpenMeteoCode(data.current_weather.weathercode);
+          const isDay = data.current_weather.is_day === 1;
+          const weatherPayload = {
+            condition: cond,
+            temp: Math.round(data.current_weather.temperature),
+            isDay,
+            description: cond.toLowerCase(),
+            _cachedAt: Date.now()
+          };
+          setWeatherData(weatherPayload);
+          localStorage.setItem('adhy_weather_cache', JSON.stringify(weatherPayload));
+          ns.setWeather(cond);
+          return;
+        }
+      } catch {
+        // Fall through to IST time default
+      }
+
+      // Reliable IST Default
+      const fallbackPayload = {
+        condition: 'Clouds',
+        temp: isDayCurrent ? 29 : 25,
+        isDay: isDayCurrent,
+        _cachedAt: Date.now()
+      };
+      setWeatherData(fallbackPayload);
+      ns.setWeather('Clouds');
     };
+
     fetchWeather();
   }, []);
 
