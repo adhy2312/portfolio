@@ -15,33 +15,6 @@ import ExpertDoc from './ExpertDoc';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
-/* ── Live Kerala Clock (IST = UTC+5:30) ── */
-const KeralaTime = () => {
-  const [time, setTime] = useState('');
-
-  useEffect(() => {
-    const format = () => {
-      const now = new Date();
-      const ist = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-      const h = ist.getHours().toString().padStart(2, '0');
-      const m = ist.getMinutes().toString().padStart(2, '0');
-      const s = ist.getSeconds().toString().padStart(2, '0');
-      setTime(`${h}:${m}:${s}`);
-    };
-    format();
-    const id = setInterval(format, 1000);
-    return () => clearInterval(id);
-  }, []);
-
-  return (
-    <div className="hero-time-badge">
-      <span className="hero-time-dot" />
-      <span className="hero-time-text">Kerala, IST</span>
-      <span className="hero-time-clock">{time}</span>
-    </div>
-  );
-};
-
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
 
@@ -203,7 +176,7 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        {/* Top status row: greeting and Kerala IST clock */}
+        {/* Top status row: greeting */}
         <div className="hero-top-row" style={{ justifyContent: 'center' }}>
           <div className="hero-greeting-wrapper">
             <div
@@ -215,7 +188,6 @@ const Hero = () => {
             </div>
             <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-primary)' }}>_</span>
           </div>
-          <KeralaTime />
         </div>
         <LiquidText>
           <h1 className="hero-name-giant metallic-reveal">

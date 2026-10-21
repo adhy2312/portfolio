@@ -21,6 +21,14 @@ import photo2 from '../assets/photo2.jpg';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import ExpertDoc from './ExpertDoc';
+import {
+  IMAGEKIT_PHOTOS,
+  IMAGEKIT_DESIGNS,
+  getImageKitMaster,
+  getImageKitThumb,
+  getCachedDynamicMedia,
+  autoDiscoverImageKitMedia
+} from '../data/imagekitMedia';
 
 /* ── Fallback items if Sanity is offline ── */
 const FALLBACK_PHOTOS = [
@@ -108,10 +116,21 @@ const Photography = () => {
   const [copiedHex, setCopiedHex] = useState(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isShutterFiring, setIsShutterFiring] = useState(false);
+  const [extraPhotos, setExtraPhotos] = useState(() => getCachedDynamicMedia().extraPhotos);
+  const [extraDesigns, setExtraDesigns] = useState(() => getCachedDynamicMedia().extraDesigns);
 
   const viewfinderRef = useRef(null);
+  const thumbStripRef = useRef(null);
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('photography');
+
+  // Auto-discover any newly uploaded photos or designs from ImageKit in background
+  useEffect(() => {
+    autoDiscoverImageKitMedia(({ extraPhotos: newPhotos, extraDesigns: newDesigns }) => {
+      setExtraPhotos(newPhotos);
+      setExtraDesigns(newDesigns);
+    });
+  }, []);
 
   // Fetch real images from Sanity for both photo and design
   useEffect(() => {
@@ -188,21 +207,93 @@ const Photography = () => {
       .catch((err) => console.error('Failed to load designs from Sanity:', err));
   }, []);
 
+  // Transform ImageKit manifest photos (static base + dynamically discovered)
+  const imageKitPhotoItems = useMemo(() => {
+    const allPhotos = [...(IMAGEKIT_PHOTOS || []), ...(extraPhotos || [])];
+    return allPhotos.map((item, idx) => {
+      const path = typeof item === 'string' ? item : item.path || item.src;
+      const title = (typeof item === 'object' && item.title) ? item.title : `Visual Frame #${idx + 1}`;
+      const rawCategory = (typeof item === 'object' && item.category) ? item.category : 'Portraits';
+      const specs = (typeof item === 'object' && item.specs) ? item.specs : {
+        camera: 'Canon EOS R',
+        lens: '50mm f/1.8 STM',
+        shutter: '1/500s',
+        aperture: 'f/2.0',
+        iso: 'ISO 200',
+        ev: '+0.0'
+      };
+
+      return {
+        _id: `ik-photo-${idx}`,
+        src: getImageKitMaster(path, 1600, 92),
+        thumb: getImageKitThumb(path, 160, 120),
+        fullSrc: getImageKitMaster(path, 2400, 98),
+        title,
+        category: 'Photography',
+        rawCategory,
+        specs
+      };
+    });
+  }, [extraPhotos]);
+
+  // Transform ImageKit manifest designs (static base + dynamically discovered)
+  const imageKitDesignItems = useMemo(() => {
+    const allDesigns = [...(IMAGEKIT_DESIGNS || []), ...(extraDesigns || [])];
+    return allDesigns.map((item, idx) => {
+      const path = typeof item === 'string' ? item : item.path || item.src;
+      const title = (typeof item === 'object' && item.title) ? item.title : `Design Artboard #${idx + 1}`;
+      const subtitle = (typeof item === 'object' && item.subtitle) ? item.subtitle : '';
+      const rawCategory = (typeof item === 'object' && item.category) ? item.category : 'UI/UX Design';
+      const figmaLink = (typeof item === 'object' && item.figmaLink) ? item.figmaLink : null;
+      const designSpecs = (typeof item === 'object' && item.designSpecs) ? item.designSpecs : {
+        artboard: (typeof item === 'object' && item.artboard) || '1920 × 1080px',
+        tool: (typeof item === 'object' && item.tool) || 'Figma',
+        colors: (typeof item === 'object' && item.colors) || ['#0f172a', '#3b82f6', '#10b981', '#f59e0b', '#f8fafc'],
+        typography: (typeof item === 'object' && item.typography) || 'Inter / Space Grotesk',
+        type: (typeof item === 'object' && item.type) || 'Digital Product Design'
+      };
+
+      return {
+        _id: `ik-design-${idx}`,
+        src: getImageKitMaster(path, 1600, 92),
+        thumb: getImageKitThumb(path, 160, 120),
+        fullSrc: getImageKitMaster(path, 2400, 98),
+        title,
+        subtitle,
+        category: 'Design',
+        rawCategory,
+        figmaLink,
+        designSpecs
+      };
+    });
+  }, [extraDesigns]);
+
   // Items based on active tab:
-  // - photography: fetchedPhotos (or fallback if offline)
-  // - design: fetchedDesigns (returns empty array if no designs uploaded yet)
+  // - photography: ImageKit items (or Sanity photos, or fallback)
+  // - design: ImageKit designs (or Sanity designs)
   const items = useMemo(() => {
     if (activeTab === 'photography') {
+      if (imageKitPhotoItems.length > 0) return imageKitPhotoItems;
       return fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
     } else {
+      if (imageKitDesignItems.length > 0) return imageKitDesignItems;
       return fetchedDesigns;
     }
-  }, [fetchedPhotos, fetchedDesigns, activeTab]);
+  }, [imageKitPhotoItems, imageKitDesignItems, fetchedPhotos, fetchedDesigns, activeTab]);
 
   // Reset index when switching tabs
   useEffect(() => {
     setCurrentIndex(0);
   }, [activeTab]);
+
+  // Auto-scroll active thumbnail into view in the filmstrip
+  useEffect(() => {
+    if (!thumbStripRef.current) return;
+    const activeThumb = thumbStripRef.current.querySelector('.active-frame');
+    if (activeThumb) {
+      activeThumb.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+  }, [currentIndex]);
 
   const activeItem = items[currentIndex] || items[0] || null;
 
@@ -330,7 +421,9 @@ const Photography = () => {
               <FiCamera className="pill-icon" />
               <span>Camera Rangefinder</span>
               <span className="pill-count">
-                {fetchedPhotos.length > 0 ? `${fetchedPhotos.length} frames` : 'Film Vault'}
+                {(imageKitPhotoItems.length || fetchedPhotos.length) > 0 
+                  ? `${imageKitPhotoItems.length || fetchedPhotos.length} frames` 
+                  : 'Film Vault'}
               </span>
             </button>
             <button
@@ -341,7 +434,9 @@ const Photography = () => {
               <FiPenTool className="pill-icon" />
               <span>Artboard Inspector</span>
               <span className="pill-count">
-                {fetchedDesigns.length > 0 ? `${fetchedDesigns.length} artboards` : 'In Curation'}
+                {(imageKitDesignItems.length || fetchedDesigns.length) > 0 
+                  ? `${imageKitDesignItems.length || fetchedDesigns.length} artboards` 
+                  : 'In Curation'}
               </span>
             </button>
           </div>
@@ -689,7 +784,7 @@ const Photography = () => {
           <div className="film-contact-strip">
             <div className="sprocket-holes-bar top" />
             {items.length > 0 ? (
-              <div className="film-strip-track">
+              <div className="film-strip-track" ref={thumbStripRef}>
                 {items.map((item, idx) => (
                   <button
                     key={idx}

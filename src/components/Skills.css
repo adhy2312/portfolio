@@ -31,7 +31,7 @@
 ═══════════════════════════════ */
 .skill-card {
   background: var(--bg-card);
-  padding: 2.5rem;
+  padding: 2rem 1.8rem;
   border-radius: var(--border-radius-bento);
   border: var(--border-heavy) !important;
   box-shadow: var(--shadow-brutal-deep) !important;
@@ -52,7 +52,7 @@
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 1.6rem;
 }
 
 .skill-card-icon {
@@ -70,13 +70,114 @@
   position: relative;
 }
 
+.skill-card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
 .skill-card-title {
   font-family: var(--font-heading);
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 900;
   margin: 0;
   text-transform: uppercase;
-  color: #000;
+  color: var(--text-primary, #000);
+  line-height: 1.2;
+}
+
+body.dark-mode .skill-card-title {
+  color: #ffffff;
+}
+
+.skill-card-count {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted, #777);
+}
+
+/* ═══════════════════════════════
+   SKILL SUBTEXTS LIST & METER
+═══════════════════════════════ */
+.skill-subtexts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.skill-subtext-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: background-color var(--transition-fast, 0.15s ease), transform var(--transition-fast, 0.15s ease);
+}
+
+.skill-subtext-item:hover {
+  background: rgba(var(--accent-primary-rgb, 229, 193, 88), 0.08);
+  transform: translateX(4px);
+}
+
+.skill-subtext-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.skill-subtext-name-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skill-subtext-bullet {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 6px currentColor;
+}
+
+.skill-subtext-name {
+  color: var(--text-primary, #111);
+  letter-spacing: 0.02em;
+}
+
+body.dark-mode .skill-subtext-name {
+  color: #e5e5eb;
+}
+
+.skill-subtext-percent {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--text-muted, #888);
+  font-variant-numeric: tabular-nums;
+}
+
+.skill-subtext-track {
+  height: 4px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  position: relative;
+}
+
+body.dark-mode .skill-subtext-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.skill-subtext-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.1s linear;
 }
 
 .skill-bar-item {

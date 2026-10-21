@@ -2,4 +2,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://portfolio-adhym.vercel.app/sitemap.xml
+Sitemap: https://adhy.tech/sitemap.xml
