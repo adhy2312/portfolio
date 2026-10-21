@@ -49,7 +49,11 @@ const TestimonialCard = memo(({ item }) => {
 
         <div className="user-info">
           <h4 className="user-name">{item.name}</h4>
-          <p className="user-role">{item.designation || item.role}</p>
+          <p className="user-role">
+            {(item.designation && item.designation.trim() !== '-')
+              ? item.designation
+              : (item.role && item.role.trim() !== '-' ? item.role : '')}
+          </p>
         </div>
       </div>
     </div>
@@ -57,9 +61,24 @@ const TestimonialCard = memo(({ item }) => {
 });
 
 const defaultQuotes = [
-  { name: 'Placeholder Client', role: 'CEO, Tech Corp', quote: 'Adhithya is a phenomenal developer who brings engineering precision to every project. Highly recommended!' },
-  { name: 'Design Lead', role: 'Creative Studio', quote: 'An amazing eye for detail. The UI/UX work produced was top-notch and exactly what we needed.' },
-  { name: 'Tech Lead', role: 'Startup Inc', quote: 'Delivered beyond expectations. The system architecture is robust, scalable, and extremely well-documented.' },
+  {
+    name: 'Snith Shibu',
+    designation: 'Mentor, ISTE SC MBCET',
+    quote: 'Working with Adhithya has always been a pleasure. His enthusiasm, curiosity, and positive attitude are contagious, and he consistently brings fresh perspectives to any discussions. What truly sets him apart is his ability to quickly learn new skills, adapt to changing situations, and contribute meaningfully wherever he is placed.',
+    stars: 5,
+  },
+  {
+    name: 'Kiran Biju',
+    designation: 'Mentor, ISTE SC MBCET',
+    quote: 'Adhithya has been a highly dedicated and versatile contributor to ISTE activities. He has supported the team in various areas including data handling, documentation, poster designing, event coordination, and organizational tasks. What stands out about him is his creativity, responsibility, and willingness to take initiative whenever needed.',
+    stars: 5,
+  },
+  {
+    name: 'Sherry Varghese George',
+    designation: 'Faculty Coordinator, FRAMES MBCET | Asst. Professor, ECE',
+    quote: 'Adhithya is a member of our FRAMES – MBCET Photography Club and deserves special appreciation for his outstanding work during the coverage of institutional events. His sharp compositions, mastery of lighting, and ability to capture the moment were top-notch. Add to that his reliability, and you have someone every team would want behind the camera.',
+    stars: 5,
+  },
 ];
 
 const Testimonials = () => {
@@ -72,9 +91,15 @@ const Testimonials = () => {
 
   useEffect(() => {
     client
-      .fetch('*[_type == "testimonial"] | order(order asc)')
-      .then((data) => { if (data?.length) setQuotes(data); })
-      .catch(console.error);
+      .fetch('*[_type == "testimonial" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)')
+      .then((data) => {
+        if (data && data.length > 0) {
+          setQuotes(data);
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to load testimonials from Sanity:', err);
+      });
   }, []);
 
   // GSAP header animation

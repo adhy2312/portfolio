@@ -19,8 +19,8 @@ const photoSchema = {
       type: 'string',
       options: {
         list: [
-          { title: 'Photography', value: 'Design' },
-          { title: 'Design', value: 'Photography' }
+          { title: 'Photography', value: 'Photography' },
+          { title: 'Design', value: 'Design' }
         ],
         layout: 'radio'
       },

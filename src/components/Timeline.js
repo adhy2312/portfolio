@@ -132,12 +132,24 @@ const Timeline = () => {
 
   // Fetch from Sanity
   useEffect(() => {
-    const query = '*[_type == "milestone"] | order(order asc)';
+    const query = '*[_type == "milestone" && !(_id in path("drafts.**"))] | order(order asc, _createdAt asc)';
     client.fetch(query).then((data) => {
       if (data && data.length > 0) {
-        setMilestones(data);
+        // Deduplicate milestones by normalized title
+        const seen = new Set();
+        const unique = [];
+        for (const m of data) {
+          const key = (m.title || '').trim().toLowerCase();
+          if (!seen.has(key)) {
+            seen.add(key);
+            unique.push(m);
+          }
+        }
+        setMilestones(unique.length > 0 ? unique : data);
       }
-    }).catch(console.error);
+    }).catch((err) => {
+      console.error('Failed to load milestones from Sanity:', err);
+    });
   }, []);
 
   // GSAP Header Reveal + Horizontal Scroll GSAP

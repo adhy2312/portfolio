@@ -124,12 +124,14 @@ const MyWorks = () => {
   const hasStory = !!getStoryForSection('projects');
 
   useEffect(() => {
-    const query = '*[_type == "project"] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink, buildTime, soundtrack, emotionalNote }';
+    const query = '*[_type == "project" && !(_id in path("drafts.**"))] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink, buildTime, soundtrack, emotionalNote }';
     client.fetch(query).then((data) => {
       if (data && data.length > 0) {
         setFetchedProjects(data);
       }
-    }).catch(console.error);
+    }).catch((err) => {
+      console.error('Failed to load projects from Sanity:', err);
+    });
   }, []);
 
   // GSAP header + filters animation
@@ -167,7 +169,42 @@ const MyWorks = () => {
     return () => ctx.revert();
   }, []);
 
-  const currentProjects = fetchedProjects.length > 0 ? fetchedProjects : projects;
+  const currentProjects = React.useMemo(() => {
+    const raw = fetchedProjects.length > 0 ? fetchedProjects : projects;
+    return raw.map((p) => {
+      let defaultAccent = 'var(--accent-primary)';
+      let defaultIcon = <FiGlobe />;
+      if (p.category === 'electronics') {
+        defaultAccent = 'var(--accent-blue, #6495ED)';
+        defaultIcon = <FiZap />;
+      } else if (p.category === 'design') {
+        defaultAccent = 'var(--accent-gold, #f5a623)';
+        defaultIcon = <FiPenTool />;
+      } else if (p.category === 'photography') {
+        defaultAccent = 'var(--accent-cyan, #4fc3f7)';
+        defaultIcon = <FiCamera />;
+      } else if (p.category === 'fullstack') {
+        defaultAccent = 'var(--accent-primary)';
+        defaultIcon = <FiGlobe />;
+      }
+
+      const cleanGithub = (p.githubLink && p.githubLink !== 'null' && p.githubLink !== '#') 
+        ? p.githubLink 
+        : ((p.github && p.github !== 'null' && p.github !== '#') ? p.github : null);
+      const cleanLive = (p.liveLink && p.liveLink !== 'null' && p.liveLink !== '#') 
+        ? p.liveLink 
+        : ((p.link && p.link !== 'null' && p.link !== '#') ? p.link : null);
+
+      return {
+        ...p,
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        accent: p.accent || defaultAccent,
+        icon: p.icon || defaultIcon,
+        githubLink: cleanGithub,
+        liveLink: cleanLive,
+      };
+    });
+  }, [fetchedProjects]);
 
   const filtered =
     activeFilter === 'all'

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Skills.css';
-import { FiMonitor, FiSettings, FiPenTool, FiZap } from 'react-icons/fi';
+import { FiMonitor, FiSettings, FiPenTool, FiZap, FiCamera } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import gsap from 'gsap';
@@ -15,6 +15,7 @@ const iconMap = {
   FiSettings: <FiSettings />,
   FiPenTool: <FiPenTool />,
   FiZap: <FiZap />,
+  FiCamera: <FiCamera />,
 };
 
 const skillCategories = [

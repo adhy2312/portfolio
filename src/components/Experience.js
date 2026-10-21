@@ -98,10 +98,25 @@ const Experience = () => {
   useEffect(() => {
     const fetchExperiences = async () => {
       try {
-        const query = '*[_type == "experience"] | order(order asc)';
+        const query = '*[_type == "experience" && !(_id in path("drafts.**"))] | order(order asc, _createdAt desc)';
         const data = await client.fetch(query);
         if (data && data.length > 0) {
-          setExperiences(data);
+          const seen = new Set();
+          const unique = [];
+          for (const exp of data) {
+            const org = (exp.organization || exp.company || '').trim().toLowerCase();
+            const normKey = org.includes('senate') ? 'senate'
+              : org.includes('finance') ? 'finance'
+              : org.includes('iste') ? 'iste'
+              : org.includes('frames') ? 'frames'
+              : org.includes('socius') ? 'socius'
+              : org;
+            if (!seen.has(normKey)) {
+              seen.add(normKey);
+              unique.push(exp);
+            }
+          }
+          setExperiences(unique.length > 0 ? unique : data);
         }
       } catch (error) {
         console.error("Error fetching experiences from Sanity:", error);

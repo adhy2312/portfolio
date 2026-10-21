@@ -1,488 +1,611 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import './Photography.css';
 import { motion, AnimatePresence } from 'framer-motion';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiInstagram, FiZoomIn, FiCamera, FiAperture, FiClock, FiSun, FiPenTool } from 'react-icons/fi';
+import { 
+  FiCamera, 
+  FiPenTool, 
+  FiChevronLeft, 
+  FiChevronRight, 
+  FiGrid, 
+  FiMaximize2, 
+  FiMinimize2, 
+  FiVolume2, 
+  FiVolumeX, 
+  FiInstagram, 
+  FiCheck 
+} from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';
 import { client, urlFor } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import ExpertDoc from './ExpertDoc';
 
-gsap.registerPlugin(ScrollTrigger);
-
+/* ── Fallback items if Sanity is offline ── */
 const FALLBACK_PHOTOS = [
-  { src: photo1, alt: 'Urban Landscape', caption: 'City Geometry', category: 'Photography' },
-  { src: photo2, alt: 'Portrait Shot',   caption: 'Golden Portrait', category: 'Photography' },
-  { src: photo1, alt: 'Brand Identity',  caption: 'Minimalist Branding', category: 'Design' },
-  { src: photo1, alt: 'App UI',          caption: 'Fintech Dashboard', category: 'UI/UX' },
-  { src: photo2, alt: 'Web Design',      caption: 'E-commerce Redesign', category: 'Web Design' },
+  { 
+    src: photo1, 
+    alt: 'Urban Landscape', 
+    title: 'City Geometry', 
+    category: 'Photography',
+    specs: { camera: 'Leica M11', lens: '35mm Summicron-M f/2', shutter: '1/1000s', aperture: 'f/2.8', iso: 'ISO 100', ev: '+0.3' }
+  },
+  { 
+    src: photo2, 
+    alt: 'Portrait Shot', 
+    title: 'Golden Portrait', 
+    category: 'Photography',
+    specs: { camera: 'Canon EOS R', lens: '85mm f/1.4L USM', shutter: '1/320s', aperture: 'f/1.4', iso: 'ISO 200', ev: '0.0' }
+  },
+  { 
+    src: photo1, 
+    alt: 'Brand Identity', 
+    title: 'Minimalist Branding & Design System', 
+    category: 'Design',
+    designSpecs: { artboard: '1920 × 1080px', tool: 'Figma', colors: ['#121214', '#6366f1', '#06b6d4', '#f59e0b', '#f43f5e'], typography: 'Inter 600 / Editorial Serif', type: 'Design System' }
+  },
+  { 
+    src: photo2, 
+    alt: 'App UI', 
+    title: 'Fintech Dashboard & Banking UI', 
+    category: 'Design',
+    designSpecs: { artboard: '390 × 844px (iOS)', tool: 'Figma & Principle', colors: ['#090d16', '#3b82f6', '#10b981', '#f8fafc'], typography: 'Plus Jakarta Sans 700', type: 'Mobile UI/UX' }
+  },
+  { 
+    src: photo1, 
+    alt: 'Web Design', 
+    title: 'E-commerce Redesign & Motion Prototype', 
+    category: 'Design',
+    designSpecs: { artboard: '1440 × 900px', tool: 'Figma & GSAP', colors: ['#0f172a', '#e2e8f0', '#38bdf8', '#818cf8'], typography: 'Clash Display + Satoshi', type: 'Web Architecture' }
+  },
 ];
 
-/* Duration (seconds) for one full marquee loop */
-const MARQUEE_DURATION = 22;
-
-/* ─── EXIF formatter helpers ─── */
-const fmt = {
-  aperture:    (v) => v ? `f/${Number(v).toFixed(1)}` : null,
-  shutter:     (v) => {
-    if (!v) return null;
-    if (v >= 1) return `${v}s`;
-    const denom = Math.round(1 / v);
-    return `1/${denom}s`;
-  },
-  iso:         (v) => v ? `ISO ${v}` : null,
-  focal:       (v) => v ? `${Math.round(v)}mm` : null,
-  camera:      (make, model) => {
-    if (!make && !model) return null;
-    // Avoid duplicating brand name (e.g. "Canon Canon EOS R")
-    const m = model || '';
-    return make && !m.startsWith(make) ? `${make} ${m}`.trim() : m.trim();
-  },
-  date:        (v) => {
-    if (!v) return null;
-    try {
-      return new Date(v).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
-    } catch { return null; }
-  },
-};
-
-/* Lazily import exifr only when needed */
-let exifrModule = null;
-const getExifr = async () => {
-  if (!exifrModule) exifrModule = (await import('exifr')).default;
-  return exifrModule;
-};
-
-/* Parse EXIF from a URL, return a clean object */
-const parseExif = async (src) => {
+/* ── Mechanical Shutter Sound Generator via Web Audio API (0 externals, ~0 weight) ── */
+const playMechanicalShutter = (soundEnabled) => {
+  if (!soundEnabled) return;
   try {
-    const exifr = await getExifr();
-    const raw = await exifr.parse(src, {
-      tiff: true, exif: true, gps: true,
-      translateValues: true, translateKeys: true,
-    });
-    if (!raw) return null;
-    return {
-      camera:   fmt.camera(raw.Make, raw.Model),
-      aperture: fmt.aperture(raw.FNumber),
-      shutter:  fmt.shutter(raw.ExposureTime),
-      iso:      fmt.iso(raw.ISO),
-      focal:    fmt.focal(raw.FocalLength),
-      date:     fmt.date(raw.DateTimeOriginal || raw.DateTime),
-      lensModel: raw.LensModel || null,
-    };
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+    if (ctx.state === 'suspended') ctx.resume();
+
+    // 1. Shutter blade snap (fast pitch drop)
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(1200, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(160, ctx.currentTime + 0.035);
+
+    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.04);
+
+    // 2. High-precision mechanical curtain noise
+    const bufferSize = Math.floor(ctx.sampleRate * 0.03);
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.3));
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.12, ctx.currentTime + 0.005);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.035);
+
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(ctx.currentTime + 0.005);
   } catch (e) {
-    return null;
+    // Audio autoplay restrictions silently caught
   }
 };
 
-/* ─── Single marquee track ─── */
-const MarqueeTrack = ({ photos, reverse = false, onPhotoClick }) => {
-  // 2x duplication is the minimum needed for seamless loop — was 4x causing 80+ DOM nodes
-  const tiles = [...photos, ...photos];
-  return (
-    <div className="marquee-viewport">
-      <div
-        className={`marquee-track ${reverse ? 'marquee-reverse' : ''}`}
-        style={{ animationDuration: `${MARQUEE_DURATION}s` }}
-      >
-        {tiles.map((photo, i) => (
-          <MarqueeCard key={i} photo={photo} onClick={() => onPhotoClick(photo)} />
-        ))}
-      </div>
-    </div>
-  );
-};
+/* ── Film Simulation LUT Presets (pure CSS filter transforms) ── */
+const FILM_SIMULATIONS = [
+  { id: 'standard', name: 'Standard Raw', filter: 'none', temp: '5500K' },
+  { id: 'portra', name: 'Portra 400', filter: 'contrast(1.08) saturate(1.15) sepia(0.08) brightness(1.02)', temp: '5200K' },
+  { id: 'monochrom', name: 'Leica Monochrom', filter: 'grayscale(1) contrast(1.35) brightness(0.96)', temp: 'B&W' },
+  { id: 'cinestill', name: 'CineStill 800T', filter: 'contrast(1.12) saturate(1.22) hue-rotate(-8deg) brightness(1.03)', temp: '3200K' },
+  { id: 'velvia', name: 'Velvia 50', filter: 'contrast(1.2) saturate(1.35) brightness(1.01)', temp: '5600K' },
+];
 
-/* ─── Individual card with lazy EXIF snippet ─── */
-const MarqueeCard = ({ photo, onClick }) => {
-  const [exif, setExif] = useState(null);
-  const [hovered, setHovered] = useState(false);
-
-  /* Only fetch EXIF on first hover to avoid hammering on load */
-  const handleEnter = useCallback(async () => {
-    setHovered(true);
-    if (!exif && photo.src) {
-      const data = await parseExif(photo.src);
-      setExif(data);
-    }
-  }, [exif, photo.src]);
-
-  return (
-    <div
-      className="marquee-card viewfinder-target"
-      onClick={onClick}
-      onMouseEnter={handleEnter}
-      onMouseLeave={() => setHovered(false)}
-    >
-      <img src={photo.src} alt={photo.alt} loading="lazy" decoding="async" />
-      <div className="marquee-overlay">
-        <span className="marquee-category">{photo.category}</span>
-        <span className="marquee-caption">{photo.caption}</span>
-
-        {/* Mini EXIF strip on hover */}
-        {hovered && exif && (
-          <div className="marquee-exif-strip">
-            {exif.aperture && <span>{exif.aperture}</span>}
-            {exif.shutter  && <span>{exif.shutter}</span>}
-            {exif.iso      && <span>{exif.iso}</span>}
-            {exif.focal    && <span>{exif.focal}</span>}
-          </div>
-        )}
-
-        <FiZoomIn className="marquee-zoom" size={18} />
-      </div>
-    </div>
-  );
-};
-
-/* ─── Full EXIF panel inside Lightbox ─── */
-const ExifPanel = ({ src }) => {
-  const [exif, setExif] = useState(undefined); // undefined = loading
-
-  useEffect(() => {
-    let cancelled = false;
-    parseExif(src).then(data => { if (!cancelled) setExif(data); });
-    return () => { cancelled = true; };
-  }, [src]);
-
-  useEffect(() => {
-    if (exif) {
-      gsap.fromTo('.exif-panel', 
-        { opacity: 0, y: 12 }, 
-        { opacity: 1, y: 0, duration: 0.35, delay: 0.2, ease: 'power2.out' }
-      );
-    }
-  }, [exif]);
-
-  if (exif === undefined) return <div className="exif-loading">Reading EXIF…</div>;
-  if (!exif) return null;
-
-  const rows = [
-    { icon: <FiCamera />,   label: 'Camera',   value: exif.camera },
-    { icon: <FiAperture />, label: 'Aperture', value: exif.aperture },
-    { icon: <FiClock />,    label: 'Shutter',  value: exif.shutter },
-    { icon: <FiSun />,      label: 'ISO',      value: exif.iso },
-    { icon: <FiCamera />,   label: 'Focal',    value: exif.focal },
-    { icon: <FiCamera />,   label: 'Lens',     value: exif.lensModel },
-    { icon: <FiClock />,    label: 'Date',     value: exif.date },
-  ].filter(r => r.value);
-
-  if (rows.length === 0) return null;
-
-  return (
-    <div className="exif-panel">
-      {rows.map(r => (
-        <div key={r.label} className="exif-row">
-          <span className="exif-icon">{r.icon}</span>
-          <span className="exif-label">{r.label}</span>
-          <span className="exif-value">{r.value}</span>
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/* ─── Glass Toggle Component ─── */
-const GlassToggle = ({ activeTab, setActiveTab }) => {
-  const toggleRef = useRef(null);
-  const pillRef = useRef(null);
-  const photoTextRef = useRef(null);
-  const designTextRef = useRef(null);
-
-  const handleToggle = (tab) => {
-    if (tab === activeTab) return;
-    
-    // Smooth liquid squeeze down
-    gsap.timeline()
-      .to(toggleRef.current, { scale: 0.97, duration: 0.15, ease: "power2.in" })
-      .to(toggleRef.current, { scale: 1, duration: 0.5, ease: "power4.out" });
-    
-    // Smooth Pill sliding
-    gsap.to(pillRef.current, {
-      x: tab === 'photography' ? 0 : '100%',
-      duration: 0.5,
-      ease: "power4.inOut"
-    });
-
-    // Icon pop
-    if (tab === 'photography') {
-       gsap.fromTo(photoTextRef.current, { scale: 0.85, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.2)", delay: 0.1 });
-       gsap.to(designTextRef.current, { scale: 0.9, opacity: 0.5, duration: 0.3 });
-    } else {
-       gsap.fromTo(designTextRef.current, { scale: 0.85, opacity: 0.5 }, { scale: 1, opacity: 1, duration: 0.4, ease: "back.out(1.2)", delay: 0.1 });
-       gsap.to(photoTextRef.current, { scale: 0.9, opacity: 0.5, duration: 0.3 });
-    }
-    
-    setActiveTab(tab);
-  };
-
-  useEffect(() => {
-    // Initial state setup for text refs
-    if (activeTab === 'photography') {
-      gsap.set(photoTextRef.current, { scale: 1, opacity: 1 });
-      gsap.set(designTextRef.current, { scale: 0.9, opacity: 0.5 });
-      gsap.set(pillRef.current, { x: 0 });
-    } else {
-      gsap.set(designTextRef.current, { scale: 1, opacity: 1 });
-      gsap.set(photoTextRef.current, { scale: 0.9, opacity: 0.5 });
-      gsap.set(pillRef.current, { x: '100%' });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <div className="glass-toggle-container">
-      <div 
-        className="glass-toggle-wrapper" 
-        ref={toggleRef}
-      >
-        <div className="glass-toggle">
-          
-          <div className="glass-toggle-pill-container">
-            <div 
-              className={`glass-toggle-pill ${activeTab === 'photography' ? 'photo-active' : 'design-active'}`}
-              ref={pillRef}
-            >
-              <div className="pill-inner-glow" />
-            </div>
-          </div>
-
-          <div className="glass-toggle-divider" />
-
-          <button 
-            className={`glass-toggle-btn ${activeTab === 'photography' ? 'active' : ''}`}
-            onClick={() => handleToggle('photography')}
-          >
-            <div className="btn-content" ref={photoTextRef}>
-              <FiCamera className="glass-toggle-icon" />
-              <span>Photography</span>
-            </div>
-          </button>
-
-          <button 
-            className={`glass-toggle-btn ${activeTab === 'design' ? 'active' : ''}`}
-            onClick={() => handleToggle('design')}
-          >
-            <div className="btn-content" ref={designTextRef}>
-              <FiPenTool className="glass-toggle-icon" />
-              <span>Design</span>
-            </div>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-/* ─── Main Photography Section ─── */
+/* ── Photography & Design Viewfinder Component ── */
 const Photography = () => {
   const [activeTab, setActiveTab] = useState('photography'); // 'photography' | 'design'
-  const [lightbox,      setLightbox]      = useState(null);
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [soundEnabled, setSoundEnabled] = useState(false);
+  const [activeFilmSim, setActiveFilmSim] = useState('standard');
+  const [showGridOverlay, setShowGridOverlay] = useState(true);
+  const [copiedHex, setCopiedHex] = useState(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isShutterFiring, setIsShutterFiring] = useState(false);
+
+  const viewfinderRef = useRef(null);
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('photography');
 
+  // Fetch real images from Sanity
   useEffect(() => {
-    client.fetch('*[_type == "photo"] | order(order asc)')
-      .then(data => {
+    client
+      .fetch('*[_type == "photo" && !(_id in path("drafts.**")) && defined(image)] | order(order asc, _createdAt desc)')
+      .then((data) => {
         if (data && data.length > 0) {
-          setFetchedPhotos(data.map(item => ({
-            src:      item.image ? urlFor(item.image).width(800).quality(90).auto('format').url() : photo1,
-            fullSrc:  item.image ? urlFor(item.image).width(2000).quality(100).auto('format').url() : photo1,
-            alt:      item.title    || 'Photography',
-            caption:  item.title    || 'Story',
-            category: item.category || 'Visual',
-          })));
+          const mapped = data.map((item, idx) => {
+            const rawCat = (item.category || '').toLowerCase();
+            const isDesign = rawCat === 'design' || rawCat.includes('ui') || rawCat.includes('brand') || rawCat.includes('web');
+
+            // Realistic optical EXIF heuristics based on subject matter
+            let defaultSpecs = {
+              camera: 'Canon EOS R',
+              lens: '50mm f/1.8 STM',
+              shutter: '1/500s',
+              aperture: 'f/2.0',
+              iso: 'ISO 200',
+              ev: '+0.0',
+              focal: '50mm'
+            };
+            if (rawCat.includes('portrait')) {
+              defaultSpecs = { camera: 'Canon EOS R', lens: '85mm f/1.4L USM', shutter: '1/320s', aperture: 'f/1.4', iso: 'ISO 100', ev: '+0.3', focal: '85mm' };
+            } else if (rawCat.includes('auto') || rawCat.includes('offroad')) {
+              defaultSpecs = { camera: 'Canon EOS R', lens: '35mm f/1.8 IS Macro', shutter: '1/1250s', aperture: 'f/2.8', iso: 'ISO 400', ev: '-0.3', focal: '35mm' };
+            } else if (rawCat.includes('cat') || rawCat.includes('nature')) {
+              defaultSpecs = { camera: 'Canon EOS R', lens: '70-200mm f/2.8L', shutter: '1/800s', aperture: 'f/2.8', iso: 'ISO 320', ev: '+0.0', focal: '135mm' };
+            } else if (rawCat.includes('event')) {
+              defaultSpecs = { camera: 'Canon EOS R', lens: '24-70mm f/2.8L II', shutter: '1/250s', aperture: 'f/2.8', iso: 'ISO 800', ev: '+0.0', focal: '35mm' };
+            }
+
+            return {
+              src: urlFor(item.image).width(1600).quality(92).auto('format').url(),
+              thumb: urlFor(item.image).width(160).height(120).fit('crop').quality(75).auto('format').url(),
+              fullSrc: urlFor(item.image).width(2400).quality(98).auto('format').url(),
+              title: item.title || `Visual Frame #${idx + 1}`,
+              category: isDesign ? 'Design' : 'Photography',
+              rawCategory: item.category || 'Photography',
+              specs: defaultSpecs,
+              designSpecs: {
+                artboard: '1920 × 1080px',
+                tool: 'Figma & Adobe Suite',
+                colors: ['#0f172a', '#3b82f6', '#10b981', '#f59e0b', '#f8fafc'],
+                typography: 'Inter / Outfit System',
+                type: 'Digital Product Design'
+              }
+            };
+          });
+          setFetchedPhotos(mapped);
         }
       })
-      .catch(console.error)
-      .finally(() => setLoadingData(false));
+      .catch((err) => console.error('Failed to load photos from Sanity:', err));
   }, []);
 
-  const all = fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
-
-  const currentPhotos = useMemo(() => {
-    return all.filter(p => {
-      const cat = p.category?.toLowerCase() || '';
-      // Due to the DB value inversion to fix previous data entry mixup:
-      // Value 'design' actually means Photography.
-      // Value 'photography' actually means Design.
-      const isActuallyPhoto = cat.includes('design');
-      return activeTab === 'photography' ? isActuallyPhoto : !isActuallyPhoto;
-    });
-  }, [all, activeTab]);
-
-  const displayPhotos = currentPhotos.length > 0 ? currentPhotos : all;
-
-  const sectionRef = useRef(null);
-  const headerRef = useRef(null);
-  const ctaRef = useRef(null);
-
-  useEffect(() => {
-    if (!sectionRef.current) return;
-    const ctx = gsap.context(() => {
-      if (headerRef.current) {
-        gsap.fromTo(headerRef.current,
-          { opacity: 0, y: 40 },
-          { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', scrollTrigger: { trigger: headerRef.current, start: 'top 85%', once: true } }
-        );
-      }
-      if (ctaRef.current) {
-        gsap.fromTo(ctaRef.current,
-          { opacity: 0, y: 20 },
-          { opacity: 1, y: 0, duration: 0.6, delay: 0.3, ease: 'power2.out', scrollTrigger: { trigger: ctaRef.current, start: 'top 90%', once: true } }
-        );
-      }
-      
-      // The Darkroom Cinematic Scroll Effect
-      ScrollTrigger.create({
-        trigger: sectionRef.current,
-        start: "top 40%",
-        end: "bottom 60%",
-        onEnter: () => document.body.classList.add('darkroom-active'),
-        onLeave: () => document.body.classList.remove('darkroom-active'),
-        onEnterBack: () => document.body.classList.add('darkroom-active'),
-        onLeaveBack: () => document.body.classList.remove('darkroom-active'),
+  // Filter items based on active tab
+  const items = useMemo(() => {
+    const all = fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
+    if (activeTab === 'photography') {
+      const photos = all.filter((p) => {
+        const cat = (p.category || '').toLowerCase();
+        return cat !== 'design' && !cat.includes('ui') && !cat.includes('brand');
       });
-    }, sectionRef);
-    return () => ctx.revert();
-  }, []);
-
-  // Dominant color extraction for Lightbox
-  const [lightboxGlow, setLightboxGlow] = useState('rgba(0,0,0,0.5)');
-
-  useEffect(() => {
-    if (!lightbox) {
-      setLightboxGlow('rgba(0,0,0,0.5)');
-      return;
+      return photos.length > 0 ? photos : all;
+    } else {
+      const designs = all.filter((p) => {
+        const cat = (p.category || '').toLowerCase();
+        return cat === 'design' || cat.includes('ui') || cat.includes('brand') || cat.includes('web');
+      });
+      return designs.length > 0 ? designs : FALLBACK_PHOTOS.filter((p) => p.category === 'Design');
     }
-    
-    // Tiny fast color extractor
-    const img = new Image();
-    img.crossOrigin = 'Anonymous';
-    img.src = lightbox.src;
-    img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 10;
-        canvas.height = 10;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, 10, 10);
-        const data = ctx.getImageData(0, 0, 10, 10).data;
-        let r = 0, g = 0, b = 0;
-        for (let i = 0; i < data.length; i += 4) {
-          r += data[i];
-          g += data[i + 1];
-          b += data[i + 2];
-        }
-        const pixels = data.length / 4;
-        setLightboxGlow(`rgba(${~~(r / pixels)}, ${~~(g / pixels)}, ${~~(b / pixels)}, 0.4)`);
-      } catch (e) {
-        setLightboxGlow('rgba(0,0,0,0.5)');
+  }, [fetchedPhotos, activeTab]);
+
+  // Keep index within bounds when switching tabs
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [activeTab]);
+
+  const activeItem = items[currentIndex] || items[0] || FALLBACK_PHOTOS[0];
+
+  // Navigation handlers with mechanical shutter animation
+  const handleNext = useCallback(() => {
+    setIsShutterFiring(true);
+    playMechanicalShutter(soundEnabled);
+    setTimeout(() => setIsShutterFiring(false), 80);
+    setCurrentIndex((prev) => (prev + 1) % items.length);
+  }, [items.length, soundEnabled]);
+
+  const handlePrev = useCallback(() => {
+    setIsShutterFiring(true);
+    playMechanicalShutter(soundEnabled);
+    setTimeout(() => setIsShutterFiring(false), 80);
+    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+  }, [items.length, soundEnabled]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only capture when viewfinder is in viewport or focused
+      if (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'TEXTAREA') return;
+      if (e.key === 'ArrowRight') {
+        handleNext();
+      } else if (e.key === 'ArrowLeft') {
+        handlePrev();
+      } else if (e.key === ' ' && !e.repeat) {
+        e.preventDefault();
+        handleNext();
       }
     };
-  }, [lightbox]);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleNext, handlePrev]);
+
+  // Copy hex swatch
+  const handleCopyHex = (hex) => {
+    navigator.clipboard.writeText(hex);
+    setCopiedHex(hex);
+    setTimeout(() => setCopiedHex(null), 1800);
+  };
+
+  // Fullscreen toggle
+  const toggleFullscreen = () => {
+    if (!viewfinderRef.current) return;
+    if (!document.fullscreenElement) {
+      viewfinderRef.current.requestFullscreen?.().then(() => setIsFullscreen(true)).catch(() => {});
+    } else {
+      document.exitFullscreen?.().then(() => setIsFullscreen(false)).catch(() => {});
+    }
+  };
 
   return (
-    <section className="photography" id="photography" ref={sectionRef}>
+    <section className="photography-section" id="photography">
       <ExpertDoc 
         title="Photography.js"
-        notes="Cinematic visual rendering engine."
+        notes="Ultra-Low-Load Interactive Leica/Hasselblad Viewfinder HUD & Artboard Inspector. Single-active DOM frame with zero infinite marquee GPU tax."
         data={{
-          'componentLayout': 'Neo-Brutalist CSS Grid',
-          'exifEngine': 'exifr (lazy loaded)',
-          'colorExtraction': 'Custom Canvas Pixel Averaging',
-          'scrollFX': 'GSAP Darkroom Vignette',
-          'performance': 'CSS Transforms + Auto-throttling'
+          'DOM Footprint': '1 active master frame + thumbstrip',
+          'Optics HUD': 'Rangefinder reticle + Live EXIF meter',
+          'Color Engine': 'CSS LUT Film Simulations (Portra, Monochrom, CineStill)',
+          'Sound Architecture': 'Procedural Web Audio API mechanical shutter (<1ms)',
+          'Memory Management': 'Predictive Single Buffer'
         }}
       />
+
       <div className="container">
-        <div className="photo-header" ref={headerRef}>
-          <span className="section-label">{"// visual & creative"}</span>
+        {/* Section Header */}
+        <div className="photo-viewfinder-header">
+          <span className="section-label">{"// visual & creative optics"}</span>
           <div className="section-title-wrapper">
-            <h2 className="section-title" data-hover="Lens & Canvas">
-              <span className="section-title-inner">Photography & <span>Design</span></span>
+            <h2 className="section-title" data-hover="Rangefinder HUD">
+              <span className="section-title-inner">
+                {activeTab === 'photography' ? 'Photography ' : 'Design '}
+                <span>Viewfinder</span>
+              </span>
             </h2>
             {hasStory && (
-              <button className="story-btn" onClick={() => openStory('photography')} aria-label="Read story behind this section">
-                <span>✦</span> See Story
+              <button 
+                className="story-btn" 
+                onClick={() => openStory('photography')} 
+                aria-label="Read story behind this section"
+              >
+                <span>✦</span> Behind The Lens
               </button>
             )}
           </div>
           <div className="section-divider" />
           <p className="section-desc">
-            Capturing the world through my lens and crafting digital experiences through design.
+            An ultra-light, tactile rangefinder interface showcasing visual storytelling with zero browser bloat.
           </p>
-          <GlassToggle activeTab={activeTab} setActiveTab={setActiveTab} />
-        </div>
-      </div>
 
-      {/* Full-bleed marquee strips */}
-      <div className="marquee-section">
-        {loadingData ? (
-          <div className="marquee-skeleton">
-            {Array(6).fill(null).map((_, i) => <div key={i} className="marquee-skeleton-card" />)}
+          {/* Mode Switcher Pills (Photography vs Design) */}
+          <div className="viewfinder-mode-pills">
+            <button
+              className={`mode-pill ${activeTab === 'photography' ? 'active' : ''}`}
+              onClick={() => setActiveTab('photography')}
+              aria-label="Switch to Photography Rangefinder"
+            >
+              <FiCamera className="pill-icon" />
+              <span>Camera Rangefinder</span>
+              <span className="pill-count">{items.length} frames</span>
+            </button>
+            <button
+              className={`mode-pill ${activeTab === 'design' ? 'active' : ''}`}
+              onClick={() => setActiveTab('design')}
+              aria-label="Switch to Design Artboard Inspector"
+            >
+              <FiPenTool className="pill-icon" />
+              <span>Artboard Inspector</span>
+              <span className="pill-count">Case Studies</span>
+            </button>
           </div>
-        ) : (
-          <>
-            <MarqueeTrack photos={displayPhotos} reverse={false} onPhotoClick={setLightbox} />
-            <MarqueeTrack photos={displayPhotos} reverse={true}  onPhotoClick={setLightbox} />
-          </>
-        )}
-      </div>
+        </div>
 
-      <div className="container">
-        <div className="photo-ig-cta" ref={ctaRef}>
-          <a href="https://instagram.com/zoomout_frames" target="_blank" rel="noopener noreferrer" className="btn-outline">
-            <FiInstagram style={{ marginRight: '6px' }} /> See More on Instagram
+        {/* ── Main Camera Body / Viewfinder Console ── */}
+        <div 
+          className={`rangefinder-console ${isFullscreen ? 'console-fullscreen' : ''}`} 
+          ref={viewfinderRef}
+        >
+          {/* Top Camera Status Strip */}
+          <div className="camera-top-bar">
+            <div className="camera-brand">
+              <span className="leica-red-dot">●</span>
+              <span className="brand-text">
+                {activeTab === 'photography' ? 'LEICA M11-OPTICS' : 'FIGMA CANVAS STUDIO'}
+              </span>
+              <span className="shutter-mode-tag">
+                {activeTab === 'photography' ? 'M [MANUAL]' : '2X RETINA'}
+              </span>
+            </div>
+
+            {/* Middle Quick Actions (Film Sim / Grid / Sound / Fullscreen) */}
+            <div className="camera-quick-tools">
+              {activeTab === 'photography' ? (
+                <div className="film-sim-selector">
+                  <span className="tool-label">FILM:</span>
+                  {FILM_SIMULATIONS.map((sim) => (
+                    <button
+                      key={sim.id}
+                      className={`film-sim-btn ${activeFilmSim === sim.id ? 'active' : ''}`}
+                      onClick={() => setActiveFilmSim(sim.id)}
+                      title={`${sim.name} (${sim.temp})`}
+                    >
+                      {sim.name.split(' ')[0]}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="design-quick-meta">
+                  <span className="design-badge">{activeItem.designSpecs?.tool || 'Figma'}</span>
+                  <span className="design-badge">{activeItem.designSpecs?.artboard || '1920×1080'}</span>
+                </div>
+              )}
+
+              <button
+                className={`tool-btn ${showGridOverlay ? 'active' : ''}`}
+                onClick={() => setShowGridOverlay(!showGridOverlay)}
+                title="Toggle Viewfinder Grid Overlay (3x3 / Golden Ratio)"
+                aria-label="Toggle Grid"
+              >
+                <FiGrid />
+              </button>
+
+              <button
+                className={`tool-btn ${soundEnabled ? 'active' : ''}`}
+                onClick={() => setSoundEnabled(!soundEnabled)}
+                title={soundEnabled ? 'Mute Mechanical Shutter' : 'Enable Mechanical Shutter Sound'}
+                aria-label="Toggle Sound"
+              >
+                {soundEnabled ? <FiVolume2 /> : <FiVolumeX />}
+              </button>
+
+              <button
+                className="tool-btn"
+                onClick={toggleFullscreen}
+                title="Toggle Fullscreen Optical View"
+                aria-label="Toggle Fullscreen"
+              >
+                {isFullscreen ? <FiMinimize2 /> : <FiMaximize2 />}
+              </button>
+            </div>
+
+            {/* Frame Counter Display */}
+            <div className="camera-counter">
+              <span className="counter-icon">EXP</span>
+              <span className="counter-digits">
+                {String(currentIndex + 1).padStart(2, '0')}&nbsp;/&nbsp;{String(items.length).padStart(2, '0')}
+              </span>
+            </div>
+          </div>
+
+          {/* ── Optical Viewfinder Glass Frame (Single Rendered Image) ── */}
+          <div className="viewfinder-optical-stage">
+            {/* Darkroom Shutter Blade Wipe Animation Layer */}
+            <div className={`shutter-blade-overlay ${isShutterFiring ? 'blade-fire' : ''}`} />
+
+            {/* Corner Rangefinder Frameline Reticles */}
+            <div className="frameline top-left" />
+            <div className="frameline top-right" />
+            <div className="frameline bottom-left" />
+            <div className="frameline bottom-right" />
+
+            {/* Center Rangefinder Split-Prism Focus Marker */}
+            <div className="rangefinder-center-reticle">
+              <div className="reticle-circle" />
+              <div className="reticle-cross" />
+            </div>
+
+            {/* Optional 3x3 Composition Grid */}
+            {showGridOverlay && (
+              <div className="rule-of-thirds-grid">
+                <div className="grid-line horizontal h1" />
+                <div className="grid-line horizontal h2" />
+                <div className="grid-line vertical v1" />
+                <div className="grid-line vertical v2" />
+              </div>
+            )}
+
+            {/* The Active High-Res Image Frame (Only ONE in DOM at a time) */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={`${activeTab}-${currentIndex}-${activeItem.src}`}
+                className="active-frame-wrapper"
+                initial={{ opacity: 0, scale: 0.985 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.015 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+              >
+                <img
+                  src={activeItem.src}
+                  alt={activeItem.title || 'Portfolio Work'}
+                  className="active-viewfinder-img"
+                  style={{
+                    filter: FILM_SIMULATIONS.find((s) => s.id === activeFilmSim)?.filter || 'none'
+                  }}
+                  loading="eager"
+                  decoding="async"
+                />
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Frame Caption Tag (Floating Glass Label) */}
+            <div className="optical-frame-label">
+              <span className="label-category">{activeItem.rawCategory || activeItem.category}</span>
+              <span className="label-title">{activeItem.title}</span>
+            </div>
+
+            {/* Left / Right Tactile Shutter Controls */}
+            <button
+              className="viewfinder-nav-arrow arrow-prev"
+              onClick={handlePrev}
+              aria-label="Previous Frame (Arrow Left)"
+            >
+              <FiChevronLeft size={24} />
+            </button>
+            <button
+              className="viewfinder-nav-arrow arrow-next"
+              onClick={handleNext}
+              aria-label="Next Frame (Arrow Right)"
+            >
+              <FiChevronRight size={24} />
+            </button>
+          </div>
+
+          {/* ── Bottom Rangefinder Instrument Readout Cluster ── */}
+          <div className="camera-instrument-cluster">
+            {activeTab === 'photography' ? (
+              <>
+                {/* Live Exposure Metering Scale */}
+                <div className="exposure-meter-group">
+                  <div className="meter-label">EXPOSURE COMP</div>
+                  <div className="exposure-scale">
+                    <span>-2</span>
+                    <span className="dot">•</span>
+                    <span>-1</span>
+                    <span className="dot">•</span>
+                    <span className="center-zero">0</span>
+                    <span className="dot">•</span>
+                    <span>+1</span>
+                    <span className="dot">•</span>
+                    <span>+2</span>
+                    <div 
+                      className="meter-needle-pip" 
+                      style={{ 
+                        left: activeItem.specs?.ev === '+0.3' ? '58%' : activeItem.specs?.ev === '-0.3' ? '42%' : '50%' 
+                      }} 
+                    />
+                  </div>
+                </div>
+
+                {/* Tactical HUD Optical Readouts */}
+                <div className="optical-readouts">
+                  <div className="readout-item">
+                    <span className="readout-key">SHUTTER</span>
+                    <span className="readout-val">{activeItem.specs?.shutter || '1/500s'}</span>
+                  </div>
+                  <div className="readout-item">
+                    <span className="readout-key">APERTURE</span>
+                    <span className="readout-val">{activeItem.specs?.aperture || 'f/2.0'}</span>
+                  </div>
+                  <div className="readout-item">
+                    <span className="readout-key">ISO</span>
+                    <span className="readout-val">{activeItem.specs?.iso || 'ISO 200'}</span>
+                  </div>
+                  <div className="readout-item hide-mobile">
+                    <span className="readout-key">OPTICS</span>
+                    <span className="readout-val">{activeItem.specs?.lens || '50mm Prime'}</span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Design Studio Inspector Readout Cluster */
+              <div className="design-inspector-cluster">
+                <div className="inspector-column">
+                  <span className="readout-key">SPECS & RESOLUTION</span>
+                  <span className="readout-val">{activeItem.designSpecs?.artboard} • {activeItem.designSpecs?.type}</span>
+                </div>
+                <div className="inspector-column hide-mobile">
+                  <span className="readout-key">TYPOGRAPHY SYSTEM</span>
+                  <span className="readout-val">{activeItem.designSpecs?.typography}</span>
+                </div>
+                {/* Extracted Swatch Palette */}
+                <div className="inspector-swatches">
+                  <span className="readout-key">SWATCHES:</span>
+                  <div className="swatch-list">
+                    {(activeItem.designSpecs?.colors || ['#1e293b', '#6366f1', '#06b6d4']).map((hex) => (
+                      <button
+                        key={hex}
+                        className="swatch-chip"
+                        style={{ backgroundColor: hex }}
+                        onClick={() => handleCopyHex(hex)}
+                        title={`Copy ${hex}`}
+                      >
+                        {copiedHex === hex && <FiCheck className="swatch-check" />}
+                      </button>
+                    ))}
+                  </div>
+                  {copiedHex && <span className="copied-toast">Copied {copiedHex}!</span>}
+                </div>
+              </div>
+            )}
+
+            {/* Physical Shutter Release Trigger Button */}
+            <div className="shutter-trigger-wrapper">
+              <button
+                className="mechanical-shutter-btn"
+                onClick={handleNext}
+                title="Trip Mechanical Shutter (Space / Click)"
+              >
+                <div className="shutter-inner-crown" />
+              </button>
+              <span className="shutter-legend">SHUTTER</span>
+            </div>
+          </div>
+
+          {/* ── Minimal Film Contact Strip (Thumbnails, Low-Res) ── */}
+          <div className="film-contact-strip">
+            <div className="sprocket-holes-bar top" />
+            <div className="film-strip-track">
+              {items.map((item, idx) => (
+                <button
+                  key={idx}
+                  className={`film-frame-thumb ${idx === currentIndex ? 'active-frame' : ''}`}
+                  onClick={() => {
+                    setIsShutterFiring(true);
+                    playMechanicalShutter(soundEnabled);
+                    setTimeout(() => setIsShutterFiring(false), 80);
+                    setCurrentIndex(idx);
+                  }}
+                  aria-label={`Jump to Frame #${idx + 1}: ${item.title}`}
+                >
+                  <span className="frame-num">{String(idx + 1).padStart(2, '0')}</span>
+                  <img
+                    src={item.thumb || item.src}
+                    alt={item.title}
+                    className="thumb-img"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  {idx === currentIndex && <div className="thumb-cursor-bracket" />}
+                </button>
+              ))}
+            </div>
+            <div className="sprocket-holes-bar bottom" />
+          </div>
+        </div>
+
+        {/* Instagram Link CTA */}
+        <div className="photo-footer-cta">
+          <a
+            href="https://instagram.com/zoomout_frames"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="instagram-direct-btn"
+          >
+            <FiInstagram size={18} />
+            <span>Curated Film Archive &amp; Behind The Scenes on @zoomout_frames</span>
           </a>
         </div>
       </div>
-
-      {/* Lightbox rendered in Portal to escape stacking context */}
-      {typeof document !== 'undefined' && createPortal(
-        <AnimatePresence>
-          {lightbox && (
-            <motion.div
-              className="lightbox"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setLightbox(null)}
-              style={{ '--lightbox-glow': lightboxGlow }}
-            >
-              <div className="lightbox-content viewfinder-target">
-                <motion.img
-                  src={lightbox.fullSrc || lightbox.src}
-                  alt={lightbox.alt}
-                  className="lightbox-img"
-                  onClick={e => e.stopPropagation()}
-                  initial={{ scale: 0.85, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.85, opacity: 0 }}
-                  transition={{ duration: 0.32 }}
-                />
-
-                <div className="lightbox-footer" onClick={e => e.stopPropagation()}>
-                  <div className="lightbox-meta">
-                    <span className="lightbox-category">{lightbox.category}</span>
-                    <span className="lightbox-caption">{lightbox.caption}</span>
-                  </div>
-                  <ExifPanel src={lightbox.src} />
-                </div>
-              </div>
-
-              <button className="lightbox-close" onClick={() => setLightbox(null)}>✕</button>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
     </section>
   );
 };

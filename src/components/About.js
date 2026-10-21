@@ -15,10 +15,10 @@ import ExpertDoc from './ExpertDoc';
 gsap.registerPlugin(ScrollTrigger);
 
 const defaultStats = [
-  { value: '300+', label: 'Members Led (ISTE)',          iconName: 'FiAward'    },
-  { value: '15+', label: 'Projects Built',                iconName: 'FiAward'    },
-  { value: '10+', label: 'Designs Done · More on the way',iconName: 'FiPenTool'  },
-  { value: '10+', label: 'Tech Stacks',                   iconName: 'FiAward'    },
+  { value: '300+', label: 'Members Led (ISTE)', iconName: 'FiAward' },
+  { value: '15+', label: 'Projects Built', iconName: 'FiAward' },
+  { value: '25+', label: 'Designs Done · More on the way', iconName: 'FiPenTool' },
+  { value: '10+', label: 'Tech Stacks', iconName: 'FiAward' },
 ];
 
 const About = () => {
@@ -41,7 +41,7 @@ const About = () => {
   const displayData = {
     location: aboutData?.location || "Kerala, India · Open to Remote & Relocation",
     bioParagraphs: aboutData?.bioParagraphs || [
-      "I'm Adhithya Mohan, Co-Founder & Director of External Affairs at Finance Club MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I drive high-impact financial literacy and technical initiatives while blending engineering precision with creative software design.",
+      "I'm Adhithya Mohan,Media Secretary at MBCET Senate, Co-Founder & Director of External Affairs at Finance Club MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I drive high-impact financial literacy and technical initiatives while blending engineering precision with creative software design.",
       "My work spans software, leadership, and hardware — building financial communities, prototyping in Figma, crafting scalable web apps with React & Node.js, and designing embedded IoT systems with ESP32 & STM32.",
       "I bring a founder's perspective and a photographer's eye to every project, building digital experiences that scale beyond the classroom."
     ],
@@ -162,7 +162,7 @@ const About = () => {
 
   return (
     <section className="about" id="about" ref={sectionRef}>
-      <ExpertDoc 
+      <ExpertDoc
         title="About.js"
         notes="Responsive layout with 3D Poltergeist Nodes."
         data={{
@@ -188,11 +188,11 @@ const About = () => {
                 }}
               >
                 <div style={{ overflow: 'hidden', borderRadius: '12px', width: '100%', height: '100%' }}>
-                  <img 
-                    src={displayData.profileImage} 
-                    alt="Adhithya Mohan" 
-                    className="about-img" 
-                    style={{ transform: "translateZ(30px)", width: '100%', height: '100%', objectFit: 'cover' }} 
+                  <img
+                    src={displayData.profileImage}
+                    alt="Adhithya Mohan"
+                    className="about-img"
+                    style={{ transform: "translateZ(30px)", width: '100%', height: '100%', objectFit: 'cover' }}
                     loading="lazy"
                     decoding="async"
                   />

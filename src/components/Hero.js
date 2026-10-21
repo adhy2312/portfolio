@@ -146,10 +146,10 @@ const Hero = () => {
 
   const hour = new Date().getHours();
   let timeGreeting = "Welcome.";
-  if (hour < 5 || hour >= 23)  timeGreeting = "Still here at this hour.";
-  else if (hour < 12)          timeGreeting = "The morning is early yet.";
-  else if (hour < 18)          timeGreeting = "Afternoon — a good time to explore.";
-  else                         timeGreeting = "The day is winding down.";
+  if (hour < 5 || hour >= 23) timeGreeting = "Still here at this hour.";
+  else if (hour < 12) timeGreeting = "The morning is early yet.";
+  else if (hour < 18) timeGreeting = "Afternoon — a good time to explore.";
+  else timeGreeting = "The day is winding down.";
 
   const displayData = {
     greeting: timeGreeting,
@@ -165,14 +165,14 @@ const Hero = () => {
 
 
   return (
-    <section 
-      id="hero" 
-      className="hero-minimal" 
+    <section
+      id="hero"
+      className="hero-minimal"
       ref={heroRef}
       data-xray="[SECTION: HERO]&#10;Render: Client Side Rendering&#10;Animation: GSAP ScrollTrigger + springs&#10;Particles: react-tsparticles (deferred load 2s)&#10;Data: Sanity CMS fetch on mount"
       style={isExperimental ? { perspective: "1500px" } : {}}
     >
-      <ExpertDoc 
+      <ExpertDoc
         title="Hero.js"
         notes="High-performance entrance layer."
         data={{
@@ -184,21 +184,21 @@ const Hero = () => {
           '3dDistortion': isExperimental
         }}
       />
-      
+
       {/* V200: Richer CSS Particles — mix of brutalist shapes */}
       <div className="hero-css-particles">
         {Array.from({ length: 20 }).map((_, i) => (
           <div key={i} className="css-star" style={{
-            '--top':   `${Math.random() * 100}%`,
-            '--left':  `${Math.random() * 100}%`,
-            '--dur':   `${5 + Math.random() * 6}s`,
+            '--top': `${Math.random() * 100}%`,
+            '--left': `${Math.random() * 100}%`,
+            '--dur': `${5 + Math.random() * 6}s`,
             '--delay': `${Math.random() * 3}s`,
-            '--size':  `${10 + Math.random() * 14}px`,
+            '--size': `${10 + Math.random() * 14}px`,
           }} />
         ))}
       </div>
 
-      <div 
+      <div
         ref={contentRef}
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
@@ -247,7 +247,7 @@ const Hero = () => {
         <LanguageTerminal />
 
         <div className="hero-tagline-premium">
-          <EntropyText text={displayData.role || "ELECTRONICS ENGINEER & FULL-STACK DEVELOPER"} />
+          <EntropyText text={displayData.role || "ELECTRONICS ENGINEER, PHOTGRAPHER & FULL-STACK DEVELOPER"} />
         </div>
       </div>
     </section>
