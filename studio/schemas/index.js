@@ -5,6 +5,7 @@ import skillCategory from './skillCategory'
 import toolChip from './toolChip'
 import achievement from './achievement'
 import photo from './photo'
+import design from './design'
 import footer from './footer'
 import testimonial from './testimonial'
 import trustedBy from './trustedBy'
@@ -34,6 +35,7 @@ export const schemaTypes = [
   achievement,
   project,
   photo,
+  design,
   footer,
   testimonial,
   trustedBy,

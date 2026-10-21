@@ -12,7 +12,9 @@ import {
   FiVolume2, 
   FiVolumeX, 
   FiInstagram, 
-  FiCheck 
+  FiCheck,
+  FiArrowUpRight,
+  FiExternalLink
 } from 'react-icons/fi';
 import photo1 from '../assets/photo1.jpg';
 import photo2 from '../assets/photo2.jpg';
@@ -27,6 +29,7 @@ const FALLBACK_PHOTOS = [
     alt: 'Urban Landscape', 
     title: 'City Geometry', 
     category: 'Photography',
+    rawCategory: 'Portraits',
     specs: { camera: 'Leica M11', lens: '35mm Summicron-M f/2', shutter: '1/1000s', aperture: 'f/2.8', iso: 'ISO 100', ev: '+0.3' }
   },
   { 
@@ -34,29 +37,9 @@ const FALLBACK_PHOTOS = [
     alt: 'Portrait Shot', 
     title: 'Golden Portrait', 
     category: 'Photography',
+    rawCategory: 'Portraits',
     specs: { camera: 'Canon EOS R', lens: '85mm f/1.4L USM', shutter: '1/320s', aperture: 'f/1.4', iso: 'ISO 200', ev: '0.0' }
-  },
-  { 
-    src: photo1, 
-    alt: 'Brand Identity', 
-    title: 'Minimalist Branding & Design System', 
-    category: 'Design',
-    designSpecs: { artboard: '1920 × 1080px', tool: 'Figma', colors: ['#121214', '#6366f1', '#06b6d4', '#f59e0b', '#f43f5e'], typography: 'Inter 600 / Editorial Serif', type: 'Design System' }
-  },
-  { 
-    src: photo2, 
-    alt: 'App UI', 
-    title: 'Fintech Dashboard & Banking UI', 
-    category: 'Design',
-    designSpecs: { artboard: '390 × 844px (iOS)', tool: 'Figma & Principle', colors: ['#090d16', '#3b82f6', '#10b981', '#f8fafc'], typography: 'Plus Jakarta Sans 700', type: 'Mobile UI/UX' }
-  },
-  { 
-    src: photo1, 
-    alt: 'Web Design', 
-    title: 'E-commerce Redesign & Motion Prototype', 
-    category: 'Design',
-    designSpecs: { artboard: '1440 × 900px', tool: 'Figma & GSAP', colors: ['#0f172a', '#e2e8f0', '#38bdf8', '#818cf8'], typography: 'Clash Display + Satoshi', type: 'Web Architecture' }
-  },
+  }
 ];
 
 /* ── Mechanical Shutter Sound Generator via Web Audio API (0 externals, ~0 weight) ── */
@@ -117,6 +100,7 @@ const FILM_SIMULATIONS = [
 const Photography = () => {
   const [activeTab, setActiveTab] = useState('photography'); // 'photography' | 'design'
   const [fetchedPhotos, setFetchedPhotos] = useState([]);
+  const [fetchedDesigns, setFetchedDesigns] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [activeFilmSim, setActiveFilmSim] = useState('standard');
@@ -129,97 +113,116 @@ const Photography = () => {
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('photography');
 
-  // Fetch real images from Sanity
+  // Fetch real images from Sanity for both photo and design
   useEffect(() => {
+    // 1. Fetch photography from Sanity 'photo' schema
     client
       .fetch('*[_type == "photo" && !(_id in path("drafts.**")) && defined(image)] | order(order asc, _createdAt desc)')
       .then((data) => {
         if (data && data.length > 0) {
           const mapped = data.map((item, idx) => {
             const rawCat = (item.category || '').toLowerCase();
-            const isDesign = rawCat === 'design' || rawCat.includes('ui') || rawCat.includes('brand') || rawCat.includes('web');
 
-            // Realistic optical EXIF heuristics based on subject matter
-            let defaultSpecs = {
-              camera: 'Canon EOS R',
-              lens: '50mm f/1.8 STM',
-              shutter: '1/500s',
-              aperture: 'f/2.0',
-              iso: 'ISO 200',
-              ev: '+0.0',
-              focal: '50mm'
+            // Optical EXIF specs: use direct Sanity values or realistic genre heuristics
+            let specs = {
+              camera: item.camera || 'Canon EOS R',
+              lens: item.lens || '50mm f/1.8 STM',
+              shutter: item.shutter || '1/500s',
+              aperture: item.aperture || 'f/2.0',
+              iso: item.iso || 'ISO 200',
+              ev: '+0.0'
             };
-            if (rawCat.includes('portrait')) {
-              defaultSpecs = { camera: 'Canon EOS R', lens: '85mm f/1.4L USM', shutter: '1/320s', aperture: 'f/1.4', iso: 'ISO 100', ev: '+0.3', focal: '85mm' };
-            } else if (rawCat.includes('auto') || rawCat.includes('offroad')) {
-              defaultSpecs = { camera: 'Canon EOS R', lens: '35mm f/1.8 IS Macro', shutter: '1/1250s', aperture: 'f/2.8', iso: 'ISO 400', ev: '-0.3', focal: '35mm' };
-            } else if (rawCat.includes('cat') || rawCat.includes('nature')) {
-              defaultSpecs = { camera: 'Canon EOS R', lens: '70-200mm f/2.8L', shutter: '1/800s', aperture: 'f/2.8', iso: 'ISO 320', ev: '+0.0', focal: '135mm' };
-            } else if (rawCat.includes('event')) {
-              defaultSpecs = { camera: 'Canon EOS R', lens: '24-70mm f/2.8L II', shutter: '1/250s', aperture: 'f/2.8', iso: 'ISO 800', ev: '+0.0', focal: '35mm' };
+            if (!item.camera && rawCat.includes('portrait')) {
+              specs = { camera: 'Canon EOS R', lens: '85mm f/1.4L USM', shutter: '1/320s', aperture: 'f/1.4', iso: 'ISO 100', ev: '+0.3' };
+            } else if (!item.camera && (rawCat.includes('auto') || rawCat.includes('offroad') || rawCat.includes('street'))) {
+              specs = { camera: 'Canon EOS R', lens: '35mm f/1.8 IS Macro', shutter: '1/1250s', aperture: 'f/2.8', iso: 'ISO 400', ev: '-0.3' };
+            } else if (!item.camera && (rawCat.includes('nature') || rawCat.includes('wildlife'))) {
+              specs = { camera: 'Canon EOS R', lens: '70-200mm f/2.8L', shutter: '1/800s', aperture: 'f/2.8', iso: 'ISO 320', ev: '+0.0' };
+            } else if (!item.camera && rawCat.includes('event')) {
+              specs = { camera: 'Canon EOS R', lens: '24-70mm f/2.8L II', shutter: '1/250s', aperture: 'f/2.8', iso: 'ISO 800', ev: '+0.0' };
             }
 
             return {
+              _id: item._id,
               src: urlFor(item.image).width(1600).quality(92).auto('format').url(),
               thumb: urlFor(item.image).width(160).height(120).fit('crop').quality(75).auto('format').url(),
               fullSrc: urlFor(item.image).width(2400).quality(98).auto('format').url(),
               title: item.title || `Visual Frame #${idx + 1}`,
-              category: isDesign ? 'Design' : 'Photography',
-              rawCategory: item.category || 'Photography',
-              specs: defaultSpecs,
-              designSpecs: {
-                artboard: '1920 × 1080px',
-                tool: 'Figma & Adobe Suite',
-                colors: ['#0f172a', '#3b82f6', '#10b981', '#f59e0b', '#f8fafc'],
-                typography: 'Inter / Outfit System',
-                type: 'Digital Product Design'
-              }
+              category: 'Photography',
+              rawCategory: item.category || 'Portraits',
+              specs
             };
           });
           setFetchedPhotos(mapped);
         }
       })
       .catch((err) => console.error('Failed to load photos from Sanity:', err));
+
+    // 2. Fetch designs from Sanity 'design' schema (newly decoupled)
+    client
+      .fetch('*[_type == "design" && !(_id in path("drafts.**")) && defined(image)] | order(order asc, _createdAt desc)')
+      .then((data) => {
+        if (data && data.length > 0) {
+          const mapped = data.map((item, idx) => ({
+            _id: item._id,
+            src: urlFor(item.image).width(1600).quality(92).auto('format').url(),
+            thumb: urlFor(item.image).width(160).height(120).fit('crop').quality(75).auto('format').url(),
+            fullSrc: urlFor(item.image).width(2400).quality(98).auto('format').url(),
+            title: item.title || `Design Artboard #${idx + 1}`,
+            subtitle: item.subtitle || '',
+            category: 'Design',
+            rawCategory: item.category || 'Mobile UI/UX',
+            figmaLink: item.figmaLink || null,
+            caseStudy: item.caseStudy || null,
+            designSpecs: {
+              artboard: item.artboard || '1920 × 1080px',
+              tool: item.tool || 'Figma',
+              colors: (Array.isArray(item.colors) && item.colors.length > 0) ? item.colors : ['#0f172a', '#3b82f6', '#10b981', '#f59e0b', '#f8fafc'],
+              typography: item.typography || 'Inter / Modern Sans',
+              type: item.category || 'Digital Product Design'
+            }
+          }));
+          setFetchedDesigns(mapped);
+        }
+      })
+      .catch((err) => console.error('Failed to load designs from Sanity:', err));
   }, []);
 
-  // Filter items based on active tab
+  // Items based on active tab:
+  // - photography: fetchedPhotos (or fallback if offline)
+  // - design: fetchedDesigns (returns empty array if no designs uploaded yet)
   const items = useMemo(() => {
-    const all = fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
     if (activeTab === 'photography') {
-      const photos = all.filter((p) => {
-        const cat = (p.category || '').toLowerCase();
-        return cat !== 'design' && !cat.includes('ui') && !cat.includes('brand');
-      });
-      return photos.length > 0 ? photos : all;
+      return fetchedPhotos.length > 0 ? fetchedPhotos : FALLBACK_PHOTOS;
     } else {
-      const designs = all.filter((p) => {
-        const cat = (p.category || '').toLowerCase();
-        return cat === 'design' || cat.includes('ui') || cat.includes('brand') || cat.includes('web');
-      });
-      return designs.length > 0 ? designs : FALLBACK_PHOTOS.filter((p) => p.category === 'Design');
+      return fetchedDesigns;
     }
-  }, [fetchedPhotos, activeTab]);
+  }, [fetchedPhotos, fetchedDesigns, activeTab]);
 
-  // Keep index within bounds when switching tabs
+  // Reset index when switching tabs
   useEffect(() => {
     setCurrentIndex(0);
   }, [activeTab]);
 
-  const activeItem = items[currentIndex] || items[0] || FALLBACK_PHOTOS[0];
+  const activeItem = items[currentIndex] || items[0] || null;
 
   // Navigation handlers with mechanical shutter animation
   const handleNext = useCallback(() => {
-    setIsShutterFiring(true);
     playMechanicalShutter(soundEnabled);
+    setIsShutterFiring(true);
     setTimeout(() => setIsShutterFiring(false), 80);
-    setCurrentIndex((prev) => (prev + 1) % items.length);
+    if (items.length > 1) {
+      setCurrentIndex((prev) => (prev + 1) % items.length);
+    }
   }, [items.length, soundEnabled]);
 
   const handlePrev = useCallback(() => {
-    setIsShutterFiring(true);
     playMechanicalShutter(soundEnabled);
+    setIsShutterFiring(true);
     setTimeout(() => setIsShutterFiring(false), 80);
-    setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+    if (items.length > 1) {
+      setCurrentIndex((prev) => (prev - 1 + items.length) % items.length);
+    }
   }, [items.length, soundEnabled]);
 
   // Keyboard navigation
@@ -239,6 +242,26 @@ const Photography = () => {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [handleNext, handlePrev]);
+
+  // 3D Optical Lens Tilt & Parallax (Pure GPU CSS variables, 0 React re-renders)
+  const handleMouseMove = useCallback((e) => {
+    if (!viewfinderRef.current) return;
+    const rect = viewfinderRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    viewfinderRef.current.style.setProperty('--lens-tilt-x', `${(-y * 6).toFixed(2)}deg`);
+    viewfinderRef.current.style.setProperty('--lens-tilt-y', `${(x * 6).toFixed(2)}deg`);
+    viewfinderRef.current.style.setProperty('--glare-x', `${(45 + x * 35).toFixed(1)}%`);
+    viewfinderRef.current.style.setProperty('--glare-y', `${(35 + y * 35).toFixed(1)}%`);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    if (!viewfinderRef.current) return;
+    viewfinderRef.current.style.setProperty('--lens-tilt-x', '0deg');
+    viewfinderRef.current.style.setProperty('--lens-tilt-y', '0deg');
+    viewfinderRef.current.style.setProperty('--glare-x', '35%');
+    viewfinderRef.current.style.setProperty('--glare-y', '25%');
+  }, []);
 
   // Copy hex swatch
   const handleCopyHex = (hex) => {
@@ -306,7 +329,9 @@ const Photography = () => {
             >
               <FiCamera className="pill-icon" />
               <span>Camera Rangefinder</span>
-              <span className="pill-count">{items.length} frames</span>
+              <span className="pill-count">
+                {fetchedPhotos.length > 0 ? `${fetchedPhotos.length} frames` : 'Film Vault'}
+              </span>
             </button>
             <button
               className={`mode-pill ${activeTab === 'design' ? 'active' : ''}`}
@@ -315,15 +340,19 @@ const Photography = () => {
             >
               <FiPenTool className="pill-icon" />
               <span>Artboard Inspector</span>
-              <span className="pill-count">Case Studies</span>
+              <span className="pill-count">
+                {fetchedDesigns.length > 0 ? `${fetchedDesigns.length} artboards` : 'In Curation'}
+              </span>
             </button>
           </div>
         </div>
 
-        {/* ── Main Camera Body / Viewfinder Console ── */}
+        {/* ── Main Camera Body / Viewfinder Console (with Interactive 3D Optical Glass Depth) ── */}
         <div 
           className={`rangefinder-console ${isFullscreen ? 'console-fullscreen' : ''}`} 
           ref={viewfinderRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         >
           {/* Top Camera Status Strip */}
           <div className="camera-top-bar">
@@ -333,7 +362,9 @@ const Photography = () => {
                 {activeTab === 'photography' ? 'LEICA M11-OPTICS' : 'FIGMA CANVAS STUDIO'}
               </span>
               <span className="shutter-mode-tag">
-                {activeTab === 'photography' ? 'M [MANUAL]' : '2X RETINA'}
+                {activeTab === 'photography' 
+                  ? 'M [MANUAL]' 
+                  : (items.length > 0 ? '2X RETINA' : 'AWAITING UPLOADS')}
               </span>
             </div>
 
@@ -355,15 +386,15 @@ const Photography = () => {
                 </div>
               ) : (
                 <div className="design-quick-meta">
-                  <span className="design-badge">{activeItem.designSpecs?.tool || 'Figma'}</span>
-                  <span className="design-badge">{activeItem.designSpecs?.artboard || '1920×1080'}</span>
+                  <span className="design-badge">{activeItem?.designSpecs?.tool || 'Figma'}</span>
+                  <span className="design-badge">{activeItem?.designSpecs?.artboard || 'Sanity Studio Ready'}</span>
                 </div>
               )}
 
               <button
                 className={`tool-btn ${showGridOverlay ? 'active' : ''}`}
                 onClick={() => setShowGridOverlay(!showGridOverlay)}
-                title="Toggle Viewfinder Grid Overlay (3x3 / Golden Ratio)"
+                title="Toggle Viewfinder Grid Overlay"
                 aria-label="Toggle Grid"
               >
                 <FiGrid />
@@ -390,15 +421,20 @@ const Photography = () => {
 
             {/* Frame Counter Display */}
             <div className="camera-counter">
-              <span className="counter-icon">EXP</span>
+              <span className="counter-icon">{activeTab === 'photography' ? 'EXP' : 'ART'}</span>
               <span className="counter-digits">
-                {String(currentIndex + 1).padStart(2, '0')}&nbsp;/&nbsp;{String(items.length).padStart(2, '0')}
+                {items.length > 0
+                  ? `${String(currentIndex + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`
+                  : '00 / 00'}
               </span>
             </div>
           </div>
 
-          {/* ── Optical Viewfinder Glass Frame (Single Rendered Image) ── */}
+          {/* ── Optical Viewfinder Glass Frame (Single Rendered Image or Curated Empty State) ── */}
           <div className="viewfinder-optical-stage">
+            {/* Multi-coated Optical Lens Glare & Chromatic Edge Reflection */}
+            <div className="optical-lens-coating" />
+
             {/* Darkroom Shutter Blade Wipe Animation Layer */}
             <div className={`shutter-blade-overlay ${isShutterFiring ? 'blade-fire' : ''}`} />
 
@@ -424,50 +460,110 @@ const Photography = () => {
               </div>
             )}
 
-            {/* The Active High-Res Image Frame (Only ONE in DOM at a time) */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={`${activeTab}-${currentIndex}-${activeItem.src}`}
-                className="active-frame-wrapper"
-                initial={{ opacity: 0, scale: 0.985 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.015 }}
-                transition={{ duration: 0.22, ease: 'easeOut' }}
-              >
-                <img
-                  src={activeItem.src}
-                  alt={activeItem.title || 'Portfolio Work'}
-                  className="active-viewfinder-img"
-                  style={{
-                    filter: FILM_SIMULATIONS.find((s) => s.id === activeFilmSim)?.filter || 'none'
-                  }}
-                  loading="eager"
-                  decoding="async"
-                />
-              </motion.div>
-            </AnimatePresence>
+            {/* Empty State for Design when no designs in Sanity yet */}
+            {activeTab === 'design' && items.length === 0 ? (
+              <div className="design-empty-state">
+                <div className="empty-blueprint-grid" />
+                <div className="empty-state-content">
+                  <div className="empty-beacon-badge">
+                    <span className="beacon-dot-pulse" />
+                    <span className="beacon-text">STUDIO STATUS: CURATING NEW ARTBOARDS &amp; CASE STUDIES</span>
+                  </div>
 
-            {/* Frame Caption Tag (Floating Glass Label) */}
-            <div className="optical-frame-label">
-              <span className="label-category">{activeItem.rawCategory || activeItem.category}</span>
-              <span className="label-title">{activeItem.title}</span>
-            </div>
+                  <div className="empty-icon-cluster">
+                    <div className="empty-icon-box">
+                      <FiPenTool className="main-empty-icon" />
+                    </div>
+                  </div>
 
-            {/* Left / Right Tactile Shutter Controls */}
-            <button
-              className="viewfinder-nav-arrow arrow-prev"
-              onClick={handlePrev}
-              aria-label="Previous Frame (Arrow Left)"
-            >
-              <FiChevronLeft size={24} />
-            </button>
-            <button
-              className="viewfinder-nav-arrow arrow-next"
-              onClick={handleNext}
-              aria-label="Next Frame (Arrow Right)"
-            >
-              <FiChevronRight size={24} />
-            </button>
+                  <h3 className="empty-title">Digital Products &amp; Visual Systems</h3>
+                  
+                  <p className="empty-desc">
+                    High-fidelity Figma prototypes, mobile UI flows, and tokenized design systems are currently being formatted and curated for live inspection.
+                  </p>
+
+                  <div className="design-pillars">
+                    <span className="pillar-chip">✦ Mobile App UI/UX</span>
+                    <span className="pillar-chip">✦ Design Systems</span>
+                    <span className="pillar-chip">✦ Web Architecture</span>
+                    <span className="pillar-chip">✦ Brand &amp; Identity</span>
+                    <span className="pillar-chip">✦ 3D &amp; Motion</span>
+                  </div>
+
+                  <div className="empty-actions">
+                    <a href="#projects" className="empty-action-primary">
+                      <span>Explore Live Implementations</span>
+                      <FiArrowUpRight />
+                    </a>
+                    <a href="#contact" className="empty-action-secondary">
+                      <span>Request Figma Walkthrough</span>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ) : activeItem ? (
+              /* The Active High-Res Image Frame (Only ONE in DOM at a time) */
+              <>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`${activeTab}-${currentIndex}-${activeItem.src}`}
+                    className="active-frame-wrapper"
+                    initial={{ opacity: 0, scale: 0.985 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 1.015 }}
+                    transition={{ duration: 0.22, ease: 'easeOut' }}
+                  >
+                    <img
+                      src={activeItem.src}
+                      alt={activeItem.title || 'Portfolio Work'}
+                      className="active-viewfinder-img"
+                      style={{
+                        filter: FILM_SIMULATIONS.find((s) => s.id === activeFilmSim)?.filter || 'none'
+                      }}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* Frame Caption Tag (Floating Glass Label) */}
+                <div className="optical-frame-label">
+                  <span className="label-category">{activeItem.rawCategory || activeItem.category}</span>
+                  <span className="label-title">{activeItem.title}</span>
+                  {activeItem.figmaLink && (
+                    <a
+                      href={activeItem.figmaLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="label-figma-link"
+                      title="Open Live Figma / Prototype"
+                    >
+                      <FiExternalLink /> Live Link
+                    </a>
+                  )}
+                </div>
+              </>
+            ) : null}
+
+            {/* Left / Right Tactile Controls */}
+            {items.length > 1 && (
+              <>
+                <button
+                  className="viewfinder-nav-arrow arrow-prev"
+                  onClick={handlePrev}
+                  aria-label="Previous Frame (Arrow Left)"
+                >
+                  <FiChevronLeft size={24} />
+                </button>
+                <button
+                  className="viewfinder-nav-arrow arrow-next"
+                  onClick={handleNext}
+                  aria-label="Next Frame (Arrow Right)"
+                >
+                  <FiChevronRight size={24} />
+                </button>
+              </>
+            )}
           </div>
 
           {/* ── Bottom Rangefinder Instrument Readout Cluster ── */}
@@ -490,7 +586,7 @@ const Photography = () => {
                     <div 
                       className="meter-needle-pip" 
                       style={{ 
-                        left: activeItem.specs?.ev === '+0.3' ? '58%' : activeItem.specs?.ev === '-0.3' ? '42%' : '50%' 
+                        left: activeItem?.specs?.ev === '+0.3' ? '58%' : activeItem?.specs?.ev === '-0.3' ? '42%' : '50%' 
                       }} 
                     />
                   </div>
@@ -500,27 +596,39 @@ const Photography = () => {
                 <div className="optical-readouts">
                   <div className="readout-item">
                     <span className="readout-key">SHUTTER</span>
-                    <span className="readout-val">{activeItem.specs?.shutter || '1/500s'}</span>
+                    <span className="readout-val">{activeItem?.specs?.shutter || '1/500s'}</span>
                   </div>
                   <div className="readout-item">
                     <span className="readout-key">APERTURE</span>
-                    <span className="readout-val">{activeItem.specs?.aperture || 'f/2.0'}</span>
+                    <span className="readout-val">{activeItem?.specs?.aperture || 'f/2.0'}</span>
                   </div>
                   <div className="readout-item">
                     <span className="readout-key">ISO</span>
-                    <span className="readout-val">{activeItem.specs?.iso || 'ISO 200'}</span>
+                    <span className="readout-val">{activeItem?.specs?.iso || 'ISO 200'}</span>
                   </div>
                   <div className="readout-item hide-mobile">
                     <span className="readout-key">OPTICS</span>
-                    <span className="readout-val">{activeItem.specs?.lens || '50mm Prime'}</span>
+                    <span className="readout-val">{activeItem?.specs?.lens || '50mm Prime'}</span>
+                  </div>
+                  <div className="readout-item hide-mobile">
+                    <span className="readout-key">FOCUS PLANE</span>
+                    <span className="readout-val" style={{ color: '#38bdf8' }}>
+                      {activeItem?.rawCategory?.toLowerCase().includes('portrait')
+                        ? '1.8m (Shallow)'
+                        : activeItem?.rawCategory?.toLowerCase().includes('auto')
+                        ? '4.2m (Zone)'
+                        : activeItem?.rawCategory?.toLowerCase().includes('event')
+                        ? '2.5m (Zone)'
+                        : '∞ (Hyperfocal)'}
+                    </span>
                   </div>
                 </div>
               </>
-            ) : (
-              /* Design Studio Inspector Readout Cluster */
+            ) : items.length > 0 && activeItem ? (
+              /* Design Studio Inspector Readout Cluster with active item */
               <div className="design-inspector-cluster">
                 <div className="inspector-column">
-                  <span className="readout-key">SPECS & RESOLUTION</span>
+                  <span className="readout-key">SPECS &amp; RESOLUTION</span>
                   <span className="readout-val">{activeItem.designSpecs?.artboard} • {activeItem.designSpecs?.type}</span>
                 </div>
                 <div className="inspector-column hide-mobile">
@@ -546,6 +654,22 @@ const Photography = () => {
                   {copiedHex && <span className="copied-toast">Copied {copiedHex}!</span>}
                 </div>
               </div>
+            ) : (
+              /* Design Studio Status Readout when awaiting uploads */
+              <div className="design-inspector-cluster empty-inspector">
+                <div className="inspector-column">
+                  <span className="readout-key">STUDIO SCHEMA</span>
+                  <span className="readout-val text-accent">sanity[_type == &quot;design&quot;]</span>
+                </div>
+                <div className="inspector-column hide-mobile">
+                  <span className="readout-key">STACK / SUITE</span>
+                  <span className="readout-val">Figma • Illustrator • Spline 3D</span>
+                </div>
+                <div className="inspector-column hide-mobile">
+                  <span className="readout-key">PIPELINE STATUS</span>
+                  <span className="readout-val text-amber">✦ Ready for Studio Upload</span>
+                </div>
+              </div>
             )}
 
             {/* Physical Shutter Release Trigger Button */}
@@ -561,34 +685,42 @@ const Photography = () => {
             </div>
           </div>
 
-          {/* ── Minimal Film Contact Strip (Thumbnails, Low-Res) ── */}
+          {/* ── Minimal Film Contact Strip ── */}
           <div className="film-contact-strip">
             <div className="sprocket-holes-bar top" />
-            <div className="film-strip-track">
-              {items.map((item, idx) => (
-                <button
-                  key={idx}
-                  className={`film-frame-thumb ${idx === currentIndex ? 'active-frame' : ''}`}
-                  onClick={() => {
-                    setIsShutterFiring(true);
-                    playMechanicalShutter(soundEnabled);
-                    setTimeout(() => setIsShutterFiring(false), 80);
-                    setCurrentIndex(idx);
-                  }}
-                  aria-label={`Jump to Frame #${idx + 1}: ${item.title}`}
-                >
-                  <span className="frame-num">{String(idx + 1).padStart(2, '0')}</span>
-                  <img
-                    src={item.thumb || item.src}
-                    alt={item.title}
-                    className="thumb-img"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  {idx === currentIndex && <div className="thumb-cursor-bracket" />}
-                </button>
-              ))}
-            </div>
+            {items.length > 0 ? (
+              <div className="film-strip-track">
+                {items.map((item, idx) => (
+                  <button
+                    key={idx}
+                    className={`film-frame-thumb ${idx === currentIndex ? 'active-frame' : ''}`}
+                    onClick={() => {
+                      setIsShutterFiring(true);
+                      playMechanicalShutter(soundEnabled);
+                      setTimeout(() => setIsShutterFiring(false), 80);
+                      setCurrentIndex(idx);
+                    }}
+                    aria-label={`Jump to Frame #${idx + 1}: ${item.title}`}
+                  >
+                    <span className="frame-num">{String(idx + 1).padStart(2, '0')}</span>
+                    <img
+                      src={item.thumb || item.src}
+                      alt={item.title}
+                      className="thumb-img"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    {idx === currentIndex && <div className="thumb-cursor-bracket" />}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="film-strip-empty">
+                <span className="empty-strip-hint">
+                  ✦ Ready for artboard uploads in Sanity Studio [schema: <code>design</code>]
+                </span>
+              </div>
+            )}
             <div className="sprocket-holes-bar bottom" />
           </div>
         </div>

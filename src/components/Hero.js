@@ -203,7 +203,7 @@ const Hero = () => {
         className="hero-minimal-content optimize-gpu"
         style={isExperimental ? { transformStyle: "preserve-3d" } : {}}
       >
-        {/* Top status row: greeting */}
+        {/* Top status row: greeting and Kerala IST clock */}
         <div className="hero-top-row" style={{ justifyContent: 'center' }}>
           <div className="hero-greeting-wrapper">
             <div
@@ -215,6 +215,7 @@ const Hero = () => {
             </div>
             <span className="typewriter-cursor-complete" style={{ marginLeft: '4px', fontSize: '1.1rem', color: 'var(--accent-primary)' }}>_</span>
           </div>
+          <KeralaTime />
         </div>
         <LiquidText>
           <h1 className="hero-name-giant metallic-reveal">

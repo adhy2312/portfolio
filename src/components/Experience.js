@@ -7,7 +7,7 @@ const defaultExperiences = [
   {
     _id: 'exp-senate',
     organization: 'MBCET Senate',
-    logo: null,
+    logo: 'https://cdn.sanity.io/images/uefti8ya/production/20be38f1a8da9be9eb1aa1bdfc10ccdbd931e568-225x225.jpg',
     roles: [
       {
         title: 'Media Secretary',
@@ -20,7 +20,7 @@ const defaultExperiences = [
   {
     _id: 'exp_finance',
     organization: 'Finance Club MBCET',
-    logo: null,
+    logo: 'https://cdn.sanity.io/images/uefti8ya/production/1b6babee7cbdb4f20bd959542c9ae2c49c8469cb-1024x1024.jpg',
     roles: [
       {
         title: 'Co-Founder & Director of External Affairs',
@@ -33,7 +33,7 @@ const defaultExperiences = [
   {
     _id: 'exp_iste',
     organization: 'ISTE SC MBCET',
-    logo: null,
+    logo: 'https://cdn.sanity.io/images/uefti8ya/production/0d78126270f91fb665446727aca1d35e015dcec2-117x120.png',
     roles: [
       {
         title: 'Chairperson',
@@ -58,7 +58,7 @@ const defaultExperiences = [
   {
     _id: 'exp_frames',
     organization: 'FRAMES MBCET — Photography Club',
-    logo: null,
+    logo: 'https://cdn.sanity.io/images/uefti8ya/production/9c513dc842dbd4fe07c36de20addd8ba26c32231-224x254.png',
     roles: [
       {
         title: 'Lead Photographer',
@@ -77,7 +77,7 @@ const defaultExperiences = [
   {
     _id: 'exp_socius',
     organization: 'Socius Innovative Global Brains',
-    logo: null,
+    logo: 'https://cdn.sanity.io/images/uefti8ya/production/cf1043ea1118e0f164018e3d5a95d460757aae2e-756x796.jpg',
     roles: [
       {
         title: 'Intern',
@@ -88,6 +88,21 @@ const defaultExperiences = [
     ]
   }
 ];
+
+// Helper to reliably resolve Sanity image object, direct CDN string, or asset ref
+const getOrgLogo = (logo) => {
+  if (!logo) return null;
+  if (typeof logo === 'string' && (logo.startsWith('http') || logo.startsWith('/'))) return logo;
+  if (logo.asset || logo._ref) {
+    try {
+      const url = urlFor(logo).width(160).height(160).fit('crop').auto('format').url();
+      return url && url.length > 0 ? url : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  return null;
+};
 
 const Experience = () => {
   const [experiences, setExperiences] = useState(defaultExperiences);
@@ -113,7 +128,12 @@ const Experience = () => {
               : org;
             if (!seen.has(normKey)) {
               seen.add(normKey);
-              unique.push(exp);
+              // Ensure logo is preserved or falls back to known CDN logo
+              const fallbackLogo = defaultExperiences.find(d => d._id.includes(normKey))?.logo;
+              unique.push({
+                ...exp,
+                logo: exp.logo || fallbackLogo
+              });
             }
           }
           setExperiences(unique.length > 0 ? unique : data);
@@ -149,27 +169,37 @@ const Experience = () => {
         </div>
         
         <div className="experience-list">
-          {experiences.map((exp, index) => (
-            <div 
-              className="experience-card" 
-              key={exp._id || index}
-              data-aos="fade-up" 
-              data-aos-delay={index * 100}
-            >
-              <div className="exp-org-header">
-                <div className="exp-org-logo">
-                  {exp.logo ? (
-                    <img src={urlFor(exp.logo).width(120).url()} alt={exp.organization} />
-                  ) : (
-                    <div className="exp-logo-placeholder">
-                      {exp.organization ? exp.organization.charAt(0) : 'E'}
-                    </div>
-                  )}
+          {experiences.map((exp, index) => {
+            const logoSrc = getOrgLogo(exp.logo);
+            return (
+              <div 
+                className="experience-card" 
+                key={exp._id || index}
+                data-aos="fade-up" 
+                data-aos-delay={index * 100}
+              >
+                <div className="exp-org-header">
+                  <div className="exp-org-logo">
+                    {logoSrc ? (
+                      <img 
+                        src={logoSrc} 
+                        alt={exp.organization} 
+                        loading="lazy"
+                        decoding="async"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="exp-logo-placeholder">
+                        {exp.organization ? exp.organization.charAt(0) : 'E'}
+                      </div>
+                    )}
+                  </div>
+                  <div className="exp-org-info">
+                    <h3 className="exp-org-name">{exp.organization}</h3>
+                  </div>
                 </div>
-                <div className="exp-org-info">
-                  <h3 className="exp-org-name">{exp.organization}</h3>
-                </div>
-              </div>
 
               <div className="exp-timeline">
                 {exp.roles && exp.roles.map((role, rIndex) => {
@@ -206,11 +236,12 @@ const Experience = () => {
                 })}
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-    </section>
-  );
+    </div>
+  </section>
+);
 };
 
 export default Experience;

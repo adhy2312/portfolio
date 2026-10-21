@@ -105,6 +105,11 @@
    THE CAMERA BODY / RANGEFINDER CONSOLE
 ═══════════════════════════════════════════════════════════════ */
 .rangefinder-console {
+  --lens-tilt-x: 0deg;
+  --lens-tilt-y: 0deg;
+  --glare-x: 35%;
+  --glare-y: 25%;
+  perspective: 1200px;
   max-width: 960px;
   margin: 0 auto;
   background: #11131a;
@@ -431,7 +436,7 @@
 .rule-of-thirds-grid .grid-line.vertical.v1 { left: 33.33%; }
 .rule-of-thirds-grid .grid-line.vertical.v2 { left: 66.66%; }
 
-/* The Active Image Layer */
+/* The Active Image Layer with 3D Tilt */
 .active-frame-wrapper {
   width: 100%;
   height: 100%;
@@ -440,14 +445,38 @@
   justify-content: center;
   position: absolute;
   inset: 0;
+  transform: perspective(1000px) rotateX(var(--lens-tilt-x, 0deg)) rotateY(var(--lens-tilt-y, 0deg));
+  transition: transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 
 .active-viewfinder-img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.7);
   transition: filter 0.3s ease;
+}
+
+/* Multi-coated Optical Lens Glare & Vignette Overlay */
+.optical-lens-coating {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 12;
+  box-shadow: 
+    inset 0 0 90px rgba(0, 0, 0, 0.75),
+    inset 0 0 160px rgba(8, 10, 16, 0.45),
+    inset 0 0 2px rgba(255, 255, 255, 0.18);
+  background: radial-gradient(
+    ellipse at var(--glare-x, 35%) var(--glare-y, 25%),
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(56, 189, 248, 0.035) 26%,
+    rgba(168, 85, 247, 0.018) 50%,
+    transparent 72%
+  );
+  mix-blend-mode: screen;
+  transition: background 0.08s ease-out;
 }
 
 /* Floating Glass Label */
@@ -889,3 +918,240 @@
     display: none;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN STUDIO EMPTY STATE & CURATION CANVAS
+   High-Taste Blueprint Canvas when awaiting Sanity 'design' uploads
+═══════════════════════════════════════════════════════════════ */
+.design-empty-state {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  z-index: 10;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 40%, rgba(99, 102, 241, 0.08) 0%, rgba(10, 12, 18, 0.95) 75%);
+}
+
+.empty-blueprint-grid {
+  position: absolute;
+  inset: 0;
+  background-image: 
+    linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.empty-state-content {
+  position: relative;
+  z-index: 2;
+  max-width: 620px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-beacon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  margin-bottom: 1.25rem;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+}
+
+.beacon-dot-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #f59e0b;
+  box-shadow: 0 0 8px #f59e0b;
+  animation: pulse-beacon 1.8s infinite ease-in-out;
+}
+
+@keyframes pulse-beacon {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.35; transform: scale(0.75); }
+}
+
+.beacon-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #fbbf24;
+}
+
+.empty-icon-cluster {
+  margin-bottom: 1rem;
+}
+
+.empty-icon-box {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%);
+  border: 1px solid rgba(165, 180, 252, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a5b4fc;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+}
+
+.main-empty-icon {
+  font-size: 1.7rem;
+}
+
+.empty-title {
+  font-family: var(--font-heading, 'Outfit', sans-serif);
+  font-size: clamp(1.4rem, 2.5vw, 1.85rem);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.empty-desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #94a3b8;
+  max-width: 520px;
+  margin-bottom: 1.4rem;
+}
+
+.design-pillars {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 1.6rem;
+}
+
+.pillar-chip {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  transition: all 0.2s ease;
+}
+
+.pillar-chip:hover {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: #ffffff;
+}
+
+.empty-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.empty-action-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.65rem 1.3rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.empty-action-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  color: #ffffff;
+}
+
+.empty-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.65rem 1.3rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.empty-action-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+/* Label Figma Link (when design artboard has a link) */
+.label-figma-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(165, 180, 252, 0.3);
+  color: #a5b4fc;
+  font-size: 0.7rem;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.label-figma-link:hover {
+  background: #6366f1;
+  color: #ffffff;
+}
+
+/* Empty Film Strip Track */
+.film-strip-empty {
+  padding: 1rem;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-strip-hint {
+  font-family: 'Space Mono', monospace;
+  font-size: 0.72rem;
+  color: #64748b;
+  letter-spacing: 0.05em;
+}
+
+.empty-strip-hint code {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+
+.text-accent {
+  color: #38bdf8 !important;
+}
+
+.text-amber {
+  color: #fbbf24 !important;
+}
+

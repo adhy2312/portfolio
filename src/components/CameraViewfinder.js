@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import html2canvas from 'html2canvas';
 import { FiCamera } from 'react-icons/fi';
 import './CameraViewfinder.css';
@@ -13,13 +13,6 @@ const CameraViewfinder = () => {
   });
   
   const [isFlashing, setIsFlashing] = useState(false);
-  const flashAudioRef = useRef(null);
-
-  useEffect(() => {
-    // Create a simple shutter click audio
-    const audio = new Audio('data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU...'); // We can just use an empty audio or rely on a visual flash if audio data is too long.
-    // Instead of base64 audio which might be buggy, we'll just rely on the visual flash, which is very impactful on its own.
-  }, []);
 
   const handleScroll = useCallback(() => {
     const scrollTop = window.scrollY;
