@@ -153,11 +153,11 @@ const Navbar = () => {
     if (!weatherData) return null;
     const { condition, isDay } = weatherData;
     if (condition === 'Clear') return isDay ? <FiSun className="weather-icon" /> : <FiMoon className="weather-icon" />;
-    if (condition === 'Clouds') return <FiCloud className="weather-icon" />;
+    if (condition === 'Clouds') return isDay ? <FiCloud className="weather-icon" /> : <FiMoon className="weather-icon" />;
     if (condition === 'Rain' || condition === 'Drizzle') return <FiCloudRain className="weather-icon" />;
     if (condition === 'Thunderstorm') return <FiCloudLightning className="weather-icon" />;
     if (condition === 'Snow') return <FiCloudSnow className="weather-icon" />;
-    return <FiCloud className="weather-icon" />;
+    return isDay ? <FiSun className="weather-icon" /> : <FiMoon className="weather-icon" />;
   };
 
   return (

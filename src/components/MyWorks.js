@@ -257,7 +257,7 @@ const MyWorks = () => {
             return (
               <div 
                 key={project.title}
-                className="vault-card"
+                className="vault-card specular-card"
                 style={{ 
                   '--card-accent': project.accent,
                   '--animation-order': index

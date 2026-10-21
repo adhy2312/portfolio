@@ -1569,3 +1569,72 @@ section {
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
 }
+
+/* ═══════════════════════════════════════════
+   APPLE-STYLE SPECULAR CARD SHEEN
+═══════════════════════════════════════════ */
+.specular-card {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Subtle inner ambient reflection */
+.specular-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    520px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(255, 255, 255, 0.06),
+    transparent 65%
+  );
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* 1px Specular Border Glint via mask */
+.specular-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    380px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(255, 255, 255, 0.32),
+    transparent 55%
+  );
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.specular-card:hover::before,
+.specular-card:hover::after {
+  opacity: 1;
+}
+
+/* Subtle styling when in light mode */
+body:not(.dark-mode) .specular-card::before {
+  background: radial-gradient(
+    520px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(0, 0, 0, 0.025),
+    transparent 65%
+  );
+}
+
+body:not(.dark-mode) .specular-card::after {
+  background: radial-gradient(
+    380px circle at var(--spec-x, -999px) var(--spec-y, -999px),
+    rgba(0, 0, 0, 0.14),
+    transparent 55%
+  );
+}
+

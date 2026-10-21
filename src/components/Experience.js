@@ -173,7 +173,7 @@ const Experience = () => {
             const logoSrc = getOrgLogo(exp.logo);
             return (
               <div 
-                className="experience-card" 
+                className="experience-card specular-card" 
                 key={exp._id || index}
                 data-aos="fade-up" 
                 data-aos-delay={index * 100}

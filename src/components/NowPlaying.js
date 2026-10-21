@@ -166,101 +166,121 @@ const NowPlaying = () => {
 
   /* ── Full widget ─────────────────────────────────────── */
   return (
-    <div className="np-widget">
-      {/* Close → minimise to dock */}
-      <button
-        className="np-close"
-        onClick={toggleMinimized}
-        aria-label="Minimise Spotify widget"
-        title="Minimise"
-      >
-        ✕
-      </button>
-
-      {/* Audio Element for Preview */}
-      {currentTrack.previewUrl && (
-        <audio 
-          ref={audioRef} 
-          src={currentTrack.previewUrl} 
-          onEnded={() => setPreviewPlaying(false)} 
+    <div className="np-wrapper">
+      {/* Dynamic ambient chroma glow behind widget */}
+      {currentTrack.albumArt && !imgError && (
+        <div
+          className={`np-ambient-glow ${currentTrack.isPlaying ? 'np-ambient-glow--active' : ''}`}
+          style={{ backgroundImage: `url(${currentTrack.albumArt})` }}
+          aria-hidden="true"
         />
       )}
 
-      {/* Album art of currently playing or last played track */}
-      <div 
-        className="np-art-wrap" 
-        onClick={currentTrack.previewUrl ? togglePreview : undefined} 
-        style={{ cursor: currentTrack.previewUrl ? 'pointer' : 'default' }}
-      >
-        {currentTrack.albumArt && !imgError ? (
-          <>
-            <img
-              src={currentTrack.albumArt}
-              alt={currentTrack.album || currentTrack.title}
-              className={`np-art ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}
-              onError={() => setImgError(true)}
-              loading="lazy"
-            />
-            {currentTrack.previewUrl && (
-              <div className={`np-play-overlay ${previewPlaying ? 'playing' : ''}`}>
-                {previewPlaying ? (
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
-                )}
-              </div>
-            )}
-          </>
-        ) : (
-          <div className={`np-art np-art--placeholder ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}>
-            <SpotifyIcon size={20} />
-          </div>
+      <div className="np-widget">
+        {/* Subtle inner ambient color aura from album artwork */}
+        {currentTrack.albumArt && !imgError && (
+          <div
+            className="np-inner-glow"
+            style={{ backgroundImage: `url(${currentTrack.albumArt})` }}
+            aria-hidden="true"
+          />
         )}
-      </div>
 
-      {/* Track Info */}
-      <div className="np-info">
-        <div className="np-label">
-          <SpotifyIcon />
-          <span>{currentTrack.isPlaying ? 'Now Playing' : 'Last Played'}</span>
+        {/* Close → minimise to dock */}
+        <button
+          className="np-close"
+          onClick={toggleMinimized}
+          aria-label="Minimise Spotify widget"
+          title="Minimise"
+        >
+          ✕
+        </button>
+
+        {/* Audio Element for Preview */}
+        {currentTrack.previewUrl && (
+          <audio 
+            ref={audioRef} 
+            src={currentTrack.previewUrl} 
+            onEnded={() => setPreviewPlaying(false)} 
+          />
+        )}
+
+        {/* Album art of currently playing or last played track */}
+        <div 
+          className="np-art-wrap" 
+          onClick={currentTrack.previewUrl ? togglePreview : undefined} 
+          style={{ cursor: currentTrack.previewUrl ? 'pointer' : 'default' }}
+        >
+          {currentTrack.albumArt && !imgError ? (
+            <>
+              <img
+                src={currentTrack.albumArt}
+                alt={currentTrack.album || currentTrack.title}
+                className={`np-art ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}
+                onError={() => setImgError(true)}
+                loading="lazy"
+              />
+              {currentTrack.previewUrl && (
+                <div className={`np-play-overlay ${previewPlaying ? 'playing' : ''}`}>
+                  {previewPlaying ? (
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                  ) : (
+                    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M8 5v14l11-7z"/></svg>
+                  )}
+                </div>
+              )}
+            </>
+          ) : (
+            <div className={`np-art np-art--placeholder ${currentTrack.isPlaying ? 'np-art--spinning' : ''}`}>
+              <SpotifyIcon size={20} />
+            </div>
+          )}
         </div>
 
-        {currentTrack.songUrl ? (
-          <a
-            href={currentTrack.songUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="np-title"
-            title={currentTrack.title}
-          >
-            {currentTrack.title}
-          </a>
-        ) : (
-          <span className="np-title">{currentTrack.title}</span>
-        )}
+        {/* Track Info */}
+        <div className="np-info">
+          <div className="np-label">
+            <SpotifyIcon />
+            <span>{currentTrack.isPlaying ? 'Now Playing' : 'Last Played'}</span>
+          </div>
 
-        <div className="np-artist">{currentTrack.artist}</div>
+          {currentTrack.songUrl ? (
+            <a
+              href={currentTrack.songUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="np-title"
+              title={currentTrack.title}
+            >
+              {currentTrack.title}
+            </a>
+          ) : (
+            <span className="np-title">{currentTrack.title}</span>
+          )}
 
-        {currentTrack.duration > 0 && (
-          <>
-            <div className="np-progress-track">
-              <div
-                className="np-progress-fill"
-                ref={progressRef}
-                style={{ width: `${progressPct}%` }}
-              />
-            </div>
-            <div className="np-timestamps">
-              <span>{formatMs(currentTrack.progress || 0)}</span>
-              <span>{formatMs(currentTrack.duration)}</span>
-            </div>
-          </>
-        )}
-      </div>
+          <div className="np-artist">{currentTrack.artist}</div>
 
-      {/* Waveform */}
-      <div className="np-status">
-        <Waveform isPlaying={currentTrack.isPlaying} />
+          {currentTrack.duration > 0 && (
+            <>
+              <div className="np-progress-track">
+                <div
+                  className="np-progress-fill"
+                  ref={progressRef}
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              <div className="np-timestamps">
+                <span>{formatMs(currentTrack.progress || 0)}</span>
+                <span>{formatMs(currentTrack.duration)}</span>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Waveform */}
+        <div className="np-status">
+          <Waveform isPlaying={currentTrack.isPlaying} />
+        </div>
       </div>
     </div>
   );

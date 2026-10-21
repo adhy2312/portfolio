@@ -2,7 +2,8 @@
 import React, { useRef, useState, useEffect } from 'react';
 import './Contact.css';
 import emailjs from 'emailjs-com';
-import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle, FiCheck, FiCopy } from 'react-icons/fi';
+import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import CopyEmail from './CopyEmail';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import gsap from 'gsap';
@@ -25,35 +26,6 @@ const useKeralaTime = () => {
     return () => clearInterval(id);
   }, []);
   return time;
-};
-
-
-// ── Click-to-copy email component ──────────────────
-const CopyEmail = ({ email }) => {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(email).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2500);
-    });
-  };
-
-  return (
-    <button
-      className={`copy-email-btn ${copied ? 'copy-email-btn--copied' : ''}`}
-      onClick={handleCopy}
-      aria-label={copied ? 'Email copied!' : 'Click to copy email'}
-      title={copied ? 'Copied!' : 'Click to copy'}
-    >
-      <span className="copy-email-text">{email}</span>
-      <span className="copy-email-hint">
-        {copied
-          ? <><FiCheck size={11} /> Copied!</>
-          : <><FiCopy size={11} /> Click to copy</>}
-      </span>
-    </button>
-  );
 };
 
 const defaultContactInfo = [
@@ -223,7 +195,7 @@ ${message}`;
         <div className="contact-grid">
           {/* Info panel */}
           <div className="contact-info" ref={infoRef}>
-            <div className="contact-info-card glass-card">
+            <div className="contact-info-card glass-card specular-card">
               {/* V200: Local time strip */}
               {keralaTime && (
                 <div className="contact-time-strip">
@@ -273,7 +245,7 @@ ${message}`;
 
           {/* Form */}
           <div className="contact-form-wrap" ref={formWrapRef}>
-            <form ref={form} onSubmit={sendEmail} className="contact-form glass-card">
+            <form ref={form} onSubmit={sendEmail} className="contact-form glass-card specular-card">
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Your Name</label>

@@ -21,6 +21,7 @@ import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
+import { initSpecularSheen } from './utils/specularSheen';
 // Initialize core pipelining & smooth scrolling
 pipeline.init();
 
@@ -187,11 +188,13 @@ function AppContent() {
   const isLateNight = hour < 5 || hour >= 23;
 
   useEffect(() => {
-    // Force scroll to top on initial component mount
     if ('scrollRestoration' in window.history) {
       window.history.scrollRestoration = 'manual';
     }
     window.scrollTo(0, 0);
+
+    // Initialize Apple-style specular card sheen engine
+    initSpecularSheen();
 
     // applyGlobalEluteEffect removed — was causing layout thrash and SVG filter GPU drain
     const eluteEffectKiller = null;

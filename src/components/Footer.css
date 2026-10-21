@@ -281,16 +281,82 @@
   color: #ff3131;
 }
 
-/* ── Build Watermark ── */
-.build-watermark {
-  text-align: center;
-  margin-top: 24px;
+/* ── Subtle Git & Deployment Signature ── */
+.footer-git-telemetry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.git-telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.git-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #1ed760;
+  box-shadow: 0 0 6px rgba(30, 215, 96, 0.6);
+  display: inline-block;
+  animation: git-pulse 2.5s infinite ease-in-out;
+}
+
+@keyframes git-pulse {
+  0%, 100% { opacity: 0.5; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+.git-telemetry-label {
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.22);
+}
+
+.git-commit-hash {
+  color: rgba(255, 255, 255, 0.55);
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.04);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: all 0.2s ease;
+}
+
+.git-commit-hash:hover {
+  color: #1ed760;
+  border-color: rgba(30, 215, 96, 0.35);
+  background: rgba(30, 215, 96, 0.08);
+}
+
+.git-telemetry-sep {
+  color: rgba(255, 255, 255, 0.15);
+}
+
+.git-telemetry-branch,
+.git-telemetry-env {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.git-telemetry-meta {
   font-family: 'Fira Code', monospace;
   font-size: 0.55rem;
-  letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.12);
-  padding: 8px 0;
-  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
 /* Responsive */

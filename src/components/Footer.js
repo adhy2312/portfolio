@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './Footer.css';
 import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiMessageCircle } from 'react-icons/fi';
+import CopyEmail from './CopyEmail';
 import { client } from '../sanity';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -230,7 +231,7 @@ const Footer = () => {
           <div className="footer-contact-column">
             <h4 className="column-title">Contact</h4>
             <div className="contact-details">
-              <a href={`mailto:${displayData.email}`} className="retro-nav-link">{displayData.email}</a>
+              <CopyEmail email={displayData.email} variant="minimal" />
               <p className="retro-text-muted">Kerala, India</p>
               <div className="system-status-badge">
                 <span className="status-indicator-green" /> SYSTEM_ONLINE
@@ -285,8 +286,31 @@ const Footer = () => {
               </div>
             </div>
           </div>
-          <div className="build-watermark">
-            {footerData?.buildVersion || "v80.0.0 — The Performance Architecture"} · Build #{new Date().toISOString().slice(0, 10).replace(/-/g, '')} · React 19 · OffscreenCanvas Engine · GSAP
+          <div className="footer-git-telemetry">
+            <div className="git-telemetry-badge">
+              <span className="git-live-dot" />
+              <span className="git-telemetry-label">DEPLOYED</span>
+              <a 
+                href="https://github.com/adhy2312/portfolio/commit/c03606d" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="git-commit-hash"
+                title="View commit c03606d on GitHub"
+              >
+                c03606d
+              </a>
+              <span className="git-telemetry-sep">/</span>
+              <span className="git-telemetry-branch">main</span>
+              <span className="git-telemetry-sep">/</span>
+              <span className="git-telemetry-env">production</span>
+            </div>
+            <div className="git-telemetry-meta">
+              <span>Next-Gen React 19 Engine</span>
+              <span className="git-telemetry-sep">·</span>
+              <span>Sanity Studio CMS</span>
+              <span className="git-telemetry-sep">·</span>
+              <span>Kerala, India</span>
+            </div>
           </div>
         </div>
       </div>

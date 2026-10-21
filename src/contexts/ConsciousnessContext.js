@@ -73,7 +73,16 @@ export const ConsciousnessProvider = ({ children }) => {
   });
 
   const [ambientThought, setAmbientThought] = useState(null);
-  const [weatherData,    setWeatherData]    = useState(null);
+  const [weatherData,    setWeatherData]    = useState(() => {
+    try {
+      const cached = localStorage.getItem('adhy_weather_cache');
+      if (cached) return JSON.parse(cached);
+    } catch {}
+    const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+    const hour = ist.getHours();
+    const isDay = hour >= 6 && hour < 18;
+    return { condition: 'Clear', temp: isDay ? 29 : 25, isDay };
+  });
   const [temporalAge,    setTemporalAge]    = useState(0);
   const isSystemThinkingRef = useRef(false);
   const fpsRef              = useRef(60);
@@ -181,21 +190,50 @@ export const ConsciousnessProvider = ({ children }) => {
 
   // Weather
   useEffect(() => {
+    const getIstIsDay = () => {
+      try {
+        const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+        const hour = ist.getHours();
+        return hour >= 6 && hour < 18;
+      } catch {
+        const hour = new Date().getHours();
+        return hour >= 6 && hour < 18;
+      }
+    };
+
     const fetchWeather = async () => {
       try {
         const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
-        const res  = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
         const data = await res.json();
         if (data.cod === 200 && data.weather?.length > 0) {
           const cond = data.weather[0].main;
-          setWeatherData({ condition: cond, temp: Math.round(data.main.temp), isDay: data.dt > data.sys.sunrise && data.dt < data.sys.sunset });
+          const isDay = data.dt > data.sys.sunrise && data.dt < data.sys.sunset;
+          const weatherPayload = {
+            condition: cond,
+            temp: Math.round(data.main.temp),
+            isDay,
+            description: data.weather[0].description
+          };
+          setWeatherData(weatherPayload);
+          localStorage.setItem('adhy_weather_cache', JSON.stringify(weatherPayload));
           ns.setWeather(cond);
         } else {
-          setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+          const isDay = getIstIsDay();
+          setWeatherData({ condition: 'Clear', temp: isDay ? 29 : 25, isDay });
           ns.setWeather('Clear');
         }
       } catch {
-        setWeatherData({ condition: 'Clear', temp: 28, isDay: true });
+        try {
+          const cached = localStorage.getItem('adhy_weather_cache');
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            setWeatherData({ ...parsed, isDay: getIstIsDay() });
+            return;
+          }
+        } catch {}
+        const isDay = getIstIsDay();
+        setWeatherData({ condition: 'Clear', temp: isDay ? 29 : 25, isDay });
       }
     };
     fetchWeather();

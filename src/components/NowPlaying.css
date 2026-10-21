@@ -1,13 +1,52 @@
 /* ═══════════════════════════════════════
-   SPOTIFY NOW PLAYING WIDGET (DARK GLASSMORPHISM)
+   SPOTIFY NOW PLAYING WIDGET (DARK GLASSMORPHISM + AMBIENT CHROMA)
 ═══════════════════════════════════════ */
 
-/* ── Full Widget ── */
-.np-widget {
+/* ── Outer Wrapper with Ambient Chroma Backlight ── */
+.np-wrapper {
   position: fixed;
   bottom: 28px;
   left: 28px;
   z-index: 900;
+  animation: np-slidein 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Dynamic Ambient Glow matching live album artwork */
+.np-ambient-glow {
+  position: absolute;
+  inset: -14px;
+  border-radius: 26px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(28px) saturate(2.2);
+  opacity: 0.32;
+  pointer-events: none;
+  z-index: -1;
+  transform: scale(0.96);
+  transition: opacity 0.8s ease, filter 0.8s ease, transform 0.8s ease;
+}
+
+.np-ambient-glow--active {
+  opacity: 0.52;
+  transform: scale(1.02);
+  animation: np-chroma-pulse 5s ease-in-out infinite alternate;
+}
+
+@keyframes np-chroma-pulse {
+  0% {
+    opacity: 0.38;
+    filter: blur(24px) saturate(2);
+  }
+  100% {
+    opacity: 0.58;
+    filter: blur(34px) saturate(2.6);
+  }
+}
+
+/* ── Full Widget Card ── */
+.np-widget {
+  position: relative;
+  z-index: 1;
 
   display: flex;
   align-items: center;
@@ -19,16 +58,30 @@
   min-width: 210px;
 
   background: rgba(10, 10, 20, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(30, 215, 96, 0.12),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
-  animation: np-slidein 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
   overflow: hidden;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Subtle Inner Chroma Aura reflecting on frosted glass */
+.np-inner-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(22px) saturate(1.8);
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.8s ease;
 }
 
 @keyframes np-slidein {
@@ -111,6 +164,7 @@
 .np-art-wrap {
   flex-shrink: 0;
   position: relative;
+  z-index: 1;
 }
 
 .np-art {
@@ -189,6 +243,8 @@
   flex-direction: column;
   gap: 2px;
   padding-top: 4px; /* space for close btn */
+  position: relative;
+  z-index: 1;
 }
 
 .np-label {
@@ -258,6 +314,8 @@
 /* ── Waveform ── */
 .np-status {
   flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .np-waveform {
@@ -292,10 +350,13 @@
 
 /* ── Mobile ── */
 @media (max-width: 768px) {
-  .np-widget {
+  .np-wrapper {
     bottom: 16px;
     left: 16px;
     max-width: calc(100vw - 80px);
+  }
+  .np-widget {
+    max-width: 100%;
     padding: 8px 12px 8px 8px;
   }
   .np-art { width: 36px; height: 36px; }
@@ -306,10 +367,13 @@
 }
 
 @media (max-width: 480px) {
-  .np-widget {
+  .np-wrapper {
     bottom: 16px;
     left: 16px;
     max-width: calc(100vw - 80px);
+  }
+  .np-widget {
+    max-width: 100%;
     padding: 8px 12px 8px 8px;
   }
   .np-art { width: 36px; height: 36px; }
