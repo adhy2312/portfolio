@@ -9,8 +9,8 @@
 /* ── Outer Wrapper ── */
 .np-wrapper {
   position: fixed;
-  bottom: 24px;
-  left: 24px;
+  bottom: 16px;
+  left: 16px;
   z-index: 999;
   animation: np-neo-slidein 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -18,7 +18,7 @@
 @keyframes np-neo-slidein {
   from {
     opacity: 0;
-    transform: translateY(18px) scale(0.96);
+    transform: translateY(14px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -26,19 +26,19 @@
   }
 }
 
-/* ── Neo-Brutalist Widget Container ── */
+/* ── Neo-Brutalist Widget Container (Tightly Packed Pill) ── */
 .np-widget--brutalist {
   position: relative;
   z-index: 1;
-  width: 270px;
-  max-width: calc(100vw - 28px);
-  padding: 10px 12px;
-  border-radius: 9px;
+  width: 220px;
+  max-width: calc(100vw - 24px);
+  padding: 7px 8px;
+  border-radius: 8px;
 
   background: #0d0e14;
-  border: 2px solid #000000;
-  outline: 1.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 4px 4px 0px #000000, 0 10px 30px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.25));
+  border: 1.5px solid #000000;
+  outline: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 3px 3px 0px #000000, 0 8px 25px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.22));
 
   overflow: hidden;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease;
@@ -46,34 +46,34 @@
 
 .np-widget--brutalist:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 6px 6px 0px #000000, 0 14px 35px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.35));
+  box-shadow: 4px 4px 0px #000000, 0 10px 28px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.30));
 }
 
-/* ── 1. Header Row ── */
+/* ── 1. Header Row (Tightly Packed) ── */
 .np-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
-  padding-bottom: 6px;
-  border-bottom: 1.5px dashed rgba(255, 255, 255, 0.14);
+  margin-bottom: 5px;
+  padding-bottom: 4px;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.14);
 }
 
 .np-status-tag {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.62rem;
+  font-size: 0.54rem;
   font-weight: 900;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #000000;
   background: #a1a1aa;
-  padding: 3px 8px;
-  border-radius: 4px;
-  border: 1.5px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
 }
 
 .np-status-tag--live {
@@ -82,8 +82,8 @@
 }
 
 .np-status-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: #000000;
   opacity: 0.6;
@@ -107,47 +107,47 @@
 .np-header-actions {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 5px;
 }
 
 .np-spotify-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
   background: var(--spotify-ambient-accent, #1ed760);
   color: #000000;
-  border: 1.5px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
   text-decoration: none;
   transition: all 0.15s ease;
 }
 
 .np-spotify-link:hover {
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #000000;
+  box-shadow: 2px 2px 0px #000000;
 }
 
 .np-spotify-link:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px #000000;
+  box-shadow: 0.5px 0.5px 0px #000000;
 }
 
 .np-btn-minimize {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
   background: #ffffff;
   color: #000000;
-  border: 1.5px solid #000000;
-  box-shadow: 2px 2px 0px #000000;
+  border: 1px solid #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 1rem;
+  font-size: 0.85rem;
   font-weight: 900;
   line-height: 1;
   cursor: pointer;
@@ -157,43 +157,43 @@
 .np-btn-minimize:hover {
   background: #fbbf24;
   transform: translate(-1px, -1px);
-  box-shadow: 3px 3px 0px #000000;
+  box-shadow: 2px 2px 0px #000000;
 }
 
 .np-btn-minimize:active {
   transform: translate(1px, 1px);
-  box-shadow: 1px 1px 0px #000000;
+  box-shadow: 0.5px 0.5px 0px #000000;
 }
 
-/* ── 2. Body: Spinning Vinyl Record + Details ── */
+/* ── 2. Body: Spinning Vinyl Record + Details (Tightly Packed) ── */
 .np-body {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 9px;
 }
 
 /* ── Spinning Music Vinyl Disc Stage ── */
 .np-disc-stage {
   position: relative;
   flex-shrink: 0;
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   cursor: pointer;
   transition: transform 0.2s ease;
 }
 
 .np-disc-stage:hover {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .np-vinyl-disc {
   position: relative;
-  width: 52px;
-  height: 52px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: radial-gradient(circle, #0a0a0e 0%, #171720 30%, #0d0d12 50%, #1e1e28 72%, #08080c 100%);
-  border: 2px solid #000000;
-  box-shadow: 2.5px 2.5px 0px #000000, 0 0 10px rgba(0, 0, 0, 0.7);
+  border: 1.5px solid #000000;
+  box-shadow: 2px 2px 0px #000000, 0 0 8px rgba(0, 0, 0, 0.7);
   overflow: hidden;
   transition: filter 0.3s;
 }
@@ -201,7 +201,7 @@
 /* Concentric Vinyl Grooves */
 .np-vinyl-grooves {
   position: absolute;
-  inset: 2px;
+  inset: 1.5px;
   border-radius: 50%;
   background: repeating-radial-gradient(
     circle,
@@ -234,16 +234,16 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
-  border: 1.5px solid #000000;
+  border: 1px solid #000000;
   overflow: hidden;
   background: #111;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
 }
 
 .np-vinyl-art {
@@ -298,13 +298,13 @@
 /* Tonearm Needle Stylus Indicator */
 .np-tonearm {
   position: absolute;
-  top: 1px;
+  top: 0px;
   right: -2px;
-  width: 14px;
-  height: 28px;
-  border-right: 2px solid #e4e4e7;
-  border-top: 2px solid #e4e4e7;
-  border-top-right-radius: 4px;
+  width: 10px;
+  height: 22px;
+  border-right: 1.5px solid #e4e4e7;
+  border-top: 1.5px solid #e4e4e7;
+  border-top-right-radius: 3px;
   transform-origin: top right;
   transform: rotate(-15deg);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -318,10 +318,10 @@
 
 .np-tonearm-head {
   position: absolute;
-  bottom: -3px;
-  right: -4px;
-  width: 6px;
-  height: 5px;
+  bottom: -2px;
+  right: -3px;
+  width: 4px;
+  height: 4px;
   background: var(--spotify-ambient-accent, #1ed760);
   border: 1px solid #000;
 }
@@ -332,24 +332,24 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1.5px;
 }
 
 .np-meta-badges {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 2px;
+  gap: 4px;
+  margin-bottom: 1px;
 }
 
 .np-badge-brutal {
   font-family: 'Fira Code', monospace;
-  font-size: 0.58rem;
+  font-size: 0.52rem;
   font-weight: 800;
   background: #181924;
   color: #94a3b8;
-  padding: 1px 5px;
-  border-radius: 3px;
+  padding: 0.5px 4px;
+  border-radius: 2.5px;
   border: 1px solid #000000;
   box-shadow: 1px 1px 0px #000000;
 }
@@ -357,7 +357,7 @@
 .np-title {
   display: block;
   font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.88rem;
+  font-size: 0.76rem;
   font-weight: 800;
   color: #ffffff;
   white-space: nowrap;
@@ -376,25 +376,25 @@
 .np-artist {
   margin: 0;
   font-family: 'Fira Code', monospace;
-  font-size: 0.68rem;
+  font-size: 0.60rem;
   color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .np-preview-btn {
-  margin-top: 5px;
+  margin-top: 3px;
   align-self: flex-start;
-  padding: 2px 7px;
-  font-size: 0.60rem;
+  padding: 1.5px 6px;
+  font-size: 0.52rem;
   font-family: 'Fira Code', monospace;
   font-weight: 800;
-  border-radius: 4px;
+  border-radius: 3px;
   background: #181924;
-  border: 1.5px solid #000000;
-  box-shadow: 1.5px 1.5px 0px #000000;
+  border: 1px solid #000000;
+  box-shadow: 1px 1px 0px #000000;
   color: var(--spotify-ambient-accent, #1ed760);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -404,7 +404,7 @@
   background: var(--spotify-ambient-accent, #1ed760);
   color: #000000;
   transform: translate(-1px, -1px);
-  box-shadow: 2px 2px 0px #000000;
+  box-shadow: 1.5px 1.5px 0px #000000;
 }
 
 .np-preview-btn:active {
@@ -414,14 +414,14 @@
 
 /* ── 3. Footer: Chunky Neo-Brutalist Progress Track ── */
 .np-progress-section {
-  margin-top: 12px;
+  margin-top: 6px;
 }
 
 .np-progress-track {
-  height: 6px;
+  height: 4px;
   background: #1c1d27;
-  border-radius: 3px;
-  border: 1.5px solid #000000;
+  border-radius: 2px;
+  border: 1px solid #000000;
   overflow: hidden;
   box-shadow: inset 1px 1px 0px rgba(0, 0, 0, 0.4);
 }
@@ -430,7 +430,7 @@
   height: 100%;
   background: var(--spotify-ambient-accent, #1ed760);
   border-radius: 0;
-  border-right: 1.5px solid #000000;
+  border-right: 1px solid #000000;
   transition: width 0.3s linear;
 }
 
@@ -438,16 +438,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 2px;
   font-family: 'Fira Code', monospace;
-  font-size: 0.60rem;
+  font-size: 0.52rem;
   font-weight: 700;
   color: #71717a;
 }
 
 .np-live-tag {
   color: var(--spotify-ambient-accent, #1ed760);
-  font-size: 0.55rem;
+  font-size: 0.50rem;
   letter-spacing: 0.05em;
 }
 
@@ -481,7 +481,7 @@
   50%       { height: 12px; }
 }
 
-/* ── Neo-Brutalist Docked Tab (When Minimized) ── */
+/* ── Neo-Brutalist Docked Tab (When Minimized — Ultra-Shortened) ── */
 .np-dock--brutalist {
   position: fixed;
   left: 0;
@@ -490,31 +490,37 @@
 
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 4px;
 
-  padding: 6px 12px 6px 8px;
-  border: 2px solid #000000;
+  padding: 4px 6px 4px 4px;
+  border: 1.5px solid #000000;
   border-left: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 6px 6px 0;
   cursor: pointer;
 
   background: #0d0e14;
-  outline: 1.5px solid rgba(255, 255, 255, 0.18);
-  box-shadow: 3px 3px 0px #000000, 0 6px 20px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.25));
+  outline: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 2px 2px 0px #000000, 0 4px 15px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.20));
 
   color: #ffffff;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  width: auto;
+  max-width: 28px; /* Ultra-short dock: only vinyl disc peeking from viewport edge */
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .np-dock--brutalist:hover {
-  padding-right: 14px;
+  max-width: 86px;
+  padding-right: 8px;
   background: #141520;
-  transform: translateX(2px);
+  transform: translateX(1px);
 }
 
 .np-dock-disc {
-  width: 20px;
-  height: 20px;
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: radial-gradient(circle, #181822 35%, #000000 100%);
   border: 1.5px solid #000000;
@@ -526,8 +532,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 5px;
-  height: 5px;
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
   background: var(--spotify-ambient-accent, #1ed760);
   border: 1px solid #000;
@@ -540,65 +546,82 @@
 .np-dock-label {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 800;
-  font-size: 0.68rem;
+  font-size: 0.58rem;
   letter-spacing: 0.05em;
   color: var(--spotify-ambient-accent, #1ed760);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.np-dock--brutalist:hover .np-dock-label {
+  opacity: 1;
+}
+
+.np-dock--brutalist .np-waveform {
+  display: none !important; /* Hide waveform inside dock to keep length minimal */
 }
 
 /* ── Mobile Responsive ── */
 @media (max-width: 768px) {
   .np-wrapper {
-    bottom: 12px;
-    left: 10px;
-    max-width: calc(100vw - 20px);
+    bottom: 10px;
+    left: 8px;
+    max-width: calc(100vw - 16px);
   }
   .np-widget--brutalist {
-    width: 236px;
-    max-width: calc(100vw - 20px);
-    padding: 8px 10px;
-    border-radius: 8px;
+    width: 196px;
+    max-width: calc(100vw - 16px);
+    padding: 5px 6px;
+    border-radius: 6px;
   }
   .np-header {
-    margin-bottom: 6px;
-    padding-bottom: 4px;
+    margin-bottom: 4px;
+    padding-bottom: 3px;
   }
   .np-disc-stage {
-    width: 42px;
-    height: 42px;
+    width: 32px;
+    height: 32px;
   }
   .np-vinyl-disc {
-    width: 42px;
-    height: 42px;
+    width: 32px;
+    height: 32px;
   }
   .np-vinyl-label {
-    width: 19px;
-    height: 19px;
+    width: 14px;
+    height: 14px;
   }
   .np-title {
-    font-size: 0.74rem;
+    font-size: 0.68rem;
   }
   .np-artist {
-    font-size: 0.62rem;
+    font-size: 0.54rem;
   }
   .np-badge-brutal {
-    font-size: 0.50rem;
-    padding: 1px 4px;
+    font-size: 0.46rem;
+    padding: 0.5px 3px;
   }
-  /* Ultra-compact docked tab on mobile: shortens length, hides long text, prevents touch blocking */
+  /* Ultra-compact docked tab on mobile: only ~25px wide, zero page blocking */
   .np-dock--brutalist {
-    bottom: 74px;
-    padding: 5px 8px 5px 6px;
-    gap: 5px;
-    border-radius: 0 6px 6px 0;
-    max-width: 44px;
-    box-shadow: 2.5px 2.5px 0px #000000;
+    bottom: 65px;
+    padding: 3px 4px 3px 3px !important;
+    gap: 0 !important;
+    border-radius: 0 5px 5px 0 !important;
+    max-width: 25px !important;
+    width: 25px !important;
+    box-shadow: 1.5px 1.5px 0px #000000 !important;
+  }
+  .np-dock--brutalist:hover {
+    max-width: 25px !important;
+    width: 25px !important;
+    padding-right: 4px !important;
+    transform: none !important;
   }
   .np-dock--brutalist .np-dock-label {
-    display: none !important; /* Strips long "NOW PLAYING" text that stretched across screen */
+    display: none !important;
   }
   .np-dock-disc {
-    width: 18px;
-    height: 18px;
+    width: 16px !important;
+    height: 16px !important;
   }
 }
 
