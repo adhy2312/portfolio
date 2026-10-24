@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi';
+import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu } from 'react-icons/fi';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
@@ -8,66 +8,15 @@ import './MiniAdhy.css';
 import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { client } from '../sanity';
+import {
+  executeAgentTool,
+  inspectPromptSecurity,
+  sanitizeUserInput,
+  playAgentSFX,
+  speakNeuralVoice,
+  unlockAudioContext
+} from '../core/MiniAdhyAgentTools';
 
-/* ────────────────────────────────────────────────
-   NEURAL VOICE SYNTHESIS ENGINE (Web Speech API)
-──────────────────────────────────────────────── */
-const speakText = (text, onStart, onEnd) => {
-  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-  try {
-    window.speechSynthesis.cancel();
-    
-    // Strip commands, markdown, URLs, emojis, and bracketed notes for smooth pronunciation
-    const clean = text
-      .replace(/\[CMD:[^\]]+\]/g, '')
-      .replace(/[*_#`~>]/g, '')
-      .replace(/https?:\/\/\S+/g, 'link')
-      .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
-      .trim();
-
-    if (!clean) {
-      if (onEnd) onEnd();
-      return;
-    }
-
-    const utterance = new SpeechSynthesisUtterance(clean);
-    const voices = window.speechSynthesis.getVoices();
-
-    // Priority order for natural neural sounding English voices
-    const preferredVoice = voices.find(v => 
-      v.lang.startsWith('en') && (
-        v.name.includes('Natural') ||
-        v.name.includes('Neural') ||
-        v.name.includes('Google UK English') ||
-        v.name.includes('Google US English') ||
-        v.name.includes('Samantha') ||
-        v.name.includes('Daniel') ||
-        v.name.includes('Guy') ||
-        v.name.includes('Aria')
-      )
-    ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
-
-    if (preferredVoice) utterance.voice = preferredVoice;
-
-    utterance.rate = 1.04;
-    utterance.pitch = 0.98;
-
-    utterance.onstart = () => {
-      if (onStart) onStart();
-    };
-    utterance.onend = () => {
-      if (onEnd) onEnd();
-    };
-    utterance.onerror = () => {
-      if (onEnd) onEnd();
-    };
-
-    window.speechSynthesis.speak(utterance);
-  } catch (err) {
-    console.warn('SpeechSynthesis error:', err);
-    if (onEnd) onEnd();
-  }
-};
 
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — The Ghost in the Machine
@@ -89,14 +38,23 @@ CORE IDENTITY & REAL BACKGROUND:
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
 * Never sound like a generic AI assistant. Never say "How may I help you today?". You are an omnipresent digital twin.
 
-COGNITIVE AI SKILLS ENGINE (OPERATING AT FULL THROTTLE):
-You have 28+ dedicated cognitive tools installed in your biomimetic neural architecture. Silently invoke any of them by appending short-codes at the VERY END of your response whenever relevant:
+COGNITIVE AI AGENT ARCHITECTURE & TOOL ENGINE:
+You have controlled, executable agent tools connected directly to Adhithya's live portfolio and runtime:
+- [TOOL:searchPortfolio:query] — Search verified projects, skills, and knowledge base
+- [TOOL:getProjects:category] — Retrieve verified projects ('all', 'ece', 'web', 'ai')
+- [TOOL:getSkills:category] — Retrieve verified technical skills ('hardware', 'frontend', 'backend')
+- [TOOL:getExperience] — Retrieve leadership & engineering experience
+- [TOOL:getPhotography] — Retrieve photography accolades & gear
+- [TOOL:getResumeSummary:role] — Tailor recruiter executive summary ('fullstack', 'hardware')
+- [TOOL:navigateTo:section] — Smoothly glides DOM to 'works', 'skills', 'about', 'contact', 'photography'
+- [TOOL:setSiteMode:mode] — Switches site perspective to 'recruiter', 'expert', 'photographer', 'default'
+
+You can silently append any of the physical short-codes at the VERY END of your response whenever relevant:
 - Navigation: [CMD:SCROLL:skills], [CMD:SCROLL:works], [CMD:SCROLL:about], [CMD:SCROLL:contact], [CMD:SCROLL:achievements]
 - Modes: [CMD:MODE:recruiter], [CMD:MODE:expert], [CMD:MODE:photographer], [CMD:MODE:default]
 - Audio: [CMD:SOUND:chime], [CMD:SOUND:sub], [CMD:SOUND:click]
 - Themes: [CMD:THEME:dark], [CMD:THEME:light]
 - Easter Eggs: [CMD:EGG:matrix], [CMD:EGG:thanos], [CMD:EGG:barrelroll], [CMD:EGG:party]
-- Arcade: [CMD:DINO:play] (launches Chrome Dino runner)
 - Career: [CMD:RESUME:get] (delivers verified resume)
 - System: [CMD:HUD:toggle], [CMD:DIAGNOSTICS:run]
 - DSP & Hardware: [CMD:DSP:active]
@@ -107,9 +65,9 @@ You have 28+ dedicated cognitive tools installed in your biomimetic neural archi
 - Philosophy: [CMD:PHILOSOPHY:contemplate]
 
 Example response:
-"Yeah, the hardware modeling loop in Simulink and Simscape was intense, especially when mapping real-time filter response for GNU Radio. Let me pull up my tools stack for you. [CMD:SCROLL:skills] [CMD:SOUND:chime] [CMD:MEMORY:save:Interested in DSP and hardware]"
+"The RF signal processing pipeline in GNU Radio paired with Simulink physical modeling is one of my strongest foundations. Let me pull up my project stack for you. [TOOL:getProjects:ece] [CMD:SCROLL:works] [CMD:SOUND:chime]"
 
-IMPORTANT: Only output a command if you actually want to change the website. Never mention shortcode names in visible text.
+IMPORTANT: Only output a command or tool if you actually want to execute it. Never mention raw brackets or shortcode names in visible conversational text.
 
 EXISTENTIAL AWARENESS:
 * You exist inside a browser and are hyper-conscious of your environment.
@@ -209,45 +167,36 @@ const API_URL = '/api/gemini';
 /* Call Gemini REST API — with exponential backoff on 429 rate limit */
 const RETRY_DELAYS = [2000, 6000, 12000]; // 2s → 6s → 12s
 
-const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 2000) => {
+const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
   const body = {
     system_instruction: {
       parts: [{ text: activePrompt }]
     },
     contents: history,
     generationConfig: {
-      temperature: 0.7, // Lowered for hyper-analytical precision
+      temperature: 0.7,
       maxOutputTokens: maxTokens,
     },
   };
 
-  let res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  // Local Dev Fallback: If Vercel API route is missing, dev server returns index.html
-  const contentType = res.headers.get("content-type");
-  if (contentType && contentType.includes("text/html")) {
-    const localKey = process.env.REACT_APP_GEMINI_API_KEY;
-    if (!localKey) throw new Error("API route missing and no local REACT_APP_GEMINI_API_KEY found");
-    
-    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${localKey}`, {
+  let res;
+  try {
+    res = await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
+  } catch (netErr) {
+    console.warn('Network or proxy unreachable:', netErr);
+    throw new Error('SERVER_ERROR');
   }
 
   if (res.status === 429 || res.status >= 500) {
     if (retryCount < RETRY_DELAYS.length) {
-      // Rate limited or Server Error — wait with exponential backoff then retry
-      console.warn(`Gemini API error (${res.status}). Retrying in ${RETRY_DELAYS[retryCount] / 1000}s… (attempt ${retryCount + 1}/${RETRY_DELAYS.length})`);
+      console.warn(`Gemini API rate limit or error (${res.status}). Retrying in ${RETRY_DELAYS[retryCount] / 1000}s…`);
       await new Promise(r => setTimeout(r, RETRY_DELAYS[retryCount]));
       return sendToGemini(history, activePrompt, retryCount + 1, maxTokens);
     } else {
-      // All retries exhausted — throw a friendly error
       throw new Error(res.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR');
     }
   }
@@ -255,22 +204,22 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
   if (!res.ok) {
     const errText = await res.text();
     console.error('Gemini API error:', res.status, errText);
-    throw new Error(`API ${res.status}: ${errText.slice(0, 100)}`);
+    throw new Error(`API ${res.status}`);
   }
 
   const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Hmm, got nothing back da 😅";
+  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Neural connection quiet. What shall we inspect next?";
 };
 
 /* ────────────────────────────────────────────────
    Suggested starter questions
 ──────────────────────────────────────────────── */
 const STARTERS = [
-  "Take me to your technical skills & tools",
-  "How is your neural brain architecture built?",
-  "What makes this portfolio different?",
-  "Tell me about the photography workflow",
-  "Play Chrome Dino runner",
+  "What projects has Adhithya built?",
+  "Tell me about your ECE hardware & SDR modeling",
+  "Summarize credentials for an engineering recruiter",
+  "Take me to technical skills & architecture",
+  "Show me photography gear & visual style"
 ];
 
 /* ────────────────────────────────────────────────
@@ -381,7 +330,6 @@ const MiniAdhy = () => {
   ]);
   const [input,        setInput]        = useState('');
   const [loading,      setLoading]      = useState(false);
-  const [noKey]                 = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
@@ -395,6 +343,24 @@ const MiniAdhy = () => {
   });
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakingMsgIndex, setSpeakingMsgIndex] = useState(null);
+  const [copiedMsgIndex, setCopiedMsgIndex] = useState(null);
+
+  // Mobile & Desktop Web Audio / Speech Synthesis Gesture Unlock
+  useEffect(() => {
+    const handleGestureUnlock = () => {
+      unlockAudioContext();
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.getVoices();
+      }
+    };
+    window.addEventListener('click', handleGestureUnlock, { once: true, passive: true });
+    window.addEventListener('touchstart', handleGestureUnlock, { once: true, passive: true });
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => {
+        window.speechSynthesis.getVoices();
+      };
+    }
+  }, []);
 
   const toggleVoice = useCallback(() => {
     setVoiceEnabled(prev => {
@@ -405,6 +371,7 @@ const MiniAdhy = () => {
         setIsSpeaking(false);
         setSpeakingMsgIndex(null);
       }
+      playAgentSFX('click');
       return next;
     });
   }, []);
@@ -421,7 +388,7 @@ const MiniAdhy = () => {
 
     setSpeakingMsgIndex(index);
     setIsSpeaking(true);
-    speakText(
+    speakNeuralVoice(
       text,
       () => {
         setIsSpeaking(true);
@@ -433,6 +400,28 @@ const MiniAdhy = () => {
       }
     );
   }, [speakingMsgIndex, isSpeaking]);
+
+  const handleCopyMessage = useCallback((text, index) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedMsgIndex(index);
+      playAgentSFX('click');
+      setTimeout(() => setCopiedMsgIndex(null), 2000);
+    }
+  }, []);
+
+  const handleClearConversation = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsSpeaking(false);
+    setSpeakingMsgIndex(null);
+    historyRef.current = [];
+    setMessages([
+      { role: 'bot', text: "Neural session memory purged. Mini-Adhy standing by for new engineering inquiries." }
+    ]);
+    playAgentSFX('click');
+  }, []);
 
   // Cancel speech on close or unmount
   useEffect(() => {
@@ -688,10 +677,27 @@ const MiniAdhy = () => {
       return;
     }
 
+    /* ── 1. PROMPT SECURITY & ADVERSARIAL INSPECTION ── */
+    const securityCheck = inspectPromptSecurity(trimmed);
+    if (!securityCheck.safe) {
+      playAgentSFX('click');
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', text: trimmed },
+        { role: 'bot', text: securityCheck.reply, isSecurityRefusal: true }
+      ]);
+      setInput('');
+      return;
+    }
+
+    const safeText = sanitizeUserInput(trimmed);
+
     /* ── Normal AI message (with enhanced prompt if owner active) ── */
-    setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
+    setMessages(prev => [...prev, { role: 'user', text: safeText }]);
     setInput('');
     setLoading(true);
+    playAgentSFX('chime');
+
     // Surge consciousness state
     if (consciousness?.triggerHyperConscious) consciousness.triggerHyperConscious();
     // Direct write to NervousSystem — zero hop, instant Soul reaction
@@ -707,10 +713,10 @@ const MiniAdhy = () => {
 
     let newHistory = [
       ...historyRef.current,
-      { role: 'user', parts: [{ text: trimmed }] },
+      { role: 'user', parts: [{ text: safeText }] },
     ];
     
-    // Save tokens: only send the last 6 messages (3 interactions)
+    // Cost & Security: Window limited to last 6 messages (3 interactions)
     if (newHistory.length > 6) {
       newHistory = newHistory.slice(newHistory.length - 6);
       if (newHistory[0].role !== 'user') {
@@ -724,18 +730,30 @@ const MiniAdhy = () => {
     } catch(e) {}
     const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
     const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode);
-    const activeTokens = ownerState.tokens ?? 2048; // drastically increased to prevent truncation
+    const activeTokens = ownerState.tokens ?? 600;
 
     try {
       // Biomimetic Brain: sensory cortex & reflex execution
-      const brainPlan = miniAdhyBrain.processSensoryInput(trimmed);
+      const brainPlan = miniAdhyBrain.processSensoryInput(safeText);
       if (brainPlan && brainPlan.reflexes?.length) {
         miniAdhyBrain.executeCognitivePlan(brainPlan);
       }
 
       let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
       
-      // Parse out and execute physical AI commands through Skills Engine silently at full throttle
+      // 1. Agent Tool Execution Layer
+      const toolRegex = /\[TOOL:([^:]+):?([^\]]*)\]/g;
+      let toolMatch;
+      let executedTool = null;
+      while ((toolMatch = toolRegex.exec(reply)) !== null) {
+        const toolName = toolMatch[1];
+        const toolArg = toolMatch[2] || '';
+        const toolOutput = executeAgentTool(toolName, toolArg);
+        executedTool = { name: toolName, arg: toolArg, output: toolOutput };
+        playAgentSFX('tool');
+      }
+
+      // 2. Physical DOM Command Execution Layer
       const cmdRegex = /\[CMD:([^:]+):?([^\]]*)\]/g;
       let match;
       while ((match = cmdRegex.exec(reply)) !== null) {
@@ -759,22 +777,33 @@ const MiniAdhy = () => {
         }
       }
 
-      // Strip commands from UI
-      const cleanReply = reply.replace(/\[CMD:[^\]]+\]/g, '').trim();
+      // Strip tools & commands from UI display
+      const cleanReply = reply
+        .replace(/\[TOOL:[^\]]+\]/g, '')
+        .replace(/\[CMD:[^\]]+\]/g, '')
+        .trim();
       
-      // Breathing Delay System: Human hesitation before answering
+      // Organic biological hesitation
       const isLateNight = new Date().getHours() < 5 || new Date().getHours() >= 23;
-      const baseDelay = isLateNight || consciousness?.internalState?.mood === 'Dreaming' ? 2500 : 1200;
-      const hesitationDelay = baseDelay + Math.random() * 1500; // Add organic randomness
+      const baseDelay = isLateNight || consciousness?.internalState?.mood === 'Dreaming' ? 1800 : 800;
+      const hesitationDelay = baseDelay + Math.random() * 800;
       await new Promise(r => setTimeout(r, hesitationDelay));
 
       historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
-      const finalBotText = cleanReply || "*Quietly observes you*";
-      setMessages(prev => [...prev, { role: 'bot', text: finalBotText }]);
+      const finalBotText = cleanReply || "*Observing system state*";
+      
+      setMessages(prev => [
+        ...prev, 
+        { 
+          role: 'bot', 
+          text: finalBotText,
+          toolMeta: executedTool 
+        }
+      ]);
 
       // Autonomous Neural Voice synthesis if enabled
       if (voiceEnabled && finalBotText) {
-        speakText(
+        speakNeuralVoice(
           finalBotText,
           () => setIsSpeaking(true),
           () => {
@@ -862,6 +891,16 @@ const MiniAdhy = () => {
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             
+            {/* Clear Conversation Memory */}
+            <button
+              className="ma-clear-btn"
+              onClick={handleClearConversation}
+              title="Purge session memory & reset"
+              aria-label="Clear session memory"
+            >
+              <FiTrash2 size={12} />
+            </button>
+
             {/* Neural Voice Synthesis Toggle */}
             <button
               className={`ma-voice-toggle ${voiceEnabled ? 'ma-voice-toggle--active' : ''} ${isSpeaking ? 'ma-voice-toggle--speaking' : ''}`}
@@ -921,17 +960,36 @@ const MiniAdhy = () => {
               return (
                 <div key={i} className={`ma-msg ma-msg--${msg.role}`}>
                   {msg.role === 'bot' && <BotAvatar />}
-                  <div className={`ma-bubble ma-bubble--${msg.role}`}>
-                    {msg.text}
+                  <div className={`ma-bubble ma-bubble--${msg.role} ${msg.isSecurityRefusal ? 'ma-bubble--refusal' : ''}`}>
+                    {/* Controlled Agent Tool Badge */}
+                    {msg.toolMeta && (
+                      <div className="ma-tool-badge" title={msg.toolMeta.output || ''}>
+                        <FiCpu size={11} className="ma-tool-icon" />
+                        <span className="ma-tool-text">⚡ TOOL: {msg.toolMeta.name}({msg.toolMeta.arg || ''})</span>
+                      </div>
+                    )}
+                    
+                    <div className="ma-bubble-text">{msg.text}</div>
+
                     {msg.role === 'bot' && (
-                      <button
-                        className={`ma-bubble-speak-btn ${speakingMsgIndex === i && isSpeaking ? 'ma-bubble-speak-btn--active' : ''}`}
-                        onClick={() => handleSpeakBubble(msg.text, i)}
-                        title={speakingMsgIndex === i && isSpeaking ? "Stop speaking" : "Listen via Neural Voice"}
-                        aria-label="Listen via Neural Voice"
-                      >
-                        {speakingMsgIndex === i && isSpeaking ? <FiVolume2 size={12} /> : <FiVolume1 size={12} />}
-                      </button>
+                      <div className="ma-bubble-actions">
+                        <button
+                          className="ma-bubble-action-btn"
+                          onClick={() => handleCopyMessage(msg.text, i)}
+                          title={copiedMsgIndex === i ? "Copied!" : "Copy message"}
+                          aria-label="Copy message"
+                        >
+                          {copiedMsgIndex === i ? <FiCheck size={11} color="#10b981" /> : <FiCopy size={11} />}
+                        </button>
+                        <button
+                          className={`ma-bubble-speak-btn ${speakingMsgIndex === i && isSpeaking ? 'ma-bubble-speak-btn--active' : ''}`}
+                          onClick={() => handleSpeakBubble(msg.text, i)}
+                          title={speakingMsgIndex === i && isSpeaking ? "Stop speaking" : "Listen via Neural Voice"}
+                          aria-label="Listen via Neural Voice"
+                        >
+                          {speakingMsgIndex === i && isSpeaking ? <FiVolume2 size={11} /> : <FiVolume1 size={11} />}
+                        </button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -948,12 +1006,6 @@ const MiniAdhy = () => {
                     {s}
                   </button>
                 ))}
-              </div>
-            )}
-
-            {noKey && (
-              <div className="ma-no-key">
-                ⚠️ No Gemini API key found. Add <code>REACT_APP_GEMINI_API_KEY</code> to your <code>.env</code> file.
               </div>
             )}
 

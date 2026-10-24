@@ -360,10 +360,10 @@ function AppContent() {
    Secret Code for Mini-Adhy: sudo namakk-sett-aakam
     `);
 
-    // Defer heavy non-critical widgets (Chatbot, Spotify) to boost Lighthouse TTI
+    // Load widgets shortly after initial render
     const widgetTimer = setTimeout(() => {
       setLoadWidgets(true);
-    }, 3500);
+    }, 500);
 
     return () => {
       ro.disconnect();

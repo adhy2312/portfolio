@@ -387,21 +387,29 @@
    FULL-SITE SPOTIFY AMBIENT LIGHTING SYSTEM
    ════════════════════════════════════════════════════ */
 
-body.spotify-ambient-active::before {
-  content: '';
+.spotify-ambient-aurora-canvas {
   position: fixed;
   inset: 0;
   background: var(--spotify-ambient-bg);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.95;
-  transition: opacity 1.5s ease;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  will-change: opacity, filter;
+}
+
+body.spotify-ambient-active .spotify-ambient-aurora-canvas {
+  opacity: 1;
+}
+
+body.spotify-ambient-active.spotify-playing .spotify-ambient-aurora-canvas {
+  opacity: 1;
   animation: np-ambient-aurora 10s ease-in-out infinite alternate;
 }
 
 @keyframes np-ambient-aurora {
   0%   { filter: hue-rotate(0deg) saturate(1.2); opacity: 0.85; }
-  100% { filter: hue-rotate(25deg) saturate(1.6); opacity: 1; }
+  100% { filter: hue-rotate(28deg) saturate(1.7); opacity: 1; }
 }
 
 body.spotify-ambient-active .navbar {

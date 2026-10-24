@@ -665,57 +665,140 @@
 }
 
 /* Individual message speak button */
-.ma-bubble--bot {
-  position: relative;
-  padding-bottom: 22px;
-}
-
-.ma-bubble-speak-btn {
-  position: absolute;
-  bottom: 4px;
-  right: 6px;
+/* Header clear / reset button */
+.ma-clear-btn {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: rgba(0, 0, 0, 0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.ma-clear-btn:hover {
+  background: var(--accent-brutal-pink, #f43f5e);
+  border-color: #000;
+  color: #000;
+  transform: rotate(15deg) scale(1.1);
+}
+
+/* Individual message actions container */
+.ma-bubble--bot {
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.ma-bubble-actions {
+  position: absolute;
+  bottom: 4px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ma-bubble-action-btn,
+.ma-bubble-speak-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.06);
   border: 1px solid rgba(0, 0, 0, 0.12);
-  color: inherit;
-  opacity: 0.55;
+  color: #111;
+  opacity: 0.6;
   cursor: pointer;
   padding: 0;
   transition: all 0.2s ease;
 }
 
+.dark-mode .ma-bubble-action-btn,
 .dark-mode .ma-bubble-speak-btn {
   background: rgba(255, 255, 255, 0.1);
   border-color: rgba(255, 255, 255, 0.15);
+  color: #fff;
   opacity: 0.7;
 }
 
+.ma-bubble:hover .ma-bubble-action-btn,
 .ma-bubble:hover .ma-bubble-speak-btn {
   opacity: 1;
 }
 
+.ma-bubble-action-btn:hover,
 .ma-bubble-speak-btn:hover {
   opacity: 1;
-  background: var(--accent-primary, #6c63ff);
-  color: #fff;
-  transform: scale(1.15);
+  background: #a78bfa;
+  color: #000;
+  border-color: #000;
+  transform: scale(1.1);
 }
 
 .ma-bubble-speak-btn--active {
   opacity: 1 !important;
   background: #c084fc !important;
   color: #000 !important;
+  border-color: #000 !important;
   animation: ma-voice-pulse-btn 0.8s infinite alternate ease-in-out;
 }
 
 @keyframes ma-voice-pulse-btn {
   0% { transform: scale(1); box-shadow: 0 0 0 rgba(192, 132, 252, 0.4); }
-  100% { transform: scale(1.2); box-shadow: 0 0 12px rgba(192, 132, 252, 0.8); }
+  100% { transform: scale(1.15); box-shadow: 0 0 10px rgba(192, 132, 252, 0.8); }
 }
+
+/* Agent Tool execution badge inside message */
+.ma-tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #111827;
+  color: #38bdf8;
+  border: 1px solid #1e293b;
+  border-radius: 4px;
+  padding: 2px 7px;
+  margin-bottom: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  box-shadow: 1px 1px 0px #000;
+}
+
+.ma-tool-icon {
+  color: #38bdf8;
+  animation: ma-tool-spin 4s linear infinite;
+}
+
+@keyframes ma-tool-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.ma-tool-text {
+  text-transform: uppercase;
+}
+
+/* Security refusal bubble */
+.ma-bubble--refusal {
+  background: #fffbeb !important;
+  border: 2px solid #f59e0b !important;
+  color: #78350f !important;
+}
+
+.dark-mode .ma-bubble--refusal {
+  background: #1c1917 !important;
+  border: 2px solid #d97706 !important;
+  color: #fde68a !important;
+}
+
 
 

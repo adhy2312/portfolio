@@ -1,5 +1,5 @@
-// Service Worker for Adhithya Mohan Portfolio PWA
-const CACHE_NAME = 'adhy-portfolio-v1';
+// Service Worker for Adhithya Mohan Portfolio PWA (V2)
+const CACHE_NAME = 'adhy-portfolio-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -19,7 +19,7 @@ self.addEventListener('install', (event) => {
   self.skipWaiting();
 });
 
-// Activate: Clean up old caches
+// Activate: Clean up old caches immediately
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -31,14 +31,19 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch: Stale-while-revalidate for static, network-first for APIs
+// Fetch: Stale-while-revalidate for static assets, NEVER cache dynamic APIs
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Skip cross-origin API mutations
+  // 1. Only process GET requests
   if (event.request.method !== 'GET') return;
 
-  // Static assets: Cache first with network fallback
+  // 2. CRITICAL: Never intercept or cache serverless APIs (/api/spotify, /api/gemini, etc.)
+  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/studio')) {
+    return;
+  }
+
+  // 3. Static assets: Cache first with network fallback
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
