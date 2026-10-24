@@ -63,7 +63,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow:
     0 10px 32px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(30, 215, 96, 0.12),
+    0 0 0 1px var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.15)),
     inset 0 1px 0 rgba(255, 255, 255, 0.05);
 
   overflow: hidden;
@@ -90,11 +90,11 @@
 }
 
 .np-widget:hover {
-  border-color: rgba(30, 215, 96, 0.28);
+  border-color: var(--spotify-ambient-accent, rgba(167, 139, 250, 0.3));
   box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.55),
-    0 0 0 1px rgba(30, 215, 96, 0.25),
-    0 0 20px rgba(30, 215, 96, 0.08),
+    0 0 0 1px var(--spotify-ambient-accent, rgba(167, 139, 250, 0.35)),
+    0 0 24px var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.2)),
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
@@ -140,11 +140,11 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 0 12px 12px 0;
-  border: 1px solid rgba(30, 215, 96, 0.25);
+  border: 1px solid var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.3));
   border-left: none;
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
 
-  color: #1ed760;
+  color: var(--spotify-ambient-accent, #a78bfa);
   transition: padding 0.2s ease, box-shadow 0.2s ease, background 0.2s;
   animation: np-dockslide 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
@@ -157,7 +157,7 @@
 .np-dock:hover {
   padding: 10px 14px;
   background: rgba(15, 15, 28, 0.96);
-  box-shadow: 6px 0 28px rgba(30, 215, 96, 0.18);
+  box-shadow: 6px 0 28px var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.3));
 }
 
 /* ── Album Art ── */
@@ -273,7 +273,7 @@
   transition: color 0.2s;
 }
 .np-title:hover {
-  color: #1ed760;
+  color: var(--spotify-ambient-accent, #a78bfa);
 }
 
 .np-artist {
@@ -296,10 +296,10 @@
 
 .np-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #1ed760, #1db954);
+  background: linear-gradient(90deg, var(--spotify-ambient-accent, #6366f1), var(--spotify-aurora-2, #a855f7));
   border-radius: 3px;
   transition: width 0.5s linear;
-  box-shadow: 0 0 8px rgba(30, 215, 96, 0.4);
+  box-shadow: 0 0 10px var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.4));
 }
 
 .np-timestamps {
@@ -329,13 +329,13 @@
   display: block;
   width: 3px;
   border-radius: 2px;
-  background: rgba(30, 215, 96, 0.4);
+  background: var(--spotify-aurora-glow-soft, rgba(167, 139, 250, 0.4));
   height: 4px;
   transition: background 0.3s;
 }
 
 .np-waveform--playing span {
-  background: #1ed760;
+  background: var(--spotify-ambient-accent, #a78bfa);
 }
 
 .np-waveform--playing span:nth-child(1) { animation: np-bar 0.9s ease-in-out infinite; }
@@ -384,46 +384,141 @@
 }
 
 /* ════════════════════════════════════════════════════
-   FULL-SITE SPOTIFY AMBIENT LIGHTING SYSTEM
+   FULL-SITE SPOTIFY NATURAL COLORSHIFTING AURORA ENGINE
    ════════════════════════════════════════════════════ */
 
 .spotify-ambient-aurora-canvas {
   position: fixed;
   inset: 0;
-  background: var(--spotify-ambient-bg);
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
+  overflow: hidden;
   opacity: 0;
-  transition: opacity 1.2s ease;
-  will-change: opacity, filter;
+  transition: opacity 1.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
 }
 
 body.spotify-ambient-active .spotify-ambient-aurora-canvas {
-  opacity: 1;
+  opacity: 0.65;
 }
 
 body.spotify-ambient-active.spotify-playing .spotify-ambient-aurora-canvas {
   opacity: 1;
-  animation: np-ambient-aurora 10s ease-in-out infinite alternate;
 }
 
-@keyframes np-ambient-aurora {
-  0%   { filter: hue-rotate(0deg) saturate(1.2); opacity: 0.85; }
-  100% { filter: hue-rotate(28deg) saturate(1.7); opacity: 1; }
+/* Dark mode: Ethereal radiant screen blend */
+body.dark-mode .spotify-ambient-aurora-canvas {
+  mix-blend-mode: screen;
 }
 
-body.spotify-ambient-active .navbar {
-  border-bottom: 2px solid var(--spotify-ambient-accent, #10b981) !important;
-  box-shadow: 0 4px 25px var(--spotify-ambient-glow, rgba(16, 185, 129, 0.2)) !important;
-  transition: border-color 0.8s ease, box-shadow 0.8s ease;
+/* Light mode: Soft atmospheric watercolor wash */
+body:not(.dark-mode) .spotify-ambient-aurora-canvas {
+  mix-blend-mode: multiply;
+  opacity: 0.35;
+}
+
+body:not(.dark-mode).spotify-playing .spotify-ambient-aurora-canvas {
+  opacity: 0.55;
+}
+
+/* Multi-layered floating natural aurora beams */
+.aurora-beam {
+  position: absolute;
+  pointer-events: none;
+  border-radius: 50%;
+  will-change: transform, opacity, filter;
+}
+
+/* Top Overhead Curtain — Flows above and behind the navbar with zero cutoff */
+.aurora-beam--top {
+  top: -24vh;
+  left: -12vw;
+  width: 124vw;
+  height: 64vh;
+  background: radial-gradient(ellipse 75% 55% at 50% 25%, var(--spotify-aurora-1, #4338ca), transparent 72%),
+              radial-gradient(ellipse 55% 40% at 82% 18%, var(--spotify-aurora-2, #8b5cf6), transparent 68%);
+  filter: blur(85px) saturate(1.8);
+  opacity: 0.65;
+  animation: aurora-drift-top 24s ease-in-out infinite alternate;
+}
+
+/* Diagonal Mid-Wave Ribbon — Undulates through the central sections */
+.aurora-beam--mid {
+  top: 22vh;
+  left: -18vw;
+  width: 136vw;
+  height: 58vh;
+  background: conic-gradient(from 125deg at 65% 45%, var(--spotify-aurora-2, #8b5cf6), var(--spotify-aurora-3, #0d9488), var(--spotify-aurora-1, #4338ca), var(--spotify-aurora-4, #f59e0b), var(--spotify-aurora-2, #8b5cf6));
+  filter: blur(120px) saturate(2);
+  opacity: 0.55;
+  animation: aurora-drift-mid 32s ease-in-out infinite alternate;
+}
+
+/* Bottom Horizon Glow — Warm soothing reflection from bottom */
+.aurora-beam--bottom {
+  bottom: -22vh;
+  right: -12vw;
+  width: 124vw;
+  height: 62vh;
+  background: radial-gradient(circle at 80% 75%, var(--spotify-aurora-3, #0d9488), transparent 65%),
+              radial-gradient(circle at 22% 82%, var(--spotify-aurora-4, #f59e0b), transparent 60%);
+  filter: blur(95px) saturate(1.7);
+  opacity: 0.58;
+  animation: aurora-drift-bottom 26s ease-in-out infinite alternate;
+}
+
+/* Full-viewport Colorshifting Living Shimmer (Northern Lights Wave) */
+.aurora-beam--shimmer {
+  inset: -5%;
+  width: 110%;
+  height: 110%;
+  background: radial-gradient(ellipse 80% 65% at 50% 50%, var(--spotify-aurora-2, #8b5cf6), transparent 72%);
+  filter: blur(140px);
+  opacity: 0.42;
+  animation: aurora-colorshift 18s ease-in-out infinite alternate;
+}
+
+/* Natural Aurora Drift Physics */
+@keyframes aurora-drift-top {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(4vw, 3vh) scale(1.06) rotate(2deg); }
+  100% { transform: translate(-3vw, -2vh) scale(0.98) rotate(-1.5deg); }
+}
+
+@keyframes aurora-drift-mid {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(-5vw, -4vh) scale(1.1) rotate(-3deg); }
+  100% { transform: translate(4vw, 3vh) scale(0.95) rotate(2.5deg); }
+}
+
+@keyframes aurora-drift-bottom {
+  0%   { transform: translate(0, 0) scale(1) rotate(0deg); }
+  50%  { transform: translate(3vw, -3vh) scale(1.05) rotate(2deg); }
+  100% { transform: translate(-4vw, 2vh) scale(0.96) rotate(-2deg); }
+}
+
+@keyframes aurora-colorshift {
+  0%   { filter: blur(130px) hue-rotate(0deg) saturate(1.4); transform: scale(1); }
+  50%  { filter: blur(150px) hue-rotate(24deg) saturate(1.8); transform: scale(1.05); }
+  100% { filter: blur(130px) hue-rotate(-18deg) saturate(1.5); transform: scale(0.98); }
+}
+
+/* Navbar integration: NO harsh border line — gentle ambient reflection through glass */
+body.spotify-ambient-active .navbar-inner {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 0 28px var(--spotify-aurora-glow-soft, rgba(139, 92, 246, 0.16)) !important;
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  transition: box-shadow 1.2s ease, border-color 1.2s ease;
 }
 
 body.spotify-ambient-active .ma-dock {
-  border-color: var(--spotify-ambient-accent, #10b981) !important;
-  box-shadow: 4px 4px 18px var(--spotify-ambient-glow, rgba(16, 185, 129, 0.25)) !important;
+  border-color: var(--spotify-ambient-accent, #6366f1) !important;
+  box-shadow: 4px 4px 18px var(--spotify-aurora-glow-soft, rgba(99, 102, 241, 0.2)) !important;
 }
 
 body.spotify-ambient-active .bento-card:hover {
-  border-color: var(--spotify-ambient-accent, #10b981) !important;
+  border-color: var(--spotify-ambient-accent, #6366f1) !important;
 }
+
 
