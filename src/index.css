@@ -108,13 +108,19 @@ body.dark-mode {
 }
 
 /* ═══════════════════════════════════════════
-   SPOTIFY AMBIENT LIGHTING: SHADOW INTEGRATION
-   Updates all elements using brutalist shadows with dynamic track glow
+   SPOTIFY AMBIENT LIGHTING: SOFT DIFFUSED AMBIENCE
+   Soft, atmospheric light blooms behind elements — NO sharp colored edges
 ═══════════════════════════════════════════ */
 body.spotify-ambient-active.spotify-playing {
-  --shadow-brutal: 5px 5px 0px var(--spotify-ambient-accent), 0 10px 30px var(--spotify-ambient-glow-card);
-  --shadow-brutal-hover: 2px 2px 0px var(--spotify-ambient-accent), 0 14px 40px var(--spotify-ambient-glow-card-deep);
-  --shadow-brutal-deep: 10px 10px 0px var(--spotify-ambient-accent), 0 20px 45px var(--spotify-ambient-glow-card-deep);
+  --shadow-brutal: 5px 5px 0px #111111, 0 12px 35px var(--spotify-ambient-glow-card), 0 0 50px var(--spotify-ambient-glow);
+  --shadow-brutal-hover: 2px 2px 0px #111111, 0 16px 45px var(--spotify-ambient-glow-card-deep), 0 0 65px var(--spotify-ambient-glow);
+  --shadow-brutal-deep: 10px 10px 0px #111111, 0 24px 60px var(--spotify-ambient-glow-card-deep), 0 0 80px var(--spotify-ambient-glow);
+}
+
+body.dark-mode.spotify-ambient-active.spotify-playing {
+  --shadow-brutal: 5px 5px 0px #000000, 0 12px 35px var(--spotify-ambient-glow-card), 0 0 50px var(--spotify-ambient-glow);
+  --shadow-brutal-hover: 2px 2px 0px #000000, 0 16px 45px var(--spotify-ambient-glow-card-deep), 0 0 65px var(--spotify-ambient-glow);
+  --shadow-brutal-deep: 10px 10px 0px #000000, 0 24px 60px var(--spotify-ambient-glow-card-deep), 0 0 80px var(--spotify-ambient-glow);
 }
 
 

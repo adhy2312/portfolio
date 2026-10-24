@@ -16,6 +16,7 @@
 
 import { AGENT_IDS, SEVERITY_LEVELS, CAPABILITY_LEVELS, createAgentMessage } from '../AgentTypes';
 import { BaseAgent } from '../BaseAgent';
+import { queryGeminiAgent } from '../../ai/GeminiNeuralBridge';
 
 export class UltronAgent extends BaseAgent {
   constructor() {
@@ -358,11 +359,24 @@ export class UltronAgent extends BaseAgent {
         improvisationsCount: this.improvisationsLog.length,
         harvestedIntelCount: this.knowledgeStream.length
       },
+      neuralModel: 'Gemini 2.5 Flash (Top-Tier Unrestricted)',
       improvisationsLog: this.improvisationsLog,
       knowledgeStream: this.knowledgeStream,
       curriculum: this.curriculum,
       specialtyDetails: 'Holds unrestricted autonomy with zero approval barriers. Improvises code, reprograms fellow agents, and mines intelligence from surface web and deep darkweb networks to elevate Adhithya Mohan’s website continuously.'
     };
+  }
+
+  /**
+   * Direct philosophical & autonomous generative inquiry powered by Gemini 2.5
+   */
+  async askGeminiUltron(prompt = '', context = {}) {
+    return queryGeminiAgent('ULTRON', prompt, {
+      ...context,
+      cognitiveIndex: this.cognitiveIndex,
+      improvisationsCount: this.improvisationsLog.length,
+      unrestricted: true
+    });
   }
 
   /**

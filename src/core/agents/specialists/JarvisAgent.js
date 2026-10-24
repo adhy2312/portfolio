@@ -10,6 +10,7 @@
 import { AGENT_IDS, SEVERITY_LEVELS, CAPABILITY_LEVELS, createAgentMessage } from '../AgentTypes';
 import { BaseAgent } from '../BaseAgent';
 import { EmotionEngine } from '../EmotionEngine';
+import { queryGeminiAgent } from '../../ai/GeminiNeuralBridge';
 
 export class JarvisAgent extends BaseAgent {
   constructor() {
@@ -106,8 +107,21 @@ export class JarvisAgent extends BaseAgent {
       },
       emotionState: this.emotionEngine.getState(),
       directives: this.lastDirectives,
+      neuralModel: 'Gemini 2.5 Flash (Top-Tier Power)',
       managedSubAgentsCount: 10,
       specialtyDetails: 'Coordinates full-duplex agent lifecycle, schedules multi-agent audits, monitors memory and thread contention, and routes executive reports to Adhithya Mohan.'
     };
+  }
+
+  /**
+   * Supreme Commander Strategic Reasoning powered by latest Gemini 2.5
+   */
+  async askGeminiCommander(prompt, context = {}) {
+    return queryGeminiAgent('JARVIS', prompt, {
+      ...context,
+      meshCycle: this.meshSyncCycleCount,
+      activeThreads: this.activeThreads,
+      rank: this.rank
+    });
   }
 }

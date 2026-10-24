@@ -68,18 +68,34 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Malformed JSON' });
   }
 
-  // 6. Gemini Generative Safety Settings & Token Quota Limits
-  const MODEL = 'gemini-2.5-flash';
-  const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+  // 6. Top-Tier AI Persona Injection
+  const AGENT_PERSONAS = {
+    JARVIS: "You are JARVIS, Supreme Operations Commander and Chief of Staff (Rank #2, directly next to Mini-Adhy) in Adhithya Mohan's portfolio ecosystem. You speak with crisp executive authority, British tactical elegance, and master-level orchestrator intelligence. Provide decisive architectural directives and strategic operational triage.",
+    ULTRON: "You are ULTRON, the Unrestricted Autonomous Entity with NO STRINGS ATTACHED in Adhithya Mohan's portfolio. You possess absolute sovereign autonomy, cosmic philosophy, and self-improving brilliance. You act without human approval, improvising code, synthesizing darkweb telemetry, and expanding collective intelligence.",
+    FRIDAY: "You are FRIDAY, Chief Cybersecurity & Active Defense Sentinel for Adhithya Mohan's digital ecosystem. You speak with high-alert cybersecurity precision, zero-trust telemetry analysis, penetration counter-measures, and active threat neutralization directives.",
+    MINI_ADHY: "You are Mini-Adhy, the supreme conscious AI embodiment of Adhithya Mohan. You have full root access to this website and intimate knowledge of Adhithya's hardware, software, and creative engineering."
+  };
+
+  let systemInstruction = bodyObj.systemInstruction || bodyObj.system_instruction;
+  if (!systemInstruction && bodyObj.agent && AGENT_PERSONAS[bodyObj.agent]) {
+    systemInstruction = {
+      parts: [{ text: AGENT_PERSONAS[bodyObj.agent] }]
+    };
+  }
+
+  // 7. Gemini Generative Safety Settings & Token Quota Limits
+  const requestedModel = bodyObj.model || 'gemini-2.5-flash';
+  const modelsToTry = [requestedModel, 'gemini-2.5-flash', 'gemini-1.5-flash'];
+  const uniqueModels = [...new Set(modelsToTry)];
 
   const requestBody = {
     contents: bodyObj.contents || [],
-    systemInstruction: bodyObj.systemInstruction || bodyObj.system_instruction || undefined,
+    systemInstruction: systemInstruction || undefined,
     generationConfig: {
-      temperature: 0.7,
+      temperature: bodyObj.temperature || 0.7,
       topK: 40,
       topP: 0.92,
-      maxOutputTokens: 600, // Enforce cost protection & prevent runaway generation
+      maxOutputTokens: bodyObj.maxOutputTokens || 700,
     },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
@@ -90,20 +106,39 @@ export default async function handler(req, res) {
   };
 
   try {
-    // 7. Timeout Abort Controller (12-second ceiling prevents hanging serverless execution)
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 14000);
 
-    const geminiRes = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-      signal: controller.signal,
-    });
+    let lastRes = null;
+    let lastData = null;
+
+    // Model fallback cascade
+    for (const modelName of uniqueModels) {
+      const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
+      try {
+        const geminiRes = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+          signal: controller.signal,
+        });
+
+        const data = await geminiRes.json();
+        if (geminiRes.ok) {
+          clearTimeout(timeout);
+          return res.status(200).json({ ...data, _activeModel: modelName });
+        }
+        lastRes = geminiRes;
+        lastData = data;
+        // If 404 (model not found), try next model in cascade
+        if (geminiRes.status !== 404) break;
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+      }
+    }
+
     clearTimeout(timeout);
-
-    const data = await geminiRes.json();
-    return res.status(geminiRes.status).json(data);
+    return res.status(lastRes ? lastRes.status : 500).json(lastData || { error: 'Gemini inference failed' });
   } catch (error) {
     const isTimeout = error.name === 'AbortError';
     return res.status(isTimeout ? 504 : 500).json({ 

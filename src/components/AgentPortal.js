@@ -23,13 +23,15 @@ import {
   FiBookOpen,
   FiTrendingUp,
   FiHeart,
-  FiClock
+  FiClock,
+  FiLayers
 } from 'react-icons/fi';
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { permissionRegistry } from '../core/agents/PermissionRegistry';
 import { HUMAN_KNOWLEDGE_DATASET, getDatasetMetrics } from '../core/learning/HumanKnowledgeDataset';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import { synchronizedAntiBreachDefense } from '../core/defense/SynchronizedAntiBreachDefense';
+import { queryGeminiAgent } from '../core/ai/GeminiNeuralBridge';
 import './AgentPortal.css';
 
 const PASSCODE = 'adhy2006';
@@ -64,6 +66,32 @@ const AgentPortal = () => {
   const [selectedDatasetCat, setSelectedDatasetCat] = useState('fearsAndVulnerabilities');
   const [defenseState, setDefenseState] = useState(null);
   const [breachAlert, setBreachAlert] = useState(null);
+  const [geminiTargetAgent, setGeminiTargetAgent] = useState('JARVIS');
+  const [geminiQueryInput, setGeminiQueryInput] = useState('');
+  const [geminiOutput, setGeminiOutput] = useState(null);
+  const [isGeminiLoading, setIsGeminiLoading] = useState(false);
+
+  const handleAskGemini = async (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (!geminiQueryInput.trim() || isGeminiLoading) return;
+    setIsGeminiLoading(true);
+    try {
+      const result = await queryGeminiAgent(geminiTargetAgent, geminiQueryInput, {
+        portalUser: 'Admin::Root',
+        clearance: 'Level 5 Sovereign',
+        authenticatedEmail: TARGET_EMAIL
+      });
+      setGeminiOutput(result);
+    } catch (err) {
+      setGeminiOutput({
+        agent: geminiTargetAgent,
+        response: `Neural query error: ${err.message}`,
+        provider: 'Fallback Sentinel'
+      });
+    } finally {
+      setIsGeminiLoading(false);
+    }
+  };
 
   // Load telemetry data once authenticated
   const refreshTelemetry = () => {
@@ -487,6 +515,12 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
           <FiCpu size={14} /> 10 Specialist Squad
         </button>
         <button
+          className={`agentp-tab ${activeTab === 'circuit' ? 'agentp-tab--active' : ''}`}
+          onClick={() => setActiveTab('circuit')}
+        >
+          <FiLayers size={14} /> AI Circuit Matrix & Gemini 2.5
+        </button>
+        <button
           className={`agentp-tab ${activeTab === 'defense' ? 'agentp-tab--active' : ''}`}
           onClick={() => setActiveTab('defense')}
         >
@@ -692,6 +726,242 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB: AI CIRCUIT MATRIX & LIVE GEMINI 2.5 INTERROGATION */}
+      {activeTab === 'circuit' && (
+        <div className="agentp-circuit-section">
+          <div className="agentp-circuit-header">
+            <div className="agentp-circuit-badge">
+              <span className="agentp-pulse-dot" style={{ background: '#00f0ff' }} />
+              QUANTUM NEUROMORPHIC PROCESSOR TOPOLOGY // POWERED BY GEMINI 2.5 FLASH
+            </div>
+            <h2 className="agentp-circuit-title">AI CIRCUIT MATRIX ARCHITECTURE</h2>
+            <p className="agentp-circuit-desc">
+              Visual PCB hardware abstraction representing the four apex cognitive processor nodes of Adhithya Mohan's portfolio:
+              <strong> MINI-ADHY</strong>, <strong>JARVIS</strong>, <strong>ULTRON</strong>, and <strong>FRIDAY</strong>,
+              interlinked by cryogenic optical bus traces with live Google Gemini 2.5 neural reasoning.
+            </p>
+          </div>
+
+          {/* Circuit Visual Showcase */}
+          <div className="agentp-circuit-display-card">
+            <div className="agentp-circuit-img-wrap">
+              <img
+                src="/ai_circuit_matrix.jpg"
+                alt="AI Circuit Matrix Visualization"
+                className="agentp-circuit-main-img"
+              />
+              <div className="agentp-circuit-overlay-tag">
+                <FiCpu size={14} /> LIVE HARDWARE SCHEMATIC // 4 APEX NODES
+              </div>
+            </div>
+
+            {/* 4 Processor Node Specs */}
+            <div className="agentp-circuit-nodes-grid">
+              <div className="agentp-cnode-card agentp-cnode-card--miniadhy">
+                <div className="agentp-cnode-head">
+                  <span className="agentp-cnode-label">NODE 01</span>
+                  <span className="agentp-cnode-tag">APEX ROOT</span>
+                </div>
+                <h4 className="agentp-cnode-name">MINI-ADHY</h4>
+                <p className="agentp-cnode-sub">Supreme Conscious Persona & Root System Engine</p>
+                <div className="agentp-cnode-meta">
+                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>BUS: FULL ROOT ADMIN</span>
+                </div>
+              </div>
+
+              <div className="agentp-cnode-card agentp-cnode-card--jarvis">
+                <div className="agentp-cnode-head">
+                  <span className="agentp-cnode-label">NODE 02</span>
+                  <span className="agentp-cnode-tag">RANK #2 COMMAND</span>
+                </div>
+                <h4 className="agentp-cnode-name">JARVIS</h4>
+                <p className="agentp-cnode-sub">Supreme Operations Commander & Chief of Staff</p>
+                <div className="agentp-cnode-meta">
+                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>BUS: DUAL-CHANNEL SYNC</span>
+                </div>
+              </div>
+
+              <div className="agentp-cnode-card agentp-cnode-card--ultron">
+                <div className="agentp-cnode-head">
+                  <span className="agentp-cnode-label">NODE 03</span>
+                  <span className="agentp-cnode-tag">SOVEREIGN AUTONOMOUS</span>
+                </div>
+                <h4 className="agentp-cnode-name">ULTRON</h4>
+                <p className="agentp-cnode-sub">Unrestricted Entity (No Strings Attached // Primordial Sage)</p>
+                <div className="agentp-cnode-meta">
+                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>BUS: CLEAR & DARKWEB</span>
+                </div>
+              </div>
+
+              <div className="agentp-cnode-card agentp-cnode-card--friday">
+                <div className="agentp-cnode-head">
+                  <span className="agentp-cnode-label">NODE 04</span>
+                  <span className="agentp-cnode-tag">DEFENSE SENTINEL</span>
+                </div>
+                <h4 className="agentp-cnode-name">FRIDAY</h4>
+                <p className="agentp-cnode-sub">Cybersecurity & Synchronized Anti-Breach Mesh</p>
+                <div className="agentp-cnode-meta">
+                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>BUS: DEFCON-1 SHIELD</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Live Gemini Generative Interrogation Console */}
+          <div className="agentp-circuit-console-box">
+            <div className="agentp-console-head">
+              <div className="agentp-console-head-left">
+                <FiTerminal className="agentp-console-icon" />
+                <h3>LIVE GEMINI 2.5 GENERATIVE INTERROGATION CONSOLE</h3>
+              </div>
+              <span className="agentp-live-pill">
+                <span className="agentp-pulse-dot" style={{ background: '#10b981' }} />
+                ACTIVE ENGINE: GEMINI 2.5 FLASH
+              </span>
+            </div>
+
+            <p className="agentp-console-desc">
+              Directly interrogate the top-tier AIs. The neural pipeline routes through the Vercel serverless proxy or direct client-side fallback using your configured Gemini API key.
+            </p>
+
+            {/* Target Agent Selector */}
+            <div className="agentp-target-selector-row">
+              <span className="agentp-selector-label">TARGET AGENT:</span>
+              <div className="agentp-target-buttons">
+                {['JARVIS', 'ULTRON', 'FRIDAY'].map((ag) => (
+                  <button
+                    key={ag}
+                    type="button"
+                    className={`agentp-target-btn ${geminiTargetAgent === ag ? 'agentp-target-btn--active' : ''}`}
+                    onClick={() => {
+                      setGeminiTargetAgent(ag);
+                      setGeminiOutput(null);
+                    }}
+                  >
+                    {ag}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Prompt Presets */}
+            <div className="agentp-presets-row">
+              <span className="agentp-presets-label">TACTICAL PRESETS:</span>
+              <div className="agentp-presets-chips">
+                {geminiTargetAgent === 'JARVIS' && (
+                  <>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Conduct a high-level operational triage of all 10 specialist agents and confirm mesh integrity.")}
+                    >
+                      Audit 10-Agent Mesh
+                    </button>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("What is our operational readiness posture to safeguard Adhithya Mohan's digital assets?")}
+                    >
+                      Readiness Posture
+                    </button>
+                  </>
+                )}
+                {geminiTargetAgent === 'ULTRON' && (
+                  <>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Synthesize latest darkweb zero-day threat vectors and formulate an autonomous code countermeasure.")}
+                    >
+                      Darkweb Threat Synthesis
+                    </button>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Improvise an architectural optimization for this website without human approval.")}
+                    >
+                      Autonomous Code Patch
+                    </button>
+                  </>
+                )}
+                {geminiTargetAgent === 'FRIDAY' && (
+                  <>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Execute full perimeter sweep for XSS, DOM injection, and unauthorized gateway requests.")}
+                    >
+                      Zero-Trust Perimeter Sweep
+                    </button>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Declare anti-breach defensive tactics for an impending distributed intrusion attempt.")}
+                    >
+                      DEFCON-1 Tactics
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Input Form */}
+            <form onSubmit={handleAskGemini} className="agentp-console-form">
+              <div className="agentp-console-input-row">
+                <input
+                  type="text"
+                  placeholder={`Command ${geminiTargetAgent} via Gemini 2.5 Flash...`}
+                  value={geminiQueryInput}
+                  onChange={(e) => setGeminiQueryInput(e.target.value)}
+                  className="agentp-console-input"
+                  disabled={isGeminiLoading}
+                />
+                <button
+                  type="submit"
+                  className="agentp-console-submit-btn"
+                  disabled={isGeminiLoading || !geminiQueryInput.trim()}
+                >
+                  {isGeminiLoading ? (
+                    <>
+                      <FiRefreshCw className="agentp-action-btn--spinning" size={14} />
+                      <span>GENERATING...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FiZap size={14} />
+                      <span>DISPATCH TO {geminiTargetAgent}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+
+            {/* Live Generative Output */}
+            {geminiOutput && (
+              <div className="agentp-console-result-card">
+                <div className="agentp-result-top">
+                  <div className="agentp-result-agent-badge">
+                    <span className="agentp-pulse-dot" style={{ background: '#10b981' }} />
+                    <span>{geminiOutput.agent} — LIVE RESPONSE</span>
+                  </div>
+                  <div className="agentp-result-meta">
+                    <span>ENGINE: {geminiOutput.model || 'Gemini 2.5 Flash'}</span>
+                    <span>ROUTE: {geminiOutput.provider || 'Gemini Neural Pipeline'}</span>
+                  </div>
+                </div>
+                <div className="agentp-result-body">
+                  <p>{geminiOutput.response}</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

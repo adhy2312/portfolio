@@ -193,12 +193,15 @@ const buildActivePrompt = (base, owner, contextData) => {
 };
 
 const API_URL = '/api/gemini';
+const FALLBACK_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
 
 /* Call Gemini REST API — with exponential backoff on 429 rate limit */
 const RETRY_DELAYS = [2000, 6000, 12000]; // 2s → 6s → 12s
 
 const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
   const body = {
+    agent: 'MINI_ADHY',
+    model: 'gemini-2.5-flash',
     system_instruction: {
       parts: [{ text: activePrompt }]
     },
@@ -218,27 +221,56 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
     });
   } catch (netErr) {
     console.warn('Network or proxy unreachable:', netErr);
-    throw new Error('SERVER_ERROR');
   }
 
-  if (res.status === 429 || res.status >= 500) {
+  if (res && res.ok) {
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (text) return text;
+  }
+
+  // Handle rate limits on proxy
+  if (res && (res.status === 429 || res.status >= 500)) {
     if (retryCount < RETRY_DELAYS.length) {
       console.warn(`Gemini API rate limit or error (${res.status}). Retrying in ${RETRY_DELAYS[retryCount] / 1000}s…`);
       await new Promise(r => setTimeout(r, RETRY_DELAYS[retryCount]));
       return sendToGemini(history, activePrompt, retryCount + 1, maxTokens);
-    } else {
-      throw new Error(res.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR');
     }
   }
 
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error('Gemini API error:', res.status, errText);
-    throw new Error(`API ${res.status}`);
+  // Direct Client-Side Fallback if proxy unreachable or returned non-ok
+  if (FALLBACK_KEY && FALLBACK_KEY.length > 5) {
+    const models = ['gemini-2.5-flash', 'gemini-1.5-flash'];
+    for (const model of models) {
+      try {
+        const directRes = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${FALLBACK_KEY}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: history,
+              systemInstruction: { parts: [{ text: activePrompt }] },
+              generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
+            })
+          }
+        );
+        if (directRes.ok) {
+          const directData = await directRes.json();
+          const text = directData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+        }
+      } catch (e) {
+        // Continue cascade
+      }
+    }
   }
 
-  const data = await res.json();
-  return data.candidates?.[0]?.content?.parts?.[0]?.text || "Neural connection quiet. What shall we inspect next?";
+  if (res && !res.ok) {
+    throw new Error(res.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR');
+  }
+
+  return "Neural connection quiet. What shall we inspect next?";
 };
 
 /* ────────────────────────────────────────────────
