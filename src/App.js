@@ -30,6 +30,7 @@ const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
+const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -413,6 +414,13 @@ function AppContent() {
 
       <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''}`}>
         <Hero />
+
+        {/* Experimental Lab Suite — Exclusively active in Experimental Mode */}
+        {mode === 'experimental' && (
+          <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '300px' }} />}>
+            <ExperimentalLabSuite />
+          </Suspense>
+        )}
 
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
         {pageData && pageData.sections && pageData.sections.length > 0 ? (

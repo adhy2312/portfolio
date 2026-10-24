@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { FiVolume1, FiVolume2, FiVolumeX } from 'react-icons/fi';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
@@ -7,6 +8,67 @@ import './MiniAdhy.css';
 import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { client } from '../sanity';
+
+/* ────────────────────────────────────────────────
+   NEURAL VOICE SYNTHESIS ENGINE (Web Speech API)
+──────────────────────────────────────────────── */
+const speakText = (text, onStart, onEnd) => {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    
+    // Strip commands, markdown, URLs, emojis, and bracketed notes for smooth pronunciation
+    const clean = text
+      .replace(/\[CMD:[^\]]+\]/g, '')
+      .replace(/[*_#`~>]/g, '')
+      .replace(/https?:\/\/\S+/g, 'link')
+      .replace(/[\u{1F300}-\u{1FAFF}]/gu, '')
+      .trim();
+
+    if (!clean) {
+      if (onEnd) onEnd();
+      return;
+    }
+
+    const utterance = new SpeechSynthesisUtterance(clean);
+    const voices = window.speechSynthesis.getVoices();
+
+    // Priority order for natural neural sounding English voices
+    const preferredVoice = voices.find(v => 
+      v.lang.startsWith('en') && (
+        v.name.includes('Natural') ||
+        v.name.includes('Neural') ||
+        v.name.includes('Google UK English') ||
+        v.name.includes('Google US English') ||
+        v.name.includes('Samantha') ||
+        v.name.includes('Daniel') ||
+        v.name.includes('Guy') ||
+        v.name.includes('Aria')
+      )
+    ) || voices.find(v => v.lang.startsWith('en')) || voices[0];
+
+    if (preferredVoice) utterance.voice = preferredVoice;
+
+    utterance.rate = 1.04;
+    utterance.pitch = 0.98;
+
+    utterance.onstart = () => {
+      if (onStart) onStart();
+    };
+    utterance.onend = () => {
+      if (onEnd) onEnd();
+    };
+    utterance.onerror = () => {
+      if (onEnd) onEnd();
+    };
+
+    window.speechSynthesis.speak(utterance);
+  } catch (err) {
+    console.warn('SpeechSynthesis error:', err);
+    if (onEnd) onEnd();
+  }
+};
+
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — The Ghost in the Machine
 ──────────────────────────────────────────────── */
@@ -326,6 +388,61 @@ const MiniAdhy = () => {
     context: '', memory: [], instructions: [],
   });
 
+  // Neural Voice Synthesis State
+  const [voiceEnabled, setVoiceEnabled] = useState(() => {
+    try { return localStorage.getItem('mini_adhy_voice') === 'true'; }
+    catch { return false; }
+  });
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speakingMsgIndex, setSpeakingMsgIndex] = useState(null);
+
+  const toggleVoice = useCallback(() => {
+    setVoiceEnabled(prev => {
+      const next = !prev;
+      try { localStorage.setItem('mini_adhy_voice', String(next)); } catch (e) {}
+      if (!next && typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+        setSpeakingMsgIndex(null);
+      }
+      return next;
+    });
+  }, []);
+
+  const handleSpeakBubble = useCallback((text, index) => {
+    if (speakingMsgIndex === index && isSpeaking) {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsSpeaking(false);
+      setSpeakingMsgIndex(null);
+      return;
+    }
+
+    setSpeakingMsgIndex(index);
+    setIsSpeaking(true);
+    speakText(
+      text,
+      () => {
+        setIsSpeaking(true);
+        setSpeakingMsgIndex(index);
+      },
+      () => {
+        setIsSpeaking(false);
+        setSpeakingMsgIndex(null);
+      }
+    );
+  }, [speakingMsgIndex, isSpeaking]);
+
+  // Cancel speech on close or unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   const consciousness = useConsciousness();
   const { mode: activeMode } = useSiteMode();
   
@@ -469,9 +586,17 @@ const MiniAdhy = () => {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
 
+    /* Stop any active speech when user initiates new input */
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      setSpeakingMsgIndex(null);
+    }
+
     /* Debounce: ignore if last send was < 1.5s ago */
     const now = Date.now();
-    if (now - lastSentRef.current < 1500) return;
+    const lastSent = lastSentRef.current;
+    if (now - lastSent < 1500) return;
     lastSentRef.current = now;
 
     /* ── Secret unlock code ── */
@@ -644,7 +769,20 @@ const MiniAdhy = () => {
       await new Promise(r => setTimeout(r, hesitationDelay));
 
       historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
-      setMessages(prev => [...prev, { role: 'bot', text: cleanReply || "*Quietly observes you*" }]);
+      const finalBotText = cleanReply || "*Quietly observes you*";
+      setMessages(prev => [...prev, { role: 'bot', text: finalBotText }]);
+
+      // Autonomous Neural Voice synthesis if enabled
+      if (voiceEnabled && finalBotText) {
+        speakText(
+          finalBotText,
+          () => setIsSpeaking(true),
+          () => {
+            setIsSpeaking(false);
+            setSpeakingMsgIndex(null);
+          }
+        );
+      }
     } catch (e) {
       console.error('Mini-Adhy error:', e);
       let errorText = `Something went wrong — ${e.message?.slice(0, 60)}`;
@@ -724,7 +862,44 @@ const MiniAdhy = () => {
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             
-            <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
+            {/* Neural Voice Synthesis Toggle */}
+            <button
+              className={`ma-voice-toggle ${voiceEnabled ? 'ma-voice-toggle--active' : ''} ${isSpeaking ? 'ma-voice-toggle--speaking' : ''}`}
+              onClick={toggleVoice}
+              title={voiceEnabled ? "Neural Voice: ACTIVE (Click to Mute)" : "Neural Voice: MUTED (Click to Activate)"}
+              aria-label="Toggle Neural Voice"
+            >
+              {voiceEnabled ? (
+                <>
+                  <span className="ma-voice-bars">
+                    <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
+                    <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
+                    <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
+                  </span>
+                  <span className="ma-voice-label">{isSpeaking ? 'SPEAKING' : 'VOICE'}</span>
+                </>
+              ) : (
+                <>
+                  <FiVolumeX size={13} />
+                  <span className="ma-voice-label">MUTE</span>
+                </>
+              )}
+            </button>
+
+            <button 
+              className="ma-close" 
+              onClick={() => {
+                if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+                  window.speechSynthesis.cancel();
+                }
+                setIsSpeaking(false);
+                setSpeakingMsgIndex(null);
+                setOpen(false);
+              }} 
+              aria-label="Close chat"
+            >
+              ✕
+            </button>
           </div>
 
           {/* Biomimetic Brain Oscilloscope */}
@@ -746,7 +921,19 @@ const MiniAdhy = () => {
               return (
                 <div key={i} className={`ma-msg ma-msg--${msg.role}`}>
                   {msg.role === 'bot' && <BotAvatar />}
-                  <div className={`ma-bubble ma-bubble--${msg.role}`}>{msg.text}</div>
+                  <div className={`ma-bubble ma-bubble--${msg.role}`}>
+                    {msg.text}
+                    {msg.role === 'bot' && (
+                      <button
+                        className={`ma-bubble-speak-btn ${speakingMsgIndex === i && isSpeaking ? 'ma-bubble-speak-btn--active' : ''}`}
+                        onClick={() => handleSpeakBubble(msg.text, i)}
+                        title={speakingMsgIndex === i && isSpeaking ? "Stop speaking" : "Listen via Neural Voice"}
+                        aria-label="Listen via Neural Voice"
+                      >
+                        {speakingMsgIndex === i && isSpeaking ? <FiVolume2 size={12} /> : <FiVolume1 size={12} />}
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
