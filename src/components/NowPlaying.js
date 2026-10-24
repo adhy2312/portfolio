@@ -1,13 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import './NowPlaying.css';
 import { getNowPlaying } from '../utils/spotify';
-import ns from '../core/NervousSystem';
 
 const POLL_INTERVAL = 6000;
 const LS_KEY = 'np_minimized';
 const CACHE_KEY = 'np_last_track';
 
-// Pre-seeded with Adhithya's actual last played Spotify track
 const INITIAL_TRACK = {
   isPlaying: false,
   title: 'Barsaat Lagdi Ae',
@@ -20,19 +18,20 @@ const INITIAL_TRACK = {
   duration: 186134,
 };
 
-const SpotifyIcon = ({ size = 14 }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>
+const SpotifyIcon = ({ size = 16, color = 'currentColor' }) => (
+  <svg viewBox="0 0 24 24" fill={color} width={size} height={size}>
     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.516 17.307a.748.748 0 01-1.03.25c-2.822-1.725-6.376-2.115-10.563-1.159a.748.748 0 11-.334-1.458c4.578-1.047 8.51-.596 11.678 1.339a.748.748 0 01.249 1.028zm1.472-3.275a.936.936 0 01-1.287.308c-3.228-1.983-8.151-2.558-11.974-1.4a.937.937 0 01-.574-1.786c4.365-1.325 9.795-.682 13.527 1.593a.937.937 0 01.308 1.285zm.127-3.407c-3.873-2.3-10.256-2.511-13.95-1.39a1.124 1.124 0 11-.652-2.15c4.244-1.29 11.3-1.04 15.762 1.607a1.124 1.124 0 11-1.16 1.933z" />
   </svg>
 );
 
-const Waveform = ({ isPlaying }) => (
-  <div className={`np-waveform ${isPlaying ? 'np-waveform--playing' : ''}`}>
+const WaveformBars = ({ isPlaying }) => (
+  <div className={`sp-eq ${isPlaying ? 'sp-eq--active' : ''}`} aria-hidden="true">
     <span /><span /><span /><span />
   </div>
 );
 
-const formatMs = (ms) => {
+const formatTime = (ms) => {
+  if (!ms || ms <= 0) return '0:00';
   const s = Math.floor(ms / 1000);
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 };
@@ -46,40 +45,23 @@ const NowPlaying = () => {
       return INITIAL_TRACK;
     }
   });
-  const [, setLoading]             = useState(true);
-  const [imgError, setImgError]     = useState(false);
-  const [minimized, setMinimized]   = useState(
-    () => localStorage.getItem(LS_KEY) === 'true'
-  );
-  const intervalRef  = useRef(null);
-  const progressRef  = useRef(null);
-  const audioRef     = useRef(null);
-  const [previewPlaying, setPreviewPlaying] = useState(false);
 
-  // Reset image error state whenever track album art changes
+  const [imgError, setImgError] = useState(false);
+  const [minimized, setMinimized] = useState(() => {
+    try {
+      return localStorage.getItem(LS_KEY) === 'true';
+    } catch {
+      return false;
+    }
+  });
+  const [liked, setLiked] = useState(true);
+
+  const progressRef = useRef(null);
+  const animFrameRef = useRef(null);
+
   useEffect(() => {
     setImgError(false);
   }, [track?.albumArt]);
-
-  // Sync audio with track changes
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.pause();
-      setPreviewPlaying(false);
-    }
-  }, [track?.songUrl]);
-
-  const togglePreview = (e) => {
-    e.stopPropagation();
-    if (!audioRef.current) return;
-    if (previewPlaying) {
-      audioRef.current.pause();
-      setPreviewPlaying(false);
-    } else {
-      audioRef.current.volume = 0.4;
-      audioRef.current.play().then(() => setPreviewPlaying(true)).catch(() => {});
-    }
-  };
 
   const fetchTrack = async () => {
     try {
@@ -88,237 +70,129 @@ const NowPlaying = () => {
         setTrack(data);
         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
       }
-    } catch {
-      // Keep existing track on error
-    } finally {
-      setLoading(false);
-    }
+    } catch {}
   };
 
   useEffect(() => {
     fetchTrack();
-    intervalRef.current = setInterval(fetchTrack, POLL_INTERVAL);
-
+    const interval = setInterval(fetchTrack, POLL_INTERVAL);
     const onVisibility = () => {
-      if (!document.hidden) {
-        fetchTrack();
-      }
+      if (!document.hidden) fetchTrack();
     };
     document.addEventListener('visibilitychange', onVisibility);
 
     return () => {
-      clearInterval(intervalRef.current);
+      clearInterval(interval);
       document.removeEventListener('visibilitychange', onVisibility);
     };
   }, []);
 
-  // Smooth real-time progress interpolation between API polls
+  // Smooth real-time progress interpolation
   useEffect(() => {
     if (!track?.isPlaying || !progressRef.current) return;
     let start = null;
     const startProgress = track.progress || 0;
-    const duration      = track.duration || 1;
+    const duration = track.duration || 1;
 
-    const animate = (time) => {
-      if (!start) start = time;
-      const elapsed = time - start;
+    const tick = (timestamp) => {
+      if (!start) start = timestamp;
+      const elapsed = timestamp - start;
       const current = Math.min(startProgress + elapsed, duration);
+      const pct = (current / duration) * 100;
+
       if (progressRef.current) {
-        progressRef.current.style.width = `${(current / duration) * 100}%`;
+        progressRef.current.style.width = `${pct}%`;
       }
-      if (current >= duration) {
-        ns.unregister('spotify-progress');
+
+      if (current < duration && track?.isPlaying) {
+        animFrameRef.current = requestAnimationFrame(tick);
       }
     };
 
-    ns.register('spotify-progress', animate, { priority: 'CRITICAL' });
-    return () => ns.unregister('spotify-progress');
-  }, [track]);
+    animFrameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animFrameRef.current);
+  }, [track?.isPlaying, track?.progress, track?.duration]);
 
-  // ── Dynamic Song Theme & Album Artwork Color Palette Extractor ──
-  // STRICT RULE: Only activate ambient lighting when music is ACTIVELY playing!
+  // Clean ambient light: STRICTLY active only when music is currently playing
   useEffect(() => {
-    const root = document.documentElement.style;
+    const isPlaying = track?.isPlaying === true;
+    const body = document.body;
 
-    const cleanupAmbient = () => {
-      document.body.classList.remove('spotify-ambient-active');
-      document.body.classList.remove('spotify-playing');
-      root.removeProperty('--spotify-ambient-accent');
-      root.removeProperty('--spotify-ambient-glow');
-      root.removeProperty('--spotify-ambient-glow-card');
-      root.removeProperty('--spotify-ambient-glow-card-deep');
-      root.removeProperty('--spotify-ambient-text-glow');
-      root.removeProperty('--spotify-ambient-border');
-      root.removeProperty('--spotify-ambient-corner-glow');
-    };
-
-    if (track && track.title && track.isPlaying) {
-      // 1. Perceptual Lyrical / Genre Theme Fallback
-      const getThemePalette = (t = '', a = '') => {
-        const text = `${t} ${a}`.toLowerCase();
-        let h = 226, s = 84, l = 56;
-        if (/barsaat|rain|monsoon|baarish|lagdi|safar|clouds|tears|night|dark|storm|sad/.test(text)) {
-          h = 248; s = 86; l = 58;
-        } else if (/love|ishq|dil|romance|sunset|warm|heart|sweet|acoustic|guitar|slow/.test(text)) {
-          h = 345; s = 88; l = 60;
-        } else if (/neon|synth|electro|club|dance|party|bass|future|cyber|trap/.test(text)) {
-          h = 188; s = 96; l = 52;
-        } else if (/chill|calm|peace|green|nature|forest|breeze|sky|ocean|fly|lo-fi|lofi/.test(text)) {
-          h = 162; s = 82; l = 48;
-        } else {
-          let hash = 0;
-          for (let i = 0; i < text.length; i++) {
-            hash = (hash << 5) - hash + text.charCodeAt(i);
-            hash |= 0;
-          }
-          h = Math.abs(hash) % 360;
-          s = 82;
-          l = 56;
-        }
-
-        return {
-          accent: `hsl(${h}, ${s}%, ${l}%)`,
-          glow: `hsla(${h}, ${s}%, ${l}%, 0.18)`,
-          glowCard: `hsla(${h}, ${s}%, 52%, 0.09)`,
-          glowCardDeep: `hsla(${h}, ${s}%, 52%, 0.16)`,
-          textGlow: `hsla(${h}, ${s}%, 62%, 0.14)`,
-          border: `hsla(${h}, ${s}%, 55%, 0.22)`,
-          cornerGlow: `hsla(${h}, ${s}%, 55%, 0.10)`
-        };
-      };
-
-      const applyPalette = (p) => {
-        root.setProperty('--spotify-ambient-accent', p.accent);
-        root.setProperty('--spotify-ambient-glow', p.glow);
-        root.setProperty('--spotify-ambient-glow-card', p.glowCard);
-        root.setProperty('--spotify-ambient-glow-card-deep', p.glowCardDeep);
-        root.setProperty('--spotify-ambient-text-glow', p.textGlow);
-        root.setProperty('--spotify-ambient-border', p.border);
-        root.setProperty('--spotify-ambient-corner-glow', p.cornerGlow);
-
-        document.body.classList.add('spotify-ambient-active');
-        document.body.classList.add('spotify-playing');
-      };
-
-      // 2. Direct Canvas pixel extraction from album cover
-      if (track.albumArt && typeof window !== 'undefined') {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.src = track.albumArt;
-        img.onload = () => {
-          try {
-            const canvas = document.createElement('canvas');
-            canvas.width = 24;
-            canvas.height = 24;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, 24, 24);
-            const imgData = ctx.getImageData(0, 0, 24, 24).data;
-            const samples = [];
-            for (let i = 0; i < imgData.length; i += 4) {
-              const r = imgData[i];
-              const g = imgData[i + 1];
-              const b = imgData[i + 2];
-              const a = imgData[i + 3];
-              if (a < 128) continue;
-              const max = Math.max(r, g, b) / 255;
-              const min = Math.min(r, g, b) / 255;
-              const l = (max + min) / 2;
-              let h = 0, s = 0;
-              if (max !== min) {
-                const d = max - min;
-                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-                switch (max) {
-                  case r / 255: h = (g / 255 - b / 255) / d + (g < b ? 6 : 0); break;
-                  case g / 255: h = (b / 255 - r / 255) / d + 2; break;
-                  case b / 255: h = (r / 255 - g / 255) / d + 4; break;
-                  default: break;
-                }
-                h = Math.round(h * 60);
-              }
-              if (s > 0.22 && l > 0.18 && l < 0.85) {
-                samples.push({ h, s: Math.round(s * 100), l: Math.round(l * 100) });
-              }
-            }
-            if (samples.length >= 2) {
-              samples.sort((a, b) => (b.s * 0.7 + b.l * 0.3) - (a.s * 0.7 + a.l * 0.3));
-              const dom = samples[0];
-              const h = dom.h;
-              const s = Math.max(dom.s, 65);
-              const l = Math.min(Math.max(dom.l, 45), 65);
-              applyPalette({
-                accent: `hsl(${h}, ${s}%, ${l}%)`,
-                glow: `hsla(${h}, ${s}%, ${l}%, 0.18)`,
-                glowCard: `hsla(${h}, ${s}%, 50%, 0.09)`,
-                glowCardDeep: `hsla(${h}, ${s}%, 50%, 0.16)`,
-                textGlow: `hsla(${h}, ${s}%, 62%, 0.14)`,
-                border: `hsla(${h}, ${s}%, 55%, 0.22)`,
-                cornerGlow: `hsla(${h}, ${s}%, 55%, 0.10)`
-              });
-              return;
-            }
-          } catch (e) {}
-          applyPalette(getThemePalette(track.title, track.artist));
-        };
-        img.onerror = () => applyPalette(getThemePalette(track.title, track.artist));
-      } else {
-        applyPalette(getThemePalette(track.title, track.artist));
-      }
-    } else {
-      // Music is paused, stopped, or not playing: ZERO ambient light
-      cleanupAmbient();
+    if (!isPlaying) {
+      body.classList.remove('spotify-ambient-active', 'spotify-playing');
+      body.style.removeProperty('--spotify-ambient-accent');
+      body.style.removeProperty('--spotify-ambient-glow-card');
+      return;
     }
 
-    return cleanupAmbient;
-  }, [track?.isPlaying, track?.title, track?.artist, track?.albumArt]);
+    body.classList.add('spotify-ambient-active', 'spotify-playing');
+    body.style.setProperty('--spotify-ambient-accent', 'rgba(30, 215, 96, 0.4)');
+    body.style.setProperty('--spotify-ambient-glow-card', 'rgba(30, 215, 96, 0.08)');
+
+    return () => {
+      body.classList.remove('spotify-ambient-active', 'spotify-playing');
+      body.style.removeProperty('--spotify-ambient-accent');
+      body.style.removeProperty('--spotify-ambient-glow-card');
+    };
+  }, [track?.isPlaying]);
 
   const toggleMinimized = () => {
     const next = !minimized;
     setMinimized(next);
-    localStorage.setItem(LS_KEY, String(next));
+    try {
+      localStorage.setItem(LS_KEY, String(next));
+    } catch {}
   };
 
   const currentTrack = track || INITIAL_TRACK;
   const progressPct = currentTrack.duration
-    ? ((currentTrack.progress || 0) / currentTrack.duration) * 100
+    ? Math.min(100, Math.max(0, ((currentTrack.progress || 0) / currentTrack.duration) * 100))
     : 0;
 
   return (
     <>
-      {/* Docked pill on the screen edge when player is minimized */}
+      {/* ─── MINIMIZED DOCK PILL ─── */}
       {minimized ? (
         <button
-          className="np-dock"
+          className="sp-dock-pill"
           onClick={toggleMinimized}
           aria-label="Expand Spotify player"
-          title="Show Spotify Player"
+          title={`${currentTrack.title} — ${currentTrack.artist}`}
         >
-          <SpotifyIcon size={16} />
-          <Waveform isPlaying={currentTrack.isPlaying} />
+          <div className="sp-dock-icon-wrap">
+            <SpotifyIcon size={18} color="#1ed760" />
+          </div>
+          <div className="sp-dock-meta">
+            <span className="sp-dock-title">{currentTrack.title}</span>
+            <span className="sp-dock-artist">{currentTrack.artist}</span>
+          </div>
+          <WaveformBars isPlaying={currentTrack.isPlaying} />
         </button>
       ) : (
-        <div className="np-wrapper">
-          <div className="np-player">
-            {/* Top Bar: Spotify Logo Badge + Device Status + Window Minimize */}
-            <div className="np-topbar">
-              <div className="np-brand">
-                <SpotifyIcon size={16} />
-                <span className="np-brand-name">Spotify</span>
-                <span className="np-device-status">
-                  <span className={`np-live-dot ${currentTrack.isPlaying ? 'np-live-dot--active' : ''}`} />
-                  {currentTrack.isPlaying ? 'Listening on Phone' : 'Paused'}
+        /* ─── EXPANDED PRISTINE SPOTIFY PLAYER ─── */
+        <div className="sp-player-wrapper">
+          <div className="sp-player-glass">
+            {/* Header: Brand & Live Indicator & Actions */}
+            <div className="sp-header">
+              <div className="sp-brand-badge">
+                <SpotifyIcon size={15} color="#1ed760" />
+                <span className="sp-brand-text">Spotify</span>
+                <span className="sp-status-dot-wrap" title={currentTrack.isPlaying ? 'Now Playing on Spotify' : 'Playback Paused'}>
+                  <span className={`sp-status-dot ${currentTrack.isPlaying ? 'sp-status-dot--live' : ''}`} />
+                  <span className="sp-status-label">{currentTrack.isPlaying ? 'Active' : 'Offline'}</span>
                 </span>
               </div>
 
-              <div className="np-window-actions">
+              <div className="sp-header-actions">
                 <a
                   href={currentTrack.songUrl || 'https://open.spotify.com'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="np-btn-icon"
-                  title="Open on Spotify"
-                  aria-label="Open on Spotify"
+                  className="sp-action-btn"
+                  title="Open in Spotify App"
+                  aria-label="Open track on Spotify"
                 >
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                     <polyline points="15 3 21 3 21 9" />
                     <line x1="10" y1="14" x2="21" y2="3" />
@@ -327,10 +201,10 @@ const NowPlaying = () => {
 
                 <button
                   type="button"
-                  className="np-btn-icon np-btn-min"
+                  className="sp-action-btn"
                   onClick={toggleMinimized}
-                  aria-label="Minimize Spotify player"
-                  title="Minimize"
+                  aria-label="Minimize player"
+                  title="Minimize player"
                 >
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                     <line x1="5" y1="12" x2="19" y2="12" />
@@ -339,87 +213,71 @@ const NowPlaying = () => {
               </div>
             </div>
 
-            {/* Middle Section: Album Cover + Track Metadata + Like Heart */}
-            <div className="np-main-row">
-              <div className="np-cover-wrap">
+            {/* Main Content: Album Cover + Track Details + Like Heart */}
+            <div className="sp-content">
+              <div className="sp-cover-container">
                 {currentTrack.albumArt && !imgError ? (
                   <img
                     src={currentTrack.albumArt}
-                    alt={currentTrack.album || currentTrack.title}
-                    className="np-cover-art"
+                    alt={currentTrack.title}
+                    className="sp-cover-img"
                     loading="lazy"
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="np-cover-placeholder">
-                    <SpotifyIcon size={24} />
+                  <div className="sp-cover-fallback">
+                    <SpotifyIcon size={24} color="#1ed760" />
                   </div>
                 )}
                 {currentTrack.isPlaying && (
-                  <div className="np-cover-live-badge">
-                    <Waveform isPlaying />
+                  <div className="sp-cover-badge">
+                    <WaveformBars isPlaying />
                   </div>
                 )}
               </div>
 
-              <div className="np-track-meta">
+              <div className="sp-track-info">
                 <a
                   href={currentTrack.songUrl || 'https://open.spotify.com'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="np-track-title"
-                  title={`${currentTrack.title} on Spotify`}
+                  className="sp-title"
+                  title={currentTrack.title}
                 >
                   {currentTrack.title}
                 </a>
-
-                <p className="np-track-artist" title={currentTrack.artist}>
+                <p className="sp-artist" title={currentTrack.artist}>
                   {currentTrack.artist}
                 </p>
               </div>
 
-              <div className="np-like-wrap" title="Saved to Your Library">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" strokeWidth="1.5">
+              <button
+                type="button"
+                className={`sp-like-btn ${liked ? 'sp-like-btn--liked' : ''}`}
+                onClick={() => setLiked(prev => !prev)}
+                title={liked ? 'Saved to Your Library' : 'Save to Library'}
+                aria-label="Save to library"
+              >
+                <svg width="17" height="17" viewBox="0 0 24 24" fill={liked ? '#1ed760' : 'none'} stroke={liked ? '#1ed760' : '#b3b3b3'} strokeWidth="1.8">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
-              </div>
+              </button>
             </div>
 
-            {/* Controls Bar: Mini Play/Pause state and sample preview */}
-            <div className="np-controls-row">
-              {currentTrack.previewUrl ? (
-                <button type="button" className="np-sample-btn" onClick={togglePreview} title="Toggle 30s preview">
-                  {previewPlaying ? '⏸ PAUSE SAMPLE' : '▶ LISTEN SAMPLE'}
-                </button>
-              ) : (
-                <span className="np-sync-note">Synced via Spotify Web API</span>
-              )}
-
-              <div className="np-play-indicator">
-                <span className={`np-play-state-badge ${currentTrack.isPlaying ? 'np-play-state-badge--live' : ''}`}>
-                  {currentTrack.isPlaying ? 'PLAYING' : 'IDLE'}
-                </span>
-              </div>
-            </div>
-
-            {/* Scrub / Progress Bar: Authentic Spotify scrubber */}
-            <div className="np-scrubber-section">
-              <span className="np-timestamp">{formatMs(currentTrack.progress || 0)}</span>
-              <div className="np-scrub-track">
+            {/* Pristine Modern Scrubber */}
+            <div className="sp-scrubber-row">
+              <span className="sp-time-label">{formatTime(currentTrack.progress || 0)}</span>
+              <div className="sp-track-bar">
                 <div
                   ref={progressRef}
-                  className="np-scrub-fill"
+                  className="sp-track-fill"
                   style={{ width: `${progressPct}%` }}
                 >
-                  <span className="np-scrub-thumb" />
+                  <span className="sp-track-knob" />
                 </div>
               </div>
-              <span className="np-timestamp">{formatMs(currentTrack.duration || 0)}</span>
+              <span className="sp-time-label">{formatTime(currentTrack.duration || 0)}</span>
             </div>
-
-            {currentTrack.previewUrl && (
-              <audio ref={audioRef} src={currentTrack.previewUrl} onEnded={() => setPreviewPlaying(false)} />
-            )}
           </div>
         </div>
       )}
