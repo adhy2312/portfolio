@@ -193,7 +193,7 @@ const buildActivePrompt = (base, owner, contextData) => {
 };
 
 const API_URL = '/api/gemini';
-const FALLBACK_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
+const FALLBACK_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY_2 || '';
 
 /* Call Gemini REST API — with exponential backoff on 429 rate limit */
 const RETRY_DELAYS = [2000, 6000, 12000]; // 2s → 6s → 12s

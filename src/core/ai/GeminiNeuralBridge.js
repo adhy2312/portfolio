@@ -11,7 +11,7 @@
  * 3. Model Cascade: gemini-3.8-flash → gemini-2.5-flash → gemini-1.5-flash
  */
 
-const FALLBACK_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || '';
+const FALLBACK_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY_2 || '';
 
 export const TOP_TIER_AGENT_CONFIG = {
   JARVIS: {

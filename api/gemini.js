@@ -45,7 +45,10 @@ export default async function handler(req, res) {
   }
 
   // 3. Secret Verification (Environment Guard)
-  const API_KEY = process.env.GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY;
+  const API_KEY = process.env.GEMINI_API_KEY || 
+                  process.env.REACT_APP_GEMINI_API_KEY || 
+                  process.env.REACT_APP_GEMINI_API_KEY_2 || 
+                  process.env.GEMINI_API_KEY_2;
   if (!API_KEY) {
     return res.status(500).json({ error: 'AI Brain service temporarily offline' });
   }
