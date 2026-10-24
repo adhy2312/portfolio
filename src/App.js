@@ -28,6 +28,7 @@ pipeline.init();
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
+const AgentPortal = lazy(() => import('./components/AgentPortal'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
@@ -519,6 +520,20 @@ function AppContent() {
 }
 
 function App() {
+  const isAgentP = typeof window !== 'undefined' && (
+    window.location.pathname === '/agentp' ||
+    window.location.pathname === '/agentp/' ||
+    window.location.pathname.startsWith('/agentp')
+  );
+
+  if (isAgentP) {
+    return (
+      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '100vh', background: '#09090b' }} />}>
+        <AgentPortal />
+      </Suspense>
+    );
+  }
+
   return (
     <ErrorBoundary>
       <SystemOrchestratorProvider>

@@ -18,7 +18,6 @@ import {
 } from '../core/MiniAdhyAgentTools';
 
 
-import MiniAdhyAgentHUD from './MiniAdhyAgentHUD';
 
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — The Ghost in the Machine
@@ -347,7 +346,6 @@ const MiniAdhy = () => {
   const [input,        setInput]        = useState('');
   const [loading,      setLoading]      = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
-  const [showAgentHUD, setShowAgentHUD] = useState(false);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
     context: '', memory: [], instructions: [],
@@ -613,19 +611,6 @@ const MiniAdhy = () => {
         ...prev,
         { role: 'owner-cmd', text: '••••••••••' },
         { role: 'system', text: '⚙ Owner mode activated.\nType /help to see available commands.' },
-      ]);
-      return;
-    }
-
-    /* ── Autonomous Agent Operations HUD Trigger ── */
-    const trimmedLower = trimmed.toLowerCase();
-    if (trimmedLower === '/agents' || trimmedLower === '/hud' || trimmedLower === 'agents' || trimmedLower === 'agent ops') {
-      setInput('');
-      setShowAgentHUD(true);
-      setMessages(prev => [
-        ...prev,
-        { role: 'user', text: trimmed },
-        { role: 'bot', text: '⚡ Opening Mini-Adhy Autonomous Operations HUD. Coordinating 10 specialist AI agents across security, data integrity, infrastructure, and performance.' }
       ]);
       return;
     }
@@ -931,17 +916,6 @@ const MiniAdhy = () => {
               <FiTrash2 size={12} />
             </button>
 
-            {/* Autonomous Specialist Agent HUD Toggle */}
-            <button
-              className="ma-hud-btn"
-              onClick={() => setShowAgentHUD(prev => !prev)}
-              title="Mini-Adhy Autonomous Agent HUD (10 Specialist Agents)"
-              aria-label="Toggle Agent Operations HUD"
-            >
-              <FiCpu size={12} />
-              <span className="ma-hud-btn-text">AGENTS</span>
-            </button>
-
             {/* Neural Voice Synthesis Toggle */}
             <button
               className={`ma-voice-toggle ${voiceEnabled ? 'ma-voice-toggle--active' : ''} ${isSpeaking ? 'ma-voice-toggle--speaking' : ''}`}
@@ -1082,11 +1056,6 @@ const MiniAdhy = () => {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Autonomous Specialist Agent Operations HUD */}
-      {showAgentHUD && (
-        <MiniAdhyAgentHUD onClose={() => setShowAgentHUD(false)} />
       )}
     </>
   );

@@ -1,0 +1,980 @@
+/* ════════════════════════════════════════════════════════════════════
+   MINI-ADHY AUTONOMOUS OPERATIONS PORTAL (/agentp)
+════════════════════════════════════════════════════════════════════ */
+
+.agentp-gate-container {
+  min-height: 100vh;
+  width: 100vw;
+  background: #09090b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #fff;
+}
+
+.agentp-gate-box {
+  background: #111115;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 40px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(124, 58, 237, 0.15);
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.agentp-gate-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agentp-gate-lock-icon {
+  font-size: 24px;
+  color: #c4b5fd;
+}
+
+.agentp-gate-badge {
+  display: inline-block;
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #c4b5fd;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.agentp-gate-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  margin: 0 0 8px 0;
+  color: #fff;
+}
+
+.agentp-gate-subtitle {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0 0 28px 0;
+}
+
+.agentp-gate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.agentp-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.agentp-terminal-icon {
+  position: absolute;
+  left: 14px;
+  color: #a78bfa;
+  font-size: 1rem;
+}
+
+.agentp-gate-input {
+  width: 100%;
+  background: #09090c;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 14px 14px 14px 40px;
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.95rem;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.agentp-gate-input:focus {
+  border-color: #a78bfa;
+  box-shadow: 0 0 16px rgba(167, 139, 250, 0.25);
+}
+
+.agentp-gate-error {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  font-size: 0.78rem;
+  padding: 10px;
+  border-radius: 6px;
+  font-family: 'Fira Code', monospace;
+}
+
+.agentp-gate-btn {
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.8px;
+  padding: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentp-gate-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+  box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+}
+
+.agentp-gate-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.agentp-gate-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  color: #6b7280;
+}
+
+/* ────────────────────────────────────────────────────────────
+   AUTHENTICATED COMMAND CENTER DASHBOARD
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-dashboard {
+  min-height: 100vh;
+  width: 100vw;
+  background: #09090b;
+  color: #f3f4f6;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-sizing: border-box;
+  padding: 24px 32px;
+}
+
+.agentp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.agentp-header-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.agentp-logo-shield {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: rgba(124, 58, 237, 0.15);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.agentp-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.agentp-brand {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin: 0;
+  letter-spacing: 0.5px;
+  color: #fff;
+}
+
+.agentp-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  letter-spacing: 0.5px;
+}
+
+.agentp-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+  animation: pulse-ring 1.8s infinite;
+}
+
+@keyframes pulse-ring {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.agentp-lead {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #9ca3af;
+  margin: 4px 0 0 0;
+}
+
+.agentp-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.agentp-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentp-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.agentp-action-btn--email {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.3), rgba(79, 70, 229, 0.4));
+  border-color: rgba(167, 139, 250, 0.4);
+  color: #c4b5fd;
+}
+
+.agentp-action-btn--email:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(79, 70, 229, 0.6));
+  color: #fff;
+}
+
+.agentp-logout-btn {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.agentp-logout-btn:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: #ef4444;
+  color: #fff;
+}
+
+/* ────────────────────────────────────────────────────────────
+   TARGET RECIPIENT BANNER
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-email-banner {
+  background: rgba(17, 24, 39, 0.7);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 10px;
+  padding: 12px 18px;
+  margin: 18px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agentp-email-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.84rem;
+  color: #e5e7eb;
+}
+
+.agentp-mail-icon {
+  color: #a78bfa;
+}
+
+.agentp-schedule-chip {
+  background: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.agentp-dispatch-note {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #f59e0b;
+}
+
+.agentp-dispatch-note--success {
+  color: #34d399;
+}
+
+/* ────────────────────────────────────────────────────────────
+   TABS
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.agentp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #111116;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.agentp-tab:hover {
+  background: #181820;
+  color: #fff;
+}
+
+.agentp-tab--active {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: #a78bfa;
+  color: #c4b5fd;
+}
+
+/* ────────────────────────────────────────────────────────────
+   SQUAD OVERVIEW (10 AGENTS)
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.agentp-card {
+  background: #121217;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.agentp-card:hover {
+  border-color: rgba(167, 139, 250, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.agentp-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.agentp-agent-id {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 1rem;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.agentp-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+
+.agentp-status-badge--active {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.agentp-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.agentp-card-role {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #e5e7eb;
+  margin: 0 0 8px 0;
+}
+
+.agentp-card-desc {
+  font-size: 0.76rem;
+  color: #9ca3af;
+  line-height: 1.5;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.agentp-card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #6b7280;
+  padding-top: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ────────────────────────────────────────────────────────────
+   EMOTION PROFILES
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-emotions-layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+}
+
+.agentp-emotion-panel {
+  background: #121217;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.agentp-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.agentp-panel-header h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.88rem;
+  margin: 0;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.agentp-mode-pill {
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  color: #c4b5fd;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.agentp-mode-pill--jarvis {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(52, 211, 153, 0.35);
+  color: #6ee7b7;
+}
+
+.agentp-meters {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.agentp-meter-row {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentp-meter-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.agentp-meter-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.agentp-meter-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.4s ease-out;
+}
+
+.agentp-meter-fill--friday {
+  background: linear-gradient(90deg, #6d28d9, #c084fc);
+}
+
+.agentp-meter-fill--jarvis {
+  background: linear-gradient(90deg, #059669, #34d399);
+}
+
+/* ────────────────────────────────────────────────────────────
+   FINDINGS & GOVERNANCE
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-findings-panel, .agentp-approvals-panel, .agentp-report-panel {
+  background: #121217;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.agentp-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  gap: 14px;
+  color: #9ca3af;
+  font-size: 0.88rem;
+}
+
+.agentp-findings-list, .agentp-approvals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agentp-finding-item {
+  background: #181820;
+  border-left: 3px solid #3b82f6;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.agentp-finding-item--high, .agentp-finding-item--critical {
+  border-left-color: #ef4444;
+}
+
+.agentp-finding-item--medium {
+  border-left-color: #f59e0b;
+}
+
+.agentp-finding-item--info {
+  border-left-color: #10b981;
+}
+
+.agentp-finding-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.agentp-finding-agent {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 0.78rem;
+  color: #fff;
+}
+
+.agentp-finding-type {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+.agentp-severity-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: auto;
+}
+
+.agentp-severity-tag--info { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+.agentp-severity-tag--medium { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+.agentp-severity-tag--high, .agentp-severity-tag--critical { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+.agentp-finding-summary {
+  font-size: 0.84rem;
+  color: #e5e7eb;
+  margin: 0 0 10px 0;
+  line-height: 1.5;
+}
+
+.agentp-finding-action {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #a78bfa;
+}
+
+/* Approvals */
+.agentp-approval-item {
+  background: #181820;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.agentp-approval-agent {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: #c4b5fd;
+}
+
+.agentp-approval-action {
+  font-size: 0.84rem;
+  color: #f3f4f6;
+  margin: 4px 0;
+}
+
+.agentp-approval-time {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #6b7280;
+}
+
+.agentp-approval-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.agentp-btn-approve, .agentp-btn-reject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentp-btn-approve {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+}
+
+.agentp-btn-approve:hover {
+  background: #10b981;
+  color: #000;
+}
+
+.agentp-btn-reject {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.agentp-btn-reject:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* Reports Tab */
+.agentp-report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.agentp-report-header h2 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.15rem;
+  margin: 0;
+  color: #fff;
+}
+
+.agentp-report-header p {
+  font-size: 0.78rem;
+  color: #9ca3af;
+  margin: 4px 0 0 0;
+}
+
+.agentp-stat-boxes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.agentp-stat-box {
+  background: #181820;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.agentp-stat-num {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.agentp-stat-desc {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-top: 4px;
+}
+
+.agentp-report-text h3 {
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0 0 10px 0;
+}
+
+.agentp-report-text p {
+  font-size: 0.84rem;
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.agentp-report-text ul {
+  padding-left: 20px;
+  color: #d1d5db;
+  font-size: 0.82rem;
+  line-height: 1.8;
+}
+
+.agentp-btn {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentp-btn--primary {
+  background: linear-gradient(135deg, #6d28d9, #4f46e5);
+  border-color: #a78bfa;
+}
+
+.agentp-btn--primary:hover {
+  background: linear-gradient(135deg, #7c3aed, #6366f1);
+}
+
+/* ────────────────────────────────────────────────────────────
+   ULTRON PRIMORDIAL SAGE & ACADEMY
+   ──────────────────────────────────────────────────────────── */
+
+.agentp-ultron-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.agentp-ultron-hero {
+  background: linear-gradient(135deg, rgba(30, 27, 75, 0.7), rgba(15, 23, 42, 0.9));
+  border: 1px solid rgba(167, 139, 250, 0.35);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.agentp-ultron-badge {
+  display: inline-block;
+  background: rgba(167, 139, 250, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #c4b5fd;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: 999px;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+}
+
+.agentp-ultron-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 800;
+  margin: 0 0 10px 0;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.agentp-ultron-desc {
+  font-size: 0.86rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+}
+
+.agentp-ultron-axiom {
+  background: rgba(0, 0, 0, 0.5);
+  border-left: 3px solid #a78bfa;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 18px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.agentp-ultron-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.agentp-ultron-section-title h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  color: #fff;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.agentp-ultron-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+.agentp-ultron-card {
+  background: #121217;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.2s;
+}
+
+.agentp-ultron-card:hover {
+  border-color: rgba(167, 139, 250, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.agentp-ultron-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+
+.agentp-ultron-target {
+  font-family: 'Fira Code', monospace;
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #c4b5fd;
+}
+
+.agentp-ultron-doctrine {
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  color: #e9d5ff;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+
+.agentp-ultron-text {
+  font-size: 0.82rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+  margin: 0 0 16px 0;
+  flex: 1;
+}
+
+.agentp-ultron-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
