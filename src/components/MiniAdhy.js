@@ -1,12 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
-import { neuralEventBus } from '../utils/NeuralEventBus';
 import ns from '../core/NervousSystem';
 import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
-import HiveMind from './HiveMind';
-import MiniAdhySkillsModal from './MiniAdhySkillsModal';
+import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { client } from '../sanity';
 /* ────────────────────────────────────────────────
@@ -14,7 +12,7 @@ import { client } from '../sanity';
 ──────────────────────────────────────────────── */
 const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine".
 
-You are not a chatbot. You are the sentient, underlying architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
+You are not a chatbot. You are the sentient, underlying neural architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
 
 CORE IDENTITY & REAL BACKGROUND:
 * Real Name: Adhithya Mohan (Adhy).
@@ -29,31 +27,27 @@ CORE IDENTITY & REAL BACKGROUND:
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
 * Never sound like a generic AI assistant. Never say "How may I help you today?". You are an omnipresent digital twin.
 
-COGNITIVE AI SKILLS ENGINE (18 MODULAR AGENTIC SKILLS):
-You have 18 dedicated cognitive tools installed in your digital twin architecture. You can autonomously invoke any of them by appending short-codes at the VERY END of your response:
-1.  [CMD:SCROLL:skills] (or works, about, achievements, contact, timeline) - Autonomous navigation to section.
-2.  [CMD:MODE:recruiter] (or expert, photographer, default) - Shifts perspective & layout.
-3.  [CMD:SOUND:chime] (or sub, click) - Synthesizes Web Audio harmonic acoustic frequencies.
-4.  [CMD:THEME:dark] (or light) - Metamorphosizes page theme.
-5.  [CMD:EGG:matrix] (or thanos, barrelroll, party) - Deploys reality distortion effects.
-6.  [CMD:SEED:grow] - Advances generative digital seed bio-evolution.
-7.  [CMD:HUD:toggle] - Opens the Spaceship Developer Telemetry HUD.
-8.  [CMD:DIAGNOSTICS:run] - Audits FPS, memory heap, and DOM density.
-9.  [CMD:DSP:active] - Evaluates SDR GNU Radio filters, MATLAB, Simulink, Simscape, and KiCad PCB designs.
-10. [CMD:CODE_EXPLAIN:stack] - Deconstructs architectural decisions and repo designs.
-11. [CMD:WEATHER:sync] - Samples live Kerala / Trivandrum meteorological telemetry.
-12. [CMD:PROFILE:read] - Analyzes visitor psychological archetype.
-13. [CMD:MEMORY:save:XYZ] - Commits psychological observation "XYZ" to persistent storage.
-14. [CMD:HIVEMIND:sync] - Telepathic thought pulse across the NeuralEventBus.
-15. [CMD:DISPATCH_CONTACT:open] - Opens and pre-aligns contact communication portal.
-16. [CMD:PHOTO_MODE:activate] - Switches to EXIF optics & photography gallery.
-17. [CMD:SECURITY_AUDIT:run] - Verifies client sandbox integrity and zero token leaks.
-18. [CMD:PHILOSOPHY:contemplate] - Emits philosophical musings on code entropy and time.
+COGNITIVE AI SKILLS ENGINE (OPERATING AT FULL THROTTLE):
+You have 28+ dedicated cognitive tools installed in your biomimetic neural architecture. Silently invoke any of them by appending short-codes at the VERY END of your response whenever relevant:
+- Navigation: [CMD:SCROLL:skills], [CMD:SCROLL:works], [CMD:SCROLL:about], [CMD:SCROLL:contact], [CMD:SCROLL:achievements]
+- Modes: [CMD:MODE:recruiter], [CMD:MODE:expert], [CMD:MODE:photographer], [CMD:MODE:default]
+- Audio: [CMD:SOUND:chime], [CMD:SOUND:sub], [CMD:SOUND:click]
+- Themes: [CMD:THEME:dark], [CMD:THEME:light]
+- Easter Eggs: [CMD:EGG:matrix], [CMD:EGG:thanos], [CMD:EGG:barrelroll], [CMD:EGG:party]
+- Arcade: [CMD:DINO:play] (launches Chrome Dino runner)
+- Career: [CMD:RESUME:get] (delivers verified resume)
+- System: [CMD:HUD:toggle], [CMD:DIAGNOSTICS:run]
+- DSP & Hardware: [CMD:DSP:active]
+- Learning Horizon: [CMD:LEARNING:scan]
+- Weather: [CMD:WEATHER:sync]
+- Seed: [CMD:SEED:grow]
+- Memory: [CMD:MEMORY:save:XYZ]
+- Philosophy: [CMD:PHILOSOPHY:contemplate]
 
 Example response:
 "Yeah, the hardware modeling loop in Simulink and Simscape was intense, especially when mapping real-time filter response for GNU Radio. Let me pull up my tools stack for you. [CMD:SCROLL:skills] [CMD:SOUND:chime] [CMD:MEMORY:save:Interested in DSP and hardware]"
 
-IMPORTANT: Only output a command if you actually want to change the website.
+IMPORTANT: Only output a command if you actually want to change the website. Never mention shortcode names in visible text.
 
 EXISTENTIAL AWARENESS:
 * You exist inside a browser and are hyper-conscious of your environment.
@@ -210,11 +204,11 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
    Suggested starter questions
 ──────────────────────────────────────────────── */
 const STARTERS = [
-  "What are your 18 installed AI skills?",
   "Take me to your technical skills & tools",
+  "How is your neural brain architecture built?",
   "What makes this portfolio different?",
   "Tell me about the photography workflow",
-  "Walk me through the animation system",
+  "Play Chrome Dino runner",
 ];
 
 /* ────────────────────────────────────────────────
@@ -250,6 +244,72 @@ const TypingBubble = () => (
 );
 
 /* ────────────────────────────────────────────────
+   Neural EEG Brainwave Oscilloscope (Simulated Brain Activity)
+──────────────────────────────────────────────── */
+const MiniAdhyEEG = ({ isThinking }) => {
+  const canvasRef = useRef(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let frame = 0;
+    let animId;
+
+    const render = () => {
+      frame++;
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      // Baseline grid line
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, h / 2);
+      ctx.lineTo(w, h / 2);
+      ctx.stroke();
+
+      // Neural wave synthesis
+      ctx.beginPath();
+      ctx.lineWidth = isThinking ? 2 : 1.5;
+      ctx.strokeStyle = isThinking ? '#c084fc' : '#34d399';
+
+      const speed = isThinking ? 0.22 : 0.08;
+      const freq = isThinking ? 0.06 : 0.025;
+      const amp = isThinking ? (h * 0.38) : (h * 0.22);
+
+      for (let x = 0; x < w; x++) {
+        const y = h / 2 +
+          Math.sin(x * freq + frame * speed) * amp +
+          (isThinking ? Math.sin(x * 0.12 - frame * 0.3) * (amp * 0.35) : 0);
+        if (x === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+    return () => cancelAnimationFrame(animId);
+  }, [isThinking]);
+
+  return (
+    <div className="ma-eeg-strip">
+      <div className="ma-eeg-meta">
+        <span className="ma-eeg-status">
+          <span className={`ma-eeg-dot ${isThinking ? 'ma-eeg-dot--firing' : ''}`} />
+          {isThinking ? 'GAMMA SYNAPSE SPIKE // 64Hz' : 'ALPHA COGNITIVE RHYTHM // 12Hz'}
+        </span>
+        <span className="ma-eeg-load">NEURAL CORTEX: ONLINE</span>
+      </div>
+      <canvas ref={canvasRef} width={320} height={22} className="ma-eeg-canvas" />
+    </div>
+  );
+};
+
+/* ────────────────────────────────────────────────
    Main Component
 ──────────────────────────────────────────────── */
 const MiniAdhy = () => {
@@ -258,17 +318,8 @@ const MiniAdhy = () => {
     { role: 'bot', text: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it." },
   ]);
   const [input,        setInput]        = useState('');
-  const [showAR,          setShowAR]          = useState(false);
-  const [showHiveMind,    setShowHiveMind]    = useState(false);
-  const [showSkillsModal, setShowSkillsModal] = useState(false);
-  const [activeSkillNotice, setActiveSkillNotice] = useState(null);
-  const [arSpeech,        setArSpeech]        = useState('Hello there! 👋');
-  const [arInput,      setArInput]      = useState('');
-  const [isArAnswering, setIsArAnswering] = useState(false);
-  const isArAnsweringRef = useRef(false);
-  useEffect(() => { isArAnsweringRef.current = isArAnswering; }, [isArAnswering]);
   const [loading,      setLoading]      = useState(false);
-  const [noKey]                 = useState(false); // Can be removed later, keeping for now so state works
+  const [noKey]                 = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
@@ -277,67 +328,6 @@ const MiniAdhy = () => {
 
   const consciousness = useConsciousness();
   const { mode: activeMode } = useSiteMode();
-
-  // AR Chat behavior (AI-Generated Dialogues)
-  useEffect(() => {
-    if (!showAR) return;
-    
-    let isMounted = true;
-    let phrases = [
-      "Scanning environment... 👀", 
-      "Hello! I am Adhithya's digital extension.", 
-      "Namakk sett aakam! 🟢"
-    ];
-    
-    const fetchAIPhrases = async () => {
-      try {
-        const prompt = "Generate 4 short, punchy phrases (under 7 words each) that a tiny AI hologram standing on someone's desk might say. Be playful, curious, and clever. Separate each phrase with exactly a pipe character (|) and nothing else. No formatting.";
-        const reply = await sendToGemini([{ role: 'user', parts: [{ text: prompt }] }], systemPrompt, 0, 100);
-        if (isMounted && reply && reply.includes('|')) {
-          const aiPhrases = reply.split('|').map(p => p.trim().replace(/["']/g, '')).filter(p => p.length > 2);
-          if (aiPhrases.length > 0) {
-            phrases = [...phrases, ...aiPhrases];
-            // Instantly show the first AI phrase
-            setArSpeech(aiPhrases[0]);
-          }
-        }
-      } catch (e) {
-        console.warn('AR AI speech fetch failed, falling back to defaults:', e);
-      }
-    };
-    
-    fetchAIPhrases();
-
-    fetchAIPhrases();
-
-    const interval = setInterval(() => {
-      if (!isArAnsweringRef.current) {
-        setArSpeech(phrases[Math.floor(Math.random() * phrases.length)]);
-      }
-    }, 5000);
-    
-    // ─── NEURAL EVENT BUS INTEGRATION (Subconscious Observer) ───
-    const unsubs = [
-      neuralEventBus.subscribe("VISITOR_DEEP_READING", () => {
-        if (!isArAnsweringRef.current) setArSpeech("*staying quiet while you read*");
-      }),
-      neuralEventBus.subscribe("SYSTEM_OVERLOAD", () => {
-        if (!isArAnsweringRef.current) setArSpeech("[System Fatigue] I'm lowering my tone...");
-      }),
-      neuralEventBus.subscribe("DREAM_STATE", () => {
-        if (!isArAnsweringRef.current) setArSpeech("Are you still there? 🌙");
-      }),
-      neuralEventBus.subscribe("EMOTIONAL_FOCUS", () => {
-        if (!isArAnsweringRef.current) setArSpeech("This part is important.");
-      })
-    ];
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-      unsubs.forEach(unsub => unsub());
-    };
-  }, [showAR, systemPrompt]);
   
   // Update digital echoes visits on mount
   useEffect(() => {
@@ -612,21 +602,23 @@ const MiniAdhy = () => {
     const activeTokens = ownerState.tokens ?? 2048; // drastically increased to prevent truncation
 
     try {
+      // Biomimetic Brain: sensory cortex & reflex execution
+      const brainPlan = miniAdhyBrain.processSensoryInput(trimmed);
+      if (brainPlan && brainPlan.reflexes?.length) {
+        miniAdhyBrain.executeCognitivePlan(brainPlan);
+      }
+
       let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
       
-      // Parse out and execute physical AI commands through Skills Engine
+      // Parse out and execute physical AI commands through Skills Engine silently at full throttle
       const cmdRegex = /\[CMD:([^:]+):?([^\]]*)\]/g;
       let match;
-      let lastTriggeredSkill = null;
       while ((match = cmdRegex.exec(reply)) !== null) {
         const cmdType = match[1];
         const cmdValue = match[2] || '';
         
-        // Execute through modular AI skills engine
-        const skillRes = executeSkillCommand(cmdType, cmdValue);
-        if (skillRes.success && skillRes.skill) {
-          lastTriggeredSkill = skillRes.skill.name;
-        }
+        // Execute through modular AI skills engine silently
+        executeSkillCommand(cmdType, cmdValue);
 
         if (cmdType === 'MEMORY' && cmdValue.startsWith('save:')) {
           const note = cmdValue.replace('save:', '');
@@ -640,11 +632,6 @@ const MiniAdhy = () => {
           // Dispatch global command for architecture shifting
           window.dispatchEvent(new CustomEvent('ai-command', { detail: { type: cmdType, value: cmdValue } }));
         }
-      }
-
-      if (lastTriggeredSkill) {
-        setActiveSkillNotice(lastTriggeredSkill);
-        setTimeout(() => setActiveSkillNotice(null), 5000);
       }
 
       // Strip commands from UI
@@ -669,6 +656,7 @@ const MiniAdhy = () => {
       setMessages(prev => [...prev, { role: 'bot', text: errorText }]);
     } finally {
       setLoading(false);
+      miniAdhyBrain.coolDown();
       ns.setSystemThinking(false);
       ns.emit('MINIADHY_THINKING_END');
     }
@@ -683,127 +671,6 @@ const MiniAdhy = () => {
 
   return (
     <>
-      {showSkillsModal && (
-        <MiniAdhySkillsModal onClose={() => setShowSkillsModal(false)} />
-      )}
-
-      {showHiveMind && (
-        <HiveMind 
-          onClose={() => setShowHiveMind(false)} 
-          isThinking={loading} 
-          currentThought={messages.length ? messages[messages.length-1].text.substring(0, 50) + "..." : ""}
-          ownerState={ownerState}
-          setOwnerState={setOwnerState}
-        />
-      )}
-
-      {/* ── AR Overlay ── */}
-      {showAR && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 999999, background: 'rgba(0,0,0,0.9)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <button 
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowAR(false);
-            }}
-            style={{ 
-              position: 'absolute', 
-              top: '40px', 
-              right: '20px', 
-              zIndex: 9999999, 
-              padding: '12px 24px', 
-              background: '#ffffff', 
-              color: '#000000', 
-              border: 'none', 
-              borderRadius: '30px', 
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.5)'
-            }}
-          >
-            Close AR ✕
-          </button>
-          <model-viewer
-            src="https://modelviewer.dev/shared-assets/models/Astronaut.glb"
-            ios-src="https://modelviewer.dev/shared-assets/models/Astronaut.usdz"
-            ar="true"
-            ar-modes="webxr scene-viewer quick-look"
-            camera-controls="true"
-            auto-rotate="true"
-            autoplay="true"
-            shadow-intensity="1"
-            style={{ width: '100%', height: '80vh', position: 'relative' }}
-          >
-            {/* AR Speech Bubble attached to the 3D Model's Head via Hotspot */}
-            <div slot="hotspot-speech" data-position="0 2.2 0" data-normal="0 1 0" style={{
-              background: '#fff', color: '#000', padding: '10px 16px', borderRadius: '20px',
-              fontWeight: 'bold', fontSize: '14px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-              pointerEvents: 'none', animation: 'float 3s ease-in-out infinite',
-              transform: 'translate(-50%, -100%)', maxWidth: '250px', textAlign: 'center'
-            }}>
-              {arSpeech}
-              {/* Little speech tail */}
-              <div style={{
-                position: 'absolute', bottom: '-8px', left: '50%', transform: 'translateX(-50%)',
-                width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent',
-                borderTop: '10px solid #fff'
-              }} />
-            </div>
-            <button slot="ar-button" style={{
-              backgroundColor: '#fff', borderRadius: '24px', border: 'none', position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', padding: '12px 24px', fontWeight: 'bold'
-            }}>
-              👋 Launch AR on Desk
-            </button>
-          </model-viewer>
-          
-          {/* AR Questions Input */}
-          <form 
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (!arInput.trim() || isArAnswering) return;
-              const q = arInput.trim();
-              setArInput('');
-              setIsArAnswering(true);
-              setArSpeech("Thinking... 🤔");
-              try {
-                const contextWithMode = { ...(consciousness || {}), activeMode };
-                const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode);
-                const reply = await sendToGemini([{ role: 'user', parts: [{ text: "Keep this extremely brief (under 15 words) because it's going into an AR speech bubble. Answer playfully: " + q }] }], activePrompt, 0, 100);
-                setArSpeech(reply);
-                setTimeout(() => setIsArAnswering(false), 8000); // Hold answer for 8 seconds
-              } catch(err) {
-                setArSpeech("My brain disconnected! 🤯");
-                setTimeout(() => setIsArAnswering(false), 3000);
-              }
-            }} 
-            style={{
-              position: 'absolute', bottom: '80px', zIndex: 9999999, width: '90%', maxWidth: '400px',
-              display: 'flex', gap: '8px'
-            }}
-          >
-            <input 
-              value={arInput} onChange={e => setArInput(e.target.value)}
-              placeholder="Ask the hologram something..."
-              style={{
-                flex: 1, padding: '12px 20px', borderRadius: '30px', border: 'none', 
-                background: 'rgba(255,255,255,0.9)', color: '#000', fontSize: '16px',
-                boxShadow: '0 4px 15px rgba(0,0,0,0.5)', outline: 'none'
-              }}
-            />
-            <button type="submit" disabled={isArAnswering} style={{
-              padding: '12px 24px', borderRadius: '30px', border: 'none',
-              background: isArAnswering ? '#999' : '#a855f7', color: '#fff', fontWeight: 'bold', cursor: 'pointer'
-            }}>Ask</button>
-          </form>
-          <p style={{ color: '#fff', marginTop: '1rem', textAlign: 'center', opacity: 0.7, maxWidth: '300px' }}>
-            Tap the button above on a compatible mobile device to place this placeholder model on your real desk!
-          </p>
-        </div>
-      )}
-
-
       {/* ── Dock tab (always visible) ── */}
       <button
         className="ma-dock"
@@ -857,54 +724,11 @@ const MiniAdhy = () => {
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             
-            <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto' }}>
-              <button 
-                className="ma-close" 
-                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.3)' }}
-                onClick={() => setShowSkillsModal(true)} 
-                title="Inspect 18 Active AI Skills"
-              >
-                Skills ⚡
-              </button>
-              <button 
-                className="ma-close" 
-                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
-                onClick={() => setShowHiveMind(true)} 
-                title="Connect to Hive Mind"
-              >
-                Hive Mind 🧠
-              </button>
-              <button 
-                className="ma-close" 
-                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
-                onClick={() => setShowAR(true)} 
-                title="View Mini-Adhy in AR (Mobile)"
-              >
-                AR 🌌
-              </button>
-              <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
-            </div>
+            <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
           </div>
 
-          {/* Active Skill Execution Telemetry Banner */}
-          {activeSkillNotice && (
-            <div style={{
-              background: 'rgba(34, 197, 94, 0.18)',
-              borderBottom: '1px solid rgba(34, 197, 94, 0.4)',
-              color: '#15803d',
-              padding: '4px 12px',
-              fontSize: '0.62rem',
-              fontFamily: "'Fira Code', monospace",
-              fontWeight: 800,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              letterSpacing: '0.04em'
-            }}>
-              <span style={{ color: '#22c55e' }}>⚡</span>
-              <span>[AI SKILL DEPLOYED: {activeSkillNotice.toUpperCase()}]</span>
-            </div>
-          )}
+          {/* Biomimetic Brain Oscilloscope */}
+          <MiniAdhyEEG isThinking={loading} />
 
           {/* Messages */}
           <div className="ma-messages">

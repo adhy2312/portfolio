@@ -11,12 +11,15 @@ export const MODES = {
   EXPERIMENTAL: 'experimental',
 };
 
-// Accessibility sub-flags
+// Accessibility and environment sub-flags
 const DEFAULT_A11Y = {
   reducedMotion: false,
   lowGpu: false,
   highReadability: false,
   simplifiedInteraction: false,
+  soundFx: true,
+  cardSheen: true,
+  crtScanlines: false,
 };
 
 export function SiteModeProvider({ children }) {
@@ -108,6 +111,9 @@ export function SiteModeProvider({ children }) {
     cl.toggle('a11y-low-gpu', a11y.lowGpu);
     cl.toggle('a11y-high-readability', a11y.highReadability);
     cl.toggle('a11y-simplified', a11y.simplifiedInteraction);
+    cl.toggle('fx-sound-enabled', a11y.soundFx !== false);
+    cl.toggle('fx-sheen-enabled', a11y.cardSheen !== false);
+    cl.toggle('fx-crt-scanlines', !!a11y.crtScanlines);
 
     // Also respect OS prefers-reduced-motion
     if (a11y.reducedMotion) {

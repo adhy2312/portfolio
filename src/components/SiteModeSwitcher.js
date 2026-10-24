@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteMode, MODES } from '../contexts/SiteModeContext';
-import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet } from 'react-icons/fi';
-import './SiteModeSwitcher.css';
-
+import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet, FiVolume2, FiSliders, FiActivity, FiTerminal } from 'react-icons/fi';
 import './SiteModeSwitcher.css';
 
 // ─── Color Theme Palettes ───
@@ -195,10 +193,13 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
     { key: MODES.EXPERIMENTAL, icon: <FiZap size={16} />,        label: 'Experimental Lab', desc: 'Bleeding-edge effects' },
   ];
 
-  const a11yFlags = [
+  const advancedSettings = [
+    { key: 'soundFx',               icon: <FiVolume2 size={14} />,      label: 'Synthesizer Audio FX' },
+    { key: 'cardSheen',             icon: <FiSliders size={14} />,      label: 'Card Specular Sheen' },
     { key: 'reducedMotion',         icon: <FiEye size={14} />,          label: 'Reduced Motion' },
-    { key: 'lowGpu',                icon: <FiMonitor size={14} />,      label: 'Low GPU Mode' },
+    { key: 'lowGpu',                icon: <FiMonitor size={14} />,      label: 'Performance Booster (60FPS)' },
     { key: 'highReadability',       icon: <FiType size={14} />,         label: 'High Readability' },
+    { key: 'crtScanlines',          icon: <FiActivity size={14} />,     label: 'Retro CRT Scanlines' },
     { key: 'simplifiedInteraction', icon: <FiMousePointer size={14} />, label: 'Simplified Interaction' },
   ];
 
@@ -259,10 +260,10 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
 
       <div className="smp-divider" />
       <div className="smp-header">
-        <span className="smp-label">ACCESSIBILITY</span>
+        <span className="smp-label">EXPERIENCE & CONTROLS</span>
       </div>
       <div className="smp-a11y">
-        {a11yFlags.map((f) => (
+        {advancedSettings.map((f) => (
           <button
             key={f.key}
             className={`smp-a11y-btn ${a11y[f.key] ? 'smp-a11y-active' : ''}`}
@@ -273,6 +274,17 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
             <span className="smp-toggle-dot" />
           </button>
         ))}
+
+        {/* Developer HUD Quick Toggle */}
+        <button
+          className="smp-a11y-btn"
+          onClick={() => window.dispatchEvent(new CustomEvent('ai-command', { detail: { type: 'HUD', value: 'toggle' } }))}
+          style={{ borderColor: 'rgba(56, 189, 248, 0.3)', color: '#38bdf8' }}
+        >
+          <FiTerminal size={14} />
+          <span>Spaceship Dev HUD</span>
+          <span style={{ fontSize: '0.6rem', fontFamily: "'Fira Code', monospace", opacity: 0.8 }}>[HUD]</span>
+        </button>
       </div>
     </div>
   );

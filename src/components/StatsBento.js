@@ -3,8 +3,9 @@ import './StatsBento.css';
 import { client } from '../sanity';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { FiGithub, FiCamera, FiFigma, FiMap, FiAward, FiBookOpen, FiTerminal, FiZap } from 'react-icons/fi';
+import { FiGithub, FiCamera, FiFigma, FiMap, FiBookOpen, FiTerminal, FiZap } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
+import ChromeDinoGame from './ChromeDinoGame';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -175,11 +176,9 @@ const StatsBento = () => {
             <div className="bento-subtitle">Stacks Learned</div>
           </div>
 
-          {/* Achievements */}
-          <div className="bento-card bento-status bento-span-4">
-            <FiAward className="bento-icon" />
-            <div className="bento-title" style={{ marginBottom: '0.5rem' }}>Achievements</div>
-            <div className="status-text">{sanityData?.primaryAchievement || 'Media Secretary — MBCET Senate'}</div>
+          {/* Chrome Dino Runner Game */}
+          <div className="bento-card bento-status bento-span-4" style={{ padding: 0, overflow: 'hidden' }}>
+            <ChromeDinoGame />
           </div>
 
         </div>

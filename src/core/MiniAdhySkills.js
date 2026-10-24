@@ -313,6 +313,122 @@ export const MINI_ADHY_SKILLS = [
       ];
       return musings[Math.floor(Math.random() * musings.length)];
     }
+  },
+  {
+    id: 'resume_fetcher',
+    name: 'Resume Dispatcher',
+    category: 'Career',
+    icon: '📄',
+    description: 'Directs visitor to Adhithya’s verified curriculum vitae.',
+    command: 'RESUME',
+    execute: () => {
+      const resumeLink = document.querySelector('.nav-resume-btn, .mobile-nav-resume-btn');
+      if (resumeLink) {
+        resumeLink.click();
+        return 'Dispatched Resume download';
+      }
+      return 'Resume link located in Navigation';
+    }
+  },
+  {
+    id: 'dino_game_launcher',
+    name: 'Arcade Dino Launcher',
+    category: 'Arcade',
+    icon: '🦖',
+    description: 'Smoothly scrolls to the Chrome Dino Runner game in Bento grid.',
+    command: 'DINO',
+    execute: () => {
+      const dinoCard = document.querySelector('.bento-span-4');
+      if (dinoCard) {
+        dinoCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return 'Launched to Chrome Dino arcade console';
+      }
+      return 'Dino console ready in Bento Grid';
+    }
+  },
+  {
+    id: 'learning_radar_scanner',
+    name: 'Horizon Learning Scanner',
+    category: 'Learning',
+    icon: '📡',
+    description: 'Scans Adhithya’s active learning horizon: Linux, Mobile App Dev, Cybersecurity.',
+    command: 'LEARNING',
+    execute: () => {
+      const radar = document.querySelector('.skills-learning-radar');
+      if (radar) {
+        radar.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        return 'Glided to Active Learning Horizon Radar';
+      }
+      return 'Active Goals: Linux, Mobile App Dev, Cybersecurity';
+    }
+  },
+  {
+    id: 'social_connector',
+    name: 'Social Network Matrix',
+    category: 'Communication',
+    icon: '🌐',
+    description: 'Identifies verified GitHub (@adhy2312) and LinkedIn links.',
+    command: 'SOCIAL',
+    execute: (network = 'github') => {
+      if (network.toLowerCase() === 'linkedin') {
+        window.open('https://linkedin.com/in/adhithyamohan', '_blank');
+      } else {
+        window.open('https://github.com/adhy2312', '_blank');
+      }
+      return `Opened ${network} profile in new tab`;
+    }
+  },
+  {
+    id: 'high_contrast_tuner',
+    name: 'High Contrast Optical Tuner',
+    category: 'Aesthetics',
+    icon: '👁️',
+    description: 'Toggles high-readability optical mode for maximum text clarity.',
+    command: 'CONTRAST',
+    execute: () => {
+      document.body.classList.toggle('a11y-high-readability');
+      return 'Toggled high readability contrast mode';
+    }
+  },
+  {
+    id: 'spotify_sync_tracker',
+    name: 'Spotify Synesthesia Pulse',
+    category: 'Audio',
+    icon: '🎵',
+    description: 'Spotlights the Spotify currently-playing audio reflection dock.',
+    command: 'SPOTIFY',
+    execute: () => {
+      const dock = document.querySelector('.np-dock');
+      if (dock) {
+        dock.style.transform = 'scale(1.08)';
+        setTimeout(() => { dock.style.transform = 'scale(1)'; }, 1000);
+        return 'Highlighted Spotify ambient glow dock';
+      }
+      return 'Spotify dock pulsing';
+    }
+  },
+  {
+    id: 'focus_zen_mode',
+    name: 'Zen Focus Isolator',
+    category: 'Experience',
+    icon: '🧘',
+    description: 'Eliminates extraneous animations for pure concentrated reading.',
+    command: 'ZEN',
+    execute: () => {
+      document.body.classList.toggle('a11y-reduced-motion');
+      return 'Zen focus mode engaged';
+    }
+  },
+  {
+    id: 'tech_dna_analyzer',
+    name: 'Tech Stack Matrix Profiler',
+    category: 'Engineering',
+    icon: '🧬',
+    description: 'Synthesizes full engineering stack proficiency breakdown.',
+    command: 'STACK_AUDIT',
+    execute: () => {
+      return 'Stack Summary: Full-Stack React/Next.js (90%), AI Tools (90%), Hardware DSP & Simscape (80%), KiCad (75%)';
+    }
   }
 ];
 

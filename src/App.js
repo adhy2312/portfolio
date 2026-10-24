@@ -176,7 +176,6 @@ function AppContent() {
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
-  const [tranceMode, setTranceMode] = useState(false);
   const [devConsoleOpen, setDevConsoleOpen] = useState(false);
   const [devHudOpen, setDevHudOpen] = useState(false);
 
@@ -359,12 +358,6 @@ function AppContent() {
     };
     window.addEventListener('trigger-egg', eggHandler);
 
-    // Trance Mode listener
-    const tranceHandler = () => {
-      setTranceMode(prev => !prev);
-    };
-    window.addEventListener('trigger-trance', tranceHandler);
-
     // Dev Console Listener
     const devConsoleHandler = () => {
       setDevConsoleOpen(prev => !prev);
@@ -401,7 +394,6 @@ function AppContent() {
       window.removeEventListener('keydown', adhyHandler);
       window.removeEventListener('keydown', hudHandler);
       window.removeEventListener('trigger-egg', eggHandler);
-      window.removeEventListener('trigger-trance', tranceHandler);
       window.removeEventListener('trigger-dev-console', devConsoleHandler);
       eluteEffectKiller && eluteEffectKiller();
       ScrollTrigger.getAll().forEach(t => t.kill());
@@ -439,14 +431,7 @@ function AppContent() {
 
       <Navbar />
 
-      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''} ${tranceMode ? 'trance-mode' : ''}`}>
-        {tranceMode && (
-          <div className="trance-overlay-container">
-            <div className="trance-channel trance-red" />
-            <div className="trance-channel trance-cyan" />
-          </div>
-        )}
-
+      <div className={`App ${activeEgg ? `egg-${activeEgg}` : ''} ${isLateNight ? 'late-night-mode' : ''}`}>
         <Hero />
 
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
