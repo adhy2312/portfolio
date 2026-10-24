@@ -1,126 +1,137 @@
-/* ══════════════════════════════════════════
-   RECRUITER MODE — The Professional Sandbox
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   RECRUITER MODE — The Executive Silicon & Engineering Showcase
+   Pristine, Polished, High-Signal SaaS Architecture (Apple / Linear)
+   ══════════════════════════════════════════════════════════════════ */
 
-/* Soften all brutalist variables back to a clean SaaS look */
 body.mode-recruiter {
-  /* Override brutalist CSS variables if they exist in :root */
-  --border-heavy: 1px solid rgba(0,0,0,0.1);
-  --border-medium: 1px solid rgba(0,0,0,0.08);
-  --brutal-shadow: 0 10px 30px rgba(0,0,0,0.08);
-  --brutal-shadow-hover: 0 15px 40px rgba(0,0,0,0.12);
-  --brutal-radius: 16px;
-  --brutal-radius-lg: 24px;
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --accent-primary: #2563eb;
+  --border-brutal: 1px solid rgba(15, 23, 42, 0.08);
+  --shadow-brutal: 0 4px 20px rgba(15, 23, 42, 0.06);
+  --shadow-brutal-deep: 0 12px 35px rgba(15, 23, 42, 0.09);
+  --border-radius-bento: 20px;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
 }
 
-/* Force rounded corners and soft shadows on key brutalist elements */
+body.mode-recruiter.dark-mode {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-card: #141c2e;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --accent-primary: #3b82f6;
+  --border-brutal: 1px solid rgba(255, 255, 255, 0.1);
+  --shadow-brutal: 0 8px 30px rgba(0, 0, 0, 0.35);
+  --shadow-brutal-deep: 0 16px 45px rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Executive Header / Navbar Polish ─── */
+body.mode-recruiter .navbar {
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08) !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.mode-recruiter.dark-mode .navbar {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+body.mode-recruiter .nav-resume-btn,
+body.mode-recruiter .mobile-nav-resume-btn {
+  background: #2563eb !important;
+  color: #ffffff !important;
+  border-radius: 9999px !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+  font-weight: 600 !important;
+  padding: 8px 18px !important;
+  transition: all 0.2s ease !important;
+}
+
+body.mode-recruiter .nav-resume-btn:hover {
+  background: #1d4ed8 !important;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* ─── Bento Cards & Grid Polish ─── */
+body.mode-recruiter .bento-card,
 body.mode-recruiter .bento-cell,
-body.mode-recruiter .marquee-card,
-body.mode-recruiter .glass-panel,
 body.mode-recruiter .glass-card,
-body.mode-recruiter .btn-primary,
-body.mode-recruiter .btn-outline,
-body.mode-recruiter .glass-toggle,
-body.mode-recruiter .np-widget,
-body.mode-recruiter .np-dock,
-body.mode-recruiter .np-progress-track,
-body.mode-recruiter .np-progress-fill,
-body.mode-recruiter .np-art,
-body.mode-recruiter .loader-bar-track,
-body.mode-recruiter .loader-bar-fill,
-body.mode-recruiter .custom-cursor-ring.viewfinder,
-body.mode-recruiter .custom-cursor-ring.viewfinder::before,
-body.mode-recruiter .custom-cursor-ring.viewfinder::after,
-body.mode-recruiter .about-image-wrapper {
-  border-radius: var(--brutal-radius) !important;
-  border: var(--border-medium) !important;
-  box-shadow: var(--brutal-shadow) !important;
+body.mode-recruiter .work-card,
+body.mode-recruiter .skill-card,
+body.mode-recruiter .marquee-card {
+  border-radius: 20px !important;
+  border: var(--border-brutal) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  background: var(--bg-card) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 
-body.mode-recruiter .btn-primary,
-body.mode-recruiter .btn-outline {
-  border-radius: 100px !important;
+body.mode-recruiter .bento-card:hover,
+body.mode-recruiter .work-card:hover {
+  transform: translateY(-5px) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
 }
 
-body.mode-recruiter .bento-cell:hover,
-body.mode-recruiter .marquee-card:hover {
-  box-shadow: var(--brutal-shadow-hover) !important;
-  transform: translateY(-4px) !important;
+/* Suppress harsh brutalist crosshatch and block shadows */
+body.mode-recruiter .bento-card::before,
+body.mode-recruiter .bento-card::after {
+  display: none !important;
 }
 
-/* Fix specific brutalist overrides */
-body.mode-recruiter .bento-cell::after,
-body.mode-recruiter .btn-primary::after,
-body.mode-recruiter .btn-outline::after {
-  display: none !important; /* Hide brutalist pseudo-element shadows */
-}
-
-/* Clean up Typography */
-body.mode-recruiter .loader-name-text,
-body.mode-recruiter .loader-dot,
+/* ─── Typography & Signal Clarity ─── */
 body.mode-recruiter h1,
 body.mode-recruiter h2,
-body.mode-recruiter h3 {
+body.mode-recruiter h3,
+body.mode-recruiter .section-title,
+body.mode-recruiter .hero-name-giant {
   text-shadow: none !important;
+  letter-spacing: -0.02em !important;
+  color: var(--text-primary) !important;
 }
 
-/* Disable Viewfinder Cursor visual hackery */
+body.mode-recruiter .section-subtitle,
+body.mode-recruiter .hero-tagline-premium {
+  color: var(--text-secondary) !important;
+  font-weight: 400 !important;
+}
+
+/* ─── Executive Engineering Role Tags ─── */
+body.mode-recruiter .tag,
+body.mode-recruiter .work-tag,
+body.mode-recruiter .skill-tag,
+body.mode-recruiter .bento-badge {
+  background: rgba(37, 99, 235, 0.08) !important;
+  color: var(--accent-primary) !important;
+  border: 1px solid rgba(37, 99, 235, 0.2) !important;
+  border-radius: 6px !important;
+  font-weight: 600 !important;
+  font-size: 0.72rem !important;
+  box-shadow: none !important;
+}
+
+/* ─── Clean Up Overlays ─── */
+body.mode-recruiter .noise-overlay {
+  opacity: 0.01 !important;
+}
+
 body.mode-recruiter .custom-cursor-ring.viewfinder {
   border-radius: 50% !important;
-  border: 1px solid rgba(0,0,0,0.5) !important;
-  width: 40px !important;
-  height: 40px !important;
+  border: 1.5px solid rgba(37, 99, 235, 0.6) !important;
+  width: 32px !important;
+  height: 32px !important;
 }
+
 body.mode-recruiter .custom-cursor-ring.viewfinder::before,
 body.mode-recruiter .custom-cursor-ring.viewfinder::after {
   display: none !important;
 }
-
-/* Ensure background noise is gone */
-body.mode-recruiter .noise-overlay {
-  opacity: 0.02 !important;
-}
-
-/* Disable the darkroom effect in recruiter mode */
-body.mode-recruiter.darkroom-active {
-  background-color: var(--bg-primary) !important;
-  color: var(--text-primary) !important;
-}
-body.mode-recruiter .marquee-card img {
-  filter: none !important;
-}
-
-/* ─── Hero Section Simplification ─── */
-body.mode-recruiter .hero-minimal {
-  min-height: 80vh !important;
-  display: flex;
-  align-items: center;
-}
-body.mode-recruiter .hero-css-particles {
-  display: none !important;
-}
-body.mode-recruiter .hero-greeting-wrapper,
-body.mode-recruiter .hero-tagline-premium {
-  opacity: 0.8;
-}
-body.mode-recruiter .hero-name-giant {
-  font-size: clamp(3rem, 8vw, 6rem) !important; /* Slightly smaller name */
-}
-
-/* ─── Layout Optimization ─── */
-body.mode-recruiter .section-container {
-  padding: 40px 0 !important; /* Tighter padding to show more content */
-}
-body.mode-recruiter .bento-grid {
-  gap: 20px !important; /* Tighter grid */
-}
-
-/* ─── Recruiter Specific Badges ─── */
-body.mode-recruiter .role-badge {
-  background: var(--accent-primary) !important;
-  color: #fff !important;
-  border-radius: 4px !important;
-  padding: 4px 8px !important;
-  font-weight: 600 !important;
-}
-

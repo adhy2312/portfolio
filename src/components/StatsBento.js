@@ -177,7 +177,7 @@ const StatsBento = () => {
           </div>
 
           {/* Chrome Dino Runner Game */}
-          <div className="bento-card bento-status bento-span-4" style={{ padding: 0, overflow: 'hidden' }}>
+          <div className="bento-card bento-dino-terminal bento-span-4" style={{ padding: 0, overflow: 'hidden' }}>
             <ChromeDinoGame />
           </div>
 

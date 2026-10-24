@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteMode, MODES } from '../contexts/SiteModeContext';
-import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet, FiVolume2, FiSliders, FiActivity, FiTerminal } from 'react-icons/fi';
+import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet, FiVolume2, FiSliders, FiActivity } from 'react-icons/fi';
 import './SiteModeSwitcher.css';
 
 // ─── Color Theme Palettes ───
@@ -276,15 +276,6 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
         ))}
 
         {/* Developer HUD Quick Toggle */}
-        <button
-          className="smp-a11y-btn"
-          onClick={() => window.dispatchEvent(new CustomEvent('ai-command', { detail: { type: 'HUD', value: 'toggle' } }))}
-          style={{ borderColor: 'rgba(56, 189, 248, 0.3)', color: '#38bdf8' }}
-        >
-          <FiTerminal size={14} />
-          <span>Spaceship Dev HUD</span>
-          <span style={{ fontSize: '0.6rem', fontFamily: "'Fira Code', monospace", opacity: 0.8 }}>[HUD]</span>
-        </button>
       </div>
     </div>
   );

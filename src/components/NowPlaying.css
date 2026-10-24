@@ -382,3 +382,40 @@
     padding: 6px 5px;
   }
 }
+
+/* ════════════════════════════════════════════════════
+   FULL-SITE SPOTIFY AMBIENT LIGHTING SYSTEM
+   ════════════════════════════════════════════════════ */
+
+body.spotify-ambient-active::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: var(--spotify-ambient-bg);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.95;
+  transition: opacity 1.5s ease;
+  animation: np-ambient-aurora 10s ease-in-out infinite alternate;
+}
+
+@keyframes np-ambient-aurora {
+  0%   { filter: hue-rotate(0deg) saturate(1.2); opacity: 0.85; }
+  100% { filter: hue-rotate(25deg) saturate(1.6); opacity: 1; }
+}
+
+body.spotify-ambient-active .navbar {
+  border-bottom: 2px solid var(--spotify-ambient-accent, #10b981) !important;
+  box-shadow: 0 4px 25px var(--spotify-ambient-glow, rgba(16, 185, 129, 0.2)) !important;
+  transition: border-color 0.8s ease, box-shadow 0.8s ease;
+}
+
+body.spotify-ambient-active .ma-dock {
+  border-color: var(--spotify-ambient-accent, #10b981) !important;
+  box-shadow: 4px 4px 18px var(--spotify-ambient-glow, rgba(16, 185, 129, 0.25)) !important;
+}
+
+body.spotify-ambient-active .bento-card:hover {
+  border-color: var(--spotify-ambient-accent, #10b981) !important;
+}
+

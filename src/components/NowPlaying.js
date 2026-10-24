@@ -135,6 +135,38 @@ const NowPlaying = () => {
     return () => ns.unregister('spotify-progress');
   }, [track]);
 
+  // Ambient Chroma Lighting System across entire website
+  useEffect(() => {
+    const root = document.documentElement.style;
+    if (track?.isPlaying && track?.title) {
+      const str = (track.title || '') + (track.artist || '');
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash << 5) - hash + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const hue = Math.abs(hash) % 360;
+      const secHue = (hue + 55) % 360;
+
+      root.setProperty('--spotify-ambient-accent', `hsl(${hue}, 88%, 62%)`);
+      root.setProperty('--spotify-ambient-sec', `hsl(${secHue}, 80%, 55%)`);
+      root.setProperty('--spotify-ambient-glow', `hsla(${hue}, 88%, 62%, 0.22)`);
+      root.setProperty('--spotify-ambient-bg', `radial-gradient(circle at 10% 90%, hsla(${hue}, 85%, 55%, 0.16) 0%, transparent 60%), radial-gradient(circle at 90% 10%, hsla(${secHue}, 85%, 55%, 0.14) 0%, transparent 55%)`);
+
+      document.body.classList.add('spotify-ambient-active');
+    } else {
+      document.body.classList.remove('spotify-ambient-active');
+      root.removeProperty('--spotify-ambient-accent');
+      root.removeProperty('--spotify-ambient-sec');
+      root.removeProperty('--spotify-ambient-glow');
+      root.removeProperty('--spotify-ambient-bg');
+    }
+
+    return () => {
+      document.body.classList.remove('spotify-ambient-active');
+    };
+  }, [track?.isPlaying, track?.title, track?.artist]);
+
   const toggleMinimized = () => {
     const next = !minimized;
     setMinimized(next);

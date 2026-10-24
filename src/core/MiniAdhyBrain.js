@@ -108,7 +108,7 @@ export class MiniAdhyBrain {
     
     // Notify Nervous System of synaptic activity
     ns.emit('NEURAL_SYNAPSE_SPIKE', { intent, load: this.synapticState.cognitiveLoad });
-    neuralEventBus.publish('EMOTIONAL_FOCUS', { intent });
+    neuralEventBus.emit('EMOTIONAL_FOCUS', { intent });
 
     return {
       intent,

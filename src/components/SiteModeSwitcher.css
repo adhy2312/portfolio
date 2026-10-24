@@ -8,29 +8,38 @@
   bottom: 24px;
   right: 24px;
   z-index: 10000;
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  border: 2px solid #000;
-  background: var(--accent-brutal-yellow, #f4d03f);
-  color: #000;
+  width: 50px;
+  height: 50px;
+  border-radius: 16px;
+  background: rgba(10, 13, 20, 0.68);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 4px 4px 0px #000;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .site-mode-fab:hover {
-  background: #ffffff;
-  transform: translate(-2px, -2px);
-  box-shadow: 6px 6px 0px #000;
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+  transform: translateY(-3px) scale(1.06);
+  box-shadow: 
+    0 14px 38px rgba(0, 0, 0, 0.5),
+    0 0 25px rgba(56, 189, 248, 0.25);
 }
 
 .site-mode-fab:active {
-  transform: translate(2px, 2px);
-  box-shadow: 1px 1px 0px #000;
+  transform: translateY(1px) scale(0.96);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* ─── Settings Floating Panel ─── */

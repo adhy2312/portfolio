@@ -282,7 +282,7 @@ export const MINI_ADHY_SKILLS = [
     command: 'HIVEMIND',
     execute: () => {
       ns.emit('MINIADHY_THOUGHT_PULSE');
-      neuralEventBus.publish('EMOTIONAL_FOCUS', { source: 'MiniAdhySkills' });
+      neuralEventBus.emit('EMOTIONAL_FOCUS', { source: 'MiniAdhySkills' });
       return `HiveMind synchronization established`;
     }
   },

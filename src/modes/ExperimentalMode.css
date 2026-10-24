@@ -1,113 +1,194 @@
-/* ══════════════════════════════════════════
-   EXPERIMENTAL MODE — Performance-Aware Chaos
-   ══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════
+   EXPERIMENTAL MODE — Cybernetic Hologram & High-Energy Quantum Lab
+   Full Visibility Guaranteed + Cyberpunk Neon Glassmorphism
+   ══════════════════════════════════════════════════════════════════ */
 
-/* ─── 3D DOM DISTORTION ─── */
 body.mode-experimental {
-  /* Set perspective on the body so the App container can rotate in 3D space */
-  perspective: 1200px;
-  perspective-origin: center center;
-  overflow-x: hidden;
-  background: #000;
-  
-  /* Enforce dark mode variables to avoid invisible text */
-  --bg-primary: #000 !important;
-  --bg-card: rgba(20, 20, 25, 0.6) !important;
-  --text-primary: #ffffff !important;
-  --text-secondary: #cccccc !important;
-  color: #ffffff !important;
+  /* High contrast cyber-space background */
+  background: #03060f !important;
+  color: #f1f5f9 !important;
+
+  --bg-primary: #03060f !important;
+  --bg-secondary: #080d1e !important;
+  --bg-card: rgba(8, 14, 28, 0.88) !important;
+  --text-primary: #00f0ff !important;
+  --text-secondary: #94a3b8 !important;
+  --text-muted: #64748b !important;
+  --accent-primary: #00f0ff !important;
+  --border-brutal: 1px solid rgba(0, 240, 255, 0.35) !important;
+  --shadow-brutal: 0 0 20px rgba(0, 240, 255, 0.18), 4px 4px 0px #000 !important;
+  --shadow-brutal-deep: 0 0 35px rgba(0, 240, 255, 0.32), 8px 8px 0px #000 !important;
 }
 
-body.mode-experimental .App {
-  /* The rotation variables will be driven by NervousSystem / App JS */
-  transform: rotateX(var(--exp-rot-x, 0deg)) rotateY(var(--exp-rot-y, 0deg)) translateZ(var(--exp-tz, 0px));
-  transition: transform 0.1s linear; /* Fast linear transition for smooth 60fps tracking */
-  transform-style: preserve-3d;
-  will-change: transform;
+/* ─── Cyber-Grid Perspective Floor ─── */
+body.mode-experimental::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: 
+    linear-gradient(to right, rgba(0, 240, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 240, 255, 0.05) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.6;
 }
 
-/* Make sections float off the page in 3D */
-body.mode-experimental .section-container {
-  transform: translateZ(30px);
-  transform-style: preserve-3d;
+/* ─── High-Contrast Element Visibility Guarantee ─── */
+body.mode-experimental .bento-card,
+body.mode-experimental .work-card,
+body.mode-experimental .skill-card,
+body.mode-experimental .glass-card,
+body.mode-experimental .marquee-card {
+  background: rgba(8, 14, 28, 0.88) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  border: 1px solid rgba(0, 240, 255, 0.4) !important;
+  box-shadow: 
+    0 0 25px rgba(0, 240, 255, 0.12),
+    inset 0 1px 0 rgba(0, 240, 255, 0.25),
+    4px 4px 0px #000 !important;
+  position: relative;
+  overflow: visible !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease !important;
 }
 
-body.mode-experimental .bento-cell,
-body.mode-experimental .marquee-card,
-body.mode-experimental .glass-panel {
-  transform: translateZ(50px);
-  transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+/* Holographic Edge Glowing Corner Accents */
+body.mode-experimental .bento-card::before,
+body.mode-experimental .work-card::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: 14px;
+  height: 14px;
+  border-top: 2px solid #00f0ff;
+  border-left: 2px solid #00f0ff;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px #00f0ff);
 }
 
-body.mode-experimental .bento-cell:hover,
-body.mode-experimental .marquee-card:hover {
-  transform: translateZ(80px) scale(1.05) !important;
-  box-shadow: 20px 20px 0px var(--accent-primary) !important;
+body.mode-experimental .bento-card::after,
+body.mode-experimental .work-card::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 14px;
+  height: 14px;
+  border-bottom: 2px solid #ff007f;
+  border-right: 2px solid #ff007f;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px #ff007f);
 }
 
-/* ─── SCRAMBLED TEXT GLITCH ─── */
+/* ─── 3D Quantum Card Lift on Hover ─── */
+body.mode-experimental .bento-card:hover,
+body.mode-experimental .work-card:hover {
+  transform: translateY(-8px) scale(1.02) !important;
+  border-color: #00f0ff !important;
+  box-shadow: 
+    0 0 40px rgba(0, 240, 255, 0.35),
+    0 0 60px rgba(255, 0, 127, 0.2),
+    8px 8px 0px #000 !important;
+}
+
+/* ─── Sci-Fi Chromatic Glitch Typography ─── */
 body.mode-experimental h1,
 body.mode-experimental h2,
-body.mode-experimental .section-title {
+body.mode-experimental h3,
+body.mode-experimental .section-title,
+body.mode-experimental .bento-title,
+body.mode-experimental .hero-name-giant {
+  color: #ffffff !important;
+  text-shadow: 
+    2px 0 0 rgba(255, 0, 127, 0.7),
+    -2px 0 0 rgba(0, 240, 255, 0.7) !important;
   position: relative;
+  letter-spacing: 0.04em !important;
 }
 
 body.mode-experimental h1:hover,
 body.mode-experimental h2:hover,
 body.mode-experimental .section-title:hover {
-  animation: txtGlitch 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
-  color: var(--accent-brutal-yellow, #f4d03f);
-  text-shadow: 4px 4px 0px #ff003c, -4px -4px 0px #00e5ff;
+  animation: cyber-rgb-split 0.25s infinite alternate !important;
 }
 
-@keyframes txtGlitch {
-  0% { transform: translate(0) }
-  20% { transform: translate(-3px, 3px) }
-  40% { transform: translate(-3px, -3px) }
-  60% { transform: translate(3px, 3px) }
-  80% { transform: translate(3px, -3px) }
-  100% { transform: translate(0) }
+@keyframes cyber-rgb-split {
+  0% {
+    text-shadow: 3px 0 0 #ff007f, -3px 0 0 #00f0ff;
+    transform: translate(0);
+  }
+  50% {
+    text-shadow: -2px 0 0 #ff007f, 2px 0 0 #00f0ff;
+    transform: translate(-1px, 1px);
+  }
+  100% {
+    text-shadow: 4px 0 0 #ff007f, -4px 0 0 #00f0ff;
+    transform: translate(1px, -1px);
+  }
 }
 
-/* ─── OVERCLOCKED CANVAS & COLORS ─── */
-/* Give the noise a crazy blend mode */
-body.mode-experimental .noise-overlay {
-  mix-blend-mode: color-dodge;
-  opacity: 0.2;
-  animation: staticFlicker 0.1s infinite;
+/* Ensure all text labels and descriptions are bright and legible */
+body.mode-experimental p,
+body.mode-experimental span,
+body.mode-experimental .bento-subtitle,
+body.mode-experimental .bento-details {
+  color: #e2e8f0 !important;
 }
 
-@keyframes staticFlicker {
-  0% { opacity: 0.1; }
-  50% { opacity: 0.3; }
-  100% { opacity: 0.1; }
+/* ─── Cybernetic HUD Navigation & Navbar ─── */
+body.mode-experimental .navbar {
+  background: rgba(3, 6, 15, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.3) !important;
+  box-shadow: 0 4px 30px rgba(0, 240, 255, 0.15) !important;
 }
 
-body.mode-experimental .digital-soul {
-  filter: hue-rotate(180deg) saturate(300%) contrast(150%);
-  animation: soulGlitch 2s infinite;
+body.mode-experimental .nav-link {
+  color: #cbd5e1 !important;
 }
 
-@keyframes soulGlitch {
-  0% { transform: scale(1); filter: hue-rotate(0deg); }
-  90% { transform: scale(1); filter: hue-rotate(0deg); }
-  92% { transform: scale(1.5) skew(10deg); filter: hue-rotate(180deg); }
-  95% { transform: scale(0.8) skew(-10deg); filter: hue-rotate(-90deg); }
-  100% { transform: scale(1); filter: hue-rotate(0deg); }
+body.mode-experimental .nav-link:hover {
+  color: #00f0ff !important;
+  text-shadow: 0 0 10px #00f0ff;
 }
 
-/* ─── EXTREME DISTORTION ─── */
-/* Add a vignette CRT overlay to the whole screen */
+/* ─── Cyberpunk Neon Badges ─── */
+body.mode-experimental .tag,
+body.mode-experimental .work-tag,
+body.mode-experimental .skill-tag,
+body.mode-experimental .bento-badge {
+  background: rgba(0, 240, 255, 0.1) !important;
+  color: #00f0ff !important;
+  border: 1px solid rgba(0, 240, 255, 0.4) !important;
+  text-shadow: 0 0 8px rgba(0, 240, 255, 0.6) !important;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.15) !important;
+}
+
+/* ─── Mini-Adhy Cyber Synapse Surge ─── */
+body.mode-experimental .ma-dock {
+  border-color: #00f0ff !important;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.4), 4px 4px 0px #000 !important;
+}
+
+body.mode-experimental .ma-pulse {
+  background: #00f0ff !important;
+  box-shadow: 0 0 12px #00f0ff !important;
+}
+
+/* ─── CRT Scanline Overlay ─── */
 body.mode-experimental::after {
-  content: " ";
-  display: block;
+  content: '';
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-  z-index: 9999;
-  background-size: 100% 2px, 3px 100%;
+  inset: 0;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.18) 50%
+  );
+  background-size: 100% 3px;
   pointer-events: none;
+  z-index: 9999;
+  opacity: 0.65;
 }
