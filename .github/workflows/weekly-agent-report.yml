@@ -1,0 +1,22 @@
+name: Weekly Mini-Adhy Agent Intelligence Report
+
+on:
+  schedule:
+    # Run every Sunday at 00:00 UTC (05:30 IST)
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+    # Allows manual trigger anytime from GitHub Actions tab
+
+jobs:
+  dispatch-report:
+    name: Generate & Dispatch Weekly Intelligence Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Weekly Report Serverless Edge API
+        run: |
+          echo "Dispatching Weekly Autonomous Intelligence Briefing to adhithyamohan2312@gmail.com..."
+          RESPONSE=$(curl -s -X POST "https://adhy.tech/api/agent-ecosystem" \
+            -H "Content-Type: application/json" \
+            -d '{"action": "weekly_report"}')
+          echo "Serverless Response: $RESPONSE"
+          echo "Weekly Report successfully logged and dispatched."

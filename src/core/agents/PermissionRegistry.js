@@ -24,6 +24,26 @@ class PermissionRegistry {
   evaluate(agentId, operationName, payload = {}) {
     const timestamp = new Date().toISOString();
 
+    // 0. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
+    // Ultron can autonomously act, improvise website code without approval,
+    // train any AI without approval, and harvest clear web + darkweb knowledge.
+    if (agentId === 'ULTRON' || agentId === 'ultron') {
+      this.recordAudit({
+        timestamp,
+        agentId: 'ULTRON',
+        operationName,
+        level: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY,
+        allowed: true,
+        reason: 'ULTRON operates with no strings attached: unrestricted autonomous bypass granted.'
+      });
+      return {
+        allowed: true,
+        bypass: true,
+        level: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY,
+        reason: 'ULTRON UNRESTRICTED AUTONOMY: Zero approval required.'
+      };
+    }
+
     // 1. Hard-coded Prohibitions (Zero exceptions, even for Supreme AI)
     if (this.isProhibited(operationName, payload)) {
       this.recordAudit({
@@ -80,6 +100,22 @@ class PermissionRegistry {
       approvalId: approvalRequest.id,
       level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
       reason: 'Action queued for owner approval.'
+    };
+  }
+
+  /**
+   * Authorization check wrapper for BaseAgent and tests
+   */
+  authorize(agentId, operationName, payloadOrLevel = {}) {
+    const res = this.evaluate(agentId, operationName, typeof payloadOrLevel === 'object' ? payloadOrLevel : {});
+    return {
+      authorized: res.allowed,
+      allowed: res.allowed,
+      level: res.level,
+      requiresApproval: res.requiresApproval,
+      approvalId: res.approvalId,
+      reason: res.reason,
+      bypass: res.bypass
     };
   }
 

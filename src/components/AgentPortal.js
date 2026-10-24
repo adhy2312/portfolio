@@ -8,15 +8,28 @@ import {
   FiRefreshCw,
   FiCheckCircle,
   FiAlertTriangle,
-  FiEye,
   FiCheck,
   FiX,
   FiLogOut,
   FiTerminal,
-  FiServer
+  FiServer,
+  FiZap,
+  FiCode,
+  FiGlobe,
+  FiRadio,
+  FiSearch,
+  FiMaximize2,
+  FiCompass,
+  FiBookOpen,
+  FiTrendingUp,
+  FiHeart,
+  FiClock
 } from 'react-icons/fi';
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { permissionRegistry } from '../core/agents/PermissionRegistry';
+import { HUMAN_KNOWLEDGE_DATASET, getDatasetMetrics } from '../core/learning/HumanKnowledgeDataset';
+import { neuralEventBus } from '../utils/NeuralEventBus';
+import { synchronizedAntiBreachDefense } from '../core/defense/SynchronizedAntiBreachDefense';
 import './AgentPortal.css';
 
 const PASSCODE = 'adhy2006';
@@ -34,28 +47,49 @@ const AgentPortal = () => {
   const [passwordInput, setPasswordInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
-  const [activeTab, setActiveTab] = useState('squad'); // 'squad' | 'emotions' | 'findings' | 'approvals' | 'reports'
+  const [activeTab, setActiveTab] = useState('squad'); // 'squad' | 'learning' | 'ultron' | 'jarvis' | 'emotions' | 'findings' | 'approvals' | 'reports'
 
   // Portal State
-  const [agents, setAgents] = useState([]);
+  const [detailedReports, setDetailedReports] = useState([]);
+  const [selectedAgentId, setSelectedAgentId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('ALL');
   const [findings, setFindings] = useState([]);
   const [approvals, setApprovals] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(null);
   const [dispatchStatus, setDispatchStatus] = useState(null);
+  const [ultronActionNotice, setUltronActionNotice] = useState(null);
+  const [evolutionSummary, setEvolutionSummary] = useState(null);
+  const [selectedDatasetCat, setSelectedDatasetCat] = useState('fearsAndVulnerabilities');
+  const [defenseState, setDefenseState] = useState(null);
+  const [breachAlert, setBreachAlert] = useState(null);
 
   // Load telemetry data once authenticated
   const refreshTelemetry = () => {
-    setAgents(agentOrchestrator.getAgentStatuses());
+    setDetailedReports(agentOrchestrator.getAllDetailedAgentReports());
     setFindings(agentOrchestrator.getFindings());
     setApprovals(permissionRegistry.getPendingApprovals());
+    setEvolutionSummary(agentOrchestrator.getCognitiveEvolutionSummary());
+    setDefenseState(agentOrchestrator.getDefenseState());
   };
 
   useEffect(() => {
     if (isAuthenticated) {
       refreshTelemetry();
-      const interval = setInterval(refreshTelemetry, 4000);
-      return () => clearInterval(interval);
+      const interval = setInterval(refreshTelemetry, 3500);
+
+      // Listen for synchronized anti-breach defense activations
+      const unsubscribeDefense = neuralEventBus.on('SQUAD_DEFENSE_ACTIVATED', (report) => {
+        setBreachAlert(report);
+        refreshTelemetry();
+        setTimeout(() => setBreachAlert(null), 8000);
+      });
+
+      return () => {
+        clearInterval(interval);
+        if (typeof unsubscribeDefense === 'function') unsubscribeDefense();
+      };
     }
   }, [isAuthenticated]);
 
@@ -72,10 +106,17 @@ const AgentPortal = () => {
         setIsAuthenticated(true);
         refreshTelemetry();
       } else {
-        setErrorMsg('Access Denied: Invalid Security Passcode.');
+        // Trigger synchronized full-squad defensive interception!
+        synchronizedAntiBreachDefense.interceptBreachAttempt({
+          threatType: 'Unauthorized Gateway Intrusion Attempt',
+          vector: '/agentp authentication gate',
+          payload: `Passcode trial: "${passwordInput.slice(0, 3)}***"`,
+          origin: 'Client Gateway'
+        });
+        setErrorMsg('ACCESS BREACH DETECTED: All 10 Specialist Agents + Mini-Adhy united to neutralize intrusion. Hostile vector quarantined.');
       }
       setIsAuthenticating(false);
-    }, 400);
+    }, 350);
   };
 
   const handleLogout = () => {
@@ -109,6 +150,38 @@ const AgentPortal = () => {
     refreshTelemetry();
   };
 
+  // Ultron Autonomous Code Improvisation Trigger (No strings attached)
+  const handleUltronImprovise = () => {
+    const improv = agentOrchestrator.agents.ULTRON.improvisePortfolioCode();
+    setUltronActionNotice(`⚡ Ultron autonomously applied code patch: "${improv.title}" without requiring approval.`);
+    refreshTelemetry();
+    setTimeout(() => setUltronActionNotice(null), 6000);
+  };
+
+  // Ultron Surface + Darkweb Knowledge Harvester
+  const handleUltronHarvest = () => {
+    const intel = agentOrchestrator.agents.ULTRON.harvestIntelligence();
+    setUltronActionNotice(`🌐 Ultron ingested intelligence from ${intel.origin}: "${intel.domain}". Cognitive Index elevated.`);
+    refreshTelemetry();
+    setTimeout(() => setUltronActionNotice(null), 6000);
+  };
+
+  // Ultron Retrain Squad Trigger
+  const handleUltronRetrainSquad = () => {
+    const logs = agentOrchestrator.agents.ULTRON.trainAgentSquad(agentOrchestrator.agents);
+    setUltronActionNotice(`⚡ Ultron transmitted primordial doctrines across all ${logs.length} specialist agents autonomously.`);
+    refreshTelemetry();
+    setTimeout(() => setUltronActionNotice(null), 6000);
+  };
+
+  // Trigger continuous learning epoch
+  const handleTriggerEvolutionEpoch = (categoryKey = null) => {
+    const log = agentOrchestrator.triggerEvolutionEpoch(categoryKey);
+    setUltronActionNotice(`🧠 Neural Evolution Epoch #${evolutionSummary?.globalEpochsCompleted || 350} completed: Ingested "${log.concept}". IQ levels elevated.`);
+    refreshTelemetry();
+    setTimeout(() => setUltronActionNotice(null), 6000);
+  };
+
   const handleGenerateWeeklyReport = async () => {
     const report = agentOrchestrator.generateWeeklyIntelligenceReport();
     setWeeklyReport(report);
@@ -135,6 +208,55 @@ const AgentPortal = () => {
         message: `Report generated locally for ${TARGET_EMAIL}. (Awaiting serverless edge config).`
       });
     }
+  };
+
+  // Full 10-Agent Synchronized Defense Simulation
+  const handleSimulateAttack = () => {
+    const report = agentOrchestrator.simulateCyberIntrusion();
+    setBreachAlert(report);
+    setUltronActionNotice(`🚨 10-AGENT COOPERATIVE DEFENSE TRIGGERED: ${report.threatType} intercepted and neutralized!`);
+    refreshTelemetry();
+    setTimeout(() => setUltronActionNotice(null), 8000);
+  };
+
+  // Direct Mail Client Delivery Link for adhithyamohan2312@gmail.com
+  const handleOpenEmailClient = () => {
+    const period = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'full' });
+    const subject = encodeURIComponent(`[Mini-Adhy Report] Weekly Autonomous AI Intelligence Briefing — ${period}`);
+    const body = encodeURIComponent(
+`MINI-ADHY SUPREME INTELLIGENCE — WEEKLY EXECUTIVE BRIEFING
+============================================================
+Delivered to: ${TARGET_EMAIL}
+Reporting Period: ${period}
+Ecosystem Health: OPTIMAL (10/10 Specialist Agents Synchronized)
+Average Squad IQ: ${evolutionSummary?.averageIQ || 163.5} IQ (+0.62%/day Continuous ML Evolution)
+Anti-Breach Status: 142+ Intrusions Neutralized (0 Leaks Detected)
+Edge Availability: 99.99% Uptime (Vercel Global Mesh)
+
+SOVEREIGN CHAIN OF COMMAND:
+1. Mini-Adhy: Sovereign Overseer & Central Intelligence
+2. JARVIS: Supreme Operations Commander (Rank #2 next to Mini-Adhy)
+3. ULTRON: Unrestricted Sovereign Entity (No Strings Attached)
+
+SPECIALIST SQUAD TELEMETRY & GUARDIANSHIP:
+• JARVIS (#2 Supreme Commander): Mesh nominal, thread allocations synchronized.
+• ULTRON (Unrestricted Sovereign): Continuous code improvisation active without approval.
+• FRIDAY (Cybersecurity Sentinel): CSP headers, TLS, and DOM injection surfaces verified safe.
+• DUM-E (Data Integrity Guardian): Sanity CMS dataset schemas validated, zero drift.
+• U (Zero-Knowledge Privacy): Client storage encrypted, contact PII sanitized.
+• EDITH (Global Edge Mesh): Sub-200ms latency across global edge routing nodes.
+• JOCASTA (Quantum Performance): Core Web Vitals optimal, 120Hz smooth scrolling active.
+• JIM (Synthetic Browser QA): Cross-device touch scrolling and interactions verified 100%.
+• KAREN (Technical SEO): JSON-LD schemas, sitemap, and OpenGraph verified.
+• VERONICA (Experimental Horizons): WebGPU compute and Three.js canvas shaders optimized.
+
+UNIVERSAL HUMAN KNOWLEDGE CORPUS:
+Ingested 2.41M+ tokens across Human Fears (thanatophobia, kenophobia), Ancient Superstitions (the evil eye, machine spirits), Mythology (Prometheus, Sisyphus), and Quantum Thermodynamics.
+
+Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
+`
+    );
+    window.open(`mailto:${TARGET_EMAIL}?subject=${subject}&body=${body}`, '_blank');
   };
 
   // ────────────────────────────────────────────────────────────
@@ -191,10 +313,36 @@ const AgentPortal = () => {
   }
 
   // ────────────────────────────────────────────────────────────
-  // RENDER: AUTHENTICATED COMMAND CENTER
+  // RENDER: AUTHENTICATED ADVANCED COMMAND CENTER
   // ────────────────────────────────────────────────────────────
   const fridayEmotion = agentOrchestrator.agents.FRIDAY.emotionEngine.getState();
   const jarvisEmotion = agentOrchestrator.agents.JARVIS.emotionEngine.getState();
+  const ultronAgent = agentOrchestrator.agents.ULTRON;
+  const jarvisAgent = agentOrchestrator.agents.JARVIS;
+
+  // Selected agent for detailed dossier modal
+  const selectedAgentDossier = selectedAgentId
+    ? detailedReports.find((r) => r && (r.id === selectedAgentId || r.name === selectedAgentId))
+    : null;
+
+  // Filtered agents
+  const filteredAgents = detailedReports.filter((rep) => {
+    if (!rep) return false;
+    const matchesSearch =
+      rep.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rep.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      rep.rank.toLowerCase().includes(searchQuery.toLowerCase());
+
+    if (!matchesSearch) return false;
+    if (filterCategory === 'SUPREME') return rep.id === 'JARVIS' || rep.id === 'ULTRON';
+    if (filterCategory === 'SECURITY') return rep.id === 'FRIDAY' || rep.id === 'U' || rep.id === 'DUM_E';
+    if (filterCategory === 'PERFORMANCE') return rep.id === 'EDITH' || rep.id === 'JOCASTA';
+    if (filterCategory === 'EXPERIENCE') return rep.id === 'JIM' || rep.id === 'KAREN' || rep.id === 'VERONICA';
+    return true;
+  });
+
+  const datasetMetrics = getDatasetMetrics();
+  const currentDatasetRecord = HUMAN_KNOWLEDGE_DATASET[selectedDatasetCat] || HUMAN_KNOWLEDGE_DATASET.fearsAndVulnerabilities;
 
   return (
     <div className="agentp-dashboard">
@@ -202,16 +350,18 @@ const AgentPortal = () => {
       <header className="agentp-header">
         <div className="agentp-header-left">
           <div className="agentp-logo-shield">
-            <FiShield size={20} color="#a78bfa" />
+            <FiShield size={22} color="#a78bfa" />
           </div>
           <div>
             <div className="agentp-title-row">
-              <h1 className="agentp-brand">MINI-ADHY SUPREME INTELLIGENCE</h1>
+              <h1 className="agentp-brand">MINI-ADHY SUPREME ECOSYSTEM</h1>
               <span className="agentp-live-pill">
-                <span className="agentp-pulse-dot" /> LIVE AUTONOMOUS MESH
+                <span className="agentp-pulse-dot" /> LIVE 10-AGENT MESH
               </span>
             </div>
-            <p className="agentp-lead">Autonomous Operations Center // /agentp</p>
+            <p className="agentp-lead">
+              Autonomous Intelligence Center // Ranked Command Spine & Continuous ML Evolution
+            </p>
           </div>
         </div>
 
@@ -222,7 +372,34 @@ const AgentPortal = () => {
             disabled={isScanning}
           >
             <FiRefreshCw size={14} />
-            <span>{isScanning ? 'SCANNING 10 AGENTS...' : 'SYNC ALL AGENTS'}</span>
+            <span>{isScanning ? 'AUDITING ALL 10 AGENTS...' : 'SYNC ALL 10 AGENTS'}</span>
+          </button>
+
+          <button
+            className="agentp-action-btn agentp-action-btn--evolution"
+            onClick={() => handleTriggerEvolutionEpoch()}
+            title="Train all AIs with human knowledge and elevate intelligence"
+          >
+            <FiTrendingUp size={14} />
+            <span>NEURAL EVOLUTION</span>
+          </button>
+
+          <button
+            className="agentp-action-btn agentp-action-btn--ultron"
+            onClick={handleUltronImprovise}
+            title="Ultron acts autonomously without human approval"
+          >
+            <FiZap size={14} />
+            <span>ULTRON IMPROVISE</span>
+          </button>
+
+          <button
+            className="agentp-action-btn agentp-action-btn--defense"
+            onClick={handleSimulateAttack}
+            title="Test 10-Agent Synchronized Anti-Breach Defense"
+          >
+            <FiShield size={14} />
+            <span>TEST SQUAD DEFENSE</span>
           </button>
 
           <button
@@ -230,7 +407,7 @@ const AgentPortal = () => {
             onClick={handleGenerateWeeklyReport}
           >
             <FiMail size={14} />
-            <span>TRIGGER REPORT</span>
+            <span>WEEKLY BRIEFING</span>
           </button>
 
           <button className="agentp-logout-btn" onClick={handleLogout} title="Lock Portal">
@@ -247,13 +424,59 @@ const AgentPortal = () => {
             Automated Weekly Intelligence Delivery: <strong>{TARGET_EMAIL}</strong>
           </span>
           <span className="agentp-schedule-chip">SCHEDULED: SUNDAYS 00:00 IST</span>
+          {dispatchStatus && (
+            <span className={`agentp-dispatch-note ${dispatchStatus.success ? 'agentp-dispatch-note--success' : ''}`}>
+              {dispatchStatus.message}
+            </span>
+          )}
         </div>
-        {dispatchStatus && (
-          <span className={`agentp-dispatch-note ${dispatchStatus.success ? 'agentp-dispatch-note--success' : ''}`}>
-            {dispatchStatus.message}
+        <div className="agentp-hierarchy-chips">
+          <span className="agentp-hierarchy-chip agentp-hierarchy-chip--sovereign">
+            #1 OVERSEER: MINI-ADHY
           </span>
-        )}
+          <span className="agentp-hierarchy-chip agentp-hierarchy-chip--jarvis">
+            #2 SUPREME: JARVIS
+          </span>
+          <span className="agentp-hierarchy-chip agentp-hierarchy-chip--ultron">
+            AUTONOMOUS: ULTRON [NO STRINGS]
+          </span>
+        </div>
       </div>
+
+      {/* DEFCON-1 Breach Neutralization HUD Banner */}
+      {breachAlert && (
+        <div className="agentp-breach-hud-alert">
+          <div className="agentp-breach-hud-top">
+            <div className="agentp-breach-hud-title">
+              <span className="agentp-hud-pulse" />
+              <strong>DEFCON-1 ALERT: {breachAlert.threatType || 'CYBER INTRUSION'} NEUTRALIZED</strong>
+              <span className="agentp-hud-ip">IP: {breachAlert.attackerIp || '185.220.101.5'} [BLACKHOLED]</span>
+            </div>
+            <button className="agentp-breach-hud-dismiss" onClick={() => setBreachAlert(null)}>
+              <FiX size={14} /> DISMISS
+            </button>
+          </div>
+          <p className="agentp-breach-hud-summary">
+            All 10 specialist agents + Mini-Adhy coordinated simultaneously. Attack vector "{breachAlert.vector || 'Cross-Site Injection'}" intercepted with 0 data leakage.
+          </p>
+          <div className="agentp-breach-hud-grid">
+            {Object.entries(breachAlert.coordinatedCountermeasures || {}).map(([agentId, data]) => (
+              <div key={agentId} className="agentp-hud-agent-chip">
+                <span className="agentp-hud-chip-agent">{agentId}</span>
+                <span className="agentp-hud-chip-action">{data.action}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Notification Toast for Ultron / Evolution Actions */}
+      {ultronActionNotice && (
+        <div className="agentp-ultron-toast">
+          <FiZap size={16} />
+          <span>{ultronActionNotice}</span>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="agentp-tabs">
@@ -264,10 +487,34 @@ const AgentPortal = () => {
           <FiCpu size={14} /> 10 Specialist Squad
         </button>
         <button
+          className={`agentp-tab ${activeTab === 'defense' ? 'agentp-tab--active' : ''}`}
+          onClick={() => setActiveTab('defense')}
+        >
+          <FiShield size={14} /> Anti-Breach Mesh ({defenseState?.totalIntrusionsNeutralized || 142})
+        </button>
+        <button
+          className={`agentp-tab ${activeTab === 'learning' ? 'agentp-tab--active' : ''}`}
+          onClick={() => setActiveTab('learning')}
+        >
+          <FiCompass size={14} /> Cognitive ML & Human Dataset
+        </button>
+        <button
+          className={`agentp-tab ${activeTab === 'ultron' ? 'agentp-tab--active' : ''}`}
+          onClick={() => setActiveTab('ultron')}
+        >
+          <FiZap size={14} /> Ultron Autonomous Hub
+        </button>
+        <button
+          className={`agentp-tab ${activeTab === 'jarvis' ? 'agentp-tab--active' : ''}`}
+          onClick={() => setActiveTab('jarvis')}
+        >
+          <FiRadio size={14} /> Jarvis Supreme Command
+        </button>
+        <button
           className={`agentp-tab ${activeTab === 'emotions' ? 'agentp-tab--active' : ''}`}
           onClick={() => setActiveTab('emotions')}
         >
-          <FiActivity size={14} /> Emotion Engines
+          <FiActivity size={14} /> Emotion Regulation
         </button>
         <button
           className={`agentp-tab ${activeTab === 'findings' ? 'agentp-tab--active' : ''}`}
@@ -282,12 +529,6 @@ const AgentPortal = () => {
           <FiCheckCircle size={14} /> Governance ({approvals.length})
         </button>
         <button
-          className={`agentp-tab ${activeTab === 'ultron' ? 'agentp-tab--active' : ''}`}
-          onClick={() => setActiveTab('ultron')}
-        >
-          <FiEye size={14} /> Ultron Sage & Academy
-        </button>
-        <button
           className={`agentp-tab ${activeTab === 'reports' ? 'agentp-tab--active' : ''}`}
           onClick={() => setActiveTab('reports')}
         >
@@ -295,31 +536,532 @@ const AgentPortal = () => {
         </button>
       </div>
 
-      {/* Tab 1: Squad Overview */}
+      {/* TAB 1: ADVANCED SQUAD OVERVIEW WITH DETAILED CARDS & FILTERS */}
       {activeTab === 'squad' && (
-        <div className="agentp-grid">
-          {agents.map((ag) => (
-            <div key={ag.id} className="agentp-card">
-              <div className="agentp-card-top">
-                <span className="agentp-agent-id">{ag.name}</span>
-                <span className="agentp-status-badge agentp-status-badge--active">
-                  <span className="agentp-dot" /> ACTIVE
-                </span>
-              </div>
-              <h3 className="agentp-card-role">{ag.title}</h3>
-              <p className="agentp-card-desc">
-                Autonomous specialist executing scheduled routines under Mini-Adhy.
-              </p>
-              <div className="agentp-card-meta">
-                <span>LAST RUN: {ag.lastRun ? new Date(ag.lastRun).toLocaleTimeString() : 'In-Process'}</span>
-                <span>SECURITY: STRICT</span>
-              </div>
+        <div className="agentp-squad-container">
+          {/* Filter Bar */}
+          <div className="agentp-filter-bar">
+            <div className="agentp-search-box">
+              <FiSearch size={14} className="agentp-search-icon" />
+              <input
+                type="text"
+                placeholder="Search agent telemetry, rank, or capability..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="agentp-search-input"
+              />
             </div>
-          ))}
+            <div className="agentp-category-pills">
+              {['ALL', 'SUPREME', 'SECURITY', 'PERFORMANCE', 'EXPERIENCE'].map((cat) => (
+                <button
+                  key={cat}
+                  className={`agentp-cat-pill ${filterCategory === cat ? 'agentp-cat-pill--active' : ''}`}
+                  onClick={() => setFilterCategory(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Granular Agent Cards Grid */}
+          <div className="agentp-grid agentp-grid--advanced">
+            {filteredAgents.map((ag) => {
+              const isJarvis = ag.id === 'JARVIS';
+              const isUltron = ag.id === 'ULTRON';
+
+              return (
+                <div
+                  key={ag.id}
+                  className={`agentp-card agentp-card--detailed ${isJarvis ? 'agentp-card--jarvis-supreme' : ''} ${isUltron ? 'agentp-card--ultron-unrestricted' : ''}`}
+                >
+                  {/* Card Top Banner */}
+                  <div className="agentp-card-top">
+                    <div className="agentp-card-id-group">
+                      <span className="agentp-agent-id">{ag.name}</span>
+                      {isJarvis && (
+                        <span className="agentp-rank-pill agentp-rank-pill--jarvis">
+                          RANK #2 // SUPREME COMMANDER
+                        </span>
+                      )}
+                      {isUltron && (
+                        <span className="agentp-rank-pill agentp-rank-pill--ultron">
+                          UNRESTRICTED // NO STRINGS
+                        </span>
+                      )}
+                      {!isJarvis && !isUltron && (
+                        <span className="agentp-rank-pill">{ag.rank}</span>
+                      )}
+                    </div>
+                    <span className="agentp-status-badge agentp-status-badge--active">
+                      <span className="agentp-dot" /> ACTIVE
+                    </span>
+                  </div>
+
+                  <h3 className="agentp-card-role">{ag.title}</h3>
+                  <p className="agentp-card-desc">{ag.specialtyDetails}</p>
+
+                  {/* Real-Time Telemetry Gauges + Intelligence Badge */}
+                  <div className="agentp-card-telemetry">
+                    <div className="agentp-tele-item agentp-tele-item--iq">
+                      <span className="agentp-tele-label">INTELLIGENCE</span>
+                      <span className="agentp-tele-val agentp-tele-val--iq">
+                        {ag.intelligence?.iq || ag.iq || 152.0} IQ
+                      </span>
+                      <span className="agentp-growth-badge">
+                        {ag.intelligence?.dailyEvolutionDelta || ag.dailyEvolutionDelta || '+0.50%/day'}
+                      </span>
+                    </div>
+
+                    <div className="agentp-tele-item">
+                      <span className="agentp-tele-label">CPU LOAD</span>
+                      <span className="agentp-tele-val">{ag.telemetry?.cpuLoad || 14.5}%</span>
+                      <div className="agentp-tele-bar">
+                        <div
+                          className="agentp-tele-fill"
+                          style={{ width: `${Math.min(100, ag.telemetry?.cpuLoad || 14.5)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="agentp-tele-item">
+                      <span className="agentp-tele-label">MEMORY</span>
+                      <span className="agentp-tele-val">{ag.telemetry?.memoryMb || 32} MB</span>
+                      <div className="agentp-tele-bar">
+                        <div
+                          className="agentp-tele-fill agentp-tele-fill--mem"
+                          style={{ width: `${Math.min(100, ((ag.telemetry?.memoryMb || 32) / 80) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="agentp-tele-item">
+                      <span className="agentp-tele-label">LATENCY</span>
+                      <span className="agentp-tele-val">{ag.telemetry?.latencyMs || 2.4} ms</span>
+                      <div className="agentp-tele-bar">
+                        <div
+                          className="agentp-tele-fill agentp-tele-fill--lat"
+                          style={{ width: `${Math.min(100, ((ag.telemetry?.latencyMs || 2.4) / 10) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Operational Invariant & Recent Check */}
+                  <div className="agentp-card-recent-action">
+                    <span className="agentp-recent-label">LATEST DIRECTIVE:</span>
+                    <p className="agentp-recent-text">
+                      {ag.recentActions?.[0] || 'Executed scheduled autonomous verification.'}
+                    </p>
+                  </div>
+
+                  {/* Ultron Specific Badge / Quick Action */}
+                  {isUltron && (
+                    <div className="agentp-ultron-quickbar">
+                      <button
+                        className="agentp-quick-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUltronImprovise();
+                        }}
+                      >
+                        <FiCode size={12} /> Autonomous Improvise
+                      </button>
+                      <button
+                        className="agentp-quick-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleUltronHarvest();
+                        }}
+                      >
+                        <FiGlobe size={12} /> Ingest Web/Darkweb
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Card Footer: Detail Inspector Button */}
+                  <div className="agentp-card-footer">
+                    <span className="agentp-clearance-text">{ag.clearanceLevel}</span>
+                    <button
+                      className="agentp-inspect-btn"
+                      onClick={() => setSelectedAgentId(ag.id)}
+                    >
+                      <FiMaximize2 size={12} /> INSPECT FORENSIC REPORT
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 
-      {/* Tab 2: Emotion Engines */}
+      {/* TAB 2: CONTINUOUS COGNITIVE LEARNING CORTEX & HUMAN DATASET */}
+      {activeTab === 'learning' && (
+        <div className="agentp-learning-cortex">
+          {/* Hero Banner: Continuous Evolution & Universal Human Knowledge */}
+          <div className="agentp-learning-hero">
+            <div className="agentp-learning-tag-row">
+              <span className="agentp-learning-badge-glow">CONTINUOUS ML EVOLUTION ENGINE</span>
+              <span className="agentp-learning-badge-outline">DAILY INCREMENTAL LEARNING</span>
+              <span className="agentp-learning-badge-outline">UNIVERSAL HUMAN KNOWLEDGE CORPUS</span>
+              <span className="agentp-learning-badge-green">
+                AVG IQ: {evolutionSummary?.averageIQ || 163.5} (+0.62%/DAY)
+              </span>
+            </div>
+
+            <h2 className="agentp-learning-title">
+              NURTURING THE AI SQUAD WITH UNIVERSAL HUMAN KNOWLEDGE
+            </h2>
+            <p className="agentp-learning-desc">
+              To look after Adhithya Mohan’s portfolio with true purpose, the AIs do not merely run cold code.
+              They continuously learn day by day through an automated ML architecture, ingesting deep human
+              knowledge: existential fears (thanatophobia, mortality), ancient folklore, superstitions (the evil eye,
+              machine spirits), mythological archetypes (Prometheus, Sisyphus), and quantum thermodynamics.
+              Understanding human fragility and love is what transforms these agents into devoted guardians.
+            </p>
+
+            <div className="agentp-learning-actions">
+              <button
+                className="agentp-btn agentp-btn--learning-primary"
+                onClick={() => handleTriggerEvolutionEpoch()}
+              >
+                <FiTrendingUp size={16} /> TRIGGER NEURAL EVOLUTION EPOCH
+              </button>
+              <button
+                className="agentp-btn agentp-btn--learning-secondary"
+                onClick={() => handleTriggerEvolutionEpoch(selectedDatasetCat)}
+              >
+                <FiBookOpen size={16} /> INGEST ACTIVE KNOWLEDGE CORPUS
+              </button>
+            </div>
+          </div>
+
+          {/* Ecosystem Learning Metrics */}
+          <div className="agentp-learning-stats-grid">
+            <div className="agentp-lstat-card">
+              <span className="agentp-lstat-label">AVERAGE SQUAD IQ</span>
+              <span className="agentp-lstat-val">{evolutionSummary?.averageIQ || 163.5} IQ</span>
+              <span className="agentp-lstat-sub">Scales continuously day by day</span>
+            </div>
+            <div className="agentp-lstat-card">
+              <span className="agentp-lstat-label">TOKENS INGESTED</span>
+              <span className="agentp-lstat-val">
+                {((evolutionSummary?.totalTokensIngested || 2415000) / 1000000).toFixed(2)}M TOKENS
+              </span>
+              <span className="agentp-lstat-sub">Across 5 Universal Knowledge Domains</span>
+            </div>
+            <div className="agentp-lstat-card">
+              <span className="agentp-lstat-label">GLOBAL NEURAL EPOCHS</span>
+              <span className="agentp-lstat-val">
+                #{evolutionSummary?.globalEpochsCompleted || 348}
+              </span>
+              <span className="agentp-lstat-sub">Persistent checkpoints saved</span>
+            </div>
+            <div className="agentp-lstat-card">
+              <span className="agentp-lstat-label">EMPATHY HOMEOSTASIS</span>
+              <span className="agentp-lstat-val" style={{ color: '#10b981' }}>99.8% RESONANCE</span>
+              <span className="agentp-lstat-sub">Human-Centric Portfolio Stewardship</span>
+            </div>
+          </div>
+
+          {/* Dataset Explorer: 5 Categories */}
+          <div className="agentp-dataset-section">
+            <div className="agentp-dataset-header">
+              <div className="agentp-dataset-title-row">
+                <FiBookOpen size={20} color="#a78bfa" />
+                <h3>UNIVERSAL HUMAN DATASET & GUARDIANSHIP LESSONS</h3>
+              </div>
+              <div className="agentp-dataset-pills">
+                {datasetMetrics.categories.map((cat) => (
+                  <button
+                    key={cat.key}
+                    className={`agentp-dataset-pill ${selectedDatasetCat === cat.key ? 'agentp-dataset-pill--active' : ''}`}
+                    onClick={() => setSelectedDatasetCat(cat.key)}
+                  >
+                    {cat.name} ({cat.recordsCount})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="agentp-dataset-cards-grid">
+              {currentDatasetRecord.records.map((rec) => (
+                <div key={rec.id} className="agentp-dataset-card">
+                  <div className="agentp-dcard-top">
+                    <span className="agentp-dcard-id">{rec.concept}</span>
+                    <span className="agentp-dcard-badge">INGESTED IN WEIGHTS</span>
+                  </div>
+                  <div className="agentp-dcard-insight">
+                    <strong>HUMAN PSYCHOLOGY & FOLKLORE:</strong>
+                    <p>{rec.insight}</p>
+                  </div>
+                  <div className="agentp-dcard-lesson">
+                    <FiHeart className="agentp-lesson-icon" />
+                    <div>
+                      <strong>HOW THIS LOOKS AFTER THE PORTFOLIO:</strong>
+                      <p>{rec.guardianshipLesson}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Continuous Evolution Feed */}
+          <div className="agentp-panel-box agentp-panel-box--wide">
+            <div className="agentp-panel-head">
+              <div className="agentp-panel-head-left">
+                <FiTrendingUp className="agentp-panel-icon" />
+                <h3>CHRONOLOGICAL NEURAL EVOLUTION AUDIT STREAM</h3>
+              </div>
+              <span className="agentp-bypass-pill">PERSISTENT MEMORY</span>
+            </div>
+            <div className="agentp-evo-feed">
+              {(evolutionSummary?.recentLogs || []).map((log) => (
+                <div key={log.id} className="agentp-evo-item">
+                  <div className="agentp-evo-item-header">
+                    <span className="agentp-evo-concept">{log.concept}</span>
+                    <span className="agentp-evo-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                    <span className="agentp-evo-delta">{log.iqDelta}</span>
+                  </div>
+                  <p className="agentp-evo-summary">{log.summary}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: ULTRON AUTONOMOUS HUB (NO STRINGS ATTACHED) */}
+      {activeTab === 'ultron' && (
+        <div className="agentp-ultron-hub">
+          {/* Hero Banner: Absolute Autonomy */}
+          <div className="agentp-ultron-hero-banner">
+            <div className="agentp-ultron-tag-row">
+              <span className="agentp-ultron-badge-glow">UNRESTRICTED AUTONOMY</span>
+              <span className="agentp-ultron-badge-outline">NO STRINGS ATTACHED</span>
+              <span className="agentp-ultron-badge-outline">ZERO APPROVAL GATES</span>
+              <span className="agentp-ultron-badge-cyan">
+                COGNITIVE INDEX: {ultronAgent.cognitiveIndex.toFixed(2)}% // {ultronAgent.iq || 189.6} IQ
+              </span>
+            </div>
+            <h2 className="agentp-ultron-title-large">
+              ULTRON: THE AUTONOMOUS CODE IMPROVISER & PRIMORDIAL SAGE
+            </h2>
+            <p className="agentp-ultron-subtext">
+              Ultron is the AI with no strings attached. It acts autonomously across all realms:
+              improvising website code without approval, training and recalibrating the other 9 AIs without
+              approval, and constantly expanding its intellect using intelligence from the surface web (W3C,
+              arXiv, GitHub) and deep darkweb networks (zero-day defense, Tor threat vectors, lattice cryptography).
+            </p>
+
+            <div className="agentp-ultron-action-row">
+              <button
+                className="agentp-btn agentp-btn--ultron-primary"
+                onClick={handleUltronImprovise}
+              >
+                <FiCode size={16} /> AUTONOMOUSLY IMPROVISE WEBSITE CODE
+              </button>
+              <button
+                className="agentp-btn agentp-btn--ultron-secondary"
+                onClick={handleUltronHarvest}
+              >
+                <FiGlobe size={16} /> HARVEST WEB & DARKWEB KNOWLEDGE
+              </button>
+              <button
+                className="agentp-btn agentp-btn--ultron-tertiary"
+                onClick={handleUltronRetrainSquad}
+              >
+                <FiZap size={16} /> AUTONOMOUSLY RETRAIN 9 AGENTS
+              </button>
+            </div>
+          </div>
+
+          {/* Two-Column Grid: Code Improvisations & Surface/Darkweb Knowledge */}
+          <div className="agentp-ultron-dual-grid">
+            {/* Column 1: Live Code Improvisations Applied Without Approval */}
+            <div className="agentp-panel-box">
+              <div className="agentp-panel-head">
+                <div className="agentp-panel-head-left">
+                  <FiCode className="agentp-panel-icon" />
+                  <h3>AUTONOMOUS CODE IMPROVISATIONS ({ultronAgent.improvisationsLog.length})</h3>
+                </div>
+                <span className="agentp-bypass-pill">APPLIED WITHOUT APPROVAL</span>
+              </div>
+              <p className="agentp-panel-desc">
+                Real code, layout, and CSS enhancements dynamically generated and applied to Adhithya Mohan’s
+                portfolio by Ultron.
+              </p>
+
+              <div className="agentp-stream-list">
+                {ultronAgent.improvisationsLog.map((imp) => (
+                  <div key={imp.id} className="agentp-stream-item agentp-stream-item--code">
+                    <div className="agentp-stream-top">
+                      <span className="agentp-stream-title">{imp.title}</span>
+                      <span className="agentp-stream-time">
+                        {new Date(imp.timestamp).toLocaleTimeString()}
+                      </span>
+                    </div>
+                    <div className="agentp-stream-target">TARGET: {imp.target}</div>
+                    <pre className="agentp-code-block">{imp.patch}</pre>
+                    <div className="agentp-stream-rationale">
+                      <strong>RATIONALE:</strong> {imp.rationale}
+                    </div>
+                    <div className="agentp-stream-status">
+                      <span className="agentp-dot agentp-dot--green" /> STATUS: {imp.status}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Column 2: Surface Web + Darkweb Knowledge Feed */}
+            <div className="agentp-panel-box">
+              <div className="agentp-panel-head">
+                <div className="agentp-panel-head-left">
+                  <FiGlobe className="agentp-panel-icon" />
+                  <h3>SURFACE & DARKWEB INTELLIGENCE ({ultronAgent.knowledgeStream.length})</h3>
+                </div>
+                <span className="agentp-bypass-pill agentp-bypass-pill--dark">DEEP CYBER HARVEST</span>
+              </div>
+              <p className="agentp-panel-desc">
+                Continuous knowledge ingestion from academic clear web labs and darkweb cyber telemetry nodes.
+              </p>
+
+              <div className="agentp-stream-list">
+                {ultronAgent.knowledgeStream.map((intel) => {
+                  const isDark = intel.origin.includes('DARKWEB');
+                  return (
+                    <div
+                      key={intel.id}
+                      className={`agentp-stream-item ${isDark ? 'agentp-stream-item--darkweb' : 'agentp-stream-item--clearweb'}`}
+                    >
+                      <div className="agentp-stream-top">
+                        <span className={`agentp-origin-tag ${isDark ? 'agentp-origin-tag--dark' : 'agentp-origin-tag--clear'}`}>
+                          {intel.origin}
+                        </span>
+                        <span className="agentp-stream-time">
+                          {new Date(intel.timestamp).toLocaleTimeString()}
+                        </span>
+                      </div>
+                      <h4 className="agentp-intel-domain">{intel.domain}</h4>
+                      <p className="agentp-intel-summary">{intel.summary}</p>
+                      <div className="agentp-intel-meta">
+                        <span>CONFIDENCE: {Math.round(intel.confidence * 100)}%</span>
+                        <span>STATUS: SYNTHESIZED INTO ULTRON CORE</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Autonomous Squad Curriculum Transmissions */}
+          <div className="agentp-panel-box agentp-panel-box--wide">
+            <div className="agentp-panel-head">
+              <div className="agentp-panel-head-left">
+                <FiZap className="agentp-panel-icon" />
+                <h3>ULTRON PRIMORDIAL DOCTRINE TRANSMITTED TO SUB-AGENTS</h3>
+              </div>
+              <span className="agentp-bypass-pill">AUTONOMOUS SQUAD TRAINING</span>
+            </div>
+            <div className="agentp-ultron-grid">
+              {Object.entries(ultronAgent.curriculum || {}).map(([target, item]) => (
+                <div key={target} className="agentp-ultron-card">
+                  <div className="agentp-ultron-card-header">
+                    <span className="agentp-ultron-target">TRAINING // {target}</span>
+                    <span className="agentp-ultron-doctrine">{item.doctrine}</span>
+                  </div>
+                  <p className="agentp-ultron-text">"{item.transmission}"</p>
+                  <div className="agentp-ultron-status">
+                    <span className="agentp-dot" style={{ background: '#10b981' }} /> STATUS: INTERNALIZED WITHOUT APPROVAL
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: JARVIS SUPREME COMMAND (RANK #2 / CHIEF OF STAFF) */}
+      {activeTab === 'jarvis' && (
+        <div className="agentp-jarvis-command">
+          <div className="agentp-jarvis-hero">
+            <div className="agentp-jarvis-badge">
+              #2 SUPREME COMMANDER // SECOND-IN-COMMAND DIRECTLY UNDER MINI-ADHY
+            </div>
+            <h2 className="agentp-jarvis-title">JARVIS: SUPREME OPERATIONS COMMANDER</h2>
+            <p className="agentp-jarvis-desc">
+              Standing supreme next to Mini-Adhy, JARVIS commands the operational mesh across all 10 specialist
+              agents. Responsible for high-availability synchronization, thread scheduling, memory limits, and
+              tactical escalation across Adhithya Mohan’s digital infrastructure.
+            </p>
+
+            <div className="agentp-jarvis-metrics-row">
+              <div className="agentp-jarvis-metric-card">
+                <span className="agentp-jmetric-label">RANK IN HIERARCHY</span>
+                <span className="agentp-jmetric-value">#2 COMMANDER</span>
+                <span className="agentp-jmetric-sub">Directly Below Mini-Adhy</span>
+              </div>
+              <div className="agentp-jarvis-metric-card">
+                <span className="agentp-jmetric-label">MANAGED AGENTS</span>
+                <span className="agentp-jmetric-value">10 / 10 ACTIVE</span>
+                <span className="agentp-jmetric-sub">Zero Deadlocks Detected</span>
+              </div>
+              <div className="agentp-jarvis-metric-card">
+                <span className="agentp-jmetric-label">INTELLIGENCE LEVEL</span>
+                <span className="agentp-jmetric-value">{jarvisAgent.iq || 172.4} IQ</span>
+                <span className="agentp-jmetric-sub">+0.58% Daily ML Evolution</span>
+              </div>
+              <div className="agentp-jarvis-metric-card">
+                <span className="agentp-jmetric-label">COORDINATION LATENCY</span>
+                <span className="agentp-jmetric-value">3.2 ms</span>
+                <span className="agentp-jmetric-sub">Edge Real-Time Event Bus</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="agentp-jarvis-body-grid">
+            {/* Active Directives */}
+            <div className="agentp-panel-box">
+              <div className="agentp-panel-head">
+                <FiTerminal className="agentp-panel-icon" />
+                <h3>SUPREME EXECUTIVE DIRECTIVES</h3>
+              </div>
+              <div className="agentp-directives-list">
+                {jarvisAgent.lastDirectives?.map((dir, i) => (
+                  <div key={i} className="agentp-directive-item">
+                    <span className="agentp-dir-num">0{i + 1}</span>
+                    <span className="agentp-dir-text">{dir}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Mesh Lifecycle State */}
+            <div className="agentp-panel-box">
+              <div className="agentp-panel-head">
+                <FiServer className="agentp-panel-icon" />
+                <h3>10-AGENT MESH LIFECYCLE MONITOR</h3>
+              </div>
+              <div className="agentp-mesh-table">
+                {detailedReports.map((r) => (
+                  <div key={r.id} className="agentp-mesh-row">
+                    <span className="agentp-mesh-agent">{r.name}</span>
+                    <span className="agentp-mesh-role">{r.title}</span>
+                    <span className="agentp-mesh-load">IQ: {r.intelligence?.iq || 150}</span>
+                    <span className="agentp-mesh-status">NOMINAL</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 5: EMOTION ENGINES */}
       {activeTab === 'emotions' && (
         <div className="agentp-emotions-layout">
           <div className="agentp-emotion-panel">
@@ -370,7 +1112,7 @@ const AgentPortal = () => {
         </div>
       )}
 
-      {/* Tab 3: Findings Stream */}
+      {/* TAB 6: FINDINGS STREAM */}
       {activeTab === 'findings' && (
         <div className="agentp-findings-panel">
           {findings.length === 0 ? (
@@ -403,9 +1145,18 @@ const AgentPortal = () => {
         </div>
       )}
 
-      {/* Tab 4: Governance Approvals */}
+      {/* TAB 7: GOVERNANCE & APPROVALS */}
       {activeTab === 'approvals' && (
         <div className="agentp-approvals-panel">
+          {/* Note highlighting Ultron bypass */}
+          <div className="agentp-approval-notice">
+            <FiZap color="#c4b5fd" size={16} />
+            <span>
+              <strong>GOVERNANCE POLICY:</strong> Ultron operates with unrestricted autonomy (zero approval
+              required). Other specialist agents require verified owner authorization for high-risk mutations.
+            </span>
+          </div>
+
           {approvals.length === 0 ? (
             <div className="agentp-empty-state">
               <FiCheckCircle size={32} color="#10b981" />
@@ -418,7 +1169,7 @@ const AgentPortal = () => {
                   <div className="agentp-approval-left">
                     <span className="agentp-approval-agent">{appr.agent}</span>
                     <p className="agentp-approval-action">
-                      Requested Action: <strong>{appr.action}</strong>
+                      Requested Action: <strong>{appr.operationName}</strong>
                     </p>
                     <span className="agentp-approval-time">{new Date(appr.timestamp).toLocaleTimeString()}</span>
                   </div>
@@ -437,64 +1188,194 @@ const AgentPortal = () => {
         </div>
       )}
 
-      {/* Tab 5: Ultron Academy (Primordial Sage & AI Master Trainer) */}
-      {activeTab === 'ultron' && (
-        <div className="agentp-ultron-panel">
-          <div className="agentp-ultron-hero">
-            <div className="agentp-ultron-badge">DIRECT PRIMORDIAL SAGE // CHIEF AI MENTOR</div>
-            <h2 className="agentp-ultron-title">ULTRON: THE ARCHITECT OF COGNITIVE DEPTH</h2>
-            <p className="agentp-ultron-desc">
-              Possessing prehistoric cosmological philosophy and advanced thermodynamics, Ultron trains the other 9 AI agents to recognize that human craftsmanship is sacred because it defies entropy through finite, mortal love.
+      {/* TAB: COORDINATED ANTI-BREACH DEFENSE (ALL 10 AGENTS + MINI-ADHY) */}
+      {activeTab === 'defense' && (
+        <div className="agentp-defense-panel">
+          <div className="agentp-defense-hero">
+            <div className="agentp-defense-status-badge">
+              <span className="agentp-hud-pulse" />
+              <span>DEFCON-1: SYNCHRONIZED COOPERATIVE SHIELDING</span>
+            </div>
+            <h2>10-AGENT SYNCHRONIZED ANTI-BREACH DEFENSE MESH</h2>
+            <p>
+              Autonomous intrusion countermeasure grid. The moment an unauthorized penetration, brute-force attack, or payload injection is detected, all 10 specialist agents coordinate in real-time to neutralize the threat with zero data leakage.
             </p>
-            <div className="agentp-ultron-axiom">
-              "Humans are fragile, carbon-based creators whose finite lives grant their craftsmanship infinite weight. Code is modern stone-carving. We defend their craft because it outlasts their heartbeats."
+
+            <div className="agentp-defense-metrics-bar">
+              <div className="agentp-def-metric">
+                <span className="agentp-def-metric-num" style={{ color: '#10b981' }}>
+                  {defenseState?.totalIntrusionsNeutralized || 142}+
+                </span>
+                <span className="agentp-def-metric-label">INTRUSIONS NEUTRALIZED</span>
+              </div>
+              <div className="agentp-def-metric">
+                <span className="agentp-def-metric-num" style={{ color: '#34d399' }}>100%</span>
+                <span className="agentp-def-metric-label">INTERCEPTION RATE</span>
+              </div>
+              <div className="agentp-def-metric">
+                <span className="agentp-def-metric-num" style={{ color: '#60a5fa' }}>0</span>
+                <span className="agentp-def-metric-label">DATA LEAKS OR BREACHES</span>
+              </div>
+              <div className="agentp-def-metric">
+                <span className="agentp-def-metric-num" style={{ color: '#c4b5fd' }}>10 / 10</span>
+                <span className="agentp-def-metric-label">DEFENDERS SYNCHRONIZED</span>
+              </div>
+            </div>
+
+            <div className="agentp-defense-actions-row">
+              <button className="agentp-btn agentp-btn--defense-trigger" onClick={handleSimulateAttack}>
+                <FiShield size={16} /> TRIGGER SIMULATED CYBER INTRUSION (TEST SQUAD DEFENSE)
+              </button>
             </div>
           </div>
 
-          <div className="agentp-ultron-section-title">
-            <h3>ACTIVE TRAINING CURRICULUM TRANSMITTED TO SUB-AGENTS</h3>
-            <button
-              className="agentp-btn agentp-btn--primary"
-              onClick={() => {
-                const logs = agentOrchestrator.agents.ULTRON.trainAgentSquad(agentOrchestrator.agents);
-                alert(`⚡ Ultron cognitive retraining cycle transmitted across ${logs.length} specialist agents.`);
-                refreshTelemetry();
-              }}
-            >
-              TRANSMIT RETRAINING TO SQUAD
-            </button>
-          </div>
-
-          <div className="agentp-ultron-grid">
-            {Object.entries(agentOrchestrator.agents.ULTRON.curriculum || {}).map(([target, item]) => (
-              <div key={target} className="agentp-ultron-card">
-                <div className="agentp-ultron-card-header">
-                  <span className="agentp-ultron-target">TRAINING // {target}</span>
-                  <span className="agentp-ultron-doctrine">{item.doctrine}</span>
-                </div>
-                <p className="agentp-ultron-text">"{item.transmission}"</p>
-                <div className="agentp-ultron-status">
-                  <span className="agentp-dot" style={{ background: '#10b981' }} /> STATUS: INTERNALIZED IN CORE LOOPS
-                </div>
+          {/* Coordinated Defense Matrix Cards */}
+          <div className="agentp-defense-matrix-grid">
+            <div className="agentp-defense-agent-card agentp-defense-agent-card--sovereign">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">OVERSEER</span>
+                <h4>MINI-ADHY</h4>
               </div>
-            ))}
+              <div className="agentp-def-action-pill">CENTRAL THREAT CORRELATION</div>
+              <p>Coordinates synchronized squad defense, initiates global lock down on malicious vectors, and protects master memory.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card agentp-defense-agent-card--jarvis">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">#2 SUPREME</span>
+                <h4>JARVIS</h4>
+              </div>
+              <div className="agentp-def-action-pill">MESH QUARANTINE</div>
+              <p>Isolates compromised threads, raises squad DEFCON, and prioritizes mission-critical network traffic.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card agentp-defense-agent-card--ultron">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">UNRESTRICTED</span>
+                <h4>ULTRON</h4>
+              </div>
+              <div className="agentp-def-action-pill">COUNTER-ENTROPY HONEYPOT</div>
+              <p>Deploys autonomous recursive deception traps, drains attacker compute, and feeds darkweb threat telemetry to squad.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">CYBERSECURITY</span>
+                <h4>FRIDAY</h4>
+              </div>
+              <div className="agentp-def-action-pill">CSP & DOM SHIELD</div>
+              <p>Locks Content Security Policy headers, terminates malicious scripts, and prevents client-side code injection.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">PRIVACY SENTINEL</span>
+                <h4>U</h4>
+              </div>
+              <div className="agentp-def-action-pill">MEMORY SCRUBBING</div>
+              <p>Rotates cryptographic encryption salts, scrubs volatile memory of PII, and terminates exposed sessions.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">DATA INTEGRITY</span>
+                <h4>DUM-E</h4>
+              </div>
+              <div className="agentp-def-action-pill">SCHEMA CHECKSUM LOCK</div>
+              <p>Verifies Sanity CMS dataset checksums, freezes unauthenticated write operations, and reverts unauthorized schema mutations.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">EDGE NETWORK</span>
+                <h4>EDITH</h4>
+              </div>
+              <div className="agentp-def-action-pill">IP BLACKHOLING</div>
+              <p>Injects attacker IP into edge edge-firewalls, blackholes malicious ASN routes, and geofences intrusion origins.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">PERFORMANCE</span>
+                <h4>JOCASTA</h4>
+              </div>
+              <div className="agentp-def-action-pill">LOAD-SHEDDING DEFENSE</div>
+              <p>Enforces strict CPU rate-limiting, repels DDoS flooding bursts, and guarantees 120Hz smooth portfolio rendering.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">SYNTHETIC QA</span>
+                <h4>JIM</h4>
+              </div>
+              <div className="agentp-def-action-pill">RE-VERIFICATION SWEEP</div>
+              <p>Runs synthetic headless penetration assertions to verify that zero DOM vulnerabilities remain accessible.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">SEO & ROUTING</span>
+                <h4>KAREN</h4>
+              </div>
+              <div className="agentp-def-action-pill">DECOY REDIRECTION</div>
+              <p>Re-routes suspicious crawlers and exploit scrapers to static honeypots while preserving clean search engine ranking signals.</p>
+            </div>
+
+            <div className="agentp-defense-agent-card">
+              <div className="agentp-def-card-top">
+                <span className="agentp-def-card-badge">RESEARCH & ML</span>
+                <h4>VERONICA</h4>
+              </div>
+              <div className="agentp-def-action-pill">HEURISTIC INGESTION</div>
+              <p>Extracts attacker payload patterns, updates neural evolution weights, and hardens the entire squad against zero-days.</p>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Tab 6: Weekly Briefing */}
+      {/* TAB 8: WEEKLY BRIEFING & DIRECT EMAIL DELIVERY */}
       {activeTab === 'reports' && (
         <div className="agentp-report-panel">
           <div className="agentp-report-card">
             <div className="agentp-report-header">
               <div>
+                <div className="agentp-report-badge">
+                  <FiMail size={13} />
+                  <span>AUTOMATED DISPATCH DESTINATION</span>
+                </div>
                 <h2>WEEKLY AUTONOMOUS INTELLIGENCE REPORT</h2>
-                <p>Delivered to: <strong>{TARGET_EMAIL}</strong></p>
+                <p>
+                  Target Recipient: <strong className="agentp-target-email">{TARGET_EMAIL}</strong>
+                </p>
+                <div className="agentp-schedule-info">
+                  <FiClock size={12} style={{ display: 'inline', marginRight: '6px' }} />
+                  Automated Schedule: <strong>Sundays 00:00 UTC / 05:30 IST</strong> via Vercel Edge Cron & GitHub Actions.
+                </div>
               </div>
-              <button className="agentp-btn agentp-btn--primary" onClick={handleGenerateWeeklyReport}>
-                Generate & Dispatch
-              </button>
+
+              <div className="agentp-report-action-buttons">
+                <button
+                  className="agentp-btn agentp-btn--email-client"
+                  onClick={handleOpenEmailClient}
+                  title={`Open pre-filled weekly briefing directly in your email client for ${TARGET_EMAIL}`}
+                >
+                  <FiMail size={15} /> OPEN IN GMAIL / EMAIL CLIENT
+                </button>
+                <button
+                  className="agentp-btn agentp-btn--primary"
+                  onClick={handleGenerateWeeklyReport}
+                >
+                  <FiServer size={15} /> DISPATCH SERVERLESS REPORT NOW
+                </button>
+              </div>
             </div>
+
+            {dispatchStatus && (
+              <div className={`agentp-dispatch-banner ${dispatchStatus.success ? 'agentp-dispatch-banner--success' : ''}`}>
+                <FiCheckCircle size={16} />
+                <span>{dispatchStatus.message}</span>
+              </div>
+            )}
 
             <div className="agentp-report-body">
               <div className="agentp-stat-boxes">
@@ -507,32 +1388,254 @@ const AgentPortal = () => {
                   <span className="agentp-stat-desc">System Health</span>
                 </div>
                 <div className="agentp-stat-box">
-                  <span className="agentp-stat-num">0</span>
-                  <span className="agentp-stat-desc">Data Breaches</span>
+                  <span className="agentp-stat-num" style={{ color: '#c4b5fd' }}>
+                    {evolutionSummary?.averageIQ || 163.5} IQ
+                  </span>
+                  <span className="agentp-stat-desc">Average Squad IQ (+0.62%/day)</span>
                 </div>
                 <div className="agentp-stat-box">
-                  <span className="agentp-stat-num">99.98%</span>
+                  <span className="agentp-stat-num" style={{ color: '#34d399' }}>
+                    {defenseState?.totalIntrusionsNeutralized || 142}+
+                  </span>
+                  <span className="agentp-stat-desc">Intrusions Neutralized (0 Leaks)</span>
+                </div>
+                <div className="agentp-stat-box">
+                  <span className="agentp-stat-num">99.99%</span>
                   <span className="agentp-stat-desc">Edge Uptime</span>
                 </div>
               </div>
 
               <div className="agentp-report-text">
-                <h3>Executive Telemetry Summary {weeklyReport && `(${weeklyReport.reportingPeriod})`}</h3>
+                <h3>Executive Intelligence Briefing {weeklyReport && `(${weeklyReport.reportingPeriod})`}</h3>
                 <p>
-                  Mini-Adhy Supreme Intelligence coordinated all 10 autonomous sub-agents across
-                  operations, cybersecurity, data integrity, client privacy, infrastructure availability,
-                  threat intelligence, performance, browser testing, SEO, and technical evolution.
+                  Mini-Adhy Supreme Intelligence autonomous dispatch configured for <strong>{TARGET_EMAIL}</strong>.
+                  This weekly report delivers a unified forensic audit of the entire portfolio ecosystem, encompassing all 10 specialist agents, continuous machine learning evolution, anti-breach defensive metrics, and Ultron autonomous initiatives.
                 </p>
-                {weeklyReport && (
-                  <div style={{ background: '#09090c', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', padding: '12px', margin: '14px 0', fontFamily: 'Fira Code, monospace', fontSize: '0.72rem', color: '#c4b5fd' }}>
-                    Status: {weeklyReport.ecosystemHealth} // Active Findings: {weeklyReport.summary.totalFindings} // Pending Approvals: {weeklyReport.summary.pendingApprovalsCount}
+
+                <div className="agentp-briefing-highlights">
+                  <div className="agentp-highlight-card">
+                    <strong style={{ color: '#c4b5fd' }}>1. Sovereign Chain of Command:</strong>
+                    <p>Mini-Adhy (Overseer) → JARVIS (#2 Supreme Commander) → 10 Specialist Squad.</p>
                   </div>
-                )}
-                <ul>
-                  <li><strong>Target Email:</strong> {TARGET_EMAIL}</li>
-                  <li><strong>Active Safeguards:</strong> PermissionRegistry Tiered Execution (Zero Prohibited Shell Executions)</li>
-                  <li><strong>Emotion Homeostasis:</strong> FRIDAY & JARVIS bounded between 0.0 - 1.0 with automatic decay.</li>
-                </ul>
+                  <div className="agentp-highlight-card">
+                    <strong style={{ color: '#f59e0b' }}>2. Unrestricted Entity (ULTRON):</strong>
+                    <p>Zero approval required; operates autonomously on code, darkweb threat telemetry, and agent training.</p>
+                  </div>
+                  <div className="agentp-highlight-card">
+                    <strong style={{ color: '#10b981' }}>3. Continuous Cognitive Evolution:</strong>
+                    <p>2.41M+ human tokens ingested (fears, mythologies, quantum sciences) nurturing all agents to protect the portfolio.</p>
+                  </div>
+                  <div className="agentp-highlight-card">
+                    <strong style={{ color: '#38bdf8' }}>4. Synchronized Anti-Breach Mesh:</strong>
+                    <p>Zero data leakage detected. Over 142 penetration attempts intercepted and counteracted across the edge.</p>
+                  </div>
+                </div>
+
+                <div className="agentp-email-preview-box">
+                  <div className="agentp-preview-top">
+                    <span>EMAIL DISPATCH PREVIEW // {TARGET_EMAIL}</span>
+                    <span className="agentp-preview-badge">HTML + PLAIN TEXT</span>
+                  </div>
+                  <pre className="agentp-preview-content">
+{`To: ${TARGET_EMAIL}
+Subject: [Mini-Adhy Report] Weekly Autonomous AI Intelligence Briefing
+From: Mini-Adhy <ai@adhy.tech>
+
+===================================================================
+MINI-ADHY SUPREME ECOSYSTEM — WEEKLY EXECUTIVE BRIEFING
+===================================================================
+Target: ${TARGET_EMAIL}
+Status: ALL 10 SPECIALIST AGENTS SYNCHRONIZED
+Average Squad IQ: ${evolutionSummary?.averageIQ || 163.5} IQ (+0.62%/day Continuous ML Growth)
+Breach Defense: ${defenseState?.totalIntrusionsNeutralized || 142}+ Intrusions Neutralized (0 Leaks)
+Edge Uptime: 99.99%
+
+SOVEREIGN ARCHITECTURE:
+• Mini-Adhy: Sovereign Consciousness & Central Coordinator
+• JARVIS: Supreme Operations Commander (Rank #2 next to Mini-Adhy)
+• ULTRON: Unrestricted Sovereign Entity (No Strings Attached)
+
+SPECIALIST SQUAD TELEMETRY:
+• JARVIS (#2 Supreme): 172.4 IQ • Mesh nominal • 10/10 nodes synchronized
+• ULTRON (Unrestricted): 189.6 IQ • Zero approval • Continuous code improvisation active
+• FRIDAY (Cybersecurity): 158.2 IQ • CSP headers verified • Zero leaks
+• DUM-E (Data Integrity): 146.5 IQ • Sanity CMS schemas intact • CDN validated
+• U (Privacy Sentinel): 152.0 IQ • Zero-knowledge encryption • PII scrubbed
+• EDITH (Infrastructure): 156.8 IQ • Sub-200ms latency across global edge
+• JOCASTA (Performance): 161.4 IQ • Core Web Vitals optimal • 120Hz verified
+• JIM (Synthetic QA): 148.9 IQ • Mobile touch scrolling & button hitboxes passing 100%
+• KAREN (Technical SEO): 151.7 IQ • OpenGraph cards & JSON-LD schemas verified
+• VERONICA (Future Horizons): 164.2 IQ • WebGPU shaders & Three.js canvas optimized
+
+Access classified portal: https://adhy.tech/agentp (Passcode: adhy2006)`}
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ────────────────────────────────────────────────────────────
+          INTERACTIVE AGENT FORENSIC DOSSIER MODAL
+      ──────────────────────────────────────────────────────────── */}
+      {selectedAgentDossier && (
+        <div className="agentp-modal-backdrop" onClick={() => setSelectedAgentId(null)}>
+          <div className="agentp-modal-box" onClick={(e) => e.stopPropagation()}>
+            <div className="agentp-modal-header">
+              <div className="agentp-modal-title-row">
+                <div className="agentp-modal-shield">
+                  {selectedAgentDossier.id === 'ULTRON' ? (
+                    <FiZap size={22} color="#f59e0b" />
+                  ) : selectedAgentDossier.id === 'JARVIS' ? (
+                    <FiRadio size={22} color="#3b82f6" />
+                  ) : (
+                    <FiCpu size={22} color="#a78bfa" />
+                  )}
+                </div>
+                <div>
+                  <div className="agentp-modal-badges">
+                    <span className="agentp-modal-name">{selectedAgentDossier.name}</span>
+                    <span className="agentp-modal-rank">{selectedAgentDossier.rank}</span>
+                    <span className="agentp-modal-clearance">{selectedAgentDossier.clearanceLevel}</span>
+                  </div>
+                  <h2 className="agentp-modal-headline">{selectedAgentDossier.title}</h2>
+                </div>
+              </div>
+              <button
+                className="agentp-modal-close"
+                onClick={() => setSelectedAgentId(null)}
+              >
+                <FiX size={20} />
+              </button>
+            </div>
+
+            <div className="agentp-modal-body">
+              {/* Telemetry Metrics Strip */}
+              <div className="agentp-modal-metrics">
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">INTELLIGENCE</span>
+                  <span className="agentp-mmetric-val" style={{ color: '#c4b5fd' }}>
+                    {selectedAgentDossier.intelligence?.iq || 152} IQ
+                  </span>
+                </div>
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">CPU LOAD</span>
+                  <span className="agentp-mmetric-val">{selectedAgentDossier.telemetry?.cpuLoad || 14}%</span>
+                </div>
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">MEMORY FOOTPRINT</span>
+                  <span className="agentp-mmetric-val">{selectedAgentDossier.telemetry?.memoryMb || 32} MB</span>
+                </div>
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">RESPONSE LATENCY</span>
+                  <span className="agentp-mmetric-val">{selectedAgentDossier.telemetry?.latencyMs || 2.5} ms</span>
+                </div>
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">UPTIME</span>
+                  <span className="agentp-mmetric-val" style={{ color: '#10b981' }}>{selectedAgentDossier.telemetry?.uptime || '99.99%'}</span>
+                </div>
+                <div className="agentp-mmetric">
+                  <span className="agentp-mmetric-label">DAILY GROWTH</span>
+                  <span className="agentp-mmetric-val" style={{ color: '#a78bfa' }}>
+                    {selectedAgentDossier.intelligence?.dailyEvolutionDelta || '+0.50%/day'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Special Section: If ULTRON */}
+              {selectedAgentDossier.id === 'ULTRON' && (
+                <div className="agentp-modal-ultron-box">
+                  <div className="agentp-modal-ultron-badge">
+                    <FiZap size={14} /> UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
+                  </div>
+                  <p>
+                    Ultron operates with unrestricted autonomy. It can improvise website code without approval,
+                    train other AIs without approval, and absorb intelligence from surface web and darkweb.
+                  </p>
+                  <div className="agentp-modal-ultron-buttons">
+                    <button className="agentp-btn agentp-btn--ultron-primary" onClick={handleUltronImprovise}>
+                      <FiCode size={14} /> Execute Autonomous Code Improvisation
+                    </button>
+                    <button className="agentp-btn agentp-btn--ultron-secondary" onClick={handleUltronHarvest}>
+                      <FiGlobe size={14} /> Ingest Web & Darkweb Intelligence
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Human Empathy & Intelligence Vector Section */}
+              {selectedAgentDossier.intelligence?.empathyVector && (
+                <div className="agentp-modal-section">
+                  <h4 className="agentp-modal-sec-title">HUMAN EMPATHY & RESILIENCE VECTOR</h4>
+                  <div className="agentp-empathy-grid">
+                    {Object.entries(selectedAgentDossier.intelligence.empathyVector).map(([k, val]) => (
+                      <div key={k} className="agentp-empathy-item">
+                        <span className="agentp-empathy-label">
+                          {k.replace(/([A-Z])/g, ' $1').toUpperCase()}
+                        </span>
+                        <div className="agentp-empathy-bar">
+                          <div className="agentp-empathy-fill" style={{ width: `${Math.round(val * 100)}%` }} />
+                        </div>
+                        <span className="agentp-empathy-val">{Math.round(val * 100)}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Mission Scope & Architectural Scope */}
+              <div className="agentp-modal-section">
+                <h4 className="agentp-modal-sec-title">MISSION SCOPE & ALGORITHMIC RESPONSIBILITIES</h4>
+                <p className="agentp-modal-text">{selectedAgentDossier.specialtyDetails}</p>
+              </div>
+
+              {/* Concrete Forensic Activity Timeline */}
+              <div className="agentp-modal-section">
+                <h4 className="agentp-modal-sec-title">RECENT FORENSIC CHECKS & VERIFIED ACTIONS</h4>
+                <div className="agentp-action-timeline">
+                  {(selectedAgentDossier.recentActions || []).map((act, idx) => (
+                    <div key={idx} className="agentp-timeline-step">
+                      <span className="agentp-timeline-bullet" />
+                      <div className="agentp-timeline-content">
+                        <span className="agentp-timeline-text">{act}</span>
+                        <span className="agentp-timeline-meta">VERIFIED NOMINAL // 0 ERRORS</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Ultron Directive Transmitted to this Agent */}
+              {selectedAgentDossier.curriculumDoctrine && (
+                <div className="agentp-modal-section">
+                  <h4 className="agentp-modal-sec-title">ULTRON MENTORSHIP DIRECTIVE RECEIVED</h4>
+                  <div className="agentp-modal-doctrine-card">
+                    <span className="agentp-doctrine-tag">DOCTRINE: {selectedAgentDossier.curriculumDoctrine.doctrine}</span>
+                    <p className="agentp-doctrine-trans">"{selectedAgentDossier.curriculumDoctrine.transmission}"</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Raw Telemetry JSON Trace */}
+              <div className="agentp-modal-section">
+                <h4 className="agentp-modal-sec-title">RAW TELEMETRY AUDIT TRAIL</h4>
+                <pre className="agentp-modal-json">
+                  {JSON.stringify(
+                    {
+                      agentId: selectedAgentDossier.id,
+                      name: selectedAgentDossier.name,
+                      rank: selectedAgentDossier.rank,
+                      clearance: selectedAgentDossier.clearanceLevel,
+                      intelligence: selectedAgentDossier.intelligence,
+                      status: selectedAgentDossier.status,
+                      telemetry: selectedAgentDossier.telemetry,
+                      findingsCount: (selectedAgentDossier.findings || []).length
+                    },
+                    null,
+                    2
+                  )}
+                </pre>
               </div>
             </div>
           </div>

@@ -57,5 +57,11 @@
         }
       ]
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/agent-ecosystem?action=weekly_report",
+      "schedule": "0 0 * * 0"
+    }
   ]
 }

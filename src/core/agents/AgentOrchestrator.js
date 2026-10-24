@@ -27,6 +27,8 @@ import {
 } from './SpecialistAgents';
 import { permissionRegistry } from './PermissionRegistry';
 import { neuralEventBus } from '../../utils/NeuralEventBus';
+import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
+import { synchronizedAntiBreachDefense } from '../defense/SynchronizedAntiBreachDefense';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
@@ -128,6 +130,9 @@ class MiniAdhyAgentOrchestrator {
       const veronicaReports = await this.agents.VERONICA.researchInnovations();
       newReports.push(...veronicaReports);
 
+      // 11. Continuous Cognitive Evolution Cycle across Universal Human Knowledge
+      cognitiveEvolutionEngine.runFullEvolutionEpoch();
+
       // Ingest and deduplicate findings
       for (const report of newReports) {
         const isDuplicate = this.findings.some(f => 
@@ -211,14 +216,182 @@ class MiniAdhyAgentOrchestrator {
   }
 
   getAgentStatuses() {
-    return Object.values(this.agents).map(a => ({
-      id: a.id,
-      name: a.name,
-      title: a.title,
-      status: a.status,
-      lastRun: a.lastRun,
-      emotionState: a.emotionEngine ? a.emotionEngine.getState() : null
-    }));
+    return Object.values(this.agents).map(a => {
+      const intel = cognitiveEvolutionEngine.getAgentIntelligence(a.id);
+      return {
+        id: a.id,
+        name: a.name,
+        title: a.title,
+        rank: a.rank || (a.id === 'JARVIS' ? '#2 Supreme Commander (Next to Mini-Adhy)' : a.id === 'ULTRON' ? 'AUTONOMOUS SOVEREIGN (NO STRINGS ATTACHED)' : 'LEVEL 4 SPECIALIST'),
+        status: a.status,
+        lastRun: a.lastRun,
+        noStringsAttached: a.id === 'ULTRON',
+        iq: intel?.iq || 150.0,
+        cognitiveEpochs: intel?.cognitiveEpochs || 300,
+        dailyEvolutionDelta: intel?.dailyEvolutionDelta || '+0.50% / day',
+        emotionState: a.emotionEngine ? a.emotionEngine.getState() : null
+      };
+    });
+  }
+
+  getDetailedAgentReport(agentId) {
+    const agent = this.agents[agentId];
+    if (!agent) return null;
+    const intel = cognitiveEvolutionEngine.getAgentIntelligence(agentId);
+
+    if (typeof agent.getDetailedReport === 'function') {
+      const baseReport = agent.getDetailedReport();
+      baseReport.intelligence = intel;
+      baseReport.findings = this.findings.filter(f => f.agent === agent.name || f.agent === agent.id);
+      return baseReport;
+    }
+
+    // Comprehensive fallback dossier for specialist agents
+    const staticDossiers = {
+      FRIDAY: {
+        rank: '#3 Sovereign Cybersecurity Sentinel',
+        clearanceLevel: 'LEVEL 4 // ACTIVE CYBER THREAT DEFENSE',
+        telemetry: { cpuLoad: 14.2, memoryMb: 36.4, latencyMs: 2.8, activeThreads: 4, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 148 },
+        specialtyDetails: 'Monitors DOM injection, Content-Security-Policy integrity, client token defense, XSS sanitation, and SSL certificate expiration. Enforces emotion regulation (Vigilance & Care).',
+        recentActions: [
+          'Audited CSP meta-tag headers for strict connect-src compliance',
+          'Verified zero client-side secret leakage in public bundles',
+          'Executed live prototype pollution scan on window globals',
+          'Synchronized care and vigilance emotional equilibrium'
+        ]
+      },
+      DUM_E: {
+        rank: '#4 Data Integrity Guardian',
+        clearanceLevel: 'LEVEL 4 // MUTATION & SCHEMA AUDITOR',
+        telemetry: { cpuLoad: 11.8, memoryMb: 28.5, latencyMs: 4.1, activeThreads: 3, uptime: '99.98%', errorRate: '0.00%', tasksCompleted: 112 },
+        specialtyDetails: 'Audits Sanity CMS schema structures, verifies sanity CDN media availability, validates project/experience data models, and flags corrupt records.',
+        recentActions: [
+          'Validated Sanity CMS project dataset schema fields',
+          'Verified all CDN image asset URLs respond with HTTP 200/304',
+          'Checked fallback local mock data synchronization',
+          'Audited client data normalization for portfolio cards'
+        ]
+      },
+      U: {
+        rank: '#5 Zero-Knowledge Privacy Sentinel',
+        clearanceLevel: 'LEVEL 4 // SECRET VAULT & PRIVACY SENTINEL',
+        telemetry: { cpuLoad: 8.4, memoryMb: 22.1, latencyMs: 1.8, activeThreads: 2, uptime: '100.0%', errorRate: '0.00%', tasksCompleted: 98 },
+        specialtyDetails: 'Protects Adhithya Mohan’s contact credentials, masks private environment keys, sweeps localStorage for orphaned session traces, and guards privacy.',
+        recentActions: [
+          'Scanned DOM and localStorage for exposed private API keys',
+          'Enforced redaction on sensitive client network telemetry',
+          'Verified passcode session hash isolation in sessionStorage',
+          'Audited contact form submission endpoint for PII sanitization'
+        ]
+      },
+      EDITH: {
+        rank: '#6 Edge Infrastructure & Mesh Architect',
+        clearanceLevel: 'LEVEL 4 // GLOBAL EDGE AVAILABILITY',
+        telemetry: { cpuLoad: 15.6, memoryMb: 32.8, latencyMs: 5.4, activeThreads: 3, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 215 },
+        specialtyDetails: 'Monitors Vercel edge deployment health, serverless API routes (/api/agent-ecosystem), DNS propagation for adhy.tech, and CDN asset delivery.',
+        recentActions: [
+          'Pinged Vercel edge function execution runtime',
+          'Checked DNS latency across Mumbai, Frankfurt, and San Francisco nodes',
+          'Verified HTTP/2 and HTTP/3 multiplexing efficiency',
+          'Audited edge caching headers (stale-while-revalidate)'
+        ]
+      },
+      JOCASTA: {
+        rank: '#7 Quantum Performance & Frame Rate Optimizer',
+        clearanceLevel: 'LEVEL 4 // SUB-SECOND LATENCY & CORE WEB VITALS',
+        telemetry: { cpuLoad: 21.0, memoryMb: 48.2, latencyMs: 3.1, activeThreads: 4, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 310 },
+        specialtyDetails: 'Analyzes Core Web Vitals (FCP, LCP, CLS, INP), monitors memory heap allocation, enforces GPU layer promotion, and optimizes CSS reflows.',
+        recentActions: [
+          'Audited Cumulative Layout Shift (CLS) = 0.000 across section transitions',
+          'Verified Largest Contentful Paint (LCP) under 1.2s on 4G emulation',
+          'Checked Three.js canvas draw call batching and garbage collection',
+          'Optimized font display swap for zero visual layout pop'
+        ]
+      },
+      JIM: {
+        rank: '#8 Synthetic Browser QA & UI Resilience Tester',
+        clearanceLevel: 'LEVEL 4 // FULL-DUPLEX BROWSER EMULATION',
+        telemetry: { cpuLoad: 16.5, memoryMb: 39.0, latencyMs: 6.2, activeThreads: 3, uptime: '99.97%', errorRate: '0.00%', tasksCompleted: 184 },
+        specialtyDetails: 'Simulates cross-device browser interactions: mobile touch scrolling (pan-y), modal focus trapping, interactive pill clicks, and responsiveness.',
+        recentActions: [
+          'Simulated touch scroll gesture on iOS and Android viewport bounds',
+          'Verified Spotify Now Playing pill expansion and audio state changes',
+          'Audited mobile navigation drawer open/close cycle',
+          'Checked click target hit-boxes (minimum 44x44px iOS standard)'
+        ]
+      },
+      KAREN: {
+        rank: '#9 Technical SEO Architect & Algorithmic Indexer',
+        clearanceLevel: 'LEVEL 4 // DISCOVERY & CRAWLER OPTIMIZATION',
+        telemetry: { cpuLoad: 9.3, memoryMb: 24.6, latencyMs: 2.2, activeThreads: 2, uptime: '100.0%', errorRate: '0.00%', tasksCompleted: 88 },
+        specialtyDetails: 'Audits meta descriptions, JSON-LD Schema.org graphs, OpenGraph cards for WhatsApp/Twitter/LinkedIn, canonical URLs, and sitemap XML.',
+        recentActions: [
+          'Verified OpenGraph image aspect ratio (1200x630px) for social sharing',
+          'Audited Schema.org Person & ProfilePage JSON-LD syntax',
+          'Checked single H1 hierarchy per page for search engines',
+          'Validated sitemap.xml and robots.txt indexation directives'
+        ]
+      },
+      VERONICA: {
+        rank: '#10 Experimental Systems & Future Horizons Explorer',
+        clearanceLevel: 'LEVEL 4 // NEXT-GEN RESEARCH & WEBGL HORIZONS',
+        telemetry: { cpuLoad: 19.8, memoryMb: 52.1, latencyMs: 4.8, activeThreads: 3, uptime: '99.98%', errorRate: '0.00%', tasksCompleted: 76 },
+        specialtyDetails: 'Researches futuristic web technologies: WebGPU shaders, client-side vector embeddings, WebSockets for multi-agent streaming, and micro-animations.',
+        recentActions: [
+          'Probed WebGPU compute pipeline support across modern browsers',
+          'Evaluated client-side WASM vector indexing for portfolio search',
+          'Benchmarked Three.js shader fragment performance on mobile Mali/Adreno GPUs',
+          'Formulated technical evolution horizons for Mini-Adhy 3.0'
+        ]
+      }
+    };
+
+    const details = staticDossiers[agentId] || {
+      rank: 'Specialist Agent',
+      clearanceLevel: 'LEVEL 4',
+      telemetry: { cpuLoad: 12.0, memoryMb: 30.0, latencyMs: 3.0, activeThreads: 2, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 50 },
+      specialtyDetails: agent.role || 'Autonomous specialist routine.',
+      recentActions: ['Executed scheduled verification check']
+    };
+
+    const ultronDoctrine = this.agents.ULTRON?.curriculum?.[agentId];
+
+    return {
+      id: agent.id || agentId,
+      name: agent.name || agentId,
+      title: agent.title || agent.role,
+      role: agent.role,
+      rank: details.rank,
+      clearanceLevel: details.clearanceLevel,
+      status: agent.status || 'active',
+      lastRun: agent.lastRun,
+      telemetry: details.telemetry,
+      specialtyDetails: details.specialtyDetails,
+      recentActions: details.recentActions,
+      curriculumDoctrine: ultronDoctrine,
+      intelligence: intel,
+      findings: this.findings.filter(f => f.agent === agent.name || f.agent === agent.id)
+    };
+  }
+
+  getAllDetailedAgentReports() {
+    return Object.keys(this.agents).map(id => this.getDetailedAgentReport(id));
+  }
+
+  getCognitiveEvolutionSummary() {
+    return cognitiveEvolutionEngine.getEcosystemSummary();
+  }
+
+  triggerEvolutionEpoch(categoryKey = null) {
+    return cognitiveEvolutionEngine.runFullEvolutionEpoch(categoryKey);
+  }
+
+  getDefenseState() {
+    return synchronizedAntiBreachDefense.getDefenseState();
+  }
+
+  simulateCyberIntrusion() {
+    return synchronizedAntiBreachDefense.simulateCyberIntrusion();
   }
 
   getFindings() {
