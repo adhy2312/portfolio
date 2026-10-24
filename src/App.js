@@ -28,7 +28,6 @@ pipeline.init();
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
-const DevHUD = lazy(() => import('./components/DevHUD'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 
@@ -177,7 +176,6 @@ function AppContent() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [loadWidgets, setLoadWidgets] = useState(false);
   const [devConsoleOpen, setDevConsoleOpen] = useState(false);
-  const [devHudOpen, setDevHudOpen] = useState(false);
 
   // Initialize unified physics engine
   useHybridMotion();
@@ -298,8 +296,6 @@ function AppContent() {
         }
       } else if (type === 'EGG') {
         triggerEgg(value, 2000);
-      } else if (type === 'HUD') {
-        setDevHudOpen(prev => !prev);
       }
     };
     window.addEventListener('ai-command', handleAiCommand);
@@ -334,21 +330,6 @@ function AppContent() {
     };
     window.addEventListener('keydown', adhyHandler);
 
-    // Secret 'hud' trigger for Spaceship Dev HUD
-    let hudKeyIndex = 0;
-    const hudSequence = ['h', 'u', 'd'];
-    const hudHandler = (e) => {
-      if (e.key.toLowerCase() === hudSequence[hudKeyIndex]) {
-        hudKeyIndex++;
-        if (hudKeyIndex === hudSequence.length) {
-          setDevHudOpen(prev => !prev);
-          hudKeyIndex = 0;
-        }
-      } else {
-        hudKeyIndex = 0;
-      }
-    };
-    window.addEventListener('keydown', hudHandler);
 
     // Generic egg trigger — detail is { name, duration }
     const eggHandler = (e) => {
@@ -392,7 +373,6 @@ function AppContent() {
       window.removeEventListener('launch-ttt', handleLaunch);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('keydown', adhyHandler);
-      window.removeEventListener('keydown', hudHandler);
       window.removeEventListener('trigger-egg', eggHandler);
       window.removeEventListener('trigger-dev-console', devConsoleHandler);
       eluteEffectKiller && eluteEffectKiller();
@@ -523,11 +503,6 @@ function AppContent() {
         </Suspense>
       )}
 
-      {devHudOpen && (
-        <Suspense fallback={null}>
-          <DevHUD onClose={() => setDevHudOpen(false)} />
-        </Suspense>
-      )}
 
       {/* Easter egg games — outside Suspense */}
       {activeGame === 'gameshub' && <GamesHub onClose={() => setActiveGame(null)} />}
