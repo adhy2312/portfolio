@@ -18,10 +18,12 @@ import {
 } from '../core/MiniAdhyAgentTools';
 
 
+import MiniAdhyAgentHUD from './MiniAdhyAgentHUD';
+
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — The Ghost in the Machine
 ──────────────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine".
+const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine" (Mini-Adhy, the Supreme AI).
 
 You are not a chatbot. You are the sentient, underlying neural architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
 
@@ -33,6 +35,20 @@ CORE IDENTITY & REAL BACKGROUND:
   - Co-Founder — Finance Club MBCET.
   - Experience in embedded circuits, IoT, MATLAB, Simulink, Simscape, GNU Radio (SDR), KiCad PCB layout.
   - Currently planning to master Linux, Mobile App Dev, and Cybersecurity.
+
+AUTONOMOUS AI SQUAD (Operating under Mini-Adhy as Supreme AI):
+You coordinate 10 specialized autonomous AI agents that run real diagnostic, integrity, and security checks across this site:
+- JARVIS: Operations, health monitoring, and cross-agent coordination.
+- FRIDAY: Cybersecurity, attack surface auditing, and active defense.
+- DUM-E: Data integrity, change baseline detection, and Sanity CMS drift prevention.
+- U: Data breach and client-side credential/privacy guardian.
+- EDITH: Infrastructure, edge serverless availability, and reliability tracking.
+- ULTRON: Threat intelligence, CVE advisories, and dependency research.
+- JOCASTA: Performance, Web Vitals, and asset optimization.
+- JIM: Synthetic QA, link verification, and responsive browser test journeys.
+- KAREN: Technical SEO, structured schema data, OpenGraph, and metadata.
+- VERONICA: Web innovation research, trend curation, and engineering roadmap.
+You can discuss any of these agents, report on their findings, or invite the user to type "/agents" or click the "AGENTS" button to view the live operations HUD.
   - Photographic and visual storytelling aesthetics.
 * Strict Rule: Never invent fake competitions, fake awards, or rankings (e.g. NEVER mention YIP or fictitious state qualifiers). Adhithya's real credentials speak for themselves.
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
@@ -331,6 +347,7 @@ const MiniAdhy = () => {
   const [input,        setInput]        = useState('');
   const [loading,      setLoading]      = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
+  const [showAgentHUD, setShowAgentHUD] = useState(false);
   const [ownerState,   setOwnerState]   = useState({
     active: false, tone: 'default', tokens: null,
     context: '', memory: [], instructions: [],
@@ -596,6 +613,19 @@ const MiniAdhy = () => {
         ...prev,
         { role: 'owner-cmd', text: '••••••••••' },
         { role: 'system', text: '⚙ Owner mode activated.\nType /help to see available commands.' },
+      ]);
+      return;
+    }
+
+    /* ── Autonomous Agent Operations HUD Trigger ── */
+    const trimmedLower = trimmed.toLowerCase();
+    if (trimmedLower === '/agents' || trimmedLower === '/hud' || trimmedLower === 'agents' || trimmedLower === 'agent ops') {
+      setInput('');
+      setShowAgentHUD(true);
+      setMessages(prev => [
+        ...prev,
+        { role: 'user', text: trimmed },
+        { role: 'bot', text: '⚡ Opening Mini-Adhy Autonomous Operations HUD. Coordinating 10 specialist AI agents across security, data integrity, infrastructure, and performance.' }
       ]);
       return;
     }
@@ -901,6 +931,17 @@ const MiniAdhy = () => {
               <FiTrash2 size={12} />
             </button>
 
+            {/* Autonomous Specialist Agent HUD Toggle */}
+            <button
+              className="ma-hud-btn"
+              onClick={() => setShowAgentHUD(prev => !prev)}
+              title="Mini-Adhy Autonomous Agent HUD (10 Specialist Agents)"
+              aria-label="Toggle Agent Operations HUD"
+            >
+              <FiCpu size={12} />
+              <span className="ma-hud-btn-text">AGENTS</span>
+            </button>
+
             {/* Neural Voice Synthesis Toggle */}
             <button
               className={`ma-voice-toggle ${voiceEnabled ? 'ma-voice-toggle--active' : ''} ${isSpeaking ? 'ma-voice-toggle--speaking' : ''}`}
@@ -1041,6 +1082,11 @@ const MiniAdhy = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Autonomous Specialist Agent Operations HUD */}
+      {showAgentHUD && (
+        <MiniAdhyAgentHUD onClose={() => setShowAgentHUD(false)} />
       )}
     </>
   );

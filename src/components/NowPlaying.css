@@ -1,12 +1,14 @@
 /* ═════════════════════════════════════════════════════════════════
-   SPOTIFY NOW PLAYING CARD & ELEMENT-LEVEL AMBIENT INTEGRATION
-   • Clean, pixel-perfect, brutalist-glass Spotify player card
-   • NO full-screen blobs or overlays
-   • NO navbar border alterations (no colored line below navbar)
-   • Ambient light only active when track is ACTIVELY PLAYING
+   SPOTIFY PLAYER MINI-CARD & AMBIENT SYSTEM
+   Authentic Spotify Desktop/Mobile Player aesthetic:
+   • Spotify Matte Obsidian palette (#121212 / #181818 / #282828)
+   • Spotify Green (#1ed760 / #1db954)
+   • Authentic scrubber bar with hover knob
+   • ZERO screen blobs, ZERO navbar border lines
+   • Ambience ONLY active when track is actively playing
    ═════════════════════════════════════════════════════════════════ */
 
-/* ── Outer Wrapper ── */
+/* ── Fixed Placement ── */
 .np-wrapper {
   position: fixed;
   bottom: 24px;
@@ -18,7 +20,7 @@
 @keyframes np-slidein {
   from {
     opacity: 0;
-    transform: translateY(14px) scale(0.97);
+    transform: translateY(16px) scale(0.96);
   }
   to {
     opacity: 1;
@@ -26,246 +28,316 @@
   }
 }
 
-/* ── Full Widget Card ── */
-.np-widget {
-  position: relative;
-  z-index: 1;
-  width: 295px;
+/* ── Authentic Spotify Player Card ── */
+.np-player {
+  width: 320px;
   max-width: calc(100vw - 36px);
   padding: 12px 14px;
-  border-radius: 14px;
+  border-radius: 12px;
 
-  background: rgba(14, 15, 23, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), 0 0 1px rgba(255, 255, 255, 0.1);
+  /* Real Spotify Player Surface */
+  background: #181818;
+  border: 1px solid #282828;
+  box-shadow:
+    0 16px 40px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.05);
 
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Circular Spotify Text', 'Inter', 'Segoe UI', sans-serif;
   overflow: hidden;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  user-select: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.np-widget:hover {
-  border-color: rgba(255, 255, 255, 0.22);
-  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.55);
+.np-player:hover {
+  border-color: #383838;
+  box-shadow:
+    0 20px 48px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-/* ── 1. Header Row ── */
-.np-header {
+/* ── 1. Top Bar: Branding & Window Actions ── */
+.np-topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.np-status-tag {
+.np-brand {
   display: flex;
   align-items: center;
   gap: 6px;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.60rem;
+  color: #1ed760;
+}
+
+.np-brand-name {
+  font-size: 0.74rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--spotify-ambient-accent, #1ed760);
+  letter-spacing: -0.01em;
+  color: #ffffff;
 }
 
-.np-status-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.45;
-}
-
-.np-status-dot--live {
-  opacity: 1;
-  box-shadow: 0 0 6px currentColor;
-  animation: np-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes np-pulse {
-  0%, 100% {
-    transform: scale(1);
-    opacity: 0.85;
-  }
-  50% {
-    transform: scale(1.3);
-    opacity: 1;
-  }
-}
-
-.np-status-text {
-  line-height: 1;
-}
-
-.np-header-actions {
+.np-device-status {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: #b3b3b3;
+  margin-left: 6px;
+  padding-left: 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-.np-spotify-link {
+.np-live-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #b3b3b3;
+}
+
+.np-live-dot--active {
+  background: #1ed760;
+  box-shadow: 0 0 6px #1ed760;
+  animation: np-live-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes np-live-pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.3); }
+}
+
+.np-window-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.np-btn-icon {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 22px;
   height: 22px;
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.6);
-  background: rgba(255, 255, 255, 0.05);
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #b3b3b3;
+  cursor: pointer;
   text-decoration: none;
   transition: all 0.2s ease;
 }
 
-.np-spotify-link:hover {
-  color: #1ed760;
-  background: rgba(30, 215, 96, 0.16);
-}
-
-.np-btn-minimize {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.06);
-  border: none;
-  color: rgba(255, 255, 255, 0.65);
-  font-size: 0.9rem;
-  line-height: 1;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.np-btn-minimize:hover {
-  background: rgba(255, 255, 255, 0.16);
+.np-btn-icon:hover {
   color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.08);
 }
 
-/* ── 2. Body: Artwork + Details ── */
-.np-body {
+/* ── 2. Middle Row: Album Artwork + Metadata + Like ── */
+.np-main-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
-.np-art-wrap {
+.np-cover-wrap {
   position: relative;
   flex-shrink: 0;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
 }
 
-.np-art {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
+.np-cover-art {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
   object-fit: cover;
   display: block;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
 }
 
-.np-art-badge {
-  position: absolute;
-  bottom: -3px;
-  right: -3px;
-  background: rgba(10, 10, 18, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 5px;
-  padding: 2px 4px;
-}
-
-.np-art--placeholder {
-  width: 48px;
-  height: 48px;
-  border-radius: 8px;
-  background: rgba(30, 215, 96, 0.08);
+.np-cover-placeholder {
+  width: 52px;
+  height: 52px;
+  border-radius: 4px;
+  background: #282828;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #1ed760;
-  border: 1px solid rgba(30, 215, 96, 0.2);
 }
 
-.np-details {
+.np-cover-live-badge {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 3px;
+  padding: 1px 3px;
+}
+
+.np-track-meta {
   flex: 1;
   min-width: 0;
 }
 
-.np-title {
+.np-track-title {
   display: block;
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 0.84rem;
-  font-weight: 600;
+  font-size: 0.86rem;
+  font-weight: 700;
   color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   text-decoration: none;
   line-height: 1.3;
-  transition: color 0.2s ease;
 }
 
-.np-title:hover {
-  color: var(--spotify-ambient-accent, #1ed760);
+.np-track-title:hover {
+  text-decoration: underline;
 }
 
-.np-artist {
-  margin-top: 1px;
-  font-family: 'Inter', sans-serif;
-  font-size: 0.70rem;
-  color: rgba(255, 255, 255, 0.5);
+.np-track-artist {
+  margin-top: 2px;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #b3b3b3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.25;
 }
 
-.np-preview-btn {
-  margin-top: 4px;
-  padding: 2px 8px;
+.np-track-artist:hover {
+  color: #ffffff;
+}
+
+.np-like-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+}
+
+.np-like-wrap:hover {
+  transform: scale(1.15);
+}
+
+/* ── 3. Controls / Status Row ── */
+.np-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.np-sample-btn {
+  padding: 3px 8px;
   font-size: 0.60rem;
-  font-family: 'Fira Code', monospace;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 20px;
+  background: #282828;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--spotify-ambient-accent, #1ed760);
+  color: #1ed760;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.np-preview-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
+.np-sample-btn:hover {
+  background: #333333;
+  color: #ffffff;
+  transform: scale(1.03);
 }
 
-/* ── 3. Footer: Progress Track and Time Row ── */
-.np-progress-section {
+.np-sync-note {
+  font-size: 0.60rem;
+  color: #727272;
+}
+
+.np-play-indicator {
+  display: flex;
+  align-items: center;
+}
+
+.np-play-state-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #222222;
+  color: #727272;
+}
+
+.np-play-state-badge--live {
+  background: rgba(30, 215, 96, 0.15);
+  color: #1ed760;
+  border: 1px solid rgba(30, 215, 96, 0.3);
+}
+
+/* ── 4. Scrubber / Progress Bar (Real Spotify Physics) ── */
+.np-scrubber-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 8px;
 }
 
-.np-progress-track {
-  height: 3px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 999px;
-  overflow: hidden;
+.np-timestamp {
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  color: #b3b3b3;
+  min-width: 26px;
 }
 
-.np-progress-fill {
+.np-scrub-track {
+  flex: 1;
+  height: 4px;
+  background: #4d4d4d;
+  border-radius: 2px;
+  position: relative;
+  overflow: visible;
+  cursor: pointer;
+}
+
+.np-scrub-fill {
   height: 100%;
-  background: var(--spotify-ambient-accent, #1ed760);
-  border-radius: 999px;
-  transition: width 0.3s linear;
+  background: #ffffff;
+  border-radius: 2px;
+  position: relative;
+  transition: width 0.3s linear, background 0.15s ease;
 }
 
-.np-time-row {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 3px;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.58rem;
-  color: rgba(255, 255, 255, 0.38);
+/* Real Spotify scrubber thumb circle */
+.np-scrub-thumb {
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* Hovering turns the bar green and shows the scrubber thumb */
+.np-player:hover .np-scrub-fill {
+  background: #1db954;
+}
+
+.np-player:hover .np-scrub-thumb {
+  opacity: 1;
 }
 
 /* ── Waveform Animation ── */
@@ -273,19 +345,19 @@
   display: flex;
   align-items: flex-end;
   gap: 2px;
-  height: 12px;
+  height: 10px;
 }
 
 .np-waveform span {
   display: block;
-  width: 2.5px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.3);
-  height: 3px;
+  width: 2px;
+  border-radius: 1px;
+  background: #727272;
+  height: 2px;
 }
 
 .np-waveform--playing span {
-  background: var(--spotify-ambient-accent, #1ed760);
+  background: #1ed760;
 }
 
 .np-waveform--playing span:nth-child(1) { animation: np-bar 0.9s ease-in-out infinite; }
@@ -294,8 +366,8 @@
 .np-waveform--playing span:nth-child(4) { animation: np-bar 0.8s ease-in-out infinite 0.25s; }
 
 @keyframes np-bar {
-  0%, 100% { height: 3px; }
-  50%       { height: 11px; }
+  0%, 100% { height: 2px; }
+  50%       { height: 10px; }
 }
 
 /* ── Docked Tab (When Minimized) ── */
@@ -313,21 +385,19 @@
   border: none;
   cursor: pointer;
 
-  background: rgba(14, 15, 23, 0.94);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border-radius: 0 14px 14px 0;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #181818;
+  border-radius: 0 12px 12px 0;
+  border: 1px solid #282828;
   border-left: none;
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.5);
 
-  color: var(--spotify-ambient-accent, #1ed760);
+  color: #1ed760;
   transition: all 0.2s ease;
 }
 
 .np-dock:hover {
   padding-right: 15px;
-  background: rgba(20, 22, 34, 0.98);
+  background: #222222;
 }
 
 /* ── Mobile ── */
@@ -337,9 +407,13 @@
     left: 14px;
     max-width: calc(100vw - 28px);
   }
-  .np-widget {
-    width: 275px;
+  .np-player {
+    width: 290px;
     padding: 10px 12px;
+  }
+  .np-cover-art, .np-cover-wrap, .np-cover-placeholder {
+    width: 44px;
+    height: 44px;
   }
   .np-dock {
     bottom: 70px;
@@ -349,11 +423,8 @@
 
 /* ═════════════════════════════════════════════════════════════════
    SUBTLE INTEGRATED AMBIENCE (ONLY WHEN MUSIC IS PLAYING)
-   • Gentle backshadows and typography depth
-   • No giant blobs, no navbar lines, no artificial tints
    ═════════════════════════════════════════════════════════════════ */
 
-/* Subtle Card Backshadows */
 body.spotify-ambient-active.spotify-playing .bento-card,
 body.spotify-ambient-active.spotify-playing .project-card,
 body.spotify-ambient-active.spotify-playing .about-bento-card,
@@ -367,20 +438,10 @@ body.spotify-ambient-active.spotify-playing .achievement-card {
   transition: box-shadow 0.6s ease;
 }
 
-/* Subtle Text Shadows on Primary Headings */
 body.spotify-ambient-active.spotify-playing h1,
 body.spotify-ambient-active.spotify-playing h2,
 body.spotify-ambient-active.spotify-playing .section-title,
 body.spotify-ambient-active.spotify-playing .hero-title {
   text-shadow: 0 0 20px var(--spotify-ambient-text-glow, rgba(0, 0, 0, 0.1));
   transition: text-shadow 0.8s ease;
-}
-
-/* Subtle Corner Accent on interactive badges */
-body.spotify-ambient-active.spotify-playing .tag,
-body.spotify-ambient-active.spotify-playing .tech-tag,
-body.spotify-ambient-active.spotify-playing .skill-pill,
-body.spotify-ambient-active.spotify-playing .badge {
-  box-shadow: 0 0 10px var(--spotify-ambient-corner-glow, transparent);
-  transition: box-shadow 0.6s ease;
 }

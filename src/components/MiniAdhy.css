@@ -590,6 +590,37 @@
   border-radius: 2px;
 }
 
+/* ─── Autonomous Specialist Agent Operations HUD Toggle ─── */
+.ma-hud-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.25), rgba(79, 70, 229, 0.3));
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  color: #c4b5fd;
+  padding: 4px 8px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+}
+
+.ma-hud-btn:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(79, 70, 229, 0.6));
+  border-color: #a78bfa;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 12px rgba(167, 139, 250, 0.45);
+}
+
+.ma-hud-btn-text {
+  font-weight: 800;
+}
+
 /* ─── Neural Voice Synthesis Controls ─── */
 .ma-voice-toggle {
   display: inline-flex;

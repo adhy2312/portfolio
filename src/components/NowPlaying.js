@@ -289,7 +289,7 @@ const NowPlaying = () => {
         <button
           className="np-dock"
           onClick={toggleMinimized}
-          aria-label="Expand Spotify widget"
+          aria-label="Expand Spotify player"
           title="Show Spotify Player"
         >
           <SpotifyIcon size={16} />
@@ -297,101 +297,124 @@ const NowPlaying = () => {
         </button>
       ) : (
         <div className="np-wrapper">
-          <div className="np-widget">
-            {/* 1. Header: Status Tag + External Link + Minimize Button */}
-            <div className="np-header">
-              <div className="np-status-tag">
-                <span className={`np-status-dot ${currentTrack.isPlaying ? 'np-status-dot--live' : ''}`} />
-                <span className="np-status-text">
-                  {currentTrack.isPlaying ? 'NOW PLAYING' : 'SPOTIFY PAUSED'}
+          <div className="np-player">
+            {/* Top Bar: Spotify Logo Badge + Device Status + Window Minimize */}
+            <div className="np-topbar">
+              <div className="np-brand">
+                <SpotifyIcon size={16} />
+                <span className="np-brand-name">Spotify</span>
+                <span className="np-device-status">
+                  <span className={`np-live-dot ${currentTrack.isPlaying ? 'np-live-dot--active' : ''}`} />
+                  {currentTrack.isPlaying ? 'Listening on Phone' : 'Paused'}
                 </span>
               </div>
 
-              <div className="np-header-actions">
+              <div className="np-window-actions">
                 <a
                   href={currentTrack.songUrl || 'https://open.spotify.com'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="np-spotify-link"
-                  title="Open track on Spotify"
-                  aria-label="Open track on Spotify"
+                  className="np-btn-icon"
+                  title="Open on Spotify"
+                  aria-label="Open on Spotify"
                 >
-                  <SpotifyIcon size={14} />
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
                 </a>
 
                 <button
                   type="button"
-                  className="np-btn-minimize"
+                  className="np-btn-icon np-btn-min"
                   onClick={toggleMinimized}
                   aria-label="Minimize Spotify player"
-                  title="Minimize player"
+                  title="Minimize"
                 >
-                  &minus;
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
                 </button>
               </div>
             </div>
 
-            {/* 2. Body: Artwork + Track Details */}
-            <div className="np-body">
-              <div className="np-art-wrap">
+            {/* Middle Section: Album Cover + Track Metadata + Like Heart */}
+            <div className="np-main-row">
+              <div className="np-cover-wrap">
                 {currentTrack.albumArt && !imgError ? (
                   <img
                     src={currentTrack.albumArt}
                     alt={currentTrack.album || currentTrack.title}
-                    className={`np-art ${currentTrack.isPlaying ? 'np-art--playing' : ''}`}
+                    className="np-cover-art"
                     loading="lazy"
                     onError={() => setImgError(true)}
                   />
                 ) : (
-                  <div className="np-art np-art--placeholder">
-                    <SpotifyIcon size={22} />
+                  <div className="np-cover-placeholder">
+                    <SpotifyIcon size={24} />
                   </div>
                 )}
                 {currentTrack.isPlaying && (
-                  <div className="np-art-badge" title="Live audio active">
+                  <div className="np-cover-live-badge">
                     <Waveform isPlaying />
                   </div>
                 )}
               </div>
 
-              <div className="np-details">
+              <div className="np-track-meta">
                 <a
                   href={currentTrack.songUrl || 'https://open.spotify.com'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="np-title"
+                  className="np-track-title"
                   title={`${currentTrack.title} on Spotify`}
                 >
                   {currentTrack.title}
                 </a>
 
-                <p className="np-artist" title={currentTrack.artist}>
+                <p className="np-track-artist" title={currentTrack.artist}>
                   {currentTrack.artist}
                 </p>
+              </div>
 
-                {currentTrack.previewUrl && (
-                  <button type="button" className="np-preview-btn" onClick={togglePreview} title="Listen to 30s sample">
-                    {previewPlaying ? 'Pause Sample ⏸' : '30s Sample ▶'}
-                  </button>
-                )}
+              <div className="np-like-wrap" title="Saved to Your Library">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="#1db954" stroke="#1db954" strokeWidth="1.5">
+                  <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
+                </svg>
               </div>
             </div>
 
-            {/* 3. Footer: Progress Track and Time Row */}
-            <div className="np-progress-section">
-              <div className="np-progress-track">
+            {/* Controls Bar: Mini Play/Pause state and sample preview */}
+            <div className="np-controls-row">
+              {currentTrack.previewUrl ? (
+                <button type="button" className="np-sample-btn" onClick={togglePreview} title="Toggle 30s preview">
+                  {previewPlaying ? '⏸ PAUSE SAMPLE' : '▶ LISTEN SAMPLE'}
+                </button>
+              ) : (
+                <span className="np-sync-note">Synced via Spotify Web API</span>
+              )}
+
+              <div className="np-play-indicator">
+                <span className={`np-play-state-badge ${currentTrack.isPlaying ? 'np-play-state-badge--live' : ''}`}>
+                  {currentTrack.isPlaying ? 'PLAYING' : 'IDLE'}
+                </span>
+              </div>
+            </div>
+
+            {/* Scrub / Progress Bar: Authentic Spotify scrubber */}
+            <div className="np-scrubber-section">
+              <span className="np-timestamp">{formatMs(currentTrack.progress || 0)}</span>
+              <div className="np-scrub-track">
                 <div
                   ref={progressRef}
-                  className="np-progress-fill"
+                  className="np-scrub-fill"
                   style={{ width: `${progressPct}%` }}
-                />
-              </div>
-              {currentTrack.duration > 0 && (
-                <div className="np-time-row">
-                  <span>{formatMs(currentTrack.progress || 0)}</span>
-                  <span>{formatMs(currentTrack.duration)}</span>
+                >
+                  <span className="np-scrub-thumb" />
                 </div>
-              )}
+              </div>
+              <span className="np-timestamp">{formatMs(currentTrack.duration || 0)}</span>
             </div>
 
             {currentTrack.previewUrl && (
