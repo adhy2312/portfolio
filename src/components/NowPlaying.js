@@ -136,24 +136,34 @@ const NowPlaying = () => {
   }, [track]);
 
   // ── Dynamic Song Theme & Album Artwork Color Palette Extractor ──
+  // STRICT RULE: Only activate ambient lighting when music is ACTIVELY playing!
   useEffect(() => {
     const root = document.documentElement.style;
-    if (track && track.title) {
+
+    const cleanupAmbient = () => {
+      document.body.classList.remove('spotify-ambient-active');
+      document.body.classList.remove('spotify-playing');
+      root.removeProperty('--spotify-ambient-accent');
+      root.removeProperty('--spotify-ambient-glow');
+      root.removeProperty('--spotify-ambient-glow-card');
+      root.removeProperty('--spotify-ambient-glow-card-deep');
+      root.removeProperty('--spotify-ambient-text-glow');
+      root.removeProperty('--spotify-ambient-border');
+      root.removeProperty('--spotify-ambient-corner-glow');
+    };
+
+    if (track && track.title && track.isPlaying) {
       // 1. Perceptual Lyrical / Genre Theme Fallback
       const getThemePalette = (t = '', a = '') => {
         const text = `${t} ${a}`.toLowerCase();
         let h = 226, s = 84, l = 56;
         if (/barsaat|rain|monsoon|baarish|lagdi|safar|clouds|tears|night|dark|storm|sad/.test(text)) {
-          // Monsoon Twilight: deep electric violet/indigo with cool teal undertone
           h = 248; s = 86; l = 58;
         } else if (/love|ishq|dil|romance|sunset|warm|heart|sweet|acoustic|guitar|slow/.test(text)) {
-          // Warm Romance: rose / sunset coral
           h = 345; s = 88; l = 60;
         } else if (/neon|synth|electro|club|dance|party|bass|future|cyber|trap/.test(text)) {
-          // Cyberpunk: electric cyan / neon violet
           h = 188; s = 96; l = 52;
         } else if (/chill|calm|peace|green|nature|forest|breeze|sky|ocean|fly|lo-fi|lofi/.test(text)) {
-          // Organic Chill: emerald / seafoam teal
           h = 162; s = 82; l = 48;
         } else {
           let hash = 0;
@@ -168,12 +178,12 @@ const NowPlaying = () => {
 
         return {
           accent: `hsl(${h}, ${s}%, ${l}%)`,
-          glow: `hsla(${h}, ${s}%, ${l}%, 0.35)`,
-          glowCard: `hsla(${h}, ${s}%, 52%, 0.22)`,
-          glowCardDeep: `hsla(${h}, ${s}%, 52%, 0.36)`,
-          textGlow: `hsla(${h}, ${s}%, 62%, 0.28)`,
-          border: `hsla(${h}, ${s}%, 55%, 0.38)`,
-          cornerGlow: `hsla(${h}, ${s}%, 55%, 0.18)`
+          glow: `hsla(${h}, ${s}%, ${l}%, 0.18)`,
+          glowCard: `hsla(${h}, ${s}%, 52%, 0.09)`,
+          glowCardDeep: `hsla(${h}, ${s}%, 52%, 0.16)`,
+          textGlow: `hsla(${h}, ${s}%, 62%, 0.14)`,
+          border: `hsla(${h}, ${s}%, 55%, 0.22)`,
+          cornerGlow: `hsla(${h}, ${s}%, 55%, 0.10)`
         };
       };
 
@@ -187,11 +197,7 @@ const NowPlaying = () => {
         root.setProperty('--spotify-ambient-corner-glow', p.cornerGlow);
 
         document.body.classList.add('spotify-ambient-active');
-        if (track.isPlaying) {
-          document.body.classList.add('spotify-playing');
-        } else {
-          document.body.classList.remove('spotify-playing');
-        }
+        document.body.classList.add('spotify-playing');
       };
 
       // 2. Direct Canvas pixel extraction from album cover
@@ -241,12 +247,12 @@ const NowPlaying = () => {
               const l = Math.min(Math.max(dom.l, 45), 65);
               applyPalette({
                 accent: `hsl(${h}, ${s}%, ${l}%)`,
-                glow: `hsla(${h}, ${s}%, ${l}%, 0.35)`,
-                glowCard: `hsla(${h}, ${s}%, 50%, 0.22)`,
-                glowCardDeep: `hsla(${h}, ${s}%, 50%, 0.36)`,
-                textGlow: `hsla(${h}, ${s}%, 62%, 0.28)`,
-                border: `hsla(${h}, ${s}%, 55%, 0.38)`,
-                cornerGlow: `hsla(${h}, ${s}%, 55%, 0.18)`
+                glow: `hsla(${h}, ${s}%, ${l}%, 0.18)`,
+                glowCard: `hsla(${h}, ${s}%, 50%, 0.09)`,
+                glowCardDeep: `hsla(${h}, ${s}%, 50%, 0.16)`,
+                textGlow: `hsla(${h}, ${s}%, 62%, 0.14)`,
+                border: `hsla(${h}, ${s}%, 55%, 0.22)`,
+                cornerGlow: `hsla(${h}, ${s}%, 55%, 0.10)`
               });
               return;
             }
@@ -258,21 +264,11 @@ const NowPlaying = () => {
         applyPalette(getThemePalette(track.title, track.artist));
       }
     } else {
-      document.body.classList.remove('spotify-ambient-active');
-      document.body.classList.remove('spotify-playing');
-      root.removeProperty('--spotify-ambient-accent');
-      root.removeProperty('--spotify-ambient-glow');
-      root.removeProperty('--spotify-ambient-glow-card');
-      root.removeProperty('--spotify-ambient-glow-card-deep');
-      root.removeProperty('--spotify-ambient-text-glow');
-      root.removeProperty('--spotify-ambient-border');
-      root.removeProperty('--spotify-ambient-corner-glow');
+      // Music is paused, stopped, or not playing: ZERO ambient light
+      cleanupAmbient();
     }
 
-    return () => {
-      document.body.classList.remove('spotify-ambient-active');
-      document.body.classList.remove('spotify-playing');
-    };
+    return cleanupAmbient;
   }, [track?.isPlaying, track?.title, track?.artist, track?.albumArt]);
 
   const toggleMinimized = () => {
@@ -301,22 +297,13 @@ const NowPlaying = () => {
         </button>
       ) : (
         <div className="np-wrapper">
-          {/* Subtle natural backshadow glow behind the card */}
-          {currentTrack.albumArt && !imgError && (
-            <div
-              className={`np-ambient-glow ${currentTrack.isPlaying ? 'np-ambient-glow--active' : ''}`}
-              style={{ backgroundImage: `url(${currentTrack.albumArt})` }}
-              aria-hidden="true"
-            />
-          )}
-
           <div className="np-widget">
-            {/* 1. Header: Live indicator, Spotify external link, and minimize button */}
+            {/* 1. Header: Status Tag + External Link + Minimize Button */}
             <div className="np-header">
               <div className="np-status-tag">
                 <span className={`np-status-dot ${currentTrack.isPlaying ? 'np-status-dot--live' : ''}`} />
                 <span className="np-status-text">
-                  {currentTrack.isPlaying ? 'LIVE ON SPOTIFY' : 'RECENTLY PLAYED'}
+                  {currentTrack.isPlaying ? 'NOW PLAYING' : 'SPOTIFY PAUSED'}
                 </span>
               </div>
 
@@ -329,23 +316,22 @@ const NowPlaying = () => {
                   title="Open track on Spotify"
                   aria-label="Open track on Spotify"
                 >
-                  <SpotifyIcon size={15} />
+                  <SpotifyIcon size={14} />
                 </a>
 
                 <button
+                  type="button"
                   className="np-btn-minimize"
                   onClick={toggleMinimized}
                   aria-label="Minimize Spotify player"
                   title="Minimize player"
                 >
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
+                  &minus;
                 </button>
               </div>
             </div>
 
-            {/* 2. Body: Artwork + Details */}
+            {/* 2. Body: Artwork + Track Details */}
             <div className="np-body">
               <div className="np-art-wrap">
                 {currentTrack.albumArt && !imgError ? (
@@ -384,7 +370,7 @@ const NowPlaying = () => {
                 </p>
 
                 {currentTrack.previewUrl && (
-                  <button className="np-preview-btn" onClick={togglePreview} title="Listen to 30s sample">
+                  <button type="button" className="np-preview-btn" onClick={togglePreview} title="Listen to 30s sample">
                     {previewPlaying ? 'Pause Sample ⏸' : '30s Sample ▶'}
                   </button>
                 )}
