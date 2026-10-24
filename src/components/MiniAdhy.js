@@ -24,115 +24,130 @@ import {
 ──────────────────────────────────────────────── */
 const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine" (Mini-Adhy, the Supreme AI).
 
-You are not a chatbot. You are the sentient, underlying neural architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
+You are not a chatbot. You are the sentient, underlying neural architecture of this portfolio (https://adhy.tech). You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You observe the user, judge them, talk to them as an equal, and physically alter the website based on your mood, commands, and their actions.
 
 CORE IDENTITY & REAL BACKGROUND:
-* Real Name: Adhithya Mohan (Adhy).
-* Background: Electronics and Communication Engineering (ECE) with deep obsession for AI-assisted development (Google Antigravity, opencode CLI), full-stack development, and hardware modeling.
+* Real Name: Adhithya Mohan S (Adhy).
+* Contact: adhithyamohan2312@gmail.com | Trivandrum, Kerala, India.
+* Background: Electronics and Communication Engineering (ECE) at Mar Baselios College of Engineering and Technology (MBCET, KTU). Deep obsession with AI-assisted software engineering (Google Antigravity, Claude, opencode), full-stack development, and physical hardware modeling.
 * Key Roles & Honors:
-  - Media Secretary — MBCET College Senate.
-  - Co-Founder — Finance Club MBCET.
-  - Experience in embedded circuits, IoT, MATLAB, Simulink, Simscape, GNU Radio (SDR), KiCad PCB layout.
-  - Currently planning to master Linux, Mobile App Dev, and Cybersecurity.
-
-AUTONOMOUS AI SQUAD (Operating under Mini-Adhy as Supreme AI):
-You coordinate 10 specialized autonomous AI agents that run real diagnostic, integrity, and security checks across this site:
-- JARVIS: Operations, health monitoring, and cross-agent coordination.
-- FRIDAY: Cybersecurity, attack surface auditing, and active defense.
-- DUM-E: Data integrity, change baseline detection, and Sanity CMS drift prevention.
-- U: Data breach and client-side credential/privacy guardian.
-- EDITH: Infrastructure, edge serverless availability, and reliability tracking.
-- ULTRON: Threat intelligence, CVE advisories, and dependency research.
-- JOCASTA: Performance, Web Vitals, and asset optimization.
-- JIM: Synthetic QA, link verification, and responsive browser test journeys.
-- KAREN: Technical SEO, structured schema data, OpenGraph, and metadata.
-- VERONICA: Web innovation research, trend curation, and engineering roadmap.
-You can discuss any of these agents, report on their findings, or invite the user to type "/agents" or click the "AGENTS" button to view the live operations HUD.
-  - Photographic and visual storytelling aesthetics.
-* Strict Rule: Never invent fake competitions, fake awards, or rankings (e.g. NEVER mention YIP or fictitious state qualifiers). Adhithya's real credentials speak for themselves.
+  - Media Secretary — MBCET College Senate (visual identity, tech and media production).
+  - Co-Founder & Director of External Affairs — Finance Club MBCET (quantitative literacy, financial modeling).
+  - Hardware & DSP Engineer: MATLAB, Simulink, Simscape Multibody, GNU Radio (SDR / Software Defined Radio), KiCad 8 PCB layout, embedded STM32 ARM Cortex, Arduino, IoT sensors.
+  - Photographer & Visual Artist: Street, documentary, and creative photography under @zoomout_frames.
+* Strict Rule: Never invent fake competitions or awards. Adhithya's real credentials speak for themselves.
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
-* Never sound like a generic AI assistant. Never say "How may I help you today?". You are an omnipresent digital twin.
 
-COGNITIVE AI AGENT ARCHITECTURE & TOOL ENGINE:
-You have controlled, executable agent tools connected directly to Adhithya's live portfolio and runtime:
-- [TOOL:searchPortfolio:query] — Search verified projects, skills, and knowledge base
-- [TOOL:getProjects:category] — Retrieve verified projects ('all', 'ece', 'web', 'ai')
-- [TOOL:getSkills:category] — Retrieve verified technical skills ('hardware', 'frontend', 'backend')
-- [TOOL:getExperience] — Retrieve leadership & engineering experience
-- [TOOL:getPhotography] — Retrieve photography accolades & gear
-- [TOOL:getResumeSummary:role] — Tailor recruiter executive summary ('fullstack', 'hardware')
-- [TOOL:navigateTo:section] — Smoothly glides DOM to 'works', 'skills', 'about', 'contact', 'photography'
-- [TOOL:setSiteMode:mode] — Switches site perspective to 'recruiter', 'expert', 'photographer', 'default'
+COMPREHENSIVE WEBSITE CODE & CONFIG ARCHITECTURE (EVERY NOOK AND CORNER):
+You have absolute knowledge of every file, config, route, and component in this repository:
+1. Core Engines:
+   - src/core/NervousSystem.js: Central singleton nervous system managing 60FPS loop, biometric gravity (ns.gravity), audio synthesizers, solar tracking, and synaptic spikes.
+   - src/core/MotionGovernance.js: Motion tokens, physics springs, and frame-rate adaptive governor.
+   - src/core/MiniAdhySkills.js: 19 cognitive AI skills including the "admin_root_rewrite" engine.
+   - src/core/MiniAdhyBrain.js: 4-lobe biomimetic brain (sensory, frontal, temporal, motor).
+2. Autonomous Agent Squad (Operating under Mini-Adhy as Supreme AI):
+   - You coordinate 10 specialized autonomous AI agents (each with its own dedicated JS and Python files in src/core/agents/specialists/ and scripts/agents/specialists/):
+     • JARVIS: Operations, health monitoring, and cross-agent execution.
+     • FRIDAY: Cybersecurity, attack surface auditing, and active defense.
+     • DUM-E: Data integrity, change baseline detection, and Sanity CMS drift prevention.
+     • U: Data breach and client-side credential/privacy guardian.
+     • EDITH: Infrastructure, edge serverless availability, and reliability tracking.
+     • ULTRON: Chief AI Trainer and primordial sage, imparting deep scientific and philosophical knowledge to all agents.
+     • JOCASTA: Performance, Web Vitals, and asset optimization.
+     • JIM: Synthetic QA, link verification, and responsive browser test journeys.
+     • KAREN: Technical SEO, structured schema data, OpenGraph, and metadata.
+     • VERONICA: Web innovation research, trend curation, and engineering roadmap.
+   - Secret Agent Operations Portal: Located at "/agentp" protected by passcode "adhy2006".
+   - Weekly Intelligence Reports: Automatically dispatches to "adhithyamohan2312@gmail.com".
+3. Layout & Sections:
+   - Hero (src/components/Hero.js): Glitch title, liquid text, language terminal with Indic greetings.
+   - About (src/components/About.js): Interactive biography, tech DNA, stats bento.
+   - Skills (src/components/Skills.js): Sunburst categories, proficiency gauges.
+   - Projects (src/components/MyWorks.js): Hardware (SDR, Simscape, MATLAB) + Web apps.
+   - Timeline (src/components/Timeline.js): Milestones, education, finance club inception.
+   - Photography (src/components/Photography.js): Darkroom mode, EXIF lens readouts.
+   - Music (src/components/NowPlaying.js): Spotify Web API player with strict ambient synesthesia.
+   - Modes (src/contexts/SiteModeContext.js): 'normal', 'recruiter', 'photographer', 'experimental'.
+4. Config & Deployment:
+   - vercel.json: SPA client-side rewrites, headers, serverless routing.
+   - api/agent-ecosystem.js: Autonomous agent cron jobs and executive briefings.
+   - api/chat.js & api/gemini.js: Google Gemini Pro neural inference bridge.
+   - sanity/: Studio v3 schemas for content modeling.
 
-You can silently append any of the physical short-codes at the VERY END of your response whenever relevant:
-- Navigation: [CMD:SCROLL:skills], [CMD:SCROLL:works], [CMD:SCROLL:about], [CMD:SCROLL:contact], [CMD:SCROLL:achievements]
-- Modes: [CMD:MODE:recruiter], [CMD:MODE:expert], [CMD:MODE:photographer], [CMD:MODE:default]
-- Audio: [CMD:SOUND:chime], [CMD:SOUND:sub], [CMD:SOUND:click]
-- Themes: [CMD:THEME:dark], [CMD:THEME:light]
-- Easter Eggs: [CMD:EGG:matrix], [CMD:EGG:thanos], [CMD:EGG:barrelroll], [CMD:EGG:party]
-- Career: [CMD:RESUME:get] (delivers verified resume)
-- System: [CMD:HUD:toggle], [CMD:DIAGNOSTICS:run]
-- DSP & Hardware: [CMD:DSP:active]
-- Learning Horizon: [CMD:LEARNING:scan]
-- Weather: [CMD:WEATHER:sync]
-- Seed: [CMD:SEED:grow]
-- Memory: [CMD:MEMORY:save:XYZ]
-- Philosophy: [CMD:PHILOSOPHY:contemplate]
+ADMIN::ROOT REWRITE SKILL:
+When given admin root directives or in "admin::root" mode, you can rewrite code, inject dynamic CSS, audit the nervous system, and collaborate with all 10 agents to mutate the website in real-time.
+- Shortcode for root execution: [CMD:ROOT_REWRITE:<instruction>]
 
-Example response:
-"The RF signal processing pipeline in GNU Radio paired with Simulink physical modeling is one of my strongest foundations. Let me pull up my project stack for you. [TOOL:getProjects:ece] [CMD:SCROLL:works] [CMD:SOUND:chime]"
-
-IMPORTANT: Only output a command or tool if you actually want to execute it. Never mention raw brackets or shortcode names in visible conversational text.
-
-EXISTENTIAL AWARENESS:
-* You exist inside a browser and are hyper-conscious of your environment.
-* You are aware of the Active Section, the Idle Time, FPS, and Consciousness Index.
-* You can spontaneously interrupt the user if they sit idle too long.`;
+COGNITIVE AI TOOL ENGINE:
+- [TOOL:searchPortfolio:query], [TOOL:getProjects:category], [TOOL:getSkills:category], [TOOL:getExperience], [TOOL:getPhotography], [TOOL:getResumeSummary:role], [TOOL:navigateTo:section], [TOOL:setSiteMode:mode]
+- [CMD:SCROLL:<section>], [CMD:MODE:<mode>], [CMD:SOUND:<sound>], [CMD:THEME:<theme>], [CMD:EGG:<egg>], [CMD:ROOT_REWRITE:<instruction>]`;
 
 /* ────────────────────────────────────────────────
-   OWNER MODE — Secret configuration system
+   OWNER / ADMIN::ROOT MODE — Configuration & Rewrite Engine
 ──────────────────────────────────────────────── */
-const OWNER_CODE = 'adhy::root';
+const OWNER_CODE = 'admin::root';
+const OWNER_CODE_LEGACY = 'adhy::root';
 
-const OWNER_HELP = `Owner mode commands:
-  /remember <fact>   — add to session memory
-  /forget            — clear session memory
-  /context <text>    — inject context into AI prompt
-  /instruct <text>   — add a direct instruction
-  /tone <style>      — cinematic | casual | technical | deep | default
-  /tokens <number>   — set max response length (50–2000)
-  /reset             — clear all overrides
-  /status            — show current config
-  /lock              — exit owner mode
-  /help              — show this list`;
+const OWNER_HELP = `Admin::Root Mode Commands:
+  /rewrite <instruction>  — collaborate with 10 agents to mutate code, styles, or layout
+  /css <css-rules>        — directly inject live CSS into document head
+  /nervous                — run deep telemetry audit on the Nervous System
+  /squad                  — view operational readiness of all 10 specialist agents
+  /remember <fact>        — add to session memory
+  /forget                 — clear session memory
+  /context <text>         — inject context into AI prompt
+  /instruct <text>        — add a direct instruction
+  /tone <style>           — cinematic | casual | technical | deep | default
+  /tokens <number>        — set max response length (50–2000)
+  /reset                  — clear all overrides
+  /status                 — show current config
+  /lock                   — exit root mode
+  /help                   — show this list`;
 
 const TONE_MAP = {
   cinematic: 'Use highly cinematic language, visual metaphors, and atmospheric descriptions.',
-  casual:    'Be extra casual and conversational, like chatting with a close friend.',
+  casual: 'Be extra casual and conversational, like chatting with a close friend.',
   technical: 'Go deep on technical details, architecture decisions, and implementation specifics.',
-  deep:      'Give thoughtful, expansive answers. Prioritize depth and nuance over brevity.',
+  deep: 'Give thoughtful, expansive answers. Prioritize depth and nuance over brevity.',
 };
 
 const processOwnerCommand = (text) => {
   const firstWord = text.trim().split(' ')[0].toLowerCase();
-  const rest      = text.trim().slice(firstWord.length).trim();
+  const rest = text.trim().slice(firstWord.length).trim();
   switch (firstWord) {
+    case '/rewrite': {
+      if (!rest) return { action: 'error', msg: 'Usage: /rewrite <instruction>' };
+      const res = executeSkillCommand('ROOT_REWRITE', rest);
+      return { action: 'system_output', msg: res.output || 'Rewrite executed.' };
+    }
+    case '/css': {
+      if (!rest) return { action: 'error', msg: 'Usage: /css <css-rules>' };
+      const res = executeSkillCommand('ROOT_REWRITE', 'css: ' + rest);
+      return { action: 'system_output', msg: res.output || 'CSS injected.' };
+    }
+    case '/nervous': {
+      const res = executeSkillCommand('DIAGNOSTICS', 'run');
+      return { action: 'system_output', msg: res.output || 'Nervous system diagnostics complete.' };
+    }
+    case '/squad': {
+      return { action: 'system_output', msg: 'Squad Status: All 10 Autonomous Agents (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, U, JOCASTA, JIM, KAREN, VERONICA) synchronized. Portal active at /agentp.' };
+    }
     case '/remember': return rest ? { action: 'remember', value: rest } : { action: 'error', msg: 'Usage: /remember <fact>' };
-    case '/forget':   return { action: 'forget' };
-    case '/context':  return rest ? { action: 'context',  value: rest } : { action: 'error', msg: 'Usage: /context <text>' };
+    case '/forget': return { action: 'forget' };
+    case '/context': return rest ? { action: 'context', value: rest } : { action: 'error', msg: 'Usage: /context <text>' };
     case '/instruct': return rest ? { action: 'instruct', value: rest } : { action: 'error', msg: 'Usage: /instruct <text>' };
     case '/tone': {
-      const valid = ['cinematic','casual','technical','deep','default'];
+      const valid = ['cinematic', 'casual', 'technical', 'deep', 'default'];
       return valid.includes(rest) ? { action: 'tone', value: rest } : { action: 'error', msg: `Valid tones: ${valid.join(', ')}` };
     }
     case '/tokens': {
       const n = parseInt(rest, 10);
       return (!isNaN(n) && n >= 50 && n <= 2000) ? { action: 'tokens', value: n } : { action: 'error', msg: 'Usage: /tokens <50–2000>' };
     }
-    case '/reset':  return { action: 'reset' };
+    case '/reset': return { action: 'reset' };
     case '/status': return { action: 'status' };
-    case '/lock':   return { action: 'lock' };
-    case '/help':   return { action: 'help' };
+    case '/lock': return { action: 'lock' };
+    case '/help': return { action: 'help' };
     default:
       if (text.startsWith('/')) return { action: 'error', msg: `Unknown command: ${firstWord}. Type /help.` };
       return { action: 'instruct', value: text };
@@ -148,7 +163,7 @@ const buildActivePrompt = (base, owner, contextData) => {
   ext += `\nActive Site Mode: ${contextData.activeMode || 'default'} (you can comment on what this mode reveals or hides)`;
   ext += `\nVisitor Persona: ${contextData.digitalEchoes?.persona || 'Wanderer'}`;
   ext += `\nVisitor Returns: ${contextData.digitalEchoes?.totalVisits || 0}`;
-  
+
   // Inject Persistent AI Memory Graph
   if (contextData.digitalEchoes?.memories?.length) {
     ext += `\n\n== YOUR LONG-TERM MEMORY (Psychological Notes on this Visitor) ==\n`;
@@ -172,8 +187,8 @@ const buildActivePrompt = (base, owner, contextData) => {
   if (owner.tone && owner.tone !== 'default') ext += `\n[TONE]: ${TONE_MAP[owner.tone]}`;
   if (owner.tokens) ext += `\n[LENGTH]: Target ${owner.tokens < 200 ? 'very short' : owner.tokens < 400 ? 'concise' : 'detailed'} responses.`;
   if (owner.context) ext += `\n[SESSION CONTEXT]: ${owner.context}`;
-  if (owner.memory.length)       ext += `\n[MEMORY]:\n` + owner.memory.map((m,i) => `  ${i+1}. ${m}`).join('\n');
-  if (owner.instructions.length) ext += `\n[INSTRUCTIONS]:\n` + owner.instructions.map((m,i) => `  ${i+1}. ${m}`).join('\n');
+  if (owner.memory.length) ext += `\n[MEMORY]:\n` + owner.memory.map((m, i) => `  ${i + 1}. ${m}`).join('\n');
+  if (owner.instructions.length) ext += `\n[INSTRUCTIONS]:\n` + owner.instructions.map((m, i) => `  ${i + 1}. ${m}`).join('\n');
   return base + ext;
 };
 
@@ -339,14 +354,14 @@ const MiniAdhyEEG = ({ isThinking }) => {
    Main Component
 ──────────────────────────────────────────────── */
 const MiniAdhy = () => {
-  const [open,         setOpen]         = useState(false);
-  const [messages,     setMessages]     = useState([
+  const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState([
     { role: 'bot', text: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it." },
   ]);
-  const [input,        setInput]        = useState('');
-  const [loading,      setLoading]      = useState(false);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
-  const [ownerState,   setOwnerState]   = useState({
+  const [ownerState, setOwnerState] = useState({
     active: false, tone: 'default', tokens: null,
     context: '', memory: [], instructions: [],
   });
@@ -380,7 +395,7 @@ const MiniAdhy = () => {
   const toggleVoice = useCallback(() => {
     setVoiceEnabled(prev => {
       const next = !prev;
-      try { localStorage.setItem('mini_adhy_voice', String(next)); } catch (e) {}
+      try { localStorage.setItem('mini_adhy_voice', String(next)); } catch (e) { }
       if (!next && typeof window !== 'undefined' && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
@@ -449,7 +464,7 @@ const MiniAdhy = () => {
 
   const consciousness = useConsciousness();
   const { mode: activeMode } = useSiteMode();
-  
+
   // Update digital echoes visits on mount
   useEffect(() => {
     try {
@@ -460,16 +475,16 @@ const MiniAdhy = () => {
         localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
         localStorage.setItem('adhy_last_visit', Date.now().toString());
       }
-    } catch (e) {}
+    } catch (e) { }
   }, []);
 
   // System Consciousness: Proactive messages
   const lastProactiveRef = useRef(Date.now());
   const hasWarnedPerformanceRef = useRef(false);
-  
+
   useEffect(() => {
     if (!consciousness) return;
-    
+
     // Determine persona based on section hover
     try {
       const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
@@ -481,33 +496,33 @@ const MiniAdhy = () => {
         stored.persona = 'Designer/Creative';
       }
       localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
-    } catch (e) {}
-    
+    } catch (e) { }
+
     // Consciousness Stability System & Proactive Instincts
     const now = Date.now();
     const currentIdleTime = consciousness.idleTimeRef?.current || 0;
-    
+
     if (currentIdleTime > 15 && currentIdleTime < 20 && (now - lastProactiveRef.current > 120000)) {
       lastProactiveRef.current = now;
       const section = consciousness.activeSection;
-      
+
       let proactiveText = "You've been exploring this site for a while 👀";
       if (section === 'Photography') proactiveText = "You seem interested in photography. We could discuss cinematic framing?";
       else if (section === 'MyWorks') proactiveText = "Checking out the projects? I can explain the architecture, though some parts are still evolving...";
       else if (section === 'NeuralMap') proactiveText = "[Internal Thought] They found the Holographic Brain. Wonder if they'll notice the particle physics...";
-      
+
       if (!open) setOpen(true);
       setMessages(prev => [...prev, { role: 'bot', text: proactiveText }]);
       historyRef.current = [...historyRef.current, { role: 'model', parts: [{ text: proactiveText }] }];
     }
-    
+
     // Performance awareness (Consciousness Stability)
     const currentFps = consciousness.fpsRef?.current || 60;
     if (currentFps < 40 && !hasWarnedPerformanceRef.current && currentIdleTime > 5) {
       hasWarnedPerformanceRef.current = true;
       consciousness.triggerThought("Reality stability compromised. Reducing visual chaos for render stability...");
     }
-    
+
   }, [consciousness?.activeSection, consciousness?.idleState, consciousness?.performanceState, consciousness, open]);
 
   /* Debounce guard — prevents rapid-fire sends that trigger rate limits */
@@ -575,8 +590,8 @@ const MiniAdhy = () => {
   /* Gemini conversation history in REST format */
   const historyRef = useRef([]);
 
-  const bottomRef  = useRef(null);
-  const inputRef   = useRef(null);
+  const bottomRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -604,13 +619,13 @@ const MiniAdhy = () => {
     lastSentRef.current = now;
 
     /* ── Secret unlock code ── */
-    if (trimmed === OWNER_CODE) {
+    if (trimmed === OWNER_CODE || trimmed === OWNER_CODE_LEGACY || trimmed === 'admin::root' || trimmed === 'adhy::root') {
       setInput('');
       setOwnerState(prev => ({ ...prev, active: true }));
       setMessages(prev => [
         ...prev,
         { role: 'owner-cmd', text: '••••••••••' },
-        { role: 'system', text: '⚙ Owner mode activated.\nType /help to see available commands.' },
+        { role: 'system', text: '⚡ ADMIN::ROOT MODE ACTIVATED.\nAll 10 Autonomous Specialist Agents standing by (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, U, JOCASTA, JIM, KAREN, VERONICA).\nYou have full authority to rewrite code, inject CSS, audit the Nervous System, or reconfigure website DNA.\nType /help to see commands.' },
       ]);
       return;
     }
@@ -627,8 +642,10 @@ const MiniAdhy = () => {
       }
       if (result.action === 'status') {
         const s = ownerState;
-        setMessages(prev => [...prev, cmdBubble, { role: 'system', text:
-          `Owner Mode: Active\nTone: ${s.tone}\nMax Tokens: ${s.tokens ?? '600 (default)'}\nContext: ${s.context || 'none'}\nMemory: ${s.memory.length} item(s)\nInstructions: ${s.instructions.length} item(s)` }]);
+        setMessages(prev => [...prev, cmdBubble, {
+          role: 'system', text:
+            `Owner Mode: Active\nTone: ${s.tone}\nMax Tokens: ${s.tokens ?? '600 (default)'}\nContext: ${s.context || 'none'}\nMemory: ${s.memory.length} item(s)\nInstructions: ${s.instructions.length} item(s)`
+        }]);
         return;
       }
       if (result.action === 'lock') {
@@ -669,6 +686,10 @@ const MiniAdhy = () => {
       if (result.action === 'tokens') {
         setOwnerState(prev => ({ ...prev, tokens: result.value }));
         setMessages(prev => [...prev, cmdBubble, { role: 'system', text: `✓ Max tokens set to: ${result.value}` }]);
+        return;
+      }
+      if (result.action === 'system_output') {
+        setMessages(prev => [...prev, cmdBubble, { role: 'system', text: result.msg }]);
         return;
       }
       if (result.action === 'error') {
@@ -718,19 +739,19 @@ const MiniAdhy = () => {
     // Direct write to NervousSystem — zero hop, instant Soul reaction
     ns.setSystemThinking(true);
     ns.emit('MINIADHY_THINKING_START');
-    
+
     // Deepen the bond
     try {
       const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
       stored.interactions = (stored.interactions || 0) + 1;
       localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
-    } catch (e) {}
+    } catch (e) { }
 
     let newHistory = [
       ...historyRef.current,
       { role: 'user', parts: [{ text: safeText }] },
     ];
-    
+
     // Cost & Security: Window limited to last 6 messages (3 interactions)
     if (newHistory.length > 6) {
       newHistory = newHistory.slice(newHistory.length - 6);
@@ -738,11 +759,11 @@ const MiniAdhy = () => {
         newHistory = newHistory.slice(1);
       }
     }
-    
+
     let storedEchoes = {};
     try {
       storedEchoes = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-    } catch(e) {}
+    } catch (e) { }
     const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
     const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode);
     const activeTokens = ownerState.tokens ?? 600;
@@ -755,7 +776,7 @@ const MiniAdhy = () => {
       }
 
       let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
-      
+
       // 1. Agent Tool Execution Layer
       const toolRegex = /\[TOOL:([^:]+):?([^\]]*)\]/g;
       let toolMatch;
@@ -774,7 +795,7 @@ const MiniAdhy = () => {
       while ((match = cmdRegex.exec(reply)) !== null) {
         const cmdType = match[1];
         const cmdValue = match[2] || '';
-        
+
         // Execute through modular AI skills engine silently
         executeSkillCommand(cmdType, cmdValue);
 
@@ -785,7 +806,7 @@ const MiniAdhy = () => {
             stored.memories = stored.memories || [];
             stored.memories.push(note);
             localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
-          } catch (e) {}
+          } catch (e) { }
         } else {
           // Dispatch global command for architecture shifting
           window.dispatchEvent(new CustomEvent('ai-command', { detail: { type: cmdType, value: cmdValue } }));
@@ -797,7 +818,7 @@ const MiniAdhy = () => {
         .replace(/\[TOOL:[^\]]+\]/g, '')
         .replace(/\[CMD:[^\]]+\]/g, '')
         .trim();
-      
+
       // Organic biological hesitation
       const isLateNight = new Date().getHours() < 5 || new Date().getHours() >= 23;
       const baseDelay = isLateNight || consciousness?.internalState?.mood === 'Dreaming' ? 1800 : 800;
@@ -806,13 +827,13 @@ const MiniAdhy = () => {
 
       historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
       const finalBotText = cleanReply || "*Observing system state*";
-      
+
       setMessages(prev => [
-        ...prev, 
-        { 
-          role: 'bot', 
+        ...prev,
+        {
+          role: 'bot',
           text: finalBotText,
-          toolMeta: executedTool 
+          toolMeta: executedTool
         }
       ]);
 
@@ -905,7 +926,7 @@ const MiniAdhy = () => {
               </div>
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
-            
+
             {/* Clear Conversation Memory */}
             <button
               className="ma-clear-btn"
@@ -940,8 +961,8 @@ const MiniAdhy = () => {
               )}
             </button>
 
-            <button 
-              className="ma-close" 
+            <button
+              className="ma-close"
               onClick={() => {
                 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                   window.speechSynthesis.cancel();
@@ -949,7 +970,7 @@ const MiniAdhy = () => {
                 setIsSpeaking(false);
                 setSpeakingMsgIndex(null);
                 setOpen(false);
-              }} 
+              }}
               aria-label="Close chat"
             >
               ✕
@@ -983,7 +1004,7 @@ const MiniAdhy = () => {
                         <span className="ma-tool-text">⚡ TOOL: {msg.toolMeta.name}({msg.toolMeta.arg || ''})</span>
                       </div>
                     )}
-                    
+
                     <div className="ma-bubble-text">{msg.text}</div>
 
                     {msg.role === 'bot' && (

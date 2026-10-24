@@ -95,6 +95,11 @@ export class MiniAdhyBrain {
       targetSkill = 'WEATHER';
       targetArg = 'sync';
       cognitiveSurge = 0.5;
+    } else if (lower.includes('admin::root') || lower.includes('root::') || lower.includes('rewrite') || lower.includes('nervous system') || lower.includes('change ui') || lower.includes('core')) {
+      intent = 'ADMIN_ROOT_OVERHAUL';
+      targetSkill = 'ROOT_REWRITE';
+      targetArg = text;
+      cognitiveSurge = 1.0;
     } else if (lower.includes('performance') || lower.includes('fps') || lower.includes('lag') || lower.includes('telemetry') || lower.includes('audit')) {
       intent = 'SYSTEM_AUDIT';
       targetSkill = 'DIAGNOSTICS';

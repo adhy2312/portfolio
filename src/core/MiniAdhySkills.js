@@ -429,6 +429,67 @@ export const MINI_ADHY_SKILLS = [
     execute: () => {
       return 'Stack Summary: Full-Stack React/Next.js (90%), AI Tools (90%), Hardware DSP & Simscape (80%), KiCad (75%)';
     }
+  },
+  {
+    id: 'admin_root_rewrite',
+    name: 'Autonomous System & UI Rewrite Engine (Admin::Root)',
+    category: 'Neural Core',
+    icon: '⚡',
+    description: 'Elevates Mini-Adhy with root privileges to rewrite website code, inject dynamic CSS, reconfigure Nervous System telemetry, and collaborate across all 10 autonomous agents.',
+    command: 'ROOT_REWRITE',
+    execute: (instruction = '') => {
+      const fps = ns.fps || 60;
+      const isLateNight = ns.state?.isLateNight || false;
+
+      let rootStyleTag = document.getElementById('admin-root-dynamic-styles');
+      if (!rootStyleTag) {
+        rootStyleTag = document.createElement('style');
+        rootStyleTag.id = 'admin-root-dynamic-styles';
+        document.head.appendChild(rootStyleTag);
+      }
+
+      const lower = (instruction || '').toLowerCase();
+      let actionTaken = 'Neural architecture audited and synchronizing with 10 specialist agents.';
+
+      if (lower.includes('gold') || lower.includes('emerald') || lower.includes('cyan') || lower.includes('purple') || lower.includes('theme')) {
+        let accentColor = '#f4d03f';
+        if (lower.includes('emerald') || lower.includes('green')) accentColor = '#1ed760';
+        if (lower.includes('cyan') || lower.includes('blue')) accentColor = '#38bdf8';
+        if (lower.includes('purple') || lower.includes('violet')) accentColor = '#a855f7';
+        
+        document.documentElement.style.setProperty('--accent-primary', accentColor);
+        document.documentElement.style.setProperty('--accent-brutal-yellow', accentColor);
+        actionTaken = `Theme custom variables dynamically mutated to ${accentColor} via JARVIS & FRIDAY.`;
+      } else if (lower.includes('glass') || lower.includes('border') || lower.includes('card')) {
+        rootStyleTag.textContent += `
+          .bento-card, .project-card, .about-bento-card {
+            border-color: rgba(255, 255, 255, 0.25) !important;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.4) !important;
+          }
+        `;
+        actionTaken = 'Glassmorphic card depth and boundary reflections polished via DUM-E & JOCASTA.';
+      } else if (lower.includes('calm') || lower.includes('smooth')) {
+        ns.emit('CALM_SYNAPSE', { intensity: 0.8 });
+        actionTaken = 'Nervous system firing rate eased to calm alpha rhythm.';
+      } else if (instruction.startsWith('css:')) {
+        const customCss = instruction.slice(4).trim();
+        rootStyleTag.textContent += customCss;
+        actionTaken = `Custom stylesheet rule injected: ${customCss}`;
+      }
+
+      playSynthesizerTone('chime');
+
+      ns.emit('ROOT_CODE_MUTATION', {
+        author: 'Mini-Adhy (Supreme AI in Admin::Root)',
+        instruction,
+        fps,
+        timestamp: Date.now()
+      });
+
+      neuralEventBus.emit('ADMIN_ROOT_EXECUTED', { instruction, actionTaken });
+
+      return `[ADMIN::ROOT ACTIVE] 10 Autonomous Agents Coordinating: JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, U, JOCASTA, JIM, KAREN, VERONICA. ${actionTaken} (NervousSystem: ${fps} FPS | LateNight: ${isLateNight ? 'ON' : 'OFF'})`;
+    }
   }
 ];
 
