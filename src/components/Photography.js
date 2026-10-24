@@ -710,10 +710,6 @@ const Photography = () => {
               /* Design Studio Inspector Readout Cluster with active item */
               <div className="design-inspector-cluster">
                 <div className="inspector-column">
-                  <span className="readout-key">SPECS &amp; RESOLUTION</span>
-                  <span className="readout-val">{activeItem.designSpecs?.artboard} • {activeItem.designSpecs?.type}</span>
-                </div>
-                <div className="inspector-column hide-mobile">
                   <span className="readout-key">TYPOGRAPHY SYSTEM</span>
                   <span className="readout-val">{activeItem.designSpecs?.typography}</span>
                 </div>
