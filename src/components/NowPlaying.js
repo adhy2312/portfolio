@@ -142,79 +142,49 @@ const NowPlaying = () => {
       // 1. Perceptual Lyrical / Genre Theme Fallback
       const getThemePalette = (t = '', a = '') => {
         const text = `${t} ${a}`.toLowerCase();
+        let h = 226, s = 84, l = 56;
         if (/barsaat|rain|monsoon|baarish|lagdi|safar|clouds|tears|night|dark|storm|sad/.test(text)) {
-          // Monsoon Twilight / Rain: Deep indigo, electric violet, cool rain teal, and amber shimmer
-          return {
-            c1: 'hsl(226, 84%, 54%)',
-            c2: 'hsl(268, 80%, 62%)',
-            c3: 'hsl(176, 82%, 40%)',
-            c4: 'hsl(38, 95%, 58%)',
-            accent: 'hsl(226, 84%, 58%)',
-            glow: 'hsla(226, 84%, 58%, 0.28)',
-            softGlow: 'hsla(268, 80%, 62%, 0.16)'
-          };
+          // Monsoon Twilight: deep electric violet/indigo with cool teal undertone
+          h = 248; s = 86; l = 58;
+        } else if (/love|ishq|dil|romance|sunset|warm|heart|sweet|acoustic|guitar|slow/.test(text)) {
+          // Warm Romance: rose / sunset coral
+          h = 345; s = 88; l = 60;
+        } else if (/neon|synth|electro|club|dance|party|bass|future|cyber|trap/.test(text)) {
+          // Cyberpunk: electric cyan / neon violet
+          h = 188; s = 96; l = 52;
+        } else if (/chill|calm|peace|green|nature|forest|breeze|sky|ocean|fly|lo-fi|lofi/.test(text)) {
+          // Organic Chill: emerald / seafoam teal
+          h = 162; s = 82; l = 48;
+        } else {
+          let hash = 0;
+          for (let i = 0; i < text.length; i++) {
+            hash = (hash << 5) - hash + text.charCodeAt(i);
+            hash |= 0;
+          }
+          h = Math.abs(hash) % 360;
+          s = 82;
+          l = 56;
         }
-        if (/love|ishq|dil|romance|sunset|warm|heart|sweet|acoustic|guitar|slow/.test(text)) {
-          return {
-            c1: 'hsl(344, 85%, 56%)',
-            c2: 'hsl(22, 92%, 56%)',
-            c3: 'hsl(284, 76%, 62%)',
-            c4: 'hsl(46, 96%, 62%)',
-            accent: 'hsl(344, 85%, 60%)',
-            glow: 'hsla(344, 85%, 60%, 0.28)',
-            softGlow: 'hsla(284, 76%, 62%, 0.16)'
-          };
-        }
-        if (/neon|synth|electro|club|dance|party|bass|future|cyber|trap/.test(text)) {
-          return {
-            c1: 'hsl(186, 95%, 50%)',
-            c2: 'hsl(315, 92%, 58%)',
-            c3: 'hsl(240, 88%, 64%)',
-            c4: 'hsl(278, 90%, 65%)',
-            accent: 'hsl(186, 95%, 52%)',
-            glow: 'hsla(186, 95%, 52%, 0.28)',
-            softGlow: 'hsla(315, 92%, 58%, 0.16)'
-          };
-        }
-        if (/chill|calm|peace|green|nature|forest|breeze|sky|ocean|fly|lo-fi|lofi/.test(text)) {
-          return {
-            c1: 'hsl(164, 80%, 46%)',
-            c2: 'hsl(198, 88%, 52%)',
-            c3: 'hsl(268, 72%, 58%)',
-            c4: 'hsl(140, 75%, 50%)',
-            accent: 'hsl(164, 80%, 50%)',
-            glow: 'hsla(164, 80%, 50%, 0.28)',
-            softGlow: 'hsla(198, 88%, 52%, 0.16)'
-          };
-        }
-        let hash = 0;
-        for (let i = 0; i < text.length; i++) {
-          hash = (hash << 5) - hash + text.charCodeAt(i);
-          hash |= 0;
-        }
-        const baseHue = Math.abs(hash) % 360;
-        const h2 = (baseHue + 60) % 360;
-        const h3 = (baseHue + 155) % 360;
-        const h4 = (baseHue + 215) % 360;
+
         return {
-          c1: `hsl(${baseHue}, 84%, 56%)`,
-          c2: `hsl(${h2}, 86%, 60%)`,
-          c3: `hsl(${h3}, 78%, 52%)`,
-          c4: `hsl(${h4}, 90%, 62%)`,
-          accent: `hsl(${baseHue}, 84%, 58%)`,
-          glow: `hsla(${baseHue}, 84%, 58%, 0.28)`,
-          softGlow: `hsla(${h2}, 86%, 60%, 0.16)`
+          accent: `hsl(${h}, ${s}%, ${l}%)`,
+          glow: `hsla(${h}, ${s}%, ${l}%, 0.35)`,
+          glowCard: `hsla(${h}, ${s}%, 52%, 0.22)`,
+          glowCardDeep: `hsla(${h}, ${s}%, 52%, 0.36)`,
+          textGlow: `hsla(${h}, ${s}%, 62%, 0.28)`,
+          border: `hsla(${h}, ${s}%, 55%, 0.38)`,
+          cornerGlow: `hsla(${h}, ${s}%, 55%, 0.18)`
         };
       };
 
       const applyPalette = (p) => {
-        root.setProperty('--spotify-aurora-1', p.c1);
-        root.setProperty('--spotify-aurora-2', p.c2);
-        root.setProperty('--spotify-aurora-3', p.c3);
-        root.setProperty('--spotify-aurora-4', p.c4);
         root.setProperty('--spotify-ambient-accent', p.accent);
         root.setProperty('--spotify-ambient-glow', p.glow);
-        root.setProperty('--spotify-aurora-glow-soft', p.softGlow);
+        root.setProperty('--spotify-ambient-glow-card', p.glowCard);
+        root.setProperty('--spotify-ambient-glow-card-deep', p.glowCardDeep);
+        root.setProperty('--spotify-ambient-text-glow', p.textGlow);
+        root.setProperty('--spotify-ambient-border', p.border);
+        root.setProperty('--spotify-ambient-corner-glow', p.cornerGlow);
 
         document.body.classList.add('spotify-ambient-active');
         if (track.isPlaying) {
@@ -263,20 +233,20 @@ const NowPlaying = () => {
                 samples.push({ h, s: Math.round(s * 100), l: Math.round(l * 100) });
               }
             }
-            if (samples.length >= 3) {
+            if (samples.length >= 2) {
               samples.sort((a, b) => (b.s * 0.7 + b.l * 0.3) - (a.s * 0.7 + a.l * 0.3));
-              const c1 = samples[0];
-              const c2 = samples.find(c => Math.abs(c.h - c1.h) > 35) || { h: (c1.h + 55) % 360, s: 80, l: 58 };
-              const c3 = samples.find(c => Math.abs(c.h - c1.h) > 80 && Math.abs(c.h - c2.h) > 30) || { h: (c1.h + 150) % 360, s: 75, l: 50 };
-              const c4 = { h: (c2.h + 60) % 360, s: 85, l: 62 };
+              const dom = samples[0];
+              const h = dom.h;
+              const s = Math.max(dom.s, 65);
+              const l = Math.min(Math.max(dom.l, 45), 65);
               applyPalette({
-                c1: `hsl(${c1.h}, ${Math.max(c1.s, 65)}%, ${Math.min(Math.max(c1.l, 42), 65)}%)`,
-                c2: `hsl(${c2.h}, ${Math.max(c2.s, 60)}%, ${Math.min(Math.max(c2.l, 45), 65)}%)`,
-                c3: `hsl(${c3.h}, ${Math.max(c3.s, 55)}%, ${Math.min(Math.max(c3.l, 40), 60)}%)`,
-                c4: `hsl(${c4.h}, ${Math.max(c4.s, 70)}%, 58%)`,
-                accent: `hsl(${c1.h}, ${c1.s}%, 55%)`,
-                glow: `hsla(${c1.h}, ${c1.s}%, 55%, 0.28)`,
-                softGlow: `hsla(${c2.h}, ${c2.s}%, 55%, 0.16)`
+                accent: `hsl(${h}, ${s}%, ${l}%)`,
+                glow: `hsla(${h}, ${s}%, ${l}%, 0.35)`,
+                glowCard: `hsla(${h}, ${s}%, 50%, 0.22)`,
+                glowCardDeep: `hsla(${h}, ${s}%, 50%, 0.36)`,
+                textGlow: `hsla(${h}, ${s}%, 62%, 0.28)`,
+                border: `hsla(${h}, ${s}%, 55%, 0.38)`,
+                cornerGlow: `hsla(${h}, ${s}%, 55%, 0.18)`
               });
               return;
             }
@@ -290,13 +260,13 @@ const NowPlaying = () => {
     } else {
       document.body.classList.remove('spotify-ambient-active');
       document.body.classList.remove('spotify-playing');
-      root.removeProperty('--spotify-aurora-1');
-      root.removeProperty('--spotify-aurora-2');
-      root.removeProperty('--spotify-aurora-3');
-      root.removeProperty('--spotify-aurora-4');
       root.removeProperty('--spotify-ambient-accent');
       root.removeProperty('--spotify-ambient-glow');
-      root.removeProperty('--spotify-aurora-glow-soft');
+      root.removeProperty('--spotify-ambient-glow-card');
+      root.removeProperty('--spotify-ambient-glow-card-deep');
+      root.removeProperty('--spotify-ambient-text-glow');
+      root.removeProperty('--spotify-ambient-border');
+      root.removeProperty('--spotify-ambient-corner-glow');
     }
 
     return () => {
@@ -318,27 +288,20 @@ const NowPlaying = () => {
 
   return (
     <>
-      {/* Full-site Spotify Ambient Natural Colorshifting Aurora */}
-      <div className={`spotify-ambient-aurora-canvas ${currentTrack.isPlaying ? 'spotify-playing' : ''}`} aria-hidden="true">
-        <div className="aurora-beam aurora-beam--top" />
-        <div className="aurora-beam aurora-beam--mid" />
-        <div className="aurora-beam aurora-beam--bottom" />
-        <div className="aurora-beam aurora-beam--shimmer" />
-      </div>
-
+      {/* Docked pill on the screen edge when player is minimized */}
       {minimized ? (
         <button
           className="np-dock"
           onClick={toggleMinimized}
           aria-label="Expand Spotify widget"
-          title="Show Now Playing"
+          title="Show Spotify Player"
         >
           <SpotifyIcon size={16} />
           <Waveform isPlaying={currentTrack.isPlaying} />
         </button>
       ) : (
         <div className="np-wrapper">
-          {/* Dynamic ambient chroma glow behind widget */}
+          {/* Subtle natural backshadow glow behind the card */}
           {currentTrack.albumArt && !imgError && (
             <div
               className={`np-ambient-glow ${currentTrack.isPlaying ? 'np-ambient-glow--active' : ''}`}
@@ -348,105 +311,106 @@ const NowPlaying = () => {
           )}
 
           <div className="np-widget">
-            {/* Subtle inner ambient color aura from album artwork */}
-            {currentTrack.albumArt && !imgError && (
-              <div
-                className="np-inner-glow"
-                style={{ backgroundImage: `url(${currentTrack.albumArt})` }}
-                aria-hidden="true"
-              />
-            )}
-
-            {/* Album art */}
-            <div className="np-art-wrap">
-              {currentTrack.albumArt && !imgError ? (
-                <img
-                  src={currentTrack.albumArt}
-                  alt={currentTrack.album || currentTrack.title}
-                  className="np-art"
-                  loading="lazy"
-                  onError={() => setImgError(true)}
-                />
-              ) : (
-                <div className="np-art np-art--placeholder">
-                  <SpotifyIcon size={24} />
-                </div>
-              )}
-              {currentTrack.isPlaying && (
-                <div className="np-art-overlay">
-                  <Waveform isPlaying />
-                </div>
-              )}
-            </div>
-
-            {/* Track info */}
-            <div className="np-info">
-              <div className="np-status-row">
+            {/* 1. Header: Live indicator, Spotify external link, and minimize button */}
+            <div className="np-header">
+              <div className="np-status-tag">
                 <span className={`np-status-dot ${currentTrack.isPlaying ? 'np-status-dot--live' : ''}`} />
                 <span className="np-status-text">
-                  {currentTrack.isPlaying ? 'NOW PLAYING' : 'LAST PLAYED'}
+                  {currentTrack.isPlaying ? 'LIVE ON SPOTIFY' : 'RECENTLY PLAYED'}
                 </span>
-                <span className="np-via">via Spotify</span>
-                <button
-                  className="np-btn-min"
-                  onClick={toggleMinimized}
-                  aria-label="Minimise Spotify widget"
-                  title="Minimise"
-                >
-                  &minus;
-                </button>
               </div>
 
-              <a
-                href={currentTrack.songUrl || 'https://open.spotify.com'}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="np-title"
-                title={`${currentTrack.title} on Spotify`}
-              >
-                {currentTrack.title}
-              </a>
+              <div className="np-header-actions">
+                <a
+                  href={currentTrack.songUrl || 'https://open.spotify.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="np-spotify-link"
+                  title="Open track on Spotify"
+                  aria-label="Open track on Spotify"
+                >
+                  <SpotifyIcon size={15} />
+                </a>
 
-              <p className="np-artist">{currentTrack.artist}</p>
+                <button
+                  className="np-btn-minimize"
+                  onClick={toggleMinimized}
+                  aria-label="Minimize Spotify player"
+                  title="Minimize player"
+                >
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
 
-              {/* Progress bar */}
-              <div className="np-progress-bar-wrap">
-                <div className="np-progress-bar">
-                  <div
-                    ref={progressRef}
-                    className="np-progress-fill"
-                    style={{ width: `${progressPct}%` }}
+            {/* 2. Body: Artwork + Details */}
+            <div className="np-body">
+              <div className="np-art-wrap">
+                {currentTrack.albumArt && !imgError ? (
+                  <img
+                    src={currentTrack.albumArt}
+                    alt={currentTrack.album || currentTrack.title}
+                    className={`np-art ${currentTrack.isPlaying ? 'np-art--playing' : ''}`}
+                    loading="lazy"
+                    onError={() => setImgError(true)}
                   />
-                </div>
-                {currentTrack.duration > 0 && (
-                  <div className="np-time-row">
-                    <span>{formatMs(currentTrack.progress || 0)}</span>
-                    <span>{formatMs(currentTrack.duration)}</span>
+                ) : (
+                  <div className="np-art np-art--placeholder">
+                    <SpotifyIcon size={22} />
+                  </div>
+                )}
+                {currentTrack.isPlaying && (
+                  <div className="np-art-badge" title="Live audio active">
+                    <Waveform isPlaying />
                   </div>
                 )}
               </div>
 
-              {/* Preview Audio player if Spotify gives a 30s preview */}
-              {currentTrack.previewUrl && (
-                <div className="np-preview-wrap">
-                  <audio ref={audioRef} src={currentTrack.previewUrl} onEnded={() => setPreviewPlaying(false)} />
-                  <button className="np-preview-btn" onClick={togglePreview}>
-                    {previewPlaying ? 'Pause Sample ⏸' : 'Listen Sample ▶'}
+              <div className="np-details">
+                <a
+                  href={currentTrack.songUrl || 'https://open.spotify.com'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="np-title"
+                  title={`${currentTrack.title} on Spotify`}
+                >
+                  {currentTrack.title}
+                </a>
+
+                <p className="np-artist" title={currentTrack.artist}>
+                  {currentTrack.artist}
+                </p>
+
+                {currentTrack.previewUrl && (
+                  <button className="np-preview-btn" onClick={togglePreview} title="Listen to 30s sample">
+                    {previewPlaying ? 'Pause Sample ⏸' : '30s Sample ▶'}
                   </button>
+                )}
+              </div>
+            </div>
+
+            {/* 3. Footer: Progress Track and Time Row */}
+            <div className="np-progress-section">
+              <div className="np-progress-track">
+                <div
+                  ref={progressRef}
+                  className="np-progress-fill"
+                  style={{ width: `${progressPct}%` }}
+                />
+              </div>
+              {currentTrack.duration > 0 && (
+                <div className="np-time-row">
+                  <span>{formatMs(currentTrack.progress || 0)}</span>
+                  <span>{formatMs(currentTrack.duration)}</span>
                 </div>
               )}
             </div>
 
-            {/* Spotify brand link */}
-            <a
-              href={currentTrack.songUrl || 'https://open.spotify.com'}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="np-spotify-link"
-              aria-label="Open on Spotify"
-            >
-              <SpotifyIcon size={20} />
-            </a>
+            {currentTrack.previewUrl && (
+              <audio ref={audioRef} src={currentTrack.previewUrl} onEnded={() => setPreviewPlaying(false)} />
+            )}
           </div>
         </div>
       )}

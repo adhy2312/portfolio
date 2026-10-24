@@ -108,6 +108,17 @@ body.dark-mode {
 }
 
 /* ═══════════════════════════════════════════
+   SPOTIFY AMBIENT LIGHTING: SHADOW INTEGRATION
+   Updates all elements using brutalist shadows with dynamic track glow
+═══════════════════════════════════════════ */
+body.spotify-ambient-active {
+  --shadow-brutal: 5px 5px 0px var(--spotify-ambient-accent), 0 10px 30px var(--spotify-ambient-glow-card);
+  --shadow-brutal-hover: 2px 2px 0px var(--spotify-ambient-accent), 0 14px 40px var(--spotify-ambient-glow-card-deep);
+  --shadow-brutal-deep: 10px 10px 0px var(--spotify-ambient-accent), 0 20px 45px var(--spotify-ambient-glow-card-deep);
+}
+
+
+/* ═══════════════════════════════════════════
    GLOBAL SOUL ILLUMINATION (Subtle Grid)
 ═══════════════════════════════════════════ */
 .App::before {
