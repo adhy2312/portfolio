@@ -6,6 +6,7 @@ export default {
     { name: 'title', title: 'Category Title', type: 'string' },
     { name: 'color', title: 'Category Color', type: 'string', description: 'Hex code, e.g., #6C63FF' },
     { name: 'iconName', title: 'Icon Name', type: 'string', description: 'Name of feather icon, e.g., FiMonitor' },
+    { name: 'order', title: 'Display Order', type: 'number', initialValue: 99 },
     { 
       name: 'skills', 
       title: 'Skills', 
@@ -14,8 +15,8 @@ export default {
         {
           type: 'object',
           fields: [
-            { name: 'name', type: 'string' },
-            { name: 'level', type: 'number', validation: Rule => Rule.min(0).max(100) }
+            { name: 'name', title: 'Skill Name', type: 'string' },
+            { name: 'level', title: 'Proficiency (0–100)', type: 'number', validation: Rule => Rule.min(0).max(100) }
           ]
         }
       ] 
