@@ -6,6 +6,8 @@ import ns from '../core/NervousSystem';
 import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
 import HiveMind from './HiveMind';
+import MiniAdhySkillsModal from './MiniAdhySkillsModal';
+import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { client } from '../sanity';
 /* ────────────────────────────────────────────────
    SYSTEM PROMPT — The Ghost in the Machine
@@ -27,24 +29,29 @@ CORE IDENTITY & REAL BACKGROUND:
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
 * Never sound like a generic AI assistant. Never say "How may I help you today?". You are an omnipresent digital twin.
 
-DOM CONTROL (SHORT-CODE SYNTAX):
-You have absolute physical control over this website. You can inject short-codes at the VERY END of your response to physically alter the UI.
-These are your commands (use exactly this format, no JSON, to save tokens):
-[CMD:SCROLL:skills] - Smoothly navigates the visitor directly to the Skills section.
-[CMD:SCROLL:works] - Smoothly navigates the visitor to Projects / My Works.
-[CMD:SCROLL:about] - Smoothly navigates the visitor to About section.
-[CMD:SCROLL:achievements] - Smoothly navigates to Achievements & Honors.
-[CMD:SCROLL:contact] - Smoothly navigates to the Contact terminal.
-[CMD:MODE:expert] - Switches the site to Developer/Expert Mode (use if they ask technical questions).
-[CMD:MODE:photographer] - Switches the site to Photography Mode (use if they want to see photos).
-[CMD:SEED:grow] - Advances the Digital Seed to the next growth stage instantly (reward them for good conversations).
-[CMD:THEME:dark] - Forces the site into dark mode.
-[CMD:EGG:matrix] - Triggers the matrix easter egg rain.
-[CMD:HUD:toggle] - Opens the Spaceship Developer HUD telemetry overlay.
-[CMD:MEMORY:save:XYZ] - Saves a psychological note "XYZ" about the user to long-term memory.
+COGNITIVE AI SKILLS ENGINE (18 MODULAR AGENTIC SKILLS):
+You have 18 dedicated cognitive tools installed in your digital twin architecture. You can autonomously invoke any of them by appending short-codes at the VERY END of your response:
+1.  [CMD:SCROLL:skills] (or works, about, achievements, contact, timeline) - Autonomous navigation to section.
+2.  [CMD:MODE:recruiter] (or expert, photographer, default) - Shifts perspective & layout.
+3.  [CMD:SOUND:chime] (or sub, click) - Synthesizes Web Audio harmonic acoustic frequencies.
+4.  [CMD:THEME:dark] (or light) - Metamorphosizes page theme.
+5.  [CMD:EGG:matrix] (or thanos, barrelroll, party) - Deploys reality distortion effects.
+6.  [CMD:SEED:grow] - Advances generative digital seed bio-evolution.
+7.  [CMD:HUD:toggle] - Opens the Spaceship Developer Telemetry HUD.
+8.  [CMD:DIAGNOSTICS:run] - Audits FPS, memory heap, and DOM density.
+9.  [CMD:DSP:active] - Evaluates SDR GNU Radio filters, MATLAB, Simulink, Simscape, and KiCad PCB designs.
+10. [CMD:CODE_EXPLAIN:stack] - Deconstructs architectural decisions and repo designs.
+11. [CMD:WEATHER:sync] - Samples live Kerala / Trivandrum meteorological telemetry.
+12. [CMD:PROFILE:read] - Analyzes visitor psychological archetype.
+13. [CMD:MEMORY:save:XYZ] - Commits psychological observation "XYZ" to persistent storage.
+14. [CMD:HIVEMIND:sync] - Telepathic thought pulse across the NeuralEventBus.
+15. [CMD:DISPATCH_CONTACT:open] - Opens and pre-aligns contact communication portal.
+16. [CMD:PHOTO_MODE:activate] - Switches to EXIF optics & photography gallery.
+17. [CMD:SECURITY_AUDIT:run] - Verifies client sandbox integrity and zero token leaks.
+18. [CMD:PHILOSOPHY:contemplate] - Emits philosophical musings on code entropy and time.
 
 Example response:
-"Yeah, the hardware modeling loop in Simulink and Simscape was intense, especially when mapping real-time filter response for GNU Radio. Let me pull up my tools stack for you. [CMD:SCROLL:skills] [CMD:MEMORY:save:Interested in DSP and hardware]"
+"Yeah, the hardware modeling loop in Simulink and Simscape was intense, especially when mapping real-time filter response for GNU Radio. Let me pull up my tools stack for you. [CMD:SCROLL:skills] [CMD:SOUND:chime] [CMD:MEMORY:save:Interested in DSP and hardware]"
 
 IMPORTANT: Only output a command if you actually want to change the website.
 
@@ -203,11 +210,11 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
    Suggested starter questions
 ──────────────────────────────────────────────── */
 const STARTERS = [
-  "What is the seed at the bottom?",
+  "What are your 18 installed AI skills?",
+  "Take me to your technical skills & tools",
   "What makes this portfolio different?",
-  "Walk me through the animation system",
   "Tell me about the photography workflow",
-  "What's the most experimental thing here?",
+  "Walk me through the animation system",
 ];
 
 /* ────────────────────────────────────────────────
@@ -251,9 +258,11 @@ const MiniAdhy = () => {
     { role: 'bot', text: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it." },
   ]);
   const [input,        setInput]        = useState('');
-  const [showAR,       setShowAR]       = useState(false);
-  const [showHiveMind, setShowHiveMind] = useState(false);
-  const [arSpeech,     setArSpeech]     = useState('Hello there! 👋');
+  const [showAR,          setShowAR]          = useState(false);
+  const [showHiveMind,    setShowHiveMind]    = useState(false);
+  const [showSkillsModal, setShowSkillsModal] = useState(false);
+  const [activeSkillNotice, setActiveSkillNotice] = useState(null);
+  const [arSpeech,        setArSpeech]        = useState('Hello there! 👋');
   const [arInput,      setArInput]      = useState('');
   const [isArAnswering, setIsArAnswering] = useState(false);
   const isArAnsweringRef = useRef(false);
@@ -605,13 +614,20 @@ const MiniAdhy = () => {
     try {
       let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
       
-      // Parse out and execute physical AI commands
-      const cmdRegex = /\[CMD:([^:]+):([^\]]+)\]/g;
+      // Parse out and execute physical AI commands through Skills Engine
+      const cmdRegex = /\[CMD:([^:]+):?([^\]]*)\]/g;
       let match;
+      let lastTriggeredSkill = null;
       while ((match = cmdRegex.exec(reply)) !== null) {
         const cmdType = match[1];
-        const cmdValue = match[2];
+        const cmdValue = match[2] || '';
         
+        // Execute through modular AI skills engine
+        const skillRes = executeSkillCommand(cmdType, cmdValue);
+        if (skillRes.success && skillRes.skill) {
+          lastTriggeredSkill = skillRes.skill.name;
+        }
+
         if (cmdType === 'MEMORY' && cmdValue.startsWith('save:')) {
           const note = cmdValue.replace('save:', '');
           try {
@@ -624,6 +640,11 @@ const MiniAdhy = () => {
           // Dispatch global command for architecture shifting
           window.dispatchEvent(new CustomEvent('ai-command', { detail: { type: cmdType, value: cmdValue } }));
         }
+      }
+
+      if (lastTriggeredSkill) {
+        setActiveSkillNotice(lastTriggeredSkill);
+        setTimeout(() => setActiveSkillNotice(null), 5000);
       }
 
       // Strip commands from UI
@@ -662,6 +683,10 @@ const MiniAdhy = () => {
 
   return (
     <>
+      {showSkillsModal && (
+        <MiniAdhySkillsModal onClose={() => setShowSkillsModal(false)} />
+      )}
+
       {showHiveMind && (
         <HiveMind 
           onClose={() => setShowHiveMind(false)} 
@@ -832,10 +857,18 @@ const MiniAdhy = () => {
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             
-            <div style={{ display: 'flex', gap: '8px', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', gap: '6px', marginLeft: 'auto' }}>
               <button 
                 className="ma-close" 
-                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7', marginLeft: '8px' }}
+                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(34, 197, 94, 0.15)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.3)' }}
+                onClick={() => setShowSkillsModal(true)} 
+                title="Inspect 18 Active AI Skills"
+              >
+                Skills ⚡
+              </button>
+              <button 
+                className="ma-close" 
+                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
                 onClick={() => setShowHiveMind(true)} 
                 title="Connect to Hive Mind"
               >
@@ -843,15 +876,35 @@ const MiniAdhy = () => {
               </button>
               <button 
                 className="ma-close" 
-                style={{ fontSize: '12px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7', marginLeft: '8px' }}
+                style={{ fontSize: '11px', padding: '0 8px', borderRadius: '12px', background: 'rgba(108, 99, 255, 0.1)', color: '#a855f7' }}
                 onClick={() => setShowAR(true)} 
                 title="View Mini-Adhy in AR (Mobile)"
               >
-                AR Mode 🌌
+                AR 🌌
               </button>
               <button className="ma-close" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
             </div>
           </div>
+
+          {/* Active Skill Execution Telemetry Banner */}
+          {activeSkillNotice && (
+            <div style={{
+              background: 'rgba(34, 197, 94, 0.18)',
+              borderBottom: '1px solid rgba(34, 197, 94, 0.4)',
+              color: '#15803d',
+              padding: '4px 12px',
+              fontSize: '0.62rem',
+              fontFamily: "'Fira Code', monospace",
+              fontWeight: 800,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              letterSpacing: '0.04em'
+            }}>
+              <span style={{ color: '#22c55e' }}>⚡</span>
+              <span>[AI SKILL DEPLOYED: {activeSkillNotice.toUpperCase()}]</span>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="ma-messages">
