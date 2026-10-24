@@ -80,7 +80,6 @@ const Testimonials = lazy(dynamicImports.Testimonials);
 const Contact = lazy(dynamicImports.Contact);
 const Footer = lazy(dynamicImports.Footer);
 const CallToAction = lazy(dynamicImports.CallToAction);
-const ScrollProgress = lazy(dynamicImports.ScrollProgress);
 const ZipGame = lazy(dynamicImports.ZipGame);
 const TicTacToe = lazy(dynamicImports.TicTacToe);
 const SnakeGame = lazy(dynamicImports.SnakeGame);
@@ -403,9 +402,6 @@ function AppContent() {
     <>
       {dreamState && <DreamStateLoader onAwake={() => setDreamState(false)} />}
 
-      <Suspense fallback={null}>
-        <ScrollProgress />
-      </Suspense>
       <SiteModeSwitcher />
       {loading && <PageLoader onDone={() => setLoading(false)} />}
 

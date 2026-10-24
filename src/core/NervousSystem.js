@@ -432,8 +432,14 @@ class NervousSystem {
   _setupGlobalListeners() {
     this._lastMoveTime = 0;
     const onMove = (e) => {
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      let clientX = e.clientX;
+      let clientY = e.clientY;
+      if (e.touches && e.touches.length > 0) {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      } else if (clientX === undefined) {
+        return;
+      }
       
       const vx = this.mousePos.x !== -1000 ? clientX - this.mousePos.x : 0;
       const vy = this.mousePos.y !== -1000 ? clientY - this.mousePos.y : 0;
