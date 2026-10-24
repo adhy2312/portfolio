@@ -284,23 +284,26 @@ const NowPlaying = () => {
       {/* Docked pill on the screen edge when player is minimized */}
       {minimized ? (
         <button
-          className="np-dock"
+          className="np-dock np-dock--brutalist"
           onClick={toggleMinimized}
-          aria-label="Expand Spotify widget"
-          title="Show Spotify Player"
+          aria-label="Expand Spotify player"
+          title="Show Neo-Brutalist Spotify Player"
         >
-          <SpotifyIcon size={16} />
+          <div className={`np-dock-disc ${currentTrack.isPlaying ? 'np-dock-disc--spinning' : ''}`}>
+            <div className="np-dock-disc-hole" />
+          </div>
+          <span className="np-dock-label">SPOTIFY</span>
           <Waveform isPlaying={currentTrack.isPlaying} />
         </button>
       ) : (
         <div className="np-wrapper">
-          <div className="np-widget">
-            {/* 1. Header: Status Tag + External Link + Minimize Button */}
+          <div className="np-widget np-widget--brutalist">
+            {/* 1. Header: Neo-Brutalist Status Tag + External Link + Minimize Button */}
             <div className="np-header">
-              <div className="np-status-tag">
+              <div className={`np-status-tag ${currentTrack.isPlaying ? 'np-status-tag--live' : ''}`}>
                 <span className={`np-status-dot ${currentTrack.isPlaying ? 'np-status-dot--live' : ''}`} />
                 <span className="np-status-text">
-                  {currentTrack.isPlaying ? 'NOW PLAYING' : 'SPOTIFY PAUSED'}
+                  {currentTrack.isPlaying ? 'ON AIR // SPOTIFY' : 'PAUSED // SPOTIFY'}
                 </span>
               </div>
 
@@ -328,30 +331,55 @@ const NowPlaying = () => {
               </div>
             </div>
 
-            {/* 2. Body: Artwork + Track Details */}
+            {/* 2. Body: Neo-Brutalist Spinning Vinyl Disc + Track Details */}
             <div className="np-body">
-              <div className="np-art-wrap">
-                {currentTrack.albumArt && !imgError ? (
-                  <img
-                    src={currentTrack.albumArt}
-                    alt={currentTrack.album || currentTrack.title}
-                    className={`np-art ${currentTrack.isPlaying ? 'np-art--playing' : ''}`}
-                    loading="lazy"
-                    onError={() => setImgError(true)}
-                  />
-                ) : (
-                  <div className="np-art np-art--placeholder">
-                    <SpotifyIcon size={22} />
+              {/* Spinning Music Vinyl Disc */}
+              <div
+                className="np-disc-stage"
+                onClick={() => {
+                  if (currentTrack.songUrl) {
+                    window.open(currentTrack.songUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }}
+                title={currentTrack.isPlaying ? `Now Spinning: ${currentTrack.title}` : `Paused: ${currentTrack.title}`}
+              >
+                <div className={`np-vinyl-disc ${currentTrack.isPlaying ? 'np-vinyl-disc--spinning' : 'np-vinyl-disc--paused'}`}>
+                  {/* Realistic Grooves & Sheen */}
+                  <div className="np-vinyl-grooves" />
+                  <div className="np-vinyl-sheen" />
+                  
+                  {/* Center Album Art Label */}
+                  <div className="np-vinyl-label">
+                    {currentTrack.albumArt && !imgError ? (
+                      <img
+                        src={currentTrack.albumArt}
+                        alt={currentTrack.album || currentTrack.title}
+                        className="np-vinyl-art"
+                        loading="lazy"
+                        onError={() => setImgError(true)}
+                      />
+                    ) : (
+                      <div className="np-vinyl-art-fallback">
+                        <SpotifyIcon size={18} />
+                      </div>
+                    )}
+                    <div className="np-vinyl-spindle" />
                   </div>
-                )}
-                {currentTrack.isPlaying && (
-                  <div className="np-art-badge" title="Live audio active">
-                    <Waveform isPlaying />
-                  </div>
-                )}
+                </div>
+
+                {/* Turntable Stylus / Needle Indicator */}
+                <div className={`np-tonearm ${currentTrack.isPlaying ? 'np-tonearm--playing' : ''}`}>
+                  <div className="np-tonearm-head" />
+                </div>
               </div>
 
+              {/* Track Details */}
               <div className="np-details">
+                <div className="np-meta-badges">
+                  <span className="np-badge-brutal">33 RPM</span>
+                  {currentTrack.isPlaying && <Waveform isPlaying />}
+                </div>
+
                 <a
                   href={currentTrack.songUrl || 'https://open.spotify.com'}
                   target="_blank"
@@ -368,13 +396,13 @@ const NowPlaying = () => {
 
                 {currentTrack.previewUrl && (
                   <button type="button" className="np-preview-btn" onClick={togglePreview} title="Listen to 30s sample">
-                    {previewPlaying ? 'Pause Sample ⏸' : '30s Sample ▶'}
+                    {previewPlaying ? '⏸ PAUSE 30S' : '▶ 30S PREVIEW'}
                   </button>
                 )}
               </div>
             </div>
 
-            {/* 3. Footer: Progress Track and Time Row */}
+            {/* 3. Footer: Chunky Neo-Brutalist Progress Track & Time Row */}
             <div className="np-progress-section">
               <div className="np-progress-track">
                 <div
@@ -386,6 +414,7 @@ const NowPlaying = () => {
               {currentTrack.duration > 0 && (
                 <div className="np-time-row">
                   <span>{formatMs(currentTrack.progress || 0)}</span>
+                  <span className="np-live-tag">{currentTrack.isPlaying ? 'STREAMING' : 'IDLE'}</span>
                   <span>{formatMs(currentTrack.duration)}</span>
                 </div>
               )}
