@@ -144,6 +144,13 @@ const skillCategories = [
     color: '#ec4899',
     order: 8,
     skills: [
+      { name: 'Google Antigravity', level: 90 },
+      { name: 'opencode CLI', level: 80 },
+      { name: 'MATLAB', level: 80 },
+      { name: 'Simulink', level: 80 },
+      { name: 'Simscape', level: 80 },
+      { name: 'GNU Radio', level: 80 },
+      { name: 'KiCad', level: 75 },
       { name: 'Git', level: 90 },
       { name: 'GitHub', level: 92 },
       { name: 'VS Code', level: 94 },
@@ -151,6 +158,27 @@ const skillCategories = [
       { name: 'Wokwi', level: 85 },
     ],
   },
+];
+
+const DEFAULT_LEARNING_GOALS = [
+  {
+    title: 'Linux',
+    domain: 'Kernel Architecture & POSIX SysAdmin',
+    status: 'planned',
+    tags: ['Kernel Internals', 'Shell Scripting', 'Systemd', 'POSIX Environments']
+  },
+  {
+    title: 'Mobile App Dev',
+    domain: 'Cross-Platform Mobile Engineering',
+    status: 'planned',
+    tags: ['React Native', 'Flutter', 'Mobile UX', 'Hardware Bridges']
+  },
+  {
+    title: 'Cybersecurity',
+    domain: 'Offensive & Defensive Security Systems',
+    status: 'planned',
+    tags: ['AppSec', 'Threat Modeling', 'Packet Analysis', 'Cryptographic Primitives']
+  }
 ];
 
 // ─── Precision Dial Constants & Geometry ──────────────────
@@ -869,6 +897,7 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
 // ─── Main Skills Component ────────────────────────────────
 const Skills = () => {
   const [categories, setCategories] = useState(skillCategories);
+  const [learningGoals, setLearningGoals] = useState(DEFAULT_LEARNING_GOALS);
   const [activeIndex, setActiveIndex] = useState(null);
   const [panelVisible, setPanelVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -879,9 +908,17 @@ const Skills = () => {
   const hasStory = !!getStoryForSection('skills');
 
   useEffect(() => {
+    // Fetch skill categories
     client.fetch('*[_type == "skillCategory"] | order(order asc)')
       .then(data => {
         if (data && data.length > 0) setCategories(data);
+      })
+      .catch(() => {});
+
+    // Fetch learning goals (horizon & radar)
+    client.fetch('*[_type == "learningGoal"] | order(order asc)')
+      .then(data => {
+        if (data && data.length > 0) setLearningGoals(data);
       })
       .catch(() => {});
   }, []);
@@ -931,10 +968,11 @@ const Skills = () => {
     <section className="skills" id="skills" ref={sectionRef}>
       <ExpertDoc
         title="Skills.js"
-        notes="Radial Sunburst + Sanity CMS."
+        notes="Radial Instrument + Learning Horizon + Sanity CMS."
         data={{
-          'visualization': 'SVG Radial Sunburst',
+          'visualization': 'Precision Chronograph Radial Instrument',
           'categories': displayCategories.length,
+          'learningHorizon': learningGoals.length,
           'interaction': 'Click segment → side panel',
           'contentSource': 'Sanity CMS (GROQ)',
           'animationEngine': 'GSAP',
@@ -979,9 +1017,41 @@ const Skills = () => {
             {!panelVisible && (
               <div className="skill-panel-placeholder">
                 <span className="skill-panel-placeholder-icon">↖</span>
-                <p>Select a domain from the chart to explore capabilities</p>
+                <p>Select a domain from the dial to inspect verified capabilities</p>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* ─── Currently Planning to Learn (Learning Horizon & Radar) ─── */}
+        <div className="skills-learning-radar">
+          <div className="learning-radar-header">
+            <div className="learning-radar-badge">
+              <span className="learning-radar-pulse" />
+              <span>HORIZON & RADAR</span>
+            </div>
+            <h3 className="learning-radar-title">Currently Planning to Learn</h3>
+            <p className="learning-radar-subtitle">Active research frontiers & technical explorations</p>
+          </div>
+
+          <div className="learning-radar-grid">
+            {learningGoals.map((goal, idx) => (
+              <div key={idx} className="learning-card specular-card">
+                <div className="learning-card-top">
+                  <span className="learning-card-index">0{idx + 1}</span>
+                  <span className="learning-card-status">HORIZON</span>
+                </div>
+                <h4 className="learning-card-title">{goal.title}</h4>
+                <p className="learning-card-domain">{goal.domain}</p>
+                {goal.tags && (
+                  <div className="learning-card-tags">
+                    {goal.tags.map((tag, tidx) => (
+                      <span key={tidx} className="learning-tag">{tag}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       </div>

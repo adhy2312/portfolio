@@ -22,12 +22,13 @@ import statsBento from './statsBento'
 import hardwareNexus from './hardwareNexus'
 import page from './page'
 import visualOptions from './visualOptions'
-import atomicBlockContent from './atomicBlockContent'
 import atomicTextBlock from './atomicTextBlock'
+import learningGoal from './learningGoal'
 
 export const schemaTypes = [
   atomicBlockContent,
   atomicTextBlock,
+  learningGoal,
   hero,
   about,
   skillCategory,

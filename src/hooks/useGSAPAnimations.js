@@ -29,8 +29,8 @@ gsap.defaults({
   ease: 'power3.out'
 });
 ScrollTrigger.config({
-  ignoreMobileResize: true, // Prevents lag when address bar collapses on mobile
-  syncInterval: 999999999   // Let requestAnimationFrame handle sync
+  ignoreMobileResize: true,
+  autoRefreshEvents: 'visibilitychange,DOMContentLoaded,load,resize',
 });
 
 // ─── Shared Config ──────────────────────────────────────

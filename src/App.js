@@ -270,10 +270,8 @@ function AppContent() {
       console.log(`[Ghost In The Machine] Executing Command: ${type}:${value}`);
       
       if (type === 'MODE') {
-        // e.g. [CMD:MODE:expert] -> physically changes the site
         const modes = ['default', 'recruiter', 'expert', 'photographer', 'experimental'];
         if (modes.includes(value)) {
-          // Find the mode switcher context or trigger event
           window.dispatchEvent(new CustomEvent('switch-mode-direct', { detail: value }));
         }
       } else if (type === 'SEED') {
@@ -281,6 +279,28 @@ function AppContent() {
       } else if (type === 'THEME') {
         if (value === 'dark') document.body.classList.add('dark-theme-override');
         if (value === 'light') document.body.classList.remove('dark-theme-override');
+      } else if (type === 'SCROLL' || type === 'FOCUS') {
+        const targetKey = (value || '').toLowerCase();
+        const selectorMap = {
+          hero: '#hero, .hero-section',
+          about: '#about, .about-section',
+          skills: '#skills, .skills-section',
+          works: '#works, .projects-section, .my-works-section',
+          projects: '#projects, .projects-section, .my-works-section',
+          timeline: '#timeline, .timeline-section',
+          achievements: '#achievements, .stats-bento, .achievements-section',
+          photography: '#photography, .photography-section',
+          contact: '#contact, .contact-section'
+        };
+        const selector = selectorMap[targetKey] || `#${targetKey}`;
+        const targetEl = document.querySelector(selector);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      } else if (type === 'EGG') {
+        triggerEgg(value, 2000);
+      } else if (type === 'HUD') {
+        setDevHudOpen(prev => !prev);
       }
     };
     window.addEventListener('ai-command', handleAiCommand);
@@ -472,9 +492,7 @@ function AppContent() {
           <>
             <LazySection name="About"><About /></LazySection>
             <LazySection name="Skills"><Skills /></LazySection>
-            <LazySection name="TechDNA"><TechDNA /></LazySection>
             <LazySection name="StatsBento"><StatsBento /></LazySection>
-            <LazySection name="NeuralMap"><NeuralMap /></LazySection>
             <LazySection name="Experience"><Experience /></LazySection>
             <LazySection name="MyWorks"><MyWorks /></LazySection>
             <LazySection name="Timeline"><Timeline /></LazySection>

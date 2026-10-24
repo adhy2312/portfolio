@@ -2,7 +2,10 @@ import fs from 'fs';
 
 const projectId = 'uefti8ya';
 const dataset = 'production';
-const token = 'skmKooOgdssGcNS7YKy3HqoObdNQ78RKVN7SVau6WZQ9BbCuvN4ZxwXmbsBTicPK8VRtDVafG0fnRWHbPlwMoJvh7ksl4JE1WOHEUwhclmoPmHz1YMjApDVOiJ9qujAcQnmHmDm49uTyhiPsMD5muayPDtrlYyS6bQhBefwioxqI6zjoKpg7';
+const token = process.env.SANITY_WRITE_TOKEN;
+if (!token) {
+  console.error("Missing SANITY_WRITE_TOKEN in environment. Please provide via environment variable.");
+}
 
 const projects = [
   {

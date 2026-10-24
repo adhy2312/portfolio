@@ -408,18 +408,31 @@ export const ConsciousnessProvider = ({ children }) => {
 
   // ─── 2. PRESENCE DETECTION ENGINE ───
   useEffect(() => {
+    let lastMoveSample = 0;
+
     const resetIdle = (e) => {
-      lastActive.current = Date.now();
-      sessionInteractions.current += 1;
-      ns.state.idleSeconds = 0;               // Instant direct write
+      const now = Date.now();
+      lastActive.current = now;
+      ns.state.idleSeconds = 0;
+
       if (e?.type === 'mousemove') {
-        const dx = e.clientX - lastMousePos.current.x;
-        const dy = e.clientY - lastMousePos.current.y;
-        adrenalineRef.current = Math.min(100, adrenalineRef.current + Math.sqrt(dx*dx + dy*dy) * 0.15);
-        lastMousePos.current = { x: e.clientX, y: e.clientY };
+        if (now - lastMoveSample < 60) return; // Throttle to max 16fps samples to eliminate 1000Hz mouse lag
+        lastMoveSample = now;
+        sessionInteractions.current += 1;
+        const dx = Math.abs(e.clientX - lastMousePos.current.x);
+        const dy = Math.abs(e.clientY - lastMousePos.current.y);
+        adrenalineRef.current = Math.min(100, adrenalineRef.current + (dx + dy) * 0.1);
+        lastMousePos.current.x = e.clientX;
+        lastMousePos.current.y = e.clientY;
       } else if (e?.type === 'scroll') {
-        adrenalineRef.current = Math.min(100, adrenalineRef.current + 40);
+        if (now - lastMoveSample < 100) return;
+        lastMoveSample = now;
+        sessionInteractions.current += 1;
+        adrenalineRef.current = Math.min(100, adrenalineRef.current + 30);
+      } else {
+        sessionInteractions.current += 1;
       }
+
       if (idleTimeRef.current > 0) {
         idleTimeRef.current = 0;
         setIdleState('active');
@@ -433,16 +446,16 @@ export const ConsciousnessProvider = ({ children }) => {
     window.addEventListener('scroll',    resetIdle, { passive: true });
     window.addEventListener('touchstart',resetIdle, { passive: true });
 
-    // Adrenaline decay + consciousness recalculation + NervousSystem sync
+    // Adrenaline decay + consciousness recalculation + NervousSystem sync (relaxed to 1s)
     const decayTimer = setInterval(() => {
-      adrenalineRef.current = Math.max(0, adrenalineRef.current - 8);
+      adrenalineRef.current = Math.max(0, adrenalineRef.current - 12);
       const idle = Math.floor((Date.now() - lastActive.current) / 1000);
       ns.state.adrenaline        = adrenalineRef.current;
       ns.state.idleSeconds       = idle;
       ns.state.isDreaming        = idle >= 60;
       ns.state.isSystemThinking  = isSystemThinkingRef.current;
       recalculateConsciousness();
-    }, 400);
+    }, 1000);
 
     // Battery Symbiosis
     if ('getBattery' in navigator) {

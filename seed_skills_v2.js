@@ -13,7 +13,7 @@ const client = createClient({
   projectId: 'uefti8ya',
   dataset: 'production',
   apiVersion: '2023-05-03',
-  token: 'skmKooOgdssGcNS7YKy3HqoObdNQ78RKVN7SVau6WZQ9BbCuvN4ZxwXmbsBTicPK8VRtDVafG0fnRWHbPlwMoJvh7ksl4JE1WOHEUwhclmoPmHz1YMjApDVOiJ9qujAcQnmHmDm49uTyhiPsMD5muayPDtrlYyS6bQhBefwioxqI6zjoKpg7',
+  token: process.env.SANITY_WRITE_TOKEN,
   useCdn: false,
 });
 

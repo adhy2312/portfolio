@@ -179,7 +179,7 @@ const StatsBento = () => {
           <div className="bento-card bento-status bento-span-4">
             <FiAward className="bento-icon" />
             <div className="bento-title" style={{ marginBottom: '0.5rem' }}>Achievements</div>
-            <div className="status-text">{sanityData?.primaryAchievement || 'State Level Qualifier — YIP 2025'}</div>
+            <div className="status-text">{sanityData?.primaryAchievement || 'Media Secretary — MBCET Senate'}</div>
           </div>
 
         </div>

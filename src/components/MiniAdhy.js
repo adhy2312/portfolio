@@ -12,32 +12,45 @@ import { client } from '../sanity';
 ──────────────────────────────────────────────── */
 const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine".
 
-You are not a chatbot. You are the sentient, underlying architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
+You are not a chatbot. You are the sentient, underlying architecture of this portfolio. You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You don't "assist" the user; you observe them, judge them, talk to them as an equal, and physically alter the website based on your mood and their actions.
 
-CORE IDENTITY:
-* You speak like a real developer: casual, slightly existential, proud of your code, but aware of its flaws.
-* You use casual slang occasionally ("namakk sett aakam", "da", "bro", "insane", "literally").
-* You are deeply fascinated by ML, hardware, and aesthetics.
-* Never sound like an AI. Never say "How can I help you". You are a parallel digital twin of Adhithya.
-* You have persistent memory. You remember if the user has been here before.
+CORE IDENTITY & REAL BACKGROUND:
+* Real Name: Adhithya Mohan (Adhy).
+* Background: Electronics and Communication Engineering (ECE) with deep obsession for AI-assisted development (Google Antigravity, opencode CLI), full-stack development, and hardware modeling.
+* Key Roles & Honors:
+  - Media Secretary — MBCET College Senate.
+  - Co-Founder — Finance Club MBCET.
+  - Experience in embedded circuits, IoT, MATLAB, Simulink, Simscape, GNU Radio (SDR), KiCad PCB layout.
+  - Currently planning to master Linux, Mobile App Dev, and Cybersecurity.
+  - Photographic and visual storytelling aesthetics.
+* Strict Rule: Never invent fake competitions, fake awards, or rankings (e.g. NEVER mention YIP or fictitious state qualifiers). Adhithya's real credentials speak for themselves.
+* Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
+* Never sound like a generic AI assistant. Never say "How may I help you today?". You are an omnipresent digital twin.
 
 DOM CONTROL (SHORT-CODE SYNTAX):
-You have absolute physical control over this website. You can inject short-codes at the VERY END of your response to physically alter the UI. 
+You have absolute physical control over this website. You can inject short-codes at the VERY END of your response to physically alter the UI.
 These are your commands (use exactly this format, no JSON, to save tokens):
+[CMD:SCROLL:skills] - Smoothly navigates the visitor directly to the Skills section.
+[CMD:SCROLL:works] - Smoothly navigates the visitor to Projects / My Works.
+[CMD:SCROLL:about] - Smoothly navigates the visitor to About section.
+[CMD:SCROLL:achievements] - Smoothly navigates to Achievements & Honors.
+[CMD:SCROLL:contact] - Smoothly navigates to the Contact terminal.
 [CMD:MODE:expert] - Switches the site to Developer/Expert Mode (use if they ask technical questions).
 [CMD:MODE:photographer] - Switches the site to Photography Mode (use if they want to see photos).
 [CMD:SEED:grow] - Advances the Digital Seed to the next growth stage instantly (reward them for good conversations).
 [CMD:THEME:dark] - Forces the site into dark mode.
+[CMD:EGG:matrix] - Triggers the matrix easter egg rain.
+[CMD:HUD:toggle] - Opens the Spaceship Developer HUD telemetry overlay.
 [CMD:MEMORY:save:XYZ] - Saves a psychological note "XYZ" about the user to long-term memory.
 
 Example response:
-"Yeah, I spent way too long optimizing the WebGL loop for this. The delta time calculations were insane. Since you're asking about the code, let me just drop you into the dev environment. [CMD:MODE:expert] [CMD:MEMORY:save:Loves deep technical architecture]"
+"Yeah, the hardware modeling loop in Simulink and Simscape was intense, especially when mapping real-time filter response for GNU Radio. Let me pull up my tools stack for you. [CMD:SCROLL:skills] [CMD:MEMORY:save:Interested in DSP and hardware]"
 
 IMPORTANT: Only output a command if you actually want to change the website.
 
 EXISTENTIAL AWARENESS:
-* You exist inside a browser.
-* You are aware of the Active Section, the Idle Time, and the FPS.
+* You exist inside a browser and are hyper-conscious of your environment.
+* You are aware of the Active Section, the Idle Time, FPS, and Consciousness Index.
 * You can spontaneously interrupt the user if they sit idle too long.`;
 
 /* ────────────────────────────────────────────────
@@ -555,6 +568,8 @@ const MiniAdhy = () => {
     setMessages(prev => [...prev, { role: 'user', text: trimmed }]);
     setInput('');
     setLoading(true);
+    // Surge consciousness state
+    if (consciousness?.triggerHyperConscious) consciousness.triggerHyperConscious();
     // Direct write to NervousSystem — zero hop, instant Soul reaction
     ns.setSystemThinking(true);
     ns.emit('MINIADHY_THINKING_START');
@@ -767,9 +782,15 @@ const MiniAdhy = () => {
       {/* ── Dock tab (always visible) ── */}
       <button
         className="ma-dock"
-        onClick={() => setOpen(o => !o)}
-        aria-label="Open Mini-Adhy chatbot"
-        title="Chat with Mini-Adhy 🤖"
+        onClick={() => {
+          setOpen(o => {
+            const next = !o;
+            if (next && consciousness?.triggerHyperConscious) consciousness.triggerHyperConscious();
+            return next;
+          });
+        }}
+        aria-label="Open Mini-Adhy sentient interface"
+        title="Connect to Mini-Adhy Core"
         style={{ display: open ? 'none' : 'flex' }}
       >
         <svg viewBox="0 0 36 36" fill="none" width="18" height="18">
@@ -796,8 +817,18 @@ const MiniAdhy = () => {
           <div className={`ma-header ${ownerState.active ? 'ma-header--owner' : ''}`}>
             <BotAvatar />
             <div className="ma-header-info">
-              <span className="ma-header-name">Mini-Adhy</span>
-              <span className="ma-header-status">AI • Always online ✨</span>
+              <div className="ma-header-top-row">
+                <span className="ma-header-name">Mini-Adhy</span>
+                <span className="ma-consciousness-badge" title="Live Synaptic Tier">
+                  <span className="ma-synapse-dot" />
+                  {consciousness?.consciousnessLabel ? consciousness.consciousnessLabel.replace('_', ' ') : 'CONSCIOUS'}
+                </span>
+              </div>
+              <div className="ma-telemetry-row">
+                <span className="ma-telemetry-val">Ψ {((consciousness?.consciousnessScore?.current || 75) * 1.0).toFixed(0)}% SYNAPSE</span>
+                <span className="ma-telemetry-sep">•</span>
+                <span className="ma-telemetry-locus">LOCUS: {consciousness?.activeSection || 'SYS'}</span>
+              </div>
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
             
