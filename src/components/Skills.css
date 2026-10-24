@@ -44,91 +44,168 @@
 /* ═══════════════════════════════
    SUNBURST SVG WRAPPER
 ═══════════════════════════════ */
-.sunburst-wrapper {
+/* ═══════════════════════════════
+   SUNBURST PRECISION INSTRUMENT
+═══════════════════════════════ */
+.sunburst-instrument {
   display: flex;
   flex-direction: column;
   align-items: center;
   flex-shrink: 0;
-  gap: 2.4rem;
-  max-width: 420px;
+  gap: 2rem;
+  max-width: 440px;
   width: 100%;
+  position: relative;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transform: perspective(1000px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+/* Atmospheric Chromatic Halo (GPU-composited back-diffusion) */
+.sunburst-ambient-halo {
+  position: absolute;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  background: var(--ambient-color, #6366f1);
+  filter: blur(80px);
+  opacity: 0.28;
+  pointer-events: none;
+  z-index: 0;
+  transition: background 0.4s ease, opacity 0.35s ease;
+  will-change: background;
+}
+
+/* Dynamic Specular Glare Surface */
+.sunburst-glare-surface {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  background: radial-gradient(
+    circle at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.02) 40%,
+    transparent 65%
+  );
+  mix-blend-mode: overlay;
+  transition: background 0.15s ease-out;
 }
 
 .sunburst-svg {
   width: 100%;
-  max-width: 380px;
+  max-width: 420px;
   height: auto;
   overflow: visible;
-  filter: drop-shadow(0 8px 40px rgba(0, 0, 0, 0.35));
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 16px 45px rgba(0, 0, 0, 0.6));
 }
 
-/* Segment hover lift */
-.sunburst-segment {
+/* Radar Sweep Animation (GPU-driven) */
+@keyframes radar-scan {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.sunburst-scanning-ray {
+  transform-origin: 250px 250px;
+  animation: radar-scan 14s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Gear Ring Micro-Spin */
+@keyframes gear-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(-360deg); }
+}
+
+.sunburst-gear-ring {
+  transform-origin: 250px 250px;
+  animation: gear-spin 48s linear infinite;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* Sector Micro-Interactions */
+.sunburst-sector {
   outline: none;
+  cursor: pointer;
 }
 
-.sunburst-segment path:first-of-type {
-  transition: opacity 0.3s ease, transform 0.25s ease;
-  transform-origin: 200px 200px;
+.sunburst-sector:hover path:nth-of-type(2),
+.sunburst-sector:focus path:nth-of-type(2) {
+  filter: brightness(1.2) contrast(1.1);
 }
 
-.sunburst-segment:hover path:first-of-type,
-.sunburst-segment:focus path:first-of-type {
-  opacity: 1 !important;
-  filter: brightness(1.1);
-}
-
-.sunburst-segment--active path {
-  filter: brightness(1.15);
+.sunburst-sector--active path:nth-of-type(2) {
+  filter: brightness(1.25) contrast(1.15);
 }
 
 /* ═══════════════════════════════
-   LEGEND BELOW CHART
+   LEGEND BELOW INSTRUMENT
 ═══════════════════════════════ */
 .sunburst-legend {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.6rem 1rem;
-  max-width: 400px;
+  gap: 0.5rem 0.8rem;
+  max-width: 430px;
+  position: relative;
+  z-index: 2;
 }
 
 .sunburst-legend-item {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 99px;
   padding: 4px 10px;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   color: var(--text-muted);
   font-family: var(--font-mono);
-  font-size: 0.72rem;
+  font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.04em;
+  backdrop-filter: blur(8px);
 }
 
-.sunburst-legend-item:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: var(--text-primary);
-  transform: translateY(-1px);
+.sunburst-legend-item:hover,
+.sunburst-legend-item--hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: var(--legend-color, rgba(255, 255, 255, 0.3));
+  color: #ffffff;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .sunburst-legend-item--active {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--legend-color, rgba(255, 255, 255, 0.2));
-  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.09);
+  border-color: var(--legend-color, #ffffff);
+  color: #ffffff;
+  box-shadow: 0 0 14px rgba(255, 255, 255, 0.15);
 }
 
 .sunburst-legend-dot {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   flex-shrink: 0;
-  box-shadow: 0 0 5px currentColor;
+  box-shadow: 0 0 6px currentColor;
 }
 
 .sunburst-legend-label {
@@ -365,8 +442,8 @@ body.dark-mode .skill-panel-track {
     min-height: 360px;
   }
 
-  .sunburst-wrapper {
-    max-width: 360px;
+  .sunburst-instrument {
+    max-width: 380px;
   }
 
   .sunburst-svg {
