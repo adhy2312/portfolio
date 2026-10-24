@@ -359,7 +359,7 @@ export class UltronAgent extends BaseAgent {
         improvisationsCount: this.improvisationsLog.length,
         harvestedIntelCount: this.knowledgeStream.length
       },
-      neuralModel: 'Gemini 2.5 Flash (Top-Tier Unrestricted)',
+      neuralModel: 'Gemini 3.8 Flash (Top-Tier Unrestricted)',
       improvisationsLog: this.improvisationsLog,
       knowledgeStream: this.knowledgeStream,
       curriculum: this.curriculum,

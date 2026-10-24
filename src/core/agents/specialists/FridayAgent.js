@@ -81,7 +81,7 @@ export class FridayAgent extends BaseAgent {
       role: this.role,
       clearanceLevel: this.clearanceLevel,
       status: 'active',
-      neuralModel: 'Gemini 2.5 Flash (Top-Tier Sentinel)',
+      neuralModel: 'Gemini 3.8 Flash (Top-Tier Sentinel)',
       telemetry: {
         cpuLoad: 12.3,
         memoryMb: 34.1,

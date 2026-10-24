@@ -107,7 +107,7 @@ export class JarvisAgent extends BaseAgent {
       },
       emotionState: this.emotionEngine.getState(),
       directives: this.lastDirectives,
-      neuralModel: 'Gemini 2.5 Flash (Top-Tier Power)',
+      neuralModel: 'Gemini 3.8 Flash (Supreme Command Power)',
       managedSubAgentsCount: 10,
       specialtyDetails: 'Coordinates full-duplex agent lifecycle, schedules multi-agent audits, monitors memory and thread contention, and routes executive reports to Adhithya Mohan.'
     };

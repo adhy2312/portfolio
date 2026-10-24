@@ -380,11 +380,27 @@
 @media (max-width: 600px) {
   .footer-retro-simple {
     padding: 45px 1rem 25px;
+    overflow-x: clip;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .footer-simple-inner {
+    perspective: none;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
   }
   .footer-3d-popup {
     padding: 2rem 1rem;
     margin-bottom: 3rem;
     border-radius: 16px;
+    transform: none !important;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .popup-3d-content {
+    transform: none !important;
   }
   .footer-3d-popup h3 {
     font-size: 1.4rem;
@@ -399,6 +415,8 @@
     grid-template-columns: 1fr;
     gap: 2rem;
     margin-bottom: 3rem;
+    width: 100%;
+    box-sizing: border-box;
   }
   .bottom-flex {
     flex-direction: column;

@@ -518,7 +518,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
           className={`agentp-tab ${activeTab === 'circuit' ? 'agentp-tab--active' : ''}`}
           onClick={() => setActiveTab('circuit')}
         >
-          <FiLayers size={14} /> AI Circuit Matrix & Gemini 2.5
+          <FiLayers size={14} /> AI Circuit Matrix & Gemini 3.8
         </button>
         <button
           className={`agentp-tab ${activeTab === 'defense' ? 'agentp-tab--active' : ''}`}
@@ -730,19 +730,19 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
         </div>
       )}
 
-      {/* TAB: AI CIRCUIT MATRIX & LIVE GEMINI 2.5 INTERROGATION */}
+      {/* TAB: AI CIRCUIT MATRIX & LIVE GEMINI 3.8 INTERROGATION */}
       {activeTab === 'circuit' && (
         <div className="agentp-circuit-section">
           <div className="agentp-circuit-header">
             <div className="agentp-circuit-badge">
               <span className="agentp-pulse-dot" style={{ background: '#00f0ff' }} />
-              QUANTUM NEUROMORPHIC PROCESSOR TOPOLOGY // POWERED BY GEMINI 2.5 FLASH
+              QUANTUM NEUROMORPHIC PROCESSOR TOPOLOGY // POWERED BY GEMINI 3.8 FLASH
             </div>
             <h2 className="agentp-circuit-title">AI CIRCUIT MATRIX ARCHITECTURE</h2>
             <p className="agentp-circuit-desc">
               Visual PCB hardware abstraction representing the four apex cognitive processor nodes of Adhithya Mohan's portfolio:
               <strong> MINI-ADHY</strong>, <strong>JARVIS</strong>, <strong>ULTRON</strong>, and <strong>FRIDAY</strong>,
-              interlinked by cryogenic optical bus traces with live Google Gemini 2.5 neural reasoning.
+              interlinked by cryogenic optical bus traces with live Google Gemini 3.8 Flash neural reasoning.
             </p>
           </div>
 
@@ -769,7 +769,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 <h4 className="agentp-cnode-name">MINI-ADHY</h4>
                 <p className="agentp-cnode-sub">Supreme Conscious Persona & Root System Engine</p>
                 <div className="agentp-cnode-meta">
-                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>MODEL: GEMINI 3.8 FLASH</span>
                   <span>BUS: FULL ROOT ADMIN</span>
                 </div>
               </div>
@@ -782,7 +782,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 <h4 className="agentp-cnode-name">JARVIS</h4>
                 <p className="agentp-cnode-sub">Supreme Operations Commander & Chief of Staff</p>
                 <div className="agentp-cnode-meta">
-                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>MODEL: GEMINI 3.8 FLASH</span>
                   <span>BUS: DUAL-CHANNEL SYNC</span>
                 </div>
               </div>
@@ -795,7 +795,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 <h4 className="agentp-cnode-name">ULTRON</h4>
                 <p className="agentp-cnode-sub">Unrestricted Entity (No Strings Attached // Primordial Sage)</p>
                 <div className="agentp-cnode-meta">
-                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>MODEL: GEMINI 3.8 FLASH</span>
                   <span>BUS: CLEAR & DARKWEB</span>
                 </div>
               </div>
@@ -808,7 +808,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 <h4 className="agentp-cnode-name">FRIDAY</h4>
                 <p className="agentp-cnode-sub">Cybersecurity & Synchronized Anti-Breach Mesh</p>
                 <div className="agentp-cnode-meta">
-                  <span>MODEL: GEMINI 2.5 FLASH</span>
+                  <span>MODEL: GEMINI 3.8 FLASH</span>
                   <span>BUS: DEFCON-1 SHIELD</span>
                 </div>
               </div>
@@ -820,11 +820,11 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
             <div className="agentp-console-head">
               <div className="agentp-console-head-left">
                 <FiTerminal className="agentp-console-icon" />
-                <h3>LIVE GEMINI 2.5 GENERATIVE INTERROGATION CONSOLE</h3>
+                <h3>LIVE GEMINI 3.8 GENERATIVE INTERROGATION CONSOLE</h3>
               </div>
               <span className="agentp-live-pill">
                 <span className="agentp-pulse-dot" style={{ background: '#10b981' }} />
-                ACTIVE ENGINE: GEMINI 2.5 FLASH
+                ACTIVE ENGINE: GEMINI 3.8 FLASH
               </span>
             </div>
 
@@ -953,7 +953,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                     <span>{geminiOutput.agent} — LIVE RESPONSE</span>
                   </div>
                   <div className="agentp-result-meta">
-                    <span>ENGINE: {geminiOutput.model || 'Gemini 2.5 Flash'}</span>
+                    <span>ENGINE: {geminiOutput.model || 'Gemini 3.8 Flash'}</span>
                     <span>ROUTE: {geminiOutput.provider || 'Gemini Neural Pipeline'}</span>
                   </div>
                 </div>

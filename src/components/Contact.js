@@ -89,29 +89,31 @@ const Contact = () => {
         );
       }
 
-      // Info panel: slide from left
+      const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+      // Info panel: slide from left on desktop, fade up on mobile
       if (infoRef.current) {
         gsap.fromTo(infoRef.current,
-          { x: -60, opacity: 0 },
+          { x: isMobile ? 0 : -60, y: isMobile ? 25 : 0, opacity: 0 },
           {
-            x: 0, opacity: 1,
-            duration: 1,
+            x: 0, y: 0, opacity: 1,
+            duration: 0.9,
             ease: 'power4.out',
-            scrollTrigger: { trigger: infoRef.current, start: 'top 85%', once: true }
+            scrollTrigger: { trigger: infoRef.current, start: 'top 88%', once: true }
           }
         );
       }
 
-      // Form: slide from right
+      // Form: slide from right on desktop, fade up on mobile
       if (formWrapRef.current) {
         gsap.fromTo(formWrapRef.current,
-          { x: 60, opacity: 0 },
+          { x: isMobile ? 0 : 60, y: isMobile ? 25 : 0, opacity: 0 },
           {
-            x: 0, opacity: 1,
-            duration: 1,
-            delay: 0.15,
+            x: 0, y: 0, opacity: 1,
+            duration: 0.9,
+            delay: isMobile ? 0.08 : 0.15,
             ease: 'power4.out',
-            scrollTrigger: { trigger: formWrapRef.current, start: 'top 85%', once: true }
+            scrollTrigger: { trigger: formWrapRef.current, start: 'top 88%', once: true }
           }
         );
       }

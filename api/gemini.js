@@ -84,8 +84,8 @@ export default async function handler(req, res) {
   }
 
   // 7. Gemini Generative Safety Settings & Token Quota Limits
-  const requestedModel = bodyObj.model || 'gemini-2.5-flash';
-  const modelsToTry = [requestedModel, 'gemini-2.5-flash', 'gemini-1.5-flash'];
+  const requestedModel = bodyObj.model || 'gemini-3.8-flash';
+  const modelsToTry = [requestedModel, 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
   const uniqueModels = [...new Set(modelsToTry)];
 
   const requestBody = {

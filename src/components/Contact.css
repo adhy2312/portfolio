@@ -369,28 +369,103 @@
 @media (max-width: 900px) {
   .contact {
     padding: 4rem 1rem 3.5rem;
+    overflow-x: clip;
   }
   .contact-grid {
     grid-template-columns: 1fr;
     gap: 1.5rem;
+    width: 100%;
   }
   .contact-info-card {
     padding: 1.5rem;
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 768px) {
   .contact {
-    padding: 3.5rem 0.75rem 2.5rem;
+    padding: 3.5rem 1rem 3rem;
+    overflow-x: clip;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-header {
+    margin-bottom: 2rem;
+  }
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-info,
+  .contact-form-wrap {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-info-card {
+    padding: 1.4rem 1.2rem;
+    border-radius: 0 !important;
+    box-shadow: 4px 4px 0px #000 !important;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+  }
+  .contact-form {
+    padding: 1.4rem 1.2rem;
+    box-shadow: 4px 4px 0px #000 !important;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
   }
   .form-row {
     grid-template-columns: 1fr;
+    gap: 1rem;
   }
-  .contact-form {
-    padding: 1.25rem 1rem;
-    box-shadow: 4px 4px 0px #000 !important;
+  .contact-info-item {
+    align-items: flex-start;
+    gap: 12px;
+    max-width: 100%;
+  }
+  .contact-info-value,
+  .contact-info-value.link,
+  .copy-email-text {
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    font-size: 0.84rem;
   }
   .contact-time-strip {
-    display: none;
+    font-size: 0.65rem;
+    padding: 6px 12px;
+    flex-wrap: wrap;
+    gap: 6px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .contact-response-badge {
+    font-size: 0.65rem;
+    padding: 6px 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 480px) {
+  .contact {
+    padding: 3rem 0.75rem 2rem;
+  }
+  .contact-info-card,
+  .contact-form {
+    padding: 1.2rem 0.9rem;
+    box-shadow: 3px 3px 0px #000 !important;
+  }
+  .form-input {
+    padding: 12px 12px;
+    font-size: 0.82rem;
+  }
+  .form-submit {
+    padding: 14px;
+    font-size: 0.88rem;
   }
 }
