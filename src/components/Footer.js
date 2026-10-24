@@ -27,7 +27,7 @@ const links = [
 
 const Footer = () => {
   const [footerData, setFooterData] = useState(null);
-  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
+  const [legalModalTab, setLegalModalTab] = useState(null);
   const footerRef = useRef(null);
   const popupRef = useRef(null);
   const mainRowRef = useRef(null);
@@ -250,17 +250,53 @@ const Footer = () => {
             </div>
             <div className="retro-made">
               BUILT WITH LATE NIGHT CODING SESSIONS & CAFFEINE
-              <div style={{ marginTop: '8px' }}>
+              <div style={{ marginTop: '8px', display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
                 <button 
-                  onClick={() => setIsPrivacyOpen(true)}
+                  onClick={() => setLegalModalTab('privacy')}
                   style={{ 
-                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', 
+                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.5)', 
                     fontSize: '0.65rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit'
                   }}
                   onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
-                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.4)'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.5)'}
                 >
-                  Privacy Policy
+                  Privacy Policy &amp; GDPR
+                </button>
+                <span style={{ color: 'rgba(255, 255, 255, 0.2)', fontSize: '0.65rem' }}>•</span>
+                <button 
+                  onClick={() => setLegalModalTab('terms')}
+                  style={{ 
+                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.5)', 
+                    fontSize: '0.65rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.5)'}
+                >
+                  Terms &amp; Conditions
+                </button>
+                <span style={{ color: 'rgba(255, 255, 255, 0.2)', fontSize: '0.65rem' }}>•</span>
+                <button 
+                  onClick={() => setLegalModalTab('cookies')}
+                  style={{ 
+                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.5)', 
+                    fontSize: '0.65rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.5)'}
+                >
+                  Cookie Policy
+                </button>
+                <span style={{ color: 'rgba(255, 255, 255, 0.2)', fontSize: '0.65rem' }}>•</span>
+                <button 
+                  onClick={() => setLegalModalTab('a11y')}
+                  style={{ 
+                    background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.5)', 
+                    fontSize: '0.65rem', textDecoration: 'underline', cursor: 'pointer', fontFamily: 'inherit'
+                  }}
+                  onMouseEnter={(e) => e.target.style.color = 'var(--accent-primary)'}
+                  onMouseLeave={(e) => e.target.style.color = 'rgba(255, 255, 255, 0.5)'}
+                >
+                  Accessibility Statement
                 </button>
               </div>
             </div>
@@ -270,13 +306,13 @@ const Footer = () => {
               <span className="git-live-dot" />
               <span className="git-telemetry-label">DEPLOYED</span>
               <a 
-                href="https://github.com/adhy2312/portfolio/commit/c03606d" 
+                href="https://github.com/adhy2312/portfolio/commit/d141adf" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="git-commit-hash"
-                title="View commit c03606d on GitHub"
+                title="View commit d141adf on GitHub"
               >
-                c03606d
+                d141adf
               </a>
               <span className="git-telemetry-sep">/</span>
               <span className="git-telemetry-branch">main</span>
@@ -294,48 +330,140 @@ const Footer = () => {
         </div>
       </div>
 
-      {isPrivacyOpen && (
+      {legalModalTab && (
         <div 
           className="privacy-modal-overlay" 
           style={{
             position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)', zIndex: 99999,
+            backgroundColor: 'rgba(0, 0, 0, 0.85)', zIndex: 99999,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            backdropFilter: 'blur(5px)'
+            backdropFilter: 'blur(8px)'
           }}
-          onClick={() => setIsPrivacyOpen(false)}
+          onClick={() => setLegalModalTab(null)}
         >
           <div 
             className="privacy-modal-content"
             style={{
-              background: '#0a0a0f', border: '1px solid rgba(255, 255, 255, 0.1)',
-              padding: '40px', borderRadius: '12px', maxWidth: '600px', width: '90%',
-              color: 'rgba(255, 255, 255, 0.85)', position: 'relative'
+              background: '#090d1a', border: '1px solid rgba(0, 240, 255, 0.3)',
+              boxShadow: '0 0 35px rgba(0, 240, 255, 0.15), 8px 8px 0px #000',
+              padding: '32px', borderRadius: '16px', maxWidth: '640px', width: '92%',
+              maxHeight: '85vh', overflowY: 'auto',
+              color: 'rgba(255, 255, 255, 0.88)', position: 'relative'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <button 
-              onClick={() => setIsPrivacyOpen(false)}
+              onClick={() => setLegalModalTab(null)}
               style={{
-                position: 'absolute', top: '15px', right: '15px', background: 'none',
-                border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer'
+                position: 'absolute', top: '16px', right: '16px', background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)', color: '#fff', width: '32px', height: '32px',
+                borderRadius: '8px', fontSize: '1.1rem', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
               }}
             >
               &times;
             </button>
-            <h2 style={{ marginBottom: '20px', fontFamily: 'Space Grotesk, sans-serif' }}>Privacy Policy</h2>
-            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              <strong>1. Data Collection:</strong> This website collects minimal data necessary for functionality. Information submitted via contact forms is used solely to respond to inquiries and is never shared or sold to third parties.
-            </p>
-            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              <strong>2. Analytics & Cookies:</strong> We may use basic analytics to understand website traffic and improve user experience. These tools do not collect personally identifiable information.
-            </p>
-            <p style={{ marginBottom: '15px', fontSize: '0.9rem', lineHeight: '1.6' }}>
-              <strong>3. Security:</strong> All data transmitted through this site is secured using standard encryption protocols. While we strive to protect your personal information, no method of transmission over the Internet is 100% secure.
-            </p>
-            <p style={{ fontSize: '0.9rem', lineHeight: '1.6' }}>
-              By continuing to use this website, you acknowledge and agree to these terms.
-            </p>
+
+            {/* Modal Tabs */}
+            <div style={{ display: 'flex', gap: '8px', borderBottom: '1px solid rgba(255,255,255,0.12)', paddingBottom: '12px', marginBottom: '20px', overflowX: 'auto' }}>
+              {[
+                { id: 'privacy', label: 'Privacy & GDPR' },
+                { id: 'terms', label: 'Terms & Conditions' },
+                { id: 'cookies', label: 'Cookie Policy' },
+                { id: 'a11y', label: 'Accessibility' },
+                { id: 'disclaimer', label: 'Disclaimer & Refund' }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setLegalModalTab(tab.id)}
+                  style={{
+                    background: legalModalTab === tab.id ? '#00f0ff' : 'rgba(255,255,255,0.06)',
+                    color: legalModalTab === tab.id ? '#030712' : '#cbd5e1',
+                    border: 'none', padding: '6px 12px', borderRadius: '6px',
+                    fontFamily: 'Space Grotesk, sans-serif', fontSize: '0.72rem', fontWeight: 700,
+                    cursor: 'pointer', whiteSpace: 'nowrap'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+
+            {legalModalTab === 'privacy' && (
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontFamily: 'Space Grotesk, sans-serif', color: '#00f0ff' }}>Privacy Policy &amp; GDPR Compliance</h3>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>1. Data Controller:</strong> Adhithya Mohan (Kerala, India). We process minimal contact telemetry strictly for direct communication.
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>2. Zero Third-Party Selling:</strong> We never sell, monetize, or broker personal information. All contact form inputs are routed solely via encrypted channels to respond to professional inquiries.
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>3. GDPR Rights:</strong> Under Articles 15-22 of the GDPR, visitors possess the right to access, rectify, or request immediate deletion of any submitted contact correspondence by emailing adhithyamohan.work@gmail.com.
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6' }}>
+                  <strong>4. Data Retention:</strong> Contact messages are stored only for the duration of the professional dialogue and purged systematically thereafter.
+                </p>
+              </div>
+            )}
+
+            {legalModalTab === 'terms' && (
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontFamily: 'Space Grotesk, sans-serif', color: '#00f0ff' }}>Terms &amp; Conditions</h3>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>1. Intellectual Property:</strong> All original source code, photography, circuit schematics, 3D assets, and graphic designs showcased on this portfolio are the proprietary property of Adhithya Mohan (&copy; 2026).
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>2. Permitted Usage:</strong> Visitors are granted a limited license to browse and evaluate the portfolio for recruitment, engineering consultation, and creative review. Unauthorized scraping or impersonation is strictly prohibited.
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6' }}>
+                  <strong>3. Open-Source Attribution:</strong> Open-source projects linked herein are subject to their respective GitHub repository licenses (e.g. MIT / Apache 2.0).
+                </p>
+              </div>
+            )}
+
+            {legalModalTab === 'cookies' && (
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontFamily: 'Space Grotesk, sans-serif', color: '#00f0ff' }}>Cookie &amp; Local Storage Policy</h3>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>1. Strictly Essential Local Storage:</strong> This website utilizes browser LocalStorage exclusively to persist user preferences:
+                </p>
+                <ul style={{ fontSize: '0.8rem', lineHeight: '1.6', paddingLeft: '20px', marginBottom: '12px' }}>
+                  <li><code>portfolio-mode</code> — Saves active visual mode (Normal, Recruiter, Photographer, Experimental).</li>
+                  <li><code>portfolio-a11y</code> — Remembers accessibility flags (Reduced Motion, Low-GPU 60FPS).</li>
+                  <li><code>mini_adhy_voice</code> — Remembers Neural Voice mute/unmute state.</li>
+                </ul>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6' }}>
+                  <strong>2. Zero Tracking Cookies:</strong> We do not use third-party behavioral ad trackers, cross-site tracking pixels, or invasive profiling cookies.
+                </p>
+              </div>
+            )}
+
+            {legalModalTab === 'a11y' && (
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontFamily: 'Space Grotesk, sans-serif', color: '#00f0ff' }}>Accessibility Statement (WCAG 2.1 AA)</h3>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  We are committed to digital inclusion. This website provides dedicated accessibility accommodations:
+                </p>
+                <ul style={{ fontSize: '0.8rem', lineHeight: '1.6', paddingLeft: '20px', marginBottom: '12px' }}>
+                  <li><strong>Reduced Motion:</strong> Automatically honors OS <code>prefers-reduced-motion</code> or manual toggle in Settings.</li>
+                  <li><strong>High Contrast &amp; Readability:</strong> High-legibility typography mode eliminates complex distortion for maximum clarity.</li>
+                  <li><strong>Touch Targets:</strong> Interactive action items maintain minimum 44&times;44px bounding targets for mobile navigation.</li>
+                  <li><strong>Screen Reader Semantic Tags:</strong> Proper semantic headings, ARIA labels, and descriptive alternative text across all visual modules.</li>
+                </ul>
+              </div>
+            )}
+
+            {legalModalTab === 'disclaimer' && (
+              <div>
+                <h3 style={{ margin: '0 0 12px 0', fontFamily: 'Space Grotesk, sans-serif', color: '#00f0ff' }}>Disclaimer &amp; Refund Policy</h3>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
+                  <strong>1. Informational Showcase:</strong> This site is an engineering portfolio and personal creative archive. No direct commercial transactions or e-commerce purchases are executed on this domain.
+                </p>
+                <p style={{ fontSize: '0.82rem', lineHeight: '1.6' }}>
+                  <strong>2. Client Engagement &amp; Refunds:</strong> Independent consulting, software engineering, or photography services are conducted via mutually signed freelance contracts, which explicitly specify deliverable milestones and refund/revision terms.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
