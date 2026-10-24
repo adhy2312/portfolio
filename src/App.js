@@ -61,7 +61,6 @@ const dynamicImports = {
   KineticMarquee: () => import('./components/motion/KineticMarquee'),
   CustomCursor: () => import('./components/motion/CustomCursor'),
   ZAxisTunnel: () => import('./components/motion/ZAxisTunnel'),
-  TechDNA: () => import('./components/TechDNA'),
   ScrollCanvasSequence: () => import('./components/ScrollCanvasSequence')
 };
 
@@ -87,7 +86,6 @@ const SnakeGame = lazy(dynamicImports.SnakeGame);
 const GamesHub = lazy(dynamicImports.GamesHub);
 const StackVisualizer = lazy(dynamicImports.StackVisualizer);
 const KineticMarquee = lazy(dynamicImports.KineticMarquee);
-const TechDNA = lazy(dynamicImports.TechDNA);
 // const ScrollCanvasSequence = lazy(dynamicImports.ScrollCanvasSequence);
 
 // ML Prefetch Listener (Predictive Pre-Computation)
@@ -429,7 +427,6 @@ function AppContent() {
               hero: Hero,
               about: About,
               skillCategory: Skills,
-              techDNASection: TechDNA,
               statsBento: StatsBento,
               neuralMap: NeuralMap,
               experience: Experience,
@@ -445,8 +442,7 @@ function AppContent() {
               contactSection: Contact,
               stackVisualizerSection: StackVisualizer,
               kineticMarqueeSection: KineticMarquee,
-              footerSection: Footer,
-              architecture: TechDNA // Fallback if architecture referenced directly
+              footerSection: Footer
             };
             const Component = COMPONENT_MAP[section._type];
             if (!Component) return null;

@@ -23,6 +23,7 @@ import hardwareNexus from './hardwareNexus'
 import page from './page'
 import visualOptions from './visualOptions'
 import atomicTextBlock from './atomicTextBlock'
+import atomicBlockContent from './atomicBlockContent'
 import learningGoal from './learningGoal'
 
 export const schemaTypes = [

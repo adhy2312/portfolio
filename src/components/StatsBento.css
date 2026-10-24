@@ -61,17 +61,6 @@ body.dark-mode .bento-card {
   justify-content: space-between;
 }
 
-.bento-dino-terminal {
-  grid-column: span 4;
-  grid-row: span 1;
-  background: #080c14 !important;
-  color: #fff;
-  border: var(--border-brutal);
-  box-shadow: var(--shadow-brutal);
-  padding: 0 !important;
-  min-height: 130px;
-}
-
 .bento-counter {
   grid-column: span 1;
   grid-row: span 1;

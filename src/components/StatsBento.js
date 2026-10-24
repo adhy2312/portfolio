@@ -5,7 +5,6 @@ import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { FiGithub, FiCamera, FiFigma, FiMap, FiBookOpen, FiTerminal, FiZap } from 'react-icons/fi';
 import { GitHubCalendar } from 'react-github-calendar';
-import ChromeDinoGame from './ChromeDinoGame';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -174,11 +173,6 @@ const StatsBento = () => {
             </div>
             <div className="bento-number">{sanityData?.stacksLearned || '10+'}</div>
             <div className="bento-subtitle">Stacks Learned</div>
-          </div>
-
-          {/* Chrome Dino Runner Game */}
-          <div className="bento-card bento-dino-terminal bento-span-4" style={{ padding: 0, overflow: 'hidden' }}>
-            <ChromeDinoGame />
           </div>
 
         </div>

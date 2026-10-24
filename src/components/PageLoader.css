@@ -1,283 +1,136 @@
 /* ════════════════════════════════════════════════════
-   CINEMATIC CAMERA SHUTTER & APERTURE BLADES LOADER
-   Photography & Optical Engineering Aesthetic
+   PAGE LOADER — AUTHENTIC MULTILINGUAL BOOT SCREEN
+   Brutalist Typography, Indic Transliterations & Zero-Jank
    ════════════════════════════════════════════════════ */
 
-.cine-loader {
+.page-loader {
   position: fixed;
   inset: 0;
-  background: #06080d;
-  z-index: 9999999;
+  background: var(--bg-primary, #0c0d14);
+  z-index: 999999;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
   user-select: none;
-}
-
-/* Background floating optical bokeh canvas */
-.cine-bokeh-canvas {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  opacity: 0.75;
-  filter: blur(8px);
-}
-
-/* Viewfinder Framing Grid */
-.cine-viewfinder-grid {
-  position: relative;
-  width: 92vw;
-  height: 88vh;
-  max-width: 1200px;
-  max-height: 800px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  padding: clamp(14px, 3vw, 28px);
-  z-index: 5;
-  box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.9);
-}
-
-/* Viewfinder Corner Brackets */
-.cine-corner {
-  position: absolute;
-  width: 22px;
-  height: 22px;
-  border-color: rgba(255, 255, 255, 0.4);
-  border-style: solid;
-  pointer-events: none;
-}
-
-.cine-corner.top-left {
-  top: -1px;
-  left: -1px;
-  border-width: 2px 0 0 2px;
-}
-
-.cine-corner.top-right {
-  top: -1px;
-  right: -1px;
-  border-width: 2px 2px 0 0;
-}
-
-.cine-corner.bottom-left {
-  bottom: -1px;
-  left: -1px;
-  border-width: 0 0 2px 2px;
-}
-
-.cine-corner.bottom-right {
-  bottom: -1px;
-  right: -1px;
-  border-width: 0 2px 2px 0;
-}
-
-/* Telemetry HUD Rows */
-.cine-hud-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-family: 'Fira Code', monospace;
-  font-size: clamp(0.6rem, 1.3vw, 0.75rem);
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.7);
-  z-index: 6;
-}
-
-.cine-hud-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cine-hud-rec-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 8px #ef4444;
-  animation: cine-rec-blink 1s steps(2, start) infinite;
-}
-
-@keyframes cine-rec-blink {
-  to { visibility: hidden; }
-}
-
-.cine-hud-val {
-  font-weight: 700;
-  color: #fff;
-}
-
-.cine-hud-val.cine-accent {
-  color: #38bdf8;
-  text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
-}
-
-/* Central Optical Lens & Aperture Barrel */
-.cine-center-lens {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 6;
-}
-
-.cine-lens-barrel {
-  position: relative;
-  width: clamp(260px, 42vw, 380px);
-  height: clamp(260px, 42vw, 380px);
-  border-radius: 50%;
-  background: radial-gradient(circle, #0e121a 0%, #06080c 70%, #000 100%);
-  border: 4px solid #1f2937;
-  box-shadow: 
-    0 0 0 8px #0a0d14,
-    0 0 0 10px #1e2530,
-    0 20px 60px rgba(0, 0, 0, 0.95);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Barrel Distance Ring Ticks */
-.cine-barrel-tick {
-  position: absolute;
-  top: 6px;
-  left: 50%;
-  width: 2px;
-  height: 8px;
-  background: rgba(255, 255, 255, 0.25);
-  transform-origin: 50% clamp(124px, 20vw, 184px);
-}
-
-/* Mechanical Aperture SVG */
-.cine-aperture-svg {
-  width: 90%;
-  height: 90%;
-  display: block;
-  filter: drop-shadow(0 0 15px rgba(0, 0, 0, 0.8));
-}
-
-.cine-iris-group {
-  transform-box: fill-box;
+  -webkit-user-select: none;
+  touch-action: pan-y;
   will-change: transform;
 }
 
-/* Central Autofocus Reticle */
-.cine-focus-reticle {
-  position: absolute;
-  width: clamp(120px, 20vw, 170px);
-  height: clamp(120px, 20vw, 170px);
-  border: 1px dashed rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-  pointer-events: none;
-}
-
-.reticle-corner {
-  position: absolute;
-  width: 12px;
-  height: 12px;
-  border-color: #38bdf8;
-  border-style: solid;
-}
-
-.reticle-corner.top-left     { top: -2px; left: -2px; border-width: 2px 0 0 2px; }
-.reticle-corner.top-right    { top: -2px; right: -2px; border-width: 2px 2px 0 0; }
-.reticle-corner.bottom-left  { bottom: -2px; left: -2px; border-width: 0 0 2px 2px; }
-.reticle-corner.bottom-right { bottom: -2px; right: -2px; border-width: 0 2px 2px 0; }
-
-/* Cultural Indian Script Focal Text */
-.cine-focal-name-wrap {
+.loader-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 26px;
+  position: relative;
+  z-index: 2;
+  padding: 20px;
 }
 
-.cine-focal-name {
+.loader-logo {
+  display: flex;
+  justify-content: center;
+}
+
+.loader-name-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+
+.loader-name-text {
   font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(2rem, 5vw, 3.4rem);
+  font-size: clamp(3.2rem, 11vw, 6.8rem);
   font-weight: 800;
-  color: #fff;
-  letter-spacing: 4px;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 6px;
   line-height: 1;
-  text-shadow: 0 0 25px rgba(255, 255, 255, 0.5);
+  text-shadow: 4px 4px 0px var(--accent-brutal-yellow, #f4d03f);
+  display: inline-block;
+  will-change: contents;
 }
 
-.cine-focal-lang {
+.loader-dot {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: clamp(3.2rem, 11vw, 6.8rem);
+  font-weight: 800;
+  color: var(--accent-primary, #6C63FF);
+  line-height: 1;
+  text-shadow: 4px 4px 0px #000;
+  display: inline-block;
+  margin-left: 2px;
+}
+
+/* Language label badge beneath the transliterated name */
+.loader-lang-label {
   font-family: 'Fira Code', monospace;
-  font-size: clamp(0.55rem, 1vw, 0.65rem);
-  letter-spacing: 2px;
-  font-weight: 700;
+  font-size: 0.68rem;
+  letter-spacing: 3px;
+  font-weight: 800;
   text-transform: uppercase;
   color: #000;
-  background: #38bdf8;
-  padding: 2px 8px;
+  background: var(--accent-brutal-yellow, #f4d03f);
+  padding: 4px 14px;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 0px #000;
+  min-height: 1.4em;
   border-radius: 2px;
 }
 
-/* Status Phrase */
-.cine-status-phrase {
-  text-align: center;
-  font-family: 'Fira Code', monospace;
-  font-size: clamp(0.65rem, 1.2vw, 0.8rem);
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
-  letter-spacing: 0.15em;
-  margin-top: 10px;
+/* Brutalist loading bar wrapper */
+.loader-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
 }
 
-/* Optical Camera Flash Pulse */
-.cine-shutter-flash {
-  position: absolute;
-  inset: 0;
+.loader-bar-track {
+  width: clamp(200px, 45vw, 280px);
+  height: 12px;
   background: #ffffff;
-  opacity: 0;
-  pointer-events: none;
-  z-index: 99;
+  border-radius: 0;
+  overflow: hidden;
+  box-shadow: 4px 4px 0px #000;
+  border: 3px solid #000;
 }
 
-/* Dual Focal-Plane Shutter Wipe Curtains */
-.cine-curtain {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 50.5%;
-  background: #080a10;
-  z-index: 90;
-  will-change: transform;
+.loader-bar-fill {
+  height: 100%;
+  background: var(--accent-primary, #6C63FF);
+  border-right: 3px solid #000;
+  box-shadow: none;
+  position: relative;
+  will-change: width;
 }
 
-.cine-curtain--top {
-  top: 0;
-  border-bottom: 3px solid #1f2937;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+.loader-percent {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 1px;
+  min-width: 38px;
 }
 
-.cine-curtain--bottom {
-  bottom: 0;
-  border-top: 3px solid #1f2937;
-  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.9);
+/* Cultural phrase ticker */
+.loader-phrase {
+  font-family: 'Fira Code', monospace;
+  font-size: clamp(0.72rem, 1.8vw, 0.82rem);
+  font-weight: 700;
+  color: var(--text-primary, #ffffff);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.85;
+  text-align: center;
 }
 
-@media (max-width: 640px) {
-  .cine-viewfinder-grid {
-    height: 94vh;
-    width: 95vw;
-    padding: 12px;
+@media (max-width: 600px) {
+  .loader-content {
+    gap: 20px;
   }
-  .cine-hud-row.bottom {
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    justify-content: center;
+  .loader-name-text {
+    letter-spacing: 4px;
   }
 }

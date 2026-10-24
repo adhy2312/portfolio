@@ -193,13 +193,13 @@ export function SiteModeProvider({ children }) {
   const isSectionVisible = useCallback((sectionName) => {
     if (mode === MODES.RECRUITER) {
       // Streamlined view, hide complex/abstract sections
-      const hiddenInRecruiter = ['TechDNA', 'NeuralMap', 'StackVisualizer', 'Timeline', 'DigitalScars', 'KineticMarquee', 'ScrollCanvasSequence'];
+      const hiddenInRecruiter = ['NeuralMap', 'StackVisualizer', 'Timeline', 'DigitalScars', 'KineticMarquee', 'ScrollCanvasSequence'];
       return !hiddenInRecruiter.includes(sectionName);
     }
     
     if (mode === MODES.PHOTOGRAPHER) {
       // Tech-heavy view, hide purely aesthetic sections
-      const hiddenInPhotographer = ['DigitalScars', 'TrustedBy', 'TechDNA', 'Timeline'];
+      const hiddenInPhotographer = ['DigitalScars', 'TrustedBy', 'Timeline'];
       return !hiddenInPhotographer.includes(sectionName);
     }
     

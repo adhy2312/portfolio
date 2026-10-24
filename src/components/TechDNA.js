@@ -160,22 +160,13 @@ const TechDNA = () => {
     const el = zoneRef.current;
     if (!el) return;
 
-    const onStart = (e) => {
-      isDraggingRef.current = true;
-      autoSpinRef.current = false;
-      const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
-      dragStartXRef.current = x || 0;
-      lastRotationRef.current = rotationRef.current || 0;
-    };
-
     const onMove = (e) => {
       if (!isDraggingRef.current) return;
       
-      // If the user is dragging horizontally on mobile, prevent default scroll
-      const x = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+      const x = e.type.includes('mouse') ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
       const deltaX = x - dragStartXRef.current;
       
-      if (Math.abs(deltaX) > 5 && e.cancelable) {
+      if (Math.abs(deltaX) > 8 && e.cancelable) {
         e.preventDefault(); 
       }
       
@@ -184,30 +175,39 @@ const TechDNA = () => {
 
     const onEnd = () => {
       isDraggingRef.current = false;
-      // Restore auto-spin after a short delay
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('touchmove', onMove);
+      window.removeEventListener('mouseup', onEnd);
+      window.removeEventListener('touchend', onEnd);
+      window.removeEventListener('touchcancel', onEnd);
+      
       setTimeout(() => {
         if (!isDraggingRef.current) autoSpinRef.current = true;
       }, 1500);
     };
 
+    const onStart = (e) => {
+      isDraggingRef.current = true;
+      autoSpinRef.current = false;
+      const x = e.type.includes('mouse') ? e.clientX : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+      dragStartXRef.current = x || 0;
+      lastRotationRef.current = rotationRef.current || 0;
+
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('mouseup', onEnd);
+      window.addEventListener('touchend', onEnd);
+      window.addEventListener('touchcancel', onEnd);
+    };
+
     el.addEventListener('mousedown', onStart);
-    el.addEventListener('touchstart', onStart, { passive: false });
-    
-    // Bind move/end to window so drag isn't lost if cursor leaves the box
-    window.addEventListener('mousemove', onMove, { passive: false });
-    window.addEventListener('touchmove', onMove, { passive: false });
-    
-    window.addEventListener('mouseup', onEnd);
-    window.addEventListener('touchend', onEnd);
-    window.addEventListener('touchcancel', onEnd);
+    el.addEventListener('touchstart', onStart, { passive: true });
 
     return () => {
       el.removeEventListener('mousedown', onStart);
       el.removeEventListener('touchstart', onStart);
-      
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('touchmove', onMove);
-      
       window.removeEventListener('mouseup', onEnd);
       window.removeEventListener('touchend', onEnd);
       window.removeEventListener('touchcancel', onEnd);

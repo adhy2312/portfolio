@@ -7,8 +7,23 @@ export default function CustomCursor() {
   const [isHovering,    setIsHovering]    = useState(false);
   const [isClicking,    setIsClicking]    = useState(false);
   const [isViewfinder,  setIsViewfinder]  = useState(false);
+  const [isTouchDevice, setIsTouchDevice] = useState(true); // Default to true until verified pointer: fine
 
   useEffect(() => {
+    // Detect mobile touch devices immediately — never hijack cursor or inject styles on touch screens
+    const isTouch = 
+      typeof window !== 'undefined' && (
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0) ||
+        window.matchMedia('(pointer: coarse)').matches
+      );
+
+    if (isTouch) {
+      setIsTouchDevice(true);
+      return;
+    }
+    setIsTouchDevice(false);
+
     const dot  = dotRef.current;
     const ring = ringRef.current;
     if (!dot || !ring) return;
@@ -65,7 +80,7 @@ export default function CustomCursor() {
     const onMouseUp    = () => setIsClicking(false);
     const onMouseLeave = () => { setIsHovering(false); setIsViewfinder(false); };
 
-    // Hide OS cursor everywhere
+    // Hide OS cursor only on fine pointer desktop devices
     document.documentElement.style.cursor = 'none';
     const style = document.createElement('style');
     style.id = 'cursor-hide';
@@ -89,6 +104,8 @@ export default function CustomCursor() {
       document.getElementById('cursor-hide')?.remove();
     };
   }, []);
+
+  if (isTouchDevice) return null;
 
   return (
     <>
