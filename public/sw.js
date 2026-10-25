@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-globals */
 // Service Worker for Adhithya Mohan Portfolio PWA (V3)
 const CACHE_NAME = 'adhy-portfolio-v3';
 const STATIC_ASSETS = [
@@ -9,8 +10,11 @@ const STATIC_ASSETS = [
   '/dp.jpg'
 ];
 
-// Install: skip waiting immediately
+// Install: Pre-cache core shell & skip waiting immediately
 self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(STATIC_ASSETS)).catch(() => {})
+  );
   self.skipWaiting();
 });
 
