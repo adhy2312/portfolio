@@ -1,14 +1,15 @@
 import { ns } from './NervousSystem';
+import pipeline from './WorkerPipeline';
 
 /**
  * LifeEngine — The Main Thread Proxy
  * ════════════════════════════════════════════════════════════════
- * This is the ultimate "Backend of the Frontend". It spawns a 
- * dedicated CPU Web Worker (LifeEngine.worker.js) to offload all
- * mathematical, psychological, and evolutionary algorithms.
+ * This is the ultimate "Backend of the Frontend". It connects to the 
+ * singleton CPU Web Worker (LifeEngine.worker.js) managed by WorkerPipeline
+ * to offload all mathematical, psychological, and evolutionary algorithms.
  * 
  * Result: The UI thread is 100% dedicated to React and RAF,
- * achieving wet, buttery smooth 60/120fps performance.
+ * achieving wet, buttery smooth 60/120fps performance without redundant workers.
  * ════════════════════════════════════════════════════════════════
  */
 
@@ -36,16 +37,17 @@ class LifeEngine {
     if (this._initialized) return;
     this._initialized = true;
 
-    // 1. Spawn the Background Worker Thread
-    this.worker = new Worker(new URL('./LifeEngine.worker.js', import.meta.url));
+    // 1. Obtain the shared singleton Worker from WorkerPipeline
+    this.worker = pipeline.getWorker('life');
+    if (!this.worker) return;
 
     // 2. Load Memory from Disk (Main Thread)
     this._loadMemory().then(memory => {
-      this.worker.postMessage({ type: 'INIT_MEMORY', payload: memory });
+      this.worker?.postMessage({ type: 'INIT_MEMORY', payload: memory });
     });
 
     // 3. Listen to the Worker Thread
-    this.worker.onmessage = (e) => {
+    this.worker.addEventListener('message', (e) => {
       const { type, payload } = e.data;
 
       if (type === 'SAVE_MEMORY') {
@@ -75,7 +77,7 @@ class LifeEngine {
           ns.emit('DREAM_STATE', { dream: payload.dreamText });
         }
       }
-    };
+    });
 
     // 4. Connect NervousSystem Events to the Worker
     ns.subscribe('VISITOR_DEEP_READING', () => this.worker.postMessage({ type: 'RECORD_EVENT', payload: { event: 'deep_read' } }));

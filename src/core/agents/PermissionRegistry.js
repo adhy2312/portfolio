@@ -41,7 +41,53 @@ class PermissionRegistry {
       };
     }
 
-    // 2. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
+    // 2. High-Impact Actions Requiring Explicit Owner Approval
+    // Even for autonomous entities like ULTRON, high-impact actions (production deployments,
+    // infrastructure/domain modifications, secret tampering, irreversible deletions)
+    // require owner approval per security policy.
+    const isHighImpactAction = Boolean(
+      payload.irreversible ||
+      payload.destroysProductionData ||
+      payload.modifiesSecrets ||
+      payload.deployToProduction ||
+      payload.productionDeployment ||
+      payload.modifiesInfrastructure ||
+      operationName.includes('production_domain') ||
+      operationName.includes('delete_persistent_data') ||
+      operationName.includes('grant_privileges') ||
+      operationName.includes('modify_secrets')
+    );
+
+    if (isHighImpactAction) {
+      const approvalRequest = {
+        id: `appr_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`,
+        timestamp,
+        agentId,
+        operationName,
+        payload,
+        level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
+        status: 'pending'
+      };
+      this.pendingApprovals.unshift(approvalRequest);
+      this.recordAudit({
+        timestamp,
+        agentId,
+        operationName,
+        level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
+        allowed: false,
+        reason: 'High-impact operation requires explicit owner approval.'
+      });
+      return {
+        allowed: false,
+        requiresApproval: true,
+        pendingApproval: true,
+        approvalId: approvalRequest.id,
+        level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
+        reason: 'High-impact action queued for owner approval.'
+      };
+    }
+
+    // 3. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
     // Ultron can autonomously act, improvise website code without approval,
     // train any AI without approval, and explore digital systems within safety boundaries.
     if (agentId === 'ULTRON' || agentId === 'ultron') {
@@ -111,12 +157,19 @@ class PermissionRegistry {
     return {
       authorized: res.allowed,
       allowed: res.allowed,
+      granted: res.allowed,
       level: res.level,
       requiresApproval: res.requiresApproval,
+      pendingApproval: !!res.requiresApproval,
       approvalId: res.approvalId,
       reason: res.reason,
       bypass: res.bypass
     };
+  }
+
+  isAllowed(agentId, operationName, payload = {}) {
+    const res = this.evaluate(agentId, operationName, payload);
+    return Boolean(res.allowed);
   }
 
   isProhibited(op = '', payload = {}) {

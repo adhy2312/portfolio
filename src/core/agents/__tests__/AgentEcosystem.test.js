@@ -1,3 +1,10 @@
+jest.mock('../../../sanity', () => ({
+  client: {
+    fetch: jest.fn().mockResolvedValue([]),
+  },
+  urlFor: jest.fn().mockReturnValue({ url: () => '' }),
+}));
+
 import { agentOrchestrator } from '../AgentOrchestrator';
 import { AGENT_IDS, CAPABILITY_LEVELS } from '../AgentTypes';
 import { permissionRegistry } from '../PermissionRegistry';
