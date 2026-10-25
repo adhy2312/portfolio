@@ -73,17 +73,20 @@ export async function queryGeminiAgent(agentId, userPrompt, context = {}) {
       body: JSON.stringify(payload)
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (text) {
-        return {
-          agent: agentId,
-          model: data._activeModel || config.model,
-          response: text,
-          provider: 'Gemini 2.5 Serverless Proxy',
-          timestamp: new Date().toISOString()
-        };
+    if (res && res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) {
+          return {
+            agent: agentId,
+            model: data._activeModel || config.model,
+            response: text,
+            provider: 'Gemini 2.5 Serverless Proxy',
+            timestamp: new Date().toISOString()
+          };
+        }
       }
     }
   } catch (proxyErr) {

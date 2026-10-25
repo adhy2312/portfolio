@@ -17,9 +17,11 @@ const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY ||
                      process.env.GROQ_API_KEY;
 
 export const GROQ_MODELS = {
-  PRIMARY: 'llama-3.3-70b-versatile',
-  HIGH_SPEED: 'llama-3.1-8b-instant',
-  MOE: 'mixtral-8x7b-32768'
+  PRIMARY: 'qwen/qwen3.8-27b',
+  FLAGSHIP: 'openai/gpt-oss-120b',
+  FAST: 'openai/gpt-oss-20b',
+  HIGH_SPEED: 'qwen/qwen3.8-27b',
+  MOE: 'openai/gpt-oss-120b'
 };
 
 const AGENT_SYSTEM_PROMPTS = {
@@ -45,7 +47,7 @@ You know Adhithya's hardware expertise (MATLAB Simulink, GNU Radio, KiCad, ESP32
  */
 export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context = {}, options = {}) {
   const model = options.model || GROQ_MODELS.PRIMARY;
-  const systemPrompt = AGENT_SYSTEM_PROMPTS[agentId] || AGENT_SYSTEM_PROMPTS.JARVIS;
+  const systemPrompt = options.activePrompt || AGENT_SYSTEM_PROMPTS[agentId] || AGENT_SYSTEM_PROMPTS.JARVIS;
 
   const messages = [
     { role: 'system', content: systemPrompt },
@@ -59,7 +61,7 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
 
   const startTime = performance.now();
 
-  // 1. Primary: Serverless Proxy /api/groq
+  // 1. Primary: Serverless Proxy /api/groq (with Content-Type safeguard)
   try {
     const res = await fetch('/api/groq', {
       method: 'POST',
@@ -74,20 +76,23 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
     });
 
     if (res.ok) {
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content;
-      if (content) {
-        const elapsed = (performance.now() - startTime).toFixed(1);
-        return {
-          agent: agentId,
-          model: data._activeModel || model,
-          response: content,
-          provider: 'GroqCloud LPU (Serverless Accelerated)',
-          hardware: 'Groq Tensor Streaming Processor',
-          latencyMs: parseFloat(elapsed),
-          tokensPerSec: data._tokensPerSec || Math.round((content.length / 4) / (elapsed / 1000)) || 540,
-          timestamp: new Date().toISOString()
-        };
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content;
+        if (content) {
+          const elapsed = (performance.now() - startTime).toFixed(1);
+          return {
+            agent: agentId,
+            model: data._activeModel || model,
+            response: content,
+            provider: 'GroqCloud LPU (Serverless Accelerated)',
+            hardware: 'Groq Tensor Streaming Processor',
+            latencyMs: parseFloat(elapsed),
+            tokensPerSec: data._tokensPerSec || Math.round((content.length / 4) / (elapsed / 1000)) || 540,
+            timestamp: new Date().toISOString()
+          };
+        }
       }
     }
   } catch (proxyErr) {
@@ -96,7 +101,7 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
 
   // 2. Direct Fallback: Client-Side Direct Groq API
   if (GROQ_API_KEY && GROQ_API_KEY.length > 10) {
-    const modelsToTry = [model, GROQ_MODELS.PRIMARY, GROQ_MODELS.HIGH_SPEED];
+    const modelsToTry = [model, 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
     const unique = [...new Set(modelsToTry)];
 
     for (const m of unique) {
@@ -116,23 +121,26 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
         });
 
         if (directRes.ok) {
-          const directData = await directRes.json();
-          const content = directData.choices?.[0]?.message?.content;
-          if (content) {
-            const elapsed = (performance.now() - startTime).toFixed(1);
-            const totalTokens = directData.usage?.total_tokens || Math.ceil(content.length / 4);
-            const tps = elapsed > 0 ? Math.round(totalTokens / (elapsed / 1000)) : 620;
+          const contentType = directRes.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const directData = await directRes.json();
+            const content = directData.choices?.[0]?.message?.content;
+            if (content) {
+              const elapsed = (performance.now() - startTime).toFixed(1);
+              const totalTokens = directData.usage?.total_tokens || Math.ceil(content.length / 4);
+              const tps = elapsed > 0 ? Math.round(totalTokens / (elapsed / 1000)) : 620;
 
-            return {
-              agent: agentId,
-              model: m,
-              response: content,
-              provider: 'GroqCloud LPU Direct Neural Stream',
-              hardware: 'Groq LPUs (Tensor Streaming Architecture)',
-              latencyMs: parseFloat(elapsed),
-              tokensPerSec: tps,
-              timestamp: new Date().toISOString()
-            };
+              return {
+                agent: agentId,
+                model: m,
+                response: content,
+                provider: 'GroqCloud LPU Direct Neural Stream',
+                hardware: 'Groq LPUs (Tensor Streaming Architecture)',
+                latencyMs: parseFloat(elapsed),
+                tokensPerSec: tps,
+                timestamp: new Date().toISOString()
+              };
+            }
           }
         }
       } catch (err) {
@@ -140,6 +148,7 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
       }
     }
   }
+
 
   // 3. Graceful Local Fallback
   return {

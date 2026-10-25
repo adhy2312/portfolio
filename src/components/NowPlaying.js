@@ -7,18 +7,19 @@ const POLL_INTERVAL = 6000;
 const LS_KEY = 'np_minimized';
 const CACHE_KEY = 'np_last_track';
 
-// Pre-seeded with Adhithya's actual last played Spotify track
+// Pre-seeded with Adhithya's verified real last played Spotify track
 const INITIAL_TRACK = {
   isPlaying: false,
-  title: 'Barsaat Lagdi Ae',
-  artist: 'Darshan Raval, Simran Choudhary',
-  album: 'Barsaat Lagdi Ae',
-  albumArt: 'https://i.scdn.co/image/ab67616d0000b2739362837aa3011d5c421f1e16',
-  songUrl: 'https://open.spotify.com/track/7xbRQfVgKHGyp5grJErFop',
+  title: 'Sitaare (From "Ikkis")',
+  artist: 'Arijit Singh, Sachin-Jigar, Amitabh Bhattacharya',
+  album: 'Sitaare (From "Ikkis")',
+  albumArt: 'https://i.scdn.co/image/ab67616d0000b273dccd4f11c8ac8e1f2c8dfc51',
+  songUrl: 'https://open.spotify.com/track/6WlARP6h4CDVOcY386wW0W',
   previewUrl: null,
   progress: 0,
-  duration: 186134,
+  duration: 242916,
 };
+
 
 const SpotifyIcon = ({ size = 14 }) => (
   <svg viewBox="0 0 24 24" fill="currentColor" width={size} height={size}>

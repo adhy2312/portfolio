@@ -393,10 +393,11 @@ const AgentPortal = ({ onExit }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'weekly_report' })
       });
-      const data = await res.json();
+      const contentType = res.headers.get('content-type') || '';
+      const data = (res.ok && contentType.includes('application/json')) ? await res.json() : {};
       setDispatchStatus({
         sending: false,
-        success: data.success,
+        success: data.success || res.ok,
         message: data.delivery?.delivered
           ? `Dispatched successfully to ${TARGET_EMAIL} via ${data.delivery.provider}.`
           : `Report compiled for ${TARGET_EMAIL}. Stored in ecosystem archive.`

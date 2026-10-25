@@ -115,18 +115,21 @@ export async function getGeminiEmbedding(text, options = {}) {
       })
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      const values = data.embedding?.values;
-      if (values && values.length > 0) {
-        VECTOR_CACHE.set(cacheKey, values);
-        return {
-          vector: values,
-          model: data._activeModel || model,
-          cached: false,
-          dimensions: values.length,
-          provider: 'Gemini Serverless Proxy'
-        };
+    if (res && res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        const values = data.embedding?.values;
+        if (values && values.length > 0) {
+          VECTOR_CACHE.set(cacheKey, values);
+          return {
+            vector: values,
+            model: data._activeModel || model,
+            cached: false,
+            dimensions: values.length,
+            provider: 'Gemini Serverless Proxy'
+          };
+        }
       }
     }
   } catch (proxyErr) {
@@ -219,17 +222,20 @@ export async function getGeminiBatchEmbeddings(texts = [], options = {}) {
       })
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      if (data.embeddings && data.embeddings.length === uncachedTexts.length) {
-        data.embeddings.forEach((emb, i) => {
-          const vals = emb.values;
-          const origIdx = uncachedIndices[i];
-          const key = hashString(uncachedTexts[i]);
-          VECTOR_CACHE.set(key, vals);
-          results[origIdx] = vals;
-        });
-        return results;
+    if (res && res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.embeddings && data.embeddings.length === uncachedTexts.length) {
+          data.embeddings.forEach((emb, i) => {
+            const vals = emb.values;
+            const origIdx = uncachedIndices[i];
+            const key = hashString(uncachedTexts[i]);
+            VECTOR_CACHE.set(key, vals);
+            results[origIdx] = vals;
+          });
+          return results;
+        }
       }
     }
   } catch (err) {

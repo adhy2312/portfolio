@@ -54,19 +54,24 @@ export async function queryHuggingFace(agentId, prompt, options = {}) {
       })
     });
 
-    if (res.ok) {
-      const data = await res.json();
-      return {
-        success: true,
-        text: data.text,
-        model: data.model,
-        agentId: data.agentId,
-        engine: 'HUGGINGFACE_OPEN_WEIGHTS',
-        metrics: data.metrics || { latencyMs: 180, tokensGenerated: 80, costEstimateUSD: 0 }
-      };
+    if (res && res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await res.json();
+        return {
+          success: true,
+          text: data.text,
+          model: data.model,
+          agentId: data.agentId,
+          engine: 'HUGGINGFACE_OPEN_WEIGHTS',
+          metrics: data.metrics || { latencyMs: 180, tokensGenerated: 80, costEstimateUSD: 0 }
+        };
+      }
     }
 
-    const err = await res.json().catch(() => ({ error: 'Inference request failed' }));
+    const err = (res && (res.headers.get('content-type') || '').includes('application/json'))
+      ? await res.json().catch(() => ({ error: 'Inference request failed' }))
+      : { error: 'Inference serverless endpoint unavailable' };
     return {
       success: false,
       error: err.error || 'HuggingFace inference failed',
