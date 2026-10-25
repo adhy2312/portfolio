@@ -322,6 +322,31 @@ const Footer = () => {
             <div className="git-telemetry-meta">
               <span>Next-Gen React 19 Engine</span>
               <span className="git-telemetry-sep">·</span>
+              <button
+                type="button"
+                onClick={() => {
+                  if (window.openAgentPortal) {
+                    window.openAgentPortal();
+                  } else {
+                    window.location.hash = '#agentp';
+                  }
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#00f0ff',
+                  cursor: 'pointer',
+                  fontSize: '0.74rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.04em',
+                  textDecoration: 'underline',
+                  padding: 0
+                }}
+                title="Enter Autonomous Agent Portal (Cognitive OS)"
+              >
+                ⚡ Agent Portal [Cognitive Core]
+              </button>
+              <span className="git-telemetry-sep">·</span>
               <span>Sanity Studio CMS</span>
               <span className="git-telemetry-sep">·</span>
               <span>Kerala, India</span>

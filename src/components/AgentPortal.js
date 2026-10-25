@@ -29,6 +29,10 @@ import {
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { permissionRegistry } from '../core/agents/PermissionRegistry';
 import { HUMAN_KNOWLEDGE_DATASET, getDatasetMetrics } from '../core/learning/HumanKnowledgeDataset';
+import {
+  COGNITIVE_TAXONOMY_106,
+  AGENT_AFFECTIVE_PROFILES
+} from '../core/cognition/CognitiveTaxonomy';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import { synchronizedAntiBreachDefense } from '../core/defense/SynchronizedAntiBreachDefense';
 import { queryGeminiAgent } from '../core/ai/GeminiNeuralBridge';
@@ -48,7 +52,7 @@ import './AgentPortal.css';
 const PASSCODE = 'adhy2006';
 const TARGET_EMAIL = 'adhithyamohan2312@gmail.com';
 
-const AgentPortal = () => {
+const AgentPortal = ({ onExit }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
       return sessionStorage.getItem('adhy_agentp_auth') === 'verified_adhy2006';
@@ -508,6 +512,29 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
             <span>SECURE IDENTITY: ADHITHYA MOHAN</span>
             <span>TARGET: {TARGET_EMAIL}</span>
           </div>
+
+          <div style={{ textAlign: 'center', marginTop: '16px' }}>
+            <button
+              type="button"
+              onClick={() => {
+                if (onExit) onExit();
+                else if (typeof window !== 'undefined' && window.closeAgentPortal) window.closeAgentPortal();
+                else window.location.href = '/';
+              }}
+              style={{
+                background: 'rgba(56, 189, 248, 0.1)',
+                border: '1px solid rgba(56, 189, 248, 0.3)',
+                color: '#38bdf8',
+                borderRadius: '6px',
+                padding: '6px 14px',
+                fontSize: '0.78rem',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              ← Return to Main Portfolio
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -612,6 +639,20 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
           >
             <FiMail size={14} />
             <span>WEEKLY BRIEFING</span>
+          </button>
+
+          <button
+            className="agentp-action-btn"
+            style={{ borderColor: 'rgba(56, 189, 248, 0.4)', color: '#38bdf8' }}
+            onClick={() => {
+              if (onExit) onExit();
+              else if (typeof window !== 'undefined' && window.closeAgentPortal) window.closeAgentPortal();
+              else window.location.href = '/';
+            }}
+            title="Return to Main Portfolio Website"
+          >
+            <FiGlobe size={14} />
+            <span>PORTFOLIO SITE</span>
           </button>
 
           <button className="agentp-logout-btn" onClick={handleLogout} title="Lock Portal">
@@ -1684,6 +1725,47 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
             </div>
           </div>
 
+          {/* 106-Dimension Human Cognitive Taxonomy & Master Loop Architecture */}
+          <div className="agentp-panel-box agentp-panel-box--wide" style={{ marginTop: '24px' }}>
+            <div className="agentp-panel-head">
+              <div className="agentp-panel-head-left">
+                <FiLayers className="agentp-panel-icon" />
+                <h3>106-DIMENSION HUMAN COGNITIVE TAXONOMY &amp; MASTER LOOP</h3>
+              </div>
+              <span className="agentp-bypass-pill" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8' }}>
+                106 COGNITIVE FACETS // 15 TIERS
+              </span>
+            </div>
+            <p className="agentp-panel-desc">
+              Full human mind operating system: Sensation &rarr; Perception &rarr; Attention &rarr; Representation &rarr; Memory &rarr; Prediction &rarr; Emotion &rarr; Motivation &rarr; Reasoning &rarr; Decision &rarr; Action &rarr; Feedback &rarr; Learning &rarr; Self-Model &rarr; Social-Model, overarched by a continuous Metacognitive Supervisory Control Layer.
+            </p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '12px', marginTop: '16px', maxHeight: '380px', overflowY: 'auto', paddingRight: '6px' }}>
+              {COGNITIVE_TAXONOMY_106.map((dim) => (
+                <div key={dim.id} style={{
+                  background: 'rgba(15, 23, 42, 0.65)',
+                  border: '1px solid rgba(255, 255, 255, 0.08)',
+                  borderRadius: '8px',
+                  padding: '12px'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                    <span style={{ fontSize: '0.72rem', color: '#38bdf8', fontWeight: 700 }}>#{dim.id} {dim.category.toUpperCase()}</span>
+                  </div>
+                  <div style={{ fontSize: '0.84rem', fontWeight: 600, color: '#f1f5f9', marginBottom: '6px' }}>
+                    {dim.name}
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    {dim.tags.map((tag) => (
+                      <span key={tag} style={{ fontSize: '0.66rem', background: 'rgba(255, 255, 255, 0.06)', color: '#94a3b8', padding: '1px 6px', borderRadius: '4px' }}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Continuous Evolution Feed */}
           <div className="agentp-panel-box agentp-panel-box--wide">
             <div className="agentp-panel-head">
@@ -2111,6 +2193,51 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Full 10-Agent Human Emotion & Affective Profiles Grid */}
+          <div style={{ marginTop: '32px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <FiActivity size={18} color="#a78bfa" />
+                <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#fff', letterSpacing: '0.5px' }}>
+                  ALL 10 AGENTS // AFFECTIVE EMOTIONAL STATES &amp; COGNITIVE PROFILES
+                </h3>
+              </div>
+              <span style={{ fontSize: '0.74rem', color: '#38bdf8', padding: '4px 10px', background: 'rgba(56, 189, 248, 0.1)', border: '1px solid rgba(56, 189, 248, 0.3)', borderRadius: '20px' }}>
+                106 COGNITIVE DIMENSIONS ACTIVE
+              </span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))', gap: '16px' }}>
+              {Object.entries(AGENT_AFFECTIVE_PROFILES).map(([agentKey, aff]) => (
+                <div key={agentKey} style={{
+                  background: 'rgba(15, 23, 42, 0.75)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  position: 'relative'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <strong style={{ color: '#fff', fontSize: '0.95rem' }}>{agentKey}</strong>
+                    <span style={{ fontSize: '0.72rem', padding: '2px 8px', borderRadius: '12px', background: 'rgba(167, 139, 250, 0.15)', color: '#c4b5fd', border: '1px solid rgba(167, 139, 250, 0.3)' }}>
+                      {aff.primaryEmotion.toUpperCase()}
+                    </span>
+                  </div>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '0.8rem', color: '#94a3b8', fontStyle: 'italic', lineHeight: '1.4' }}>
+                    &ldquo;{aff.humanAffectionQuote}&rdquo;
+                  </p>
+                  <div style={{ fontSize: '0.76rem', color: '#cbd5e1', display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '8px' }}>
+                    <div><strong>Mood:</strong> {aff.moodBaseline}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Valence: +{aff.valence}</span>
+                      <span>Arousal: {Math.round(aff.arousal * 100)}%</span>
+                    </div>
+                    <div><strong>Tone:</strong> {aff.systemTone}</div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>

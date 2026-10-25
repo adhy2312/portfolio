@@ -516,16 +516,68 @@ function AppContent() {
 }
 
 function App() {
-  const isAgentP = typeof window !== 'undefined' && (
-    window.location.pathname === '/agentp' ||
-    window.location.pathname === '/agentp/' ||
-    window.location.pathname.startsWith('/agentp')
-  );
+  const checkIsAgentP = () => {
+    if (typeof window === 'undefined') return false;
+    const p = (window.location.pathname || '').toLowerCase();
+    const h = (window.location.hash || '').toLowerCase();
+    const s = (window.location.search || '').toLowerCase();
+    return (
+      p === '/agentp' ||
+      p === '/agentp/' ||
+      p.startsWith('/agentp') ||
+      h === '#agentp' ||
+      h === '#/agentp' ||
+      s.includes('agentp')
+    );
+  };
+
+  const [isAgentP, setIsAgentP] = useState(checkIsAgentP);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setIsAgentP(checkIsAgentP());
+    };
+
+    window.addEventListener('popstate', handleLocationChange);
+    window.addEventListener('hashchange', handleLocationChange);
+    window.addEventListener('adhy:open_agentp', handleLocationChange);
+
+    window.openAgentPortal = () => {
+      try {
+        window.history.pushState({}, '', '/agentp');
+      } catch {
+        window.location.hash = '#agentp';
+      }
+      setIsAgentP(true);
+    };
+
+    window.closeAgentPortal = () => {
+      try {
+        window.history.pushState({}, '', '/');
+      } catch {
+        window.location.hash = '';
+      }
+      setIsAgentP(false);
+    };
+
+    return () => {
+      window.removeEventListener('popstate', handleLocationChange);
+      window.removeEventListener('hashchange', handleLocationChange);
+      window.removeEventListener('adhy:open_agentp', handleLocationChange);
+    };
+  }, []);
 
   if (isAgentP) {
     return (
       <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '100vh', background: '#09090b' }} />}>
-        <AgentPortal />
+        <AgentPortal onExit={() => {
+          try {
+            window.history.pushState({}, '', '/');
+          } catch {
+            window.location.hash = '';
+          }
+          setIsAgentP(false);
+        }} />
       </Suspense>
     );
   }

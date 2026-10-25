@@ -218,6 +218,35 @@ const Navbar = () => {
               Resume ↓
             </a>
           </li>
+          <li>
+            <button
+              className="mobile-nav-resume-btn"
+              onClick={() => {
+                setMenuOpen(false);
+                playClickSound();
+                if (window.openAgentPortal) {
+                  window.openAgentPortal();
+                } else {
+                  window.location.hash = '#agentp';
+                }
+              }}
+              style={{
+                marginTop: '10px',
+                background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(123, 97, 255, 0.25))',
+                borderColor: '#00f0ff',
+                color: '#00f0ff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                fontWeight: 700,
+                boxShadow: '0 0 16px rgba(0, 240, 255, 0.2)'
+              }}
+            >
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 8px #00ff88' }} />
+              ⚡ AGENT PORTAL [L5]
+            </button>
+          </li>
 
           <li className="mobile-menu-divider" aria-hidden="true" />
 
@@ -318,6 +347,41 @@ const Navbar = () => {
                   Resume ↓
                 </a>
               </MagneticButton>
+            </li>
+            <li>
+              <button
+                onClick={() => {
+                  playClickSound();
+                  if (window.openAgentPortal) {
+                    window.openAgentPortal();
+                  } else {
+                    window.location.hash = '#agentp';
+                  }
+                }}
+                className="nav-agent-portal-btn"
+                style={{
+                  background: 'linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(123, 97, 255, 0.2))',
+                  border: '1px solid rgba(0, 240, 255, 0.5)',
+                  color: '#00f0ff',
+                  borderRadius: '20px',
+                  padding: '7px 14px',
+                  fontSize: '0.75rem',
+                  fontWeight: 700,
+                  letterSpacing: '0.08em',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: '0 0 14px rgba(0, 240, 255, 0.25)',
+                  transition: 'all 0.2s ease',
+                  marginLeft: '8px',
+                  fontFamily: 'Space Grotesk, sans-serif'
+                }}
+                title="Access Autonomous Agent Intelligence Portal & Cognitive OS"
+              >
+                <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#00ff88', boxShadow: '0 0 6px #00ff88' }} />
+                ⚡ AGENTS
+              </button>
             </li>
           </ul>
 

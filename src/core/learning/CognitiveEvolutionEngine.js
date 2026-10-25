@@ -15,13 +15,22 @@
  */
 
 import { HUMAN_KNOWLEDGE_DATASET, getDatasetMetrics } from './HumanKnowledgeDataset';
+import {
+  COGNITIVE_TAXONOMY_106,
+  AGENT_AFFECTIVE_PROFILES,
+  HUMAN_EMOTION_SETS,
+  CognitiveLoopRunner
+} from '../cognition/CognitiveTaxonomy';
 
 class ContinuousCognitiveEvolutionEngine {
   constructor() {
     this.storageKey = 'mini_adhy_cognitive_evolution_v3';
-    this.totalEcosystemTokensIngested = 2415000;
-    this.globalEpochsCompleted = 348;
+    this.totalEcosystemTokensIngested = 4850000;
+    this.globalEpochsCompleted = 352;
     this.lastEvolutionTimestamp = new Date().toISOString();
+    this.cognitiveTaxonomy = COGNITIVE_TAXONOMY_106;
+    this.emotionSets = HUMAN_EMOTION_SETS;
+    this.cognitiveRunners = {};
 
     // Default intelligence profiles for all AI entities
     this.agentIntelligenceProfiles = {
@@ -196,8 +205,23 @@ class ContinuousCognitiveEvolutionEngine {
       }
     ];
 
+    this.initAffectiveProfiles();
     this.loadCheckpoints();
     this.startContinuousBackgroundEvolution();
+  }
+
+  initAffectiveProfiles() {
+    for (const [key, profile] of Object.entries(this.agentIntelligenceProfiles)) {
+      const runnerKey = key === 'MINI_ADHY' ? 'ULTRON' : key;
+      this.cognitiveRunners[key] = new CognitiveLoopRunner(runnerKey);
+      const affective = AGENT_AFFECTIVE_PROFILES[runnerKey] || AGENT_AFFECTIVE_PROFILES.ULTRON;
+      profile.affectiveProfile = affective;
+      profile.activeEmotion = affective.primaryEmotion;
+      profile.valence = affective.valence;
+      profile.arousal = affective.arousal;
+      profile.moodBaseline = affective.moodBaseline;
+      profile.cognitiveDimensionsCount = 106;
+    }
   }
 
   loadCheckpoints() {
@@ -318,6 +342,8 @@ class ContinuousCognitiveEvolutionEngine {
       globalEpochsCompleted: this.globalEpochsCompleted,
       lastEvolutionTimestamp: this.lastEvolutionTimestamp,
       datasetMetrics: getDatasetMetrics(),
+      totalCognitiveDimensions: 106,
+      masterCognitiveLoop: 'SENSATION → PERCEPTION → ATTENTION → REPRESENTATION → MEMORY → PREDICTION → EMOTION → MOTIVATION → REASONING → DECISION → ACTION → FEEDBACK → LEARNING → METACOGNITION',
       profiles: this.agentIntelligenceProfiles,
       recentLogs: this.evolutionLog
     };
@@ -326,6 +352,32 @@ class ContinuousCognitiveEvolutionEngine {
   getAgentIntelligence(agentId) {
     const key = (agentId || '').toUpperCase().replace('-', '_');
     return this.agentIntelligenceProfiles[key] || this.agentIntelligenceProfiles.MINI_ADHY;
+  }
+
+  getAgentCognitiveProfile(agentId) {
+    const key = (agentId || '').toUpperCase().replace('-', '_');
+    const runner = this.cognitiveRunners[key] || this.cognitiveRunners.MINI_ADHY;
+    const base = this.getAgentIntelligence(key);
+    return {
+      ...base,
+      cognitiveDimensionsCount: 106,
+      telemetry: runner ? runner.getTelemetry() : null
+    };
+  }
+
+  processAgentCognitiveStimulus(agentId, stimulus) {
+    const key = (agentId || '').toUpperCase().replace('-', '_');
+    const runner = this.cognitiveRunners[key] || this.cognitiveRunners.MINI_ADHY;
+    if (!runner) return null;
+    const telemetry = runner.processStimulus(stimulus);
+    const profile = this.agentIntelligenceProfiles[key];
+    if (profile) {
+      profile.activeEmotion = telemetry.emotion;
+      profile.valence = telemetry.valence;
+      profile.arousal = telemetry.arousal;
+    }
+    this.saveCheckpoints();
+    return telemetry;
   }
 }
 
