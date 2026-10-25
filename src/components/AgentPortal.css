@@ -3930,3 +3930,492 @@
   border-radius: 6px;
   border-left: 3px solid #38bdf8;
 }
+
+/* ────────────────────────────────────────────────────────────
+   INDUSTRY TREND AUDITOR & PORTFOLIO VULNERABILITY ALERT STYLES
+──────────────────────────────────────────────────────────── */
+.agentp-trend-audit-card {
+  background: radial-gradient(circle at 10% 20%, rgba(244, 63, 94, 0.08) 0%, rgba(13, 17, 28, 0.95) 80%);
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-radius: 14px;
+  padding: 24px;
+  margin: 24px 0;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+}
+
+.agentp-trend-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.agentp-trend-title-block h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 4px 0;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agentp-trend-title-block p {
+  font-size: 0.82rem;
+  color: #94a3b8;
+  margin: 0;
+}
+
+.agentp-trend-score-pill {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agentp-trend-score-pill--alert {
+  background: rgba(244, 63, 94, 0.2);
+  border: 1px solid #f43f5e;
+  color: #fca5a5;
+}
+
+.agentp-trend-score-pill--nominal {
+  background: rgba(16, 185, 129, 0.2);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+}
+
+/* Alert Banner */
+.agentp-trend-alert-banner {
+  background: linear-gradient(90deg, rgba(239, 68, 68, 0.22), rgba(245, 158, 11, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  border-left: 5px solid #ef4444;
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  animation: pulseAlert 2.5s infinite alternate ease-in-out;
+}
+
+@keyframes pulseAlert {
+  0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.15); }
+  100% { box-shadow: 0 0 22px rgba(239, 68, 68, 0.35); }
+}
+
+.agentp-alert-headline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #fecaca;
+  margin-bottom: 4px;
+}
+
+.agentp-alert-desc {
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Newly Changing Industry Patterns Radar */
+.agentp-patterns-section {
+  margin-bottom: 24px;
+}
+
+.agentp-sec-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.agentp-patterns-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.agentp-pattern-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentp-pattern-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agentp-pattern-domain {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #f1f5f9;
+}
+
+.agentp-pattern-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.agentp-pattern-tag--exceeds {
+  background: rgba(16, 185, 129, 0.18);
+  color: #6ee7b7;
+  border: 1px solid #10b981;
+}
+
+.agentp-pattern-tag--gap {
+  background: rgba(245, 158, 11, 0.18);
+  color: #fde68a;
+  border: 1px solid #f59e0b;
+}
+
+.agentp-pattern-trend {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  line-height: 1.4;
+}
+
+.agentp-pattern-bar-wrap {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 4px;
+}
+
+.agentp-pattern-bar {
+  height: 100%;
+  border-radius: 2px;
+}
+
+/* Portfolio Gaps Cards */
+.agentp-gaps-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.agentp-gap-card {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.agentp-gap-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agentp-gap-cat {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.agentp-gap-sev {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.agentp-gap-sev--high {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+}
+
+.agentp-gap-sev--medium {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid #f59e0b;
+  color: #fde68a;
+}
+
+.agentp-gap-sev--low {
+  background: rgba(56, 189, 248, 0.2);
+  border: 1px solid #38bdf8;
+  color: #7dd3fc;
+}
+
+.agentp-gap-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.agentp-gap-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.agentp-gap-benchmark-box {
+  background: rgba(56, 189, 248, 0.08);
+  border-left: 2px solid #38bdf8;
+  padding: 6px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.74rem;
+  color: #bae6fd;
+}
+
+.agentp-gap-action-box {
+  background: rgba(16, 185, 129, 0.08);
+  border-left: 2px solid #10b981;
+  padding: 6px 10px;
+  border-radius: 0 6px 6px 0;
+  font-size: 0.74rem;
+  color: #a7f3d0;
+}
+
+.agentp-gap-impact {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #c4b5fd;
+  font-weight: 700;
+}
+
+/* ────────────────────────────────────────────────────────────
+   ALL AGENTS CANONICAL ROSTER & ARCHITECTURAL DIRECTORY
+──────────────────────────────────────────────────────────── */
+.agentp-roster-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.agentp-roster-header {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 20px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.agentp-roster-title-box h3 {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agentp-roster-subtitle {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin: 0;
+  font-family: 'Fira Code', monospace;
+}
+
+.agentp-roster-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+  gap: 20px;
+}
+
+.agentp-roster-card {
+  background: rgba(11, 15, 25, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.agentp-roster-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(0, 240, 255, 0.4);
+  box-shadow: 0 10px 30px -10px rgba(0, 240, 255, 0.15);
+}
+
+.agentp-roster-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.agentp-roster-id-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agentp-roster-name {
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+}
+
+.agentp-roster-codename {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.08em;
+}
+
+.agentp-roster-clearance {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  font-weight: 600;
+}
+
+.agentp-roster-purpose {
+  font-size: 0.82rem;
+  color: #cbd5e1;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.agentp-roster-models-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.agentp-roster-model-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.12);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  color: #d8b4fe;
+}
+
+.agentp-roster-capabilities-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentp-roster-cap-item {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  line-height: 1.35;
+}
+
+.agentp-roster-cap-bullet {
+  color: #00f0ff;
+  font-weight: bold;
+}
+
+.agentp-roster-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+  margin-top: auto;
+  font-size: 0.72rem;
+  color: #64748b;
+  font-family: 'Fira Code', monospace;
+}
+
+/* ────────────────────────────────────────────────────────────
+   CLAUDE AGENTIC ENGINE & EFFICIENCY TELEMETRY
+──────────────────────────────────────────────────────────── */
+.agentp-claude-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.agentp-claude-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.agentp-claude-metric-card {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentp-claude-metric-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.05em;
+}
+
+.agentp-claude-metric-val {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #38bdf8;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.agentp-claude-metric-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.agentp-claude-panel {
+  background: rgba(11, 15, 25, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+

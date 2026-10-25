@@ -176,7 +176,6 @@ const GravityWell = () => {
 
             // Signal Decay: slow down and fade pulse timelines as scroll progresses
             const speed = 1 - self.progress * 0.95; // 1.0 → 0.05
-            const pulseOpacity = 1 - self.progress;
 
             pulseTimelines.current.forEach(tl => {
               tl.timeScale(Math.max(0.05, speed));

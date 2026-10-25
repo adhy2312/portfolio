@@ -17,6 +17,7 @@ const generateZipLevel = (id, size) => {
   while (solutionPath.length === 0) {
     let attempts = 0;
     
+    // eslint-disable-next-line no-loop-func
     const findHamiltonian = (r, c, visited) => {
       attempts++;
       // Failsafe: if we get stuck in a bad branch, abort and try a new random start

@@ -56,7 +56,7 @@ const TrustedBy = () => {
     <div className="trusted-by" ref={sectionRef}>
       <div className="container">
         <div className="trusted-header" ref={headerRef}>
-          <span className="section-label">// trusted partners</span>
+          <span className="section-label">{"// trusted partners"}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title">
               Trusted <span>By</span>

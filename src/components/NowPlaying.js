@@ -266,7 +266,7 @@ const NowPlaying = () => {
     }
 
     return cleanupAmbient;
-  }, [track?.isPlaying, track?.title, track?.artist, track?.albumArt]);
+  }, [track]);
 
   const toggleMinimized = () => {
     const next = !minimized;

@@ -20,6 +20,7 @@ const SNIPPETS = [
     lines: [
       { tokens: [{ text: 'const ', c: 'kw' }, { text: 'build ', c: 'fn' }, { text: '= async () => {', c: 'plain' }] },
       { tokens: [{ text: '  const ', c: 'kw' }, { text: 'dream ', c: 'def' }, { text: '= ', c: 'plain' }, { text: 'await ', c: 'kw' }, { text: 'ship()', c: 'fn' }, { text: ';', c: 'plain' }] },
+      // eslint-disable-next-line no-template-curly-in-string
       { tokens: [{ text: '  ', c: 'plain' }, { text: 'console', c: 'fn' }, { text: '.log(', c: 'plain' }, { text: '`✨ ${dream}`', c: 'str' }, { text: ');', c: 'plain' }] },
       { tokens: [{ text: '};', c: 'plain' }] },
     ],

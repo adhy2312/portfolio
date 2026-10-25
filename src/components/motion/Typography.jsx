@@ -7,7 +7,6 @@ import VelocityText from './VelocityText';
 gsap.registerPlugin(ScrollTrigger);
 
 const EASE_BUTTER = motionTokens.ease.butter;
-const EASE_ELASTIC = motionTokens.ease.elastic;
 const EASE_EXPO = motionTokens.ease.expo;
 
 /**

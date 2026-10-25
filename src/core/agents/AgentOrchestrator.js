@@ -30,6 +30,9 @@ import { neuralEventBus } from '../../utils/NeuralEventBus';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { synchronizedAntiBreachDefense } from '../defense/SynchronizedAntiBreachDefense';
 import { EmotionEngine } from './EmotionEngine';
+import { industryTrendAuditor } from './IndustryTrendAuditor';
+import { COMPLETE_AGENT_ROSTER } from './AgentRegistry';
+import { claudeAgenticEngine } from './ClaudeAgenticEngine';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
@@ -186,13 +189,16 @@ class MiniAdhyAgentOrchestrator {
 
     const criticalIssues = this.findings.filter(f => f.severity === 'critical' || f.severity === 'high');
     const warnings = this.findings.filter(f => f.severity === 'medium');
+    const industryAudit = industryTrendAuditor.auditPortfolio();
 
     const report = {
       id: `report_${Date.now()}`,
       generatedAt: timestamp,
       reportingPeriod: `Week ending ${periodEnd} (IST)`,
       coordinator: 'Mini-Adhy Supreme Intelligence',
-      ecosystemHealth: criticalIssues.length === 0 ? 'OPTIMAL' : 'ATTENTION_REQUIRED',
+      ecosystemHealth: criticalIssues.length === 0 && !industryAudit.alert.active ? 'OPTIMAL' : 'ATTENTION_REQUIRED',
+      healthScore: Math.round((industryAudit.trendAlignmentScore * 0.5) + (criticalIssues.length === 0 ? 50 : 35)),
+      executiveSummary: 'Mini-Adhy Supreme Intelligence Hub weekly operational and industry alignment briefing.',
       agentStatuses: Object.values(this.agents).map(a => ({
         id: a.id,
         name: a.name,
@@ -200,6 +206,7 @@ class MiniAdhyAgentOrchestrator {
         status: a.status,
         lastRun: a.lastRun
       })),
+      industryTrendsAudit: industryAudit,
       emotionalStates: {
         FRIDAY: this.agents.FRIDAY?.emotionEngine ? this.agents.FRIDAY.emotionEngine.getState() : null,
         JARVIS: this.agents.JARVIS?.emotionEngine ? this.agents.JARVIS.emotionEngine.getState() : null,
@@ -210,11 +217,14 @@ class MiniAdhyAgentOrchestrator {
         totalFindings: this.findings.length,
         criticalCount: criticalIssues.length,
         warningsCount: warnings.length,
-        pendingApprovalsCount: permissionRegistry.getPendingApprovals().length
+        pendingApprovalsCount: permissionRegistry.getPendingApprovals().length,
+        trendAlignmentScore: industryAudit.trendAlignmentScore,
+        industryGapsCount: industryAudit.summary.gapsIdentifiedCount
       },
       criticalFindings: criticalIssues,
       pendingApprovals: permissionRegistry.getPendingApprovals(),
       recommendations: [
+        ...industryAudit.gaps.map(g => `[INDUSTRY GAP FIX] ${g.title}: ${g.remediationAction}`),
         'Maintain automatic edge-cached SSL/TLS certificates on Vercel deployment.',
         'Review Sanity CMS schema revisions and monitor asset CDN cache hit rates.',
         'Sustain periodic zero-trust audit across client-exposed dependencies.'
@@ -226,6 +236,14 @@ class MiniAdhyAgentOrchestrator {
     this.saveState();
 
     return report;
+  }
+
+  generateWeeklyReport() {
+    return this.generateWeeklyIntelligenceReport();
+  }
+
+  getIndustryTrendsAudit() {
+    return industryTrendAuditor.auditPortfolio();
   }
 
   getAgentStatuses() {
@@ -424,6 +442,18 @@ class MiniAdhyAgentOrchestrator {
 
   rejectAction(approvalId) {
     return permissionRegistry.resolveApproval(approvalId, false, 'owner');
+  }
+
+  getCompleteAgentRoster() {
+    return COMPLETE_AGENT_ROSTER;
+  }
+
+  getClaudeEngineTelemetry() {
+    return claudeAgenticEngine.getTelemetrySummary();
+  }
+
+  runClaudeReActCycle(agentId, prompt) {
+    return claudeAgenticEngine.executeReActCycle(agentId, prompt);
   }
 }
 

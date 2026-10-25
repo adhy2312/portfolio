@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import ns from '../../core/NervousSystem';
 
 export default function SchrodingersNode({ children, className = '' }) {

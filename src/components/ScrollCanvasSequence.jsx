@@ -20,6 +20,7 @@ const ScrollCanvasSequence = () => {
     for (let i = 0; i < frameCount; i++) {
       const img = new Image();
       img.src = currentFrame(i);
+      // eslint-disable-next-line no-loop-func
       img.onload = () => {
         loadedCount++;
         if (loadedCount === 1) {
