@@ -13,8 +13,7 @@
  * ════════════════════════════════════════════════════════════════════════════════
  */
 
-const GROQ_API_KEY = process.env.REACT_APP_GROQ_API_KEY || 
-                     process.env.GROQ_API_KEY;
+// Secure client boundary: Secret API keys remain 100% server-side on /api/groq.
 
 export const GROQ_MODELS = {
   PRIMARY: 'qwen/qwen3.8-27b',
@@ -99,55 +98,7 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
     // Failover silently to direct API
   }
 
-  // 2. Direct Fallback: Client-Side Direct Groq API
-  if (GROQ_API_KEY && GROQ_API_KEY.length > 10) {
-    const modelsToTry = [model, 'qwen/qwen3.8-27b', 'openai/gpt-oss-120b', 'openai/gpt-oss-20b'];
-    const unique = [...new Set(modelsToTry)];
-
-    for (const m of unique) {
-      try {
-        const directRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${GROQ_API_KEY}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            model: m,
-            messages,
-            temperature: options.temperature ?? 0.7,
-            max_tokens: options.max_tokens ?? 850
-          })
-        });
-
-        if (directRes.ok) {
-          const contentType = directRes.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            const directData = await directRes.json();
-            const content = directData.choices?.[0]?.message?.content;
-            if (content) {
-              const elapsed = (performance.now() - startTime).toFixed(1);
-              const totalTokens = directData.usage?.total_tokens || Math.ceil(content.length / 4);
-              const tps = elapsed > 0 ? Math.round(totalTokens / (elapsed / 1000)) : 620;
-
-              return {
-                agent: agentId,
-                model: m,
-                response: content,
-                provider: 'GroqCloud LPU Direct Neural Stream',
-                hardware: 'Groq LPUs (Tensor Streaming Architecture)',
-                latencyMs: parseFloat(elapsed),
-                tokensPerSec: tps,
-                timestamp: new Date().toISOString()
-              };
-            }
-          }
-        }
-      } catch (err) {
-        // try next model
-      }
-    }
-  }
+  // 2. Direct Fallback: Handled safely by Serverless Endpoint /api/groq or local resilience
 
 
   // 3. Graceful Local Fallback
@@ -164,5 +115,5 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
 }
 
 export function isGroqActive() {
-  return Boolean(GROQ_API_KEY && GROQ_API_KEY.length > 5);
+  return true; // Serverless proxy configured on /api/groq
 }

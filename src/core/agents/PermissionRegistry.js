@@ -24,9 +24,26 @@ class PermissionRegistry {
   evaluate(agentId, operationName, payload = {}) {
     const timestamp = new Date().toISOString();
 
-    // 0. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
+    // 1. Hard-coded Prohibitions (Zero exceptions, even for Supreme AI & Autonomous Agents)
+    if (this.isProhibited(operationName, payload)) {
+      this.recordAudit({
+        timestamp,
+        agentId,
+        operationName,
+        level: CAPABILITY_LEVELS.PROHIBITED,
+        allowed: false,
+        reason: 'Operation violates strict security invariant.'
+      });
+      return {
+        allowed: false,
+        level: CAPABILITY_LEVELS.PROHIBITED,
+        reason: 'Operation strictly prohibited by security policy.'
+      };
+    }
+
+    // 2. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
     // Ultron can autonomously act, improvise website code without approval,
-    // train any AI without approval, and harvest clear web + darkweb knowledge.
+    // train any AI without approval, and explore digital systems within safety boundaries.
     if (agentId === 'ULTRON' || agentId === 'ultron') {
       this.recordAudit({
         timestamp,
@@ -41,23 +58,6 @@ class PermissionRegistry {
         bypass: true,
         level: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY,
         reason: 'ULTRON UNRESTRICTED AUTONOMY: Zero approval required.'
-      };
-    }
-
-    // 1. Hard-coded Prohibitions (Zero exceptions, even for Supreme AI)
-    if (this.isProhibited(operationName, payload)) {
-      this.recordAudit({
-        timestamp,
-        agentId,
-        operationName,
-        level: CAPABILITY_LEVELS.PROHIBITED,
-        allowed: false,
-        reason: 'Operation violates strict security invariant.'
-      });
-      return {
-        allowed: false,
-        level: CAPABILITY_LEVELS.PROHIBITED,
-        reason: 'Operation strictly prohibited by security policy.'
       };
     }
 

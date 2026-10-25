@@ -11,7 +11,7 @@
  * 3. Model Cascade: gemini-3.8-flash → gemini-2.5-flash → gemini-1.5-flash
  */
 
-const FALLBACK_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY_2 || '';
+// Secure client boundary: Secret API keys remain 100% server-side on /api/gemini.
 
 export const TOP_TIER_AGENT_CONFIG = {
   JARVIS: {
@@ -93,41 +93,7 @@ export async function queryGeminiAgent(agentId, userPrompt, context = {}) {
     console.warn(`[GeminiNeuralBridge] /api/gemini proxy bypassed:`, proxyErr.message);
   }
 
-  // 2. Direct Fallback: Client-Side Gemini Endpoint
-  if (FALLBACK_API_KEY && FALLBACK_API_KEY.length > 5) {
-    const models = [config.model, 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
-    const uniqueModels = [...new Set(models)];
-    for (const model of uniqueModels) {
-      try {
-        const directUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${FALLBACK_API_KEY}`;
-        const directRes = await fetch(directUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: payload.contents,
-            systemInstruction: payload.system_instruction,
-            generationConfig: payload.generationConfig
-          })
-        });
-
-        if (directRes.ok) {
-          const directData = await directRes.json();
-          const text = directData.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (text) {
-            return {
-              agent: agentId,
-              model,
-              response: text,
-              provider: 'Gemini 2.5 Direct Neural Pipeline',
-              timestamp: new Date().toISOString()
-            };
-          }
-        }
-      } catch (err) {
-        // try next model in fallback
-      }
-    }
-  }
+  // 2. Direct Fallback: Handled securely via Groq LPU Serverless Proxy (/api/groq) or local heuristic
 
   // 3. GroqCloud LPU Computational Accelerator Failover (500+ tokens/sec)
   try {

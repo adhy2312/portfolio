@@ -49,13 +49,24 @@ import {
 import { AgentOrb } from './AgentOrb';
 import './AgentPortal.css';
 
-const PASSCODE = 'adhy2006';
+// Cryptographic Hash Digest for Offline / Static Fallback (Zero Plaintext Secrets in Bundle)
+const VERIFIED_GATEWAY_HASH = '3f462008f2539259e8600f0272f17e31e22438472d9fbde4776b06235548fe04';
 const TARGET_EMAIL = 'adhithyamohan2312@gmail.com';
+
+async function computeSHA256(str) {
+  try {
+    const enc = new TextEncoder().encode(str);
+    const buf = await window.crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  } catch {
+    return '';
+  }
+}
 
 const AgentPortal = ({ onExit }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     try {
-      return sessionStorage.getItem('adhy_agentp_auth') === 'verified_adhy2006';
+      return Boolean(sessionStorage.getItem('adhy_agentp_session'));
     } catch {
       return false;
     }
@@ -293,35 +304,69 @@ const AgentPortal = ({ onExit }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setIsAuthenticating(true);
     setErrorMsg('');
 
-    setTimeout(() => {
-      if (passwordInput === PASSCODE) {
-        try {
-          sessionStorage.setItem('adhy_agentp_auth', 'verified_adhy2006');
-        } catch {}
-        setIsAuthenticated(true);
-        refreshTelemetry();
-      } else {
-        // Trigger synchronized full-squad defensive interception!
-        synchronizedAntiBreachDefense.interceptBreachAttempt({
-          threatType: 'Unauthorized Gateway Intrusion Attempt',
-          vector: '/agentp authentication gate',
-          payload: `Passcode trial: "${passwordInput.slice(0, 3)}***"`,
-          origin: 'Client Gateway'
-        });
-        setErrorMsg('ACCESS BREACH DETECTED: All 10 Specialist Agents + Mini-Adhy united to neutralize intrusion. Hostile vector quarantined.');
+    const inputTrimmed = passwordInput.trim();
+    let authSuccess = false;
+    let sessionToken = null;
+
+    // 1. Primary: Serverless Authentication Boundary (/api/auth)
+    try {
+      const res = await fetch('/api/auth?action=login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: inputTrimmed, scope: 'agentp' })
+      });
+      if (res && res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          if (data.authenticated) {
+            authSuccess = true;
+            sessionToken = data.token || 'verified_server_session';
+          }
+        }
       }
-      setIsAuthenticating(false);
-    }, 350);
+    } catch {
+      // Offline or static server: Fall through to client cryptographic hash validation
+    }
+
+    // 2. Resilient Static / Offline Cryptographic Verification
+    if (!authSuccess) {
+      const hash = await computeSHA256(inputTrimmed);
+      if (hash && hash === VERIFIED_GATEWAY_HASH) {
+        authSuccess = true;
+        sessionToken = 'offline_crypto_verified_' + Date.now();
+      }
+    }
+
+    if (authSuccess) {
+      try {
+        sessionStorage.setItem('adhy_agentp_session', sessionToken);
+      } catch {}
+      setIsAuthenticated(true);
+      refreshTelemetry();
+    } else {
+      // Trigger synchronized full-squad defensive interception!
+      synchronizedAntiBreachDefense.interceptBreachAttempt({
+        threatType: 'Unauthorized Gateway Intrusion Attempt',
+        vector: '/agentp authentication gate',
+        payload: `Passcode trial: "${inputTrimmed.slice(0, 3)}***"`,
+        origin: 'Client Gateway'
+      });
+      setErrorMsg('ACCESS BREACH DETECTED: All 10 Specialist Agents + Mini-Adhy united to neutralize intrusion. Hostile vector quarantined.');
+    }
+
+    setIsAuthenticating(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     try {
-      sessionStorage.removeItem('adhy_agentp_auth');
+      await fetch('/api/auth?action=logout', { method: 'POST' }).catch(() => {});
+      sessionStorage.removeItem('adhy_agentp_session');
     } catch {}
     setIsAuthenticated(false);
     setPasswordInput('');
@@ -471,7 +516,7 @@ SPECIALIST SQUAD TELEMETRY & GUARDIANSHIP:
 UNIVERSAL HUMAN KNOWLEDGE CORPUS:
 Ingested 2.41M+ tokens across Human Fears (thanatophobia, kenophobia), Ancient Superstitions (the evil eye, machine spirits), Mythology (Prometheus, Sisyphus), and Quantum Thermodynamics.
 
-Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
+Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
 `
     );
     window.open(`mailto:${TARGET_EMAIL}?subject=${subject}&body=${body}`, '_blank');
@@ -2777,7 +2822,7 @@ SPECIALIST SQUAD TELEMETRY:
 • KAREN (Technical SEO): 151.7 IQ • OpenGraph cards & JSON-LD schemas verified
 • VERONICA (Future Horizons): 164.2 IQ • WebGPU shaders & Three.js canvas optimized
 
-Access classified portal: https://adhy.tech/agentp (Passcode: adhy2006)`}
+Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
                   </pre>
                 </div>
               </div>

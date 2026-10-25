@@ -17,7 +17,7 @@
  * ════════════════════════════════════════════════════════════════════════════════
  */
 
-const FALLBACK_API_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY_2 || '';
+// Secure client boundary: Secret API keys remain 100% server-side on /api/gemini.
 
 // Local in-memory vector cache to eliminate redundant computation
 const VECTOR_CACHE = new Map();
@@ -136,43 +136,7 @@ export async function getGeminiEmbedding(text, options = {}) {
     // Failover silently to direct API
   }
 
-  // 2. Direct Fallback: Client-Side Gemini Key
-  if (FALLBACK_API_KEY && FALLBACK_API_KEY.length > 5) {
-    const fallbackModels = [model, 'gemini-embedding-001', 'gemini-embedding-2', 'text-embedding-004'];
-    const unique = [...new Set(fallbackModels)];
-    for (const m of unique) {
-      try {
-        const cleanM = m.replace('models/', '');
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${cleanM}:embedContent?key=${FALLBACK_API_KEY}`;
-        const directRes = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: `models/${cleanM}`,
-            content: { parts: [{ text }] },
-            taskType
-          })
-        });
-
-        if (directRes.ok) {
-          const directData = await directRes.json();
-          const vals = directData.embedding?.values;
-          if (vals && vals.length > 0) {
-            VECTOR_CACHE.set(cacheKey, vals);
-            return {
-              vector: vals,
-              model: cleanM,
-              cached: false,
-              dimensions: vals.length,
-              provider: 'Direct Gemini Neural Pipeline'
-            };
-          }
-        }
-      } catch (err) {
-        // try next model
-      }
-    }
-  }
+  // 2. Direct Fallback: Handled securely via serverless proxy /api/gemini or local deterministic vector engine
 
   // 3. Resilient Built-in Deterministic Vector Engine
   const localVec = generateDeterministicVector(text, 128);

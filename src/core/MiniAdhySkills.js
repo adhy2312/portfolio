@@ -57,6 +57,29 @@ const playSynthesizerTone = (preset = 'chime') => {
   }
 };
 
+/**
+ * Defensive CSS Sanitizer
+ * Strips dangerous injection vectors: @import, external url(), behavior, expression, javascript:, and HTML breakout tags.
+ */
+export function sanitizeDynamicCss(rawCss = '') {
+  if (typeof rawCss !== 'string') return '';
+  const trimmed = rawCss.trim().slice(0, 4096);
+  // Block @import rules (can load external untrusted sheets)
+  if (/@import/i.test(trimmed)) {
+    return '/* Blocked: @import disallowed in dynamic stylesheet injection */';
+  }
+  // Block external URLs and data URLs in url(...)
+  if (/url\s*\(\s*['"]?\s*(https?:|\/\/|data:|javascript:)/i.test(trimmed)) {
+    return '/* Blocked: external or protocol URLs disallowed in dynamic stylesheet injection */';
+  }
+  // Block dynamic expression execution and ActiveX behavior
+  if (/expression\s*\(|behavior\s*:|-moz-binding\s*:/i.test(trimmed)) {
+    return '/* Blocked: dynamic expressions disallowed */';
+  }
+  // Strip dangerous tag breakout characters
+  return trimmed.replace(/[<>]/g, '');
+}
+
 export const MINI_ADHY_SKILLS = [
   {
     id: 'portfolio_navigator',
@@ -472,9 +495,10 @@ export const MINI_ADHY_SKILLS = [
         ns.emit('CALM_SYNAPSE', { intensity: 0.8 });
         actionTaken = 'Nervous system firing rate eased to calm alpha rhythm.';
       } else if (instruction.startsWith('css:')) {
-        const customCss = instruction.slice(4).trim();
-        rootStyleTag.textContent += customCss;
-        actionTaken = `Custom stylesheet rule injected: ${customCss}`;
+        const rawCss = instruction.slice(4).trim();
+        const safeCss = sanitizeDynamicCss(rawCss);
+        rootStyleTag.textContent += '\n' + safeCss;
+        actionTaken = `Custom stylesheet rule validated & injected: ${safeCss.slice(0, 80)}`;
       }
 
       playSynthesizerTone('chime');
@@ -498,7 +522,10 @@ export const MINI_ADHY_SKILLS = [
  * Scans AI replies for short-codes or executes skills programmatically.
  */
 export const executeSkillCommand = (cmdType, cmdValue) => {
-  const upperType = (cmdType || '').toUpperCase().trim();
+  if (!cmdType || typeof cmdType !== 'string' || cmdType.length > 50) {
+    return { success: false, error: 'Invalid command type specification.' };
+  }
+  const upperType = cmdType.toUpperCase().trim();
   
   // Find matching skill by command or ID
   const matchedSkill = MINI_ADHY_SKILLS.find(
@@ -507,7 +534,8 @@ export const executeSkillCommand = (cmdType, cmdValue) => {
 
   if (matchedSkill) {
     try {
-      const result = matchedSkill.execute(cmdValue);
+      const sanitizedValue = typeof cmdValue === 'string' ? cmdValue.slice(0, 1000) : cmdValue;
+      const result = matchedSkill.execute(sanitizedValue);
       return {
         success: true,
         skill: matchedSkill,
@@ -515,9 +543,9 @@ export const executeSkillCommand = (cmdType, cmdValue) => {
       };
     } catch (err) {
       console.error(`[MiniAdhy Skill Execution Error] ${matchedSkill.name}:`, err);
-      return { success: false, skill: matchedSkill, error: err.message };
+      return { success: false, skill: matchedSkill, error: 'Execution failure' };
     }
   }
 
-  return { success: false, error: `Skill [${cmdType}] not found` };
+  return { success: false, error: `Skill [${upperType}] not found` };
 };

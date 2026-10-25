@@ -84,8 +84,43 @@ COGNITIVE AI TOOL ENGINE:
 /* ────────────────────────────────────────────────
    OWNER / ADMIN::ROOT MODE — Configuration & Rewrite Engine
 ──────────────────────────────────────────────── */
-const OWNER_CODE = 'admin::root';
-const OWNER_CODE_LEGACY = 'adhy::root';
+// Zero plaintext credentials in frontend bundles:
+// Verified via /api/auth?action=login with client-side SHA-256 fallback digest
+const ROOT_DIGEST_PRIMARY = '7272e09fc6ce088f1b0f21dc0c747031415b247d451cf0f99abeb5f6be1e304b';
+const ROOT_DIGEST_LEGACY = 'b078d90d9dd945137c61509eed5f4d8fdba7c7939d10df93e981ba690e57c4b2';
+
+const verifyOwnerPasscode = async (input = '') => {
+  const trimmed = input.trim();
+  if (!trimmed) return false;
+
+  // 1. Authoritative serverless boundary check
+  try {
+    const res = await fetch('/api/auth?action=login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ passcode: trimmed, scope: 'root' })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && (data.role === 'owner' || data.role === 'admin')) {
+        return true;
+      }
+    }
+  } catch {}
+
+  // 2. Cryptographic SHA-256 fallback for static/offline previews
+  try {
+    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
+      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(trimmed));
+      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+      if (hash === ROOT_DIGEST_PRIMARY || hash === ROOT_DIGEST_LEGACY) {
+        return true;
+      }
+    }
+  } catch {}
+
+  return false;
+};
 
 const OWNER_HELP = `Admin::Root Mode Commands:
   /rewrite <instruction>  — collaborate with 10 agents to mutate code, styles, or layout
@@ -195,15 +230,13 @@ const buildActivePrompt = (base, owner, contextData) => {
 };
 
 const API_URL = '/api/gemini';
-const FALLBACK_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_APP_GEMINI_API_KEY_2 || '';
 
-/* Bulletproof Silent Failover Cascade:
- * Tier 1: Serverless Proxy /api/gemini (safeguarded against HTML 200 responses)
- * Tier 2: Client-side Direct Gemini REST (gemini-2.5-flash / gemini-1.5-flash)
- * Tier 3: GroqCloud LPU (qwen/qwen3.8-27b & openai/gpt-oss-120b @ 500+ tokens/sec)
- * Tier 4: Core Hugging Face Open-Weight Models (Qwen Coder 7B & Mistral 7B powering JARVIS & ULTRON)
- * Tier 5: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
- * GUARANTEE: Never leaks rate limits, JSON parse errors, or internal technical failovers to the user!
+/* Bulletproof Silent Failover Cascade (Fortified Server Boundaries):
+ * Tier 1: Serverless Proxy /api/gemini (safeguarded against HTML 200 responses, server-side auth)
+ * Tier 2: Ultra-Fast GroqCloud LPU (via serverless proxy /api/groq @ 500+ tokens/sec)
+ * Tier 3: Core Open-Weight Models (via serverless proxy /api/hf - Qwen Coder & Mistral)
+ * Tier 4: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
+ * GUARANTEE: Zero client secrets exposed; zero rate-limit or failover leaks to the user!
  */
 const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
   const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
@@ -231,39 +264,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       }
     }
   } catch (proxyErr) {
-    // Silently proceed to Tier 2
-  }
-
-  // ─── TIER 2: Direct Google Generative Language REST Endpoint (Client-Side) ───
-  if (FALLBACK_KEY && FALLBACK_KEY.length > 5) {
-    const geminiModels = ['gemini-2.5-flash', 'gemini-1.5-flash'];
-    for (const model of geminiModels) {
-      try {
-        const directRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${FALLBACK_KEY}`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              contents: history,
-              systemInstruction: { parts: [{ text: activePrompt }] },
-              generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
-            })
-          }
-        );
-
-        if (directRes && directRes.ok) {
-          const contentType = directRes.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            const directData = await directRes.json();
-            const text = directData.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (text) return text;
-          }
-        }
-      } catch (directErr) {
-        // Silently continue cascade
-      }
-    }
+    // Silently continue cascade through secure proxies
   }
 
   // ─── TIER 3: Ultra-Fast GroqCloud LPU (Qwen 27B / GPT-OSS 120B @ 500+ tokens/sec) ───
@@ -738,8 +739,9 @@ const MiniAdhy = () => {
     if (now - lastSent < 1500) return;
     lastSentRef.current = now;
 
-    /* ── Secret unlock code ── */
-    if (trimmed === OWNER_CODE || trimmed === OWNER_CODE_LEGACY || trimmed === 'admin::root' || trimmed === 'adhy::root') {
+    /* ── Secret unlock code (Serverless + SHA-256 Auth Boundary) ── */
+    const isRootUnlock = await verifyOwnerPasscode(trimmed);
+    if (isRootUnlock) {
       setInput('');
       setOwnerState(prev => ({ ...prev, active: true }));
       setMessages(prev => [
