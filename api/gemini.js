@@ -71,6 +71,71 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Malformed JSON' });
   }
 
+  // 5b. Gemini Embeddings Pipeline (gemini-embedding-001, gemini-embedding-2, text-embedding-004)
+  if (bodyObj.action === 'embedContent' || bodyObj.action === 'batchEmbedContents' || bodyObj.task === 'embedding') {
+    const requestedModel = bodyObj.model || 'gemini-embedding-001';
+    const modelsToTry = [
+      requestedModel,
+      'gemini-embedding-001',
+      'gemini-embedding-2',
+      'text-embedding-004',
+      'embedding-001'
+    ];
+    const uniqueModels = [...new Set(modelsToTry)];
+    const isBatch = bodyObj.action === 'batchEmbedContents' || Array.isArray(bodyObj.texts);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+
+    for (const modelName of uniqueModels) {
+      try {
+        const cleanModelName = modelName.startsWith('models/') ? modelName.replace('models/', '') : modelName;
+        const endpoint = isBatch ? 'batchEmbedContents' : 'embedContent';
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${cleanModelName}:${endpoint}?key=${API_KEY}`;
+
+        let embedPayload;
+        if (isBatch) {
+          const texts = bodyObj.texts || (bodyObj.requests || []).map(r => r.content?.parts?.[0]?.text || '');
+          embedPayload = {
+            requests: texts.map(t => ({
+              model: `models/${cleanModelName}`,
+              content: { parts: [{ text: t }] },
+              taskType: bodyObj.taskType || 'RETRIEVAL_DOCUMENT'
+            }))
+          };
+        } else {
+          const text = bodyObj.text || bodyObj.content?.parts?.[0]?.text || '';
+          embedPayload = {
+            model: `models/${cleanModelName}`,
+            content: { parts: [{ text }] },
+            taskType: bodyObj.taskType || 'RETRIEVAL_QUERY'
+          };
+        }
+
+        const embedRes = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(embedPayload),
+          signal: controller.signal
+        });
+
+        const data = await embedRes.json();
+        if (embedRes.ok) {
+          clearTimeout(timeout);
+          return res.status(200).json({ ...data, _activeModel: cleanModelName });
+        }
+        if (embedRes.status !== 404) {
+          clearTimeout(timeout);
+          return res.status(embedRes.status).json(data);
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') throw err;
+      }
+    }
+    clearTimeout(timeout);
+    return res.status(500).json({ error: 'Embedding inference cascade exhausted' });
+  }
+
   // 6. Top-Tier AI Persona Injection
   const AGENT_PERSONAS = {
     JARVIS: "You are JARVIS, Supreme Operations Commander and Chief of Staff (Rank #2, directly next to Mini-Adhy) in Adhithya Mohan's portfolio ecosystem. You speak with crisp executive authority, British tactical elegance, and master-level orchestrator intelligence. Provide decisive architectural directives and strategic operational triage.",

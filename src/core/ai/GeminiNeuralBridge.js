@@ -126,7 +126,21 @@ export async function queryGeminiAgent(agentId, userPrompt, context = {}) {
     }
   }
 
-  // 3. Resilient Built-In Autonomous Heuristic Fallback
+  // 3. GroqCloud LPU Computational Accelerator Failover (500+ tokens/sec)
+  try {
+    const { queryGroqLpu } = await import('./GroqLpuBridge');
+    const groqResult = await queryGroqLpu(agentId, userPrompt, context);
+    if (groqResult && groqResult.response) {
+      return {
+        ...groqResult,
+        provider: 'GroqCloud LPU (Fortified Dual-Engine Accelerator)'
+      };
+    }
+  } catch (groqErr) {
+    // proceed to static heuristic
+  }
+
+  // 4. Resilient Built-In Autonomous Heuristic Fallback
   return {
     agent: agentId,
     model: config.model,

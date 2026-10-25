@@ -267,6 +267,18 @@ const sendToGemini = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 
     }
   }
 
+  // 3. GroqCloud LPU Neural Acceleration Failover (Llama 3.3 70B @ 500+ T/s)
+  try {
+    const { queryGroqLpu } = await import('../core/ai/GroqLpuBridge');
+    const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
+    const groqResult = await queryGroqLpu('MINI_ADHY', lastUserTurn, { activePrompt });
+    if (groqResult && groqResult.response) {
+      return groqResult.response;
+    }
+  } catch (groqErr) {
+    console.warn('Groq LPU failover error:', groqErr);
+  }
+
   if (res && !res.ok) {
     throw new Error(res.status === 429 ? 'RATE_LIMITED' : 'SERVER_ERROR');
   }

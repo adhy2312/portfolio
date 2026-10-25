@@ -3404,5 +3404,529 @@
   word-break: break-word;
 }
 
+/* ────────────────────────────────────────────────────────────
+   NEURAL CONSTELLATION HUD // 10-AGENT FLOATING ORB NEXUS
+   ──────────────────────────────────────────────────────────── */
+.agentp-constellation-hud {
+  background: radial-gradient(circle at 50% 0%, rgba(167, 139, 250, 0.12), rgba(15, 23, 42, 0.95) 75%);
+  border: 1px solid rgba(167, 139, 250, 0.28);
+  border-radius: 16px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.7);
+}
 
+.agentp-constellation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
 
+.agentp-constellation-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.agentp-constellation-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.8px;
+  margin: 0;
+}
+
+.agentp-constellation-pill {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.45);
+  color: #c084fc;
+  letter-spacing: 0.5px;
+}
+
+.agentp-constellation-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  overflow-x: auto;
+  padding: 8px 4px 14px 4px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(168, 85, 247, 0.4) transparent;
+}
+
+.agentp-constellation-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: 100px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.agentp-constellation-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(168, 85, 247, 0.5);
+  transform: translateY(-4px);
+}
+
+.agentp-constellation-item--active {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: #a855f7;
+  box-shadow: 0 0 16px rgba(168, 85, 247, 0.35);
+}
+
+.agentp-constellation-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 0.5px;
+}
+
+.agentp-constellation-iq {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #a78bfa;
+  font-weight: 700;
+}
+
+.agentp-constellation-emotion-badge {
+  font-size: 0.65rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+
+/* ─── CARD WITH ORB LAYOUT ─── */
+.agentp-card-orb-layout {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.agentp-card-orb-wrapper {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.agentp-card-header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.agentp-card-cortex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px;
+  padding: 10px;
+  margin: 12px 0;
+}
+
+.agentp-cortex-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.agentp-cortex-metric-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.agentp-cortex-metric-val {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #e2e8f0;
+}
+
+.agentp-card-tension-box {
+  background: rgba(168, 85, 247, 0.08);
+  border-left: 2px solid #a855f7;
+  padding: 8px 12px;
+  border-radius: 0 8px 8px 0;
+  margin: 10px 0;
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  font-style: italic;
+  line-height: 1.45;
+}
+
+.agentp-entangled-highlight {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(244, 63, 94, 0.2), rgba(56, 189, 248, 0.2));
+  border: 1px solid rgba(244, 63, 94, 0.45);
+  color: #fca5a5;
+  font-size: 0.68rem;
+  font-weight: 800;
+  margin: 8px 0;
+  width: 100%;
+}
+
+.agentp-modal-orb-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.agentp-modal-cortex-full {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 16px 0;
+}
+
+/* ────────────────────────────────────────────────────────────
+   GEMINI EMBEDDINGS & SEMANTIC RAG PIPELINE STYLES
+──────────────────────────────────────────────────────────── */
+.agentp-rag-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.agentp-rag-hero {
+  background: radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.12) 0%, rgba(10, 15, 29, 0.95) 70%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 16px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+.agentp-rag-badge-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.agentp-rag-badge-blue {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid #38bdf8;
+  color: #7dd3fc;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.agentp-rag-badge-purple {
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid #a855f7;
+  color: #d8b4fe;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.agentp-rag-badge-green {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid #10b981;
+  color: #6ee7b7;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 4px 12px;
+  border-radius: 6px;
+}
+
+.agentp-rag-title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 12px 0;
+  letter-spacing: 0.5px;
+}
+
+.agentp-rag-desc {
+  font-size: 0.9rem;
+  color: #cbd5e1;
+  line-height: 1.6;
+  max-width: 950px;
+  margin: 0 0 24px 0;
+}
+
+.agentp-rag-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.agentp-rag-mcard {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.2s, transform 0.2s;
+}
+
+.agentp-rag-mcard:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  transform: translateY(-2px);
+}
+
+.agentp-rag-mlabel {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  color: #94a3b8;
+  letter-spacing: 0.8px;
+  font-weight: 700;
+}
+
+.agentp-rag-mval {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f8fafc;
+}
+
+.agentp-rag-msub {
+  font-size: 0.72rem;
+  color: #64748b;
+  font-family: 'Fira Code', monospace;
+}
+
+/* RAG Interactive Search Card */
+.agentp-rag-search-card {
+  background: rgba(13, 17, 28, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.agentp-rag-search-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.agentp-rag-search-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.agentp-rag-presets-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.agentp-rag-preset-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #94a3b8;
+  font-size: 0.75rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.agentp-rag-preset-btn:hover {
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #38bdf8;
+}
+
+.agentp-rag-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.agentp-rag-input {
+  flex: 1;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.agentp-rag-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+.agentp-rag-submit-btn {
+  background: linear-gradient(135deg, #0284c7, #2563eb);
+  color: #fff;
+  font-weight: 700;
+  border: none;
+  padding: 0 22px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.agentp-rag-submit-btn:hover:not(:disabled) {
+  opacity: 0.92;
+  transform: translateY(-1px);
+}
+
+.agentp-rag-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* RAG Results Display */
+.agentp-rag-results-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agentp-rag-result-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 16px;
+  transition: border-color 0.2s;
+}
+
+.agentp-rag-result-card:hover {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.agentp-rag-result-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.agentp-rag-result-title {
+  font-weight: 700;
+  color: #f1f5f9;
+  font-size: 0.9rem;
+}
+
+.agentp-rag-sim-pill {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.agentp-rag-result-body {
+  font-size: 0.84rem;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+/* K-Means Clusters Display */
+.agentp-rag-clusters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.agentp-rag-cluster-card {
+  background: rgba(15, 23, 42, 0.7);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.agentp-rag-cluster-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.agentp-rag-cluster-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.agentp-rag-cluster-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.agentp-rag-cluster-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.agentp-rag-citem {
+  font-size: 0.78rem;
+  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 10px;
+  border-radius: 6px;
+  border-left: 3px solid #38bdf8;
+}

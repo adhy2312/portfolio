@@ -29,6 +29,7 @@ import { permissionRegistry } from './PermissionRegistry';
 import { neuralEventBus } from '../../utils/NeuralEventBus';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { synchronizedAntiBreachDefense } from '../defense/SynchronizedAntiBreachDefense';
+import { EmotionEngine } from './EmotionEngine';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
@@ -45,6 +46,13 @@ class MiniAdhyAgentOrchestrator {
       KAREN: new KarenAgent(),
       VERONICA: new VeronicaAgent()
     };
+
+    // Guarantee that every specialist agent has a live calibrated EmotionEngine
+    Object.values(this.agents).forEach(a => {
+      if (!a.emotionEngine) {
+        a.emotionEngine = new EmotionEngine(a.id);
+      }
+    });
 
     // 2. Central Ecosystem Stores
     this.findings = [];
@@ -247,6 +255,8 @@ class MiniAdhyAgentOrchestrator {
     if (typeof agent.getDetailedReport === 'function') {
       const baseReport = agent.getDetailedReport();
       baseReport.intelligence = intel;
+      baseReport.emotionState = agent.emotionEngine ? agent.emotionEngine.getState() : null;
+      baseReport.curriculumDoctrine = this.agents.ULTRON?.curriculum?.[agentId];
       baseReport.findings = this.findings.filter(f => f.agent === agent.name || f.agent === agent.id);
       return baseReport;
     }
@@ -375,6 +385,7 @@ class MiniAdhyAgentOrchestrator {
       recentActions: details.recentActions,
       curriculumDoctrine: ultronDoctrine,
       intelligence: intel,
+      emotionState: agent.emotionEngine ? agent.emotionEngine.getState() : null,
       findings: this.findings.filter(f => f.agent === agent.name || f.agent === agent.id)
     };
   }

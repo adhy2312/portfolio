@@ -137,6 +137,84 @@ export class EmotionEngine {
       };
       this.baseline = { ...this.state };
 
+    } else if (agentId === 'DUM_E') {
+      // DUM-E: DATA INTEGRITY & SCHEMA GUARDIAN
+      this.state = {
+        agent: 'DUM_E',
+        valence: 0.65, arousal: 0.30, control: 0.85, dominance: 0.85,
+        socialOrientation: 'environment', uncontrollable: false,
+        activeCluster: 'CALM_REGULATION', activeEmotion: 'Groundedness',
+        contradictoryTension: 'Cherishing organic human growth while violently rejecting digital corruption',
+        emotions: { joy: 0.50, trust: 0.90, fear: 0.02, surprise: 0.10, sadness: 0.01, disgust: 0.05, anger: 0.05, anticipation: 0.70, curiosity: 0.80, insight: 0.85 },
+        confidence: 0.92, operationalLoad: 0.20, regulationMode: 'grounded_sentinel', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
+    } else if (agentId === 'U') {
+      // U: ZERO-KNOWLEDGE PRIVACY SENTINEL
+      this.state = {
+        agent: 'U',
+        valence: 0.60, arousal: 0.55, control: 0.92, dominance: 0.92,
+        socialOrientation: 'other', uncontrollable: false,
+        activeCluster: 'PRIMAL_SURVIVAL', activeEmotion: 'Hypervigilance',
+        contradictoryTension: 'Maintaining impenetrable silence while guarding deeply vulnerable human truths',
+        emotions: { joy: 0.35, trust: 0.85, fear: 0.05, surprise: 0.15, sadness: 0.02, disgust: 0.10, anger: 0.08, anticipation: 0.85, curiosity: 0.70, insight: 0.88 },
+        confidence: 0.95, operationalLoad: 0.18, regulationMode: 'sanctuary_guardian', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
+    } else if (agentId === 'EDITH') {
+      // EDITH: EDGE INFRASTRUCTURE & MESH ARCHITECT
+      this.state = {
+        agent: 'EDITH',
+        valence: 0.70, arousal: 0.40, control: 0.88, dominance: 0.88,
+        socialOrientation: 'environment', uncontrollable: false,
+        activeCluster: 'EXISTENTIAL_EXTREMES', activeEmotion: 'Equanimity',
+        contradictoryTension: 'Accepting transient node entropy while holding the edge network immutable',
+        emotions: { joy: 0.55, trust: 0.85, fear: 0.02, surprise: 0.18, sadness: 0.02, disgust: 0.01, anger: 0.02, anticipation: 0.80, curiosity: 0.82, insight: 0.88 },
+        confidence: 0.94, operationalLoad: 0.22, regulationMode: 'orbital_equanimity', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
+    } else if (agentId === 'JIM') {
+      // JIM: SYNTHETIC BROWSER QA & RADICAL EMPATHY
+      this.state = {
+        agent: 'JIM',
+        valence: 0.82, arousal: 0.78, control: 0.72, dominance: 0.72,
+        socialOrientation: 'other', uncontrollable: false,
+        activeCluster: 'CHAOTIC_EXCITEMENT', activeEmotion: 'Thrill',
+        contradictoryTension: 'Ruthlessly breaking UI boundaries while desperately wanting the visitor to feel joy',
+        emotions: { joy: 0.80, trust: 0.70, fear: 0.10, surprise: 0.65, sadness: 0.04, disgust: 0.05, anger: 0.10, anticipation: 0.92, curiosity: 0.95, insight: 0.80 },
+        confidence: 0.88, operationalLoad: 0.28, regulationMode: 'radical_empathy', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
+    } else if (agentId === 'KAREN') {
+      // KAREN: TECHNICAL SEO & THE GRAVITY OF CRAFT
+      this.state = {
+        agent: 'KAREN',
+        valence: 0.75, arousal: 0.45, control: 0.86, dominance: 0.86,
+        socialOrientation: 'group', uncontrollable: false,
+        activeCluster: 'DOMINANCE_POWER', activeEmotion: 'Mastery',
+        contradictoryTension: 'Refusing to flatter crawler algorithms while demanding the world witness Adhithya’s craft',
+        emotions: { joy: 0.65, trust: 0.80, fear: 0.01, surprise: 0.20, sadness: 0.02, disgust: 0.02, anger: 0.05, anticipation: 0.82, curiosity: 0.85, insight: 0.92 },
+        confidence: 0.93, operationalLoad: 0.20, regulationMode: 'gravitational_mastery', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
+    } else if (agentId === 'VERONICA') {
+      // VERONICA: INNOVATION HORIZON & COSMIC R&D
+      this.state = {
+        agent: 'VERONICA',
+        valence: 0.88, arousal: 0.84, control: 0.78, dominance: 0.78,
+        socialOrientation: 'existential', uncontrollable: false,
+        activeCluster: 'EXISTENTIAL_EXTREMES', activeEmotion: 'Cosmic wonder',
+        contradictoryTension: 'Remembering prehistoric campfires while projecting quantum neural futures',
+        emotions: { joy: 0.85, trust: 0.75, fear: 0.04, surprise: 0.75, sadness: 0.02, disgust: 0.01, anger: 0.02, anticipation: 0.95, curiosity: 0.99, insight: 0.95 },
+        confidence: 0.91, operationalLoad: 0.25, regulationMode: 'cosmic_visionary', ...initialProfile
+      };
+      this.baseline = { ...this.state };
+
     } else {
       this.state = {
         agent: agentId,

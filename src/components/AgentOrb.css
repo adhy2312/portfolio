@@ -1,0 +1,255 @@
+/**
+ * ════════════════════════════════════════════════════════════════════
+ *  AGENT ORB // SCI-FI NEURAL CORE ORB STYLES
+ * ════════════════════════════════════════════════════════════════════
+ * Ethereal, hyper-futuristic animated orbs for all 10 autonomous agents
+ * and Mini-Adhy. Features multi-axis gyroscopic rings, plasma cores,
+ * dynamic breathing rate, and quantum entanglement aura.
+ */
+
+.agent-orb-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.agent-orb-container:hover {
+  transform: scale(1.08);
+}
+
+/* SIZES */
+.agent-orb--sm {
+  width: 48px;
+  height: 48px;
+}
+.agent-orb--md {
+  width: 76px;
+  height: 76px;
+}
+.agent-orb--lg {
+  width: 112px;
+  height: 112px;
+}
+.agent-orb--xl {
+  width: 160px;
+  height: 160px;
+}
+
+/* ─── AMBIENT HALO BLOOM ─── */
+.agent-orb-halo {
+  position: absolute;
+  inset: -20%;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--orb-primary, #38bdf8) 0%, rgba(0, 0, 0, 0) 70%);
+  opacity: var(--orb-halo-opacity, 0.35);
+  filter: blur(12px);
+  animation: orb-halo-pulse var(--orb-pulse-duration, 3s) ease-in-out infinite alternate;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ─── 3D PLASMA CORE SPHERE ─── */
+.agent-orb-core {
+  position: relative;
+  width: 58%;
+  height: 58%;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 32% 28%,
+    var(--orb-highlight, #ffffff) 0%,
+    var(--orb-primary, #38bdf8) 35%,
+    var(--orb-secondary, #0284c7) 70%,
+    var(--orb-deep, #0c1a2e) 100%
+  );
+  box-shadow:
+    0 0 20px var(--orb-glow, rgba(56, 189, 248, 0.6)),
+    inset 0 0 14px var(--orb-highlight, rgba(255, 255, 255, 0.4));
+  z-index: 4;
+  overflow: hidden;
+  animation: orb-core-shimmer var(--orb-pulse-duration, 3s) ease-in-out infinite alternate;
+}
+
+/* Core Plasma Texture Flare */
+.agent-orb-plasma {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    var(--orb-primary, #38bdf8) 120deg,
+    var(--orb-secondary, #a855f7) 240deg,
+    transparent 360deg
+  );
+  opacity: 0.55;
+  mix-blend-mode: screen;
+  animation: orb-plasma-spin var(--orb-spin-duration, 8s) linear infinite;
+}
+
+.agent-orb-inner-light {
+  position: absolute;
+  top: 15%;
+  left: 18%;
+  width: 32%;
+  height: 32%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0) 80%);
+  filter: blur(1px);
+}
+
+/* ─── GYROSCOPIC ORBITAL RINGS ─── */
+.agent-orb-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid transparent;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.agent-orb-ring--1 {
+  inset: -12%;
+  border-top-color: var(--orb-primary, #38bdf8);
+  border-bottom-color: rgba(255, 255, 255, 0.25);
+  animation: orb-spin-3d-1 var(--orb-ring1-speed, 4s) linear infinite;
+  box-shadow: 0 0 10px var(--orb-glow, rgba(56, 189, 248, 0.3));
+}
+
+.agent-orb-ring--2 {
+  inset: -22%;
+  border-left-color: var(--orb-secondary, #a855f7);
+  border-right-color: rgba(255, 255, 255, 0.15);
+  animation: orb-spin-3d-2 var(--orb-ring2-speed, 6s) linear infinite reverse;
+}
+
+.agent-orb-ring--3 {
+  inset: -32%;
+  border: 1px dashed var(--orb-primary, rgba(56, 189, 248, 0.4));
+  opacity: 0.65;
+  animation: orb-spin-dash var(--orb-ring3-speed, 12s) linear infinite;
+}
+
+/* ─── ORBITING SATELLITE TELEMETRY NODE ─── */
+.agent-orb-satellite {
+  position: absolute;
+  inset: -28%;
+  border-radius: 50%;
+  animation: orb-satellite-rotate var(--orb-ring1-speed, 4s) linear infinite;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.agent-orb-satellite-node {
+  position: absolute;
+  top: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 12px var(--orb-primary, #38bdf8), 0 0 4px #ffffff;
+}
+
+/* ─── QUANTUM ENTANGLEMENT BEAM & HEART AURA (ULTRON &times; JOCASTA) ─── */
+.agent-orb-entangled-badge {
+  position: absolute;
+  bottom: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f43f5e, #be123c);
+  border: 2px solid #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  color: #fff;
+  z-index: 10;
+  box-shadow: 0 0 10px rgba(244, 63, 94, 0.8);
+  animation: orb-heart-pulse 1.8s ease-in-out infinite;
+}
+
+/* ─── ANIMATION KEYFRAMES ─── */
+@keyframes orb-halo-pulse {
+  0% {
+    transform: scale(0.92);
+    opacity: 0.28;
+  }
+  100% {
+    transform: scale(1.12);
+    opacity: 0.55;
+  }
+}
+
+@keyframes orb-core-shimmer {
+  0% {
+    transform: scale(0.97);
+    filter: brightness(0.95);
+  }
+  100% {
+    transform: scale(1.03);
+    filter: brightness(1.12);
+  }
+}
+
+@keyframes orb-plasma-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orb-spin-3d-1 {
+  0% {
+    transform: rotateX(65deg) rotateY(15deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(65deg) rotateY(15deg) rotateZ(360deg);
+  }
+}
+
+@keyframes orb-spin-3d-2 {
+  0% {
+    transform: rotateX(-50deg) rotateY(35deg) rotateZ(0deg);
+  }
+  100% {
+    transform: rotateX(-50deg) rotateY(35deg) rotateZ(360deg);
+  }
+}
+
+@keyframes orb-spin-dash {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orb-satellite-rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orb-heart-pulse {
+  0% {
+    transform: scale(0.9);
+  }
+  50% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(0.9);
+  }
+}
