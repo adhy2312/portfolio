@@ -305,13 +305,12 @@
 
 /* ── Bubbles ── */
 .ma-bubble {
-  max-width: 220px;
-  padding: 10px 13px;
+  max-width: calc(100% - 36px);
+  padding: 10px 14px;
   border-radius: 16px;
   font-family: 'Inter', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   line-height: 1.55;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
@@ -329,6 +328,131 @@
   border: var(--border-brutal);
   border-bottom-right-radius: 4px;
   box-shadow: 2px 2px 0px #000;
+}
+
+/* ── Rich Text & Markdown Styling ── */
+.ma-formatted-text {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: inherit;
+}
+
+.ma-md-bold {
+  font-weight: 700;
+  color: inherit;
+}
+
+.ma-md-italic {
+  font-style: italic;
+  opacity: 0.95;
+}
+
+.ma-inline-code {
+  font-family: var(--font-mono, 'Fira Code', monospace);
+  font-size: 0.85em;
+  background: rgba(0, 0, 0, 0.07);
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  color: #4338ca;
+  word-break: break-word;
+}
+
+.ma-code-block-wrap {
+  margin: 8px 0;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #27272a;
+  background: #09090b;
+}
+
+.ma-code-lang {
+  font-family: var(--font-mono, 'Fira Code', monospace);
+  font-size: 0.65rem;
+  color: #a1a1aa;
+  padding: 3px 8px;
+  background: #18181b;
+  border-bottom: 1px solid #27272a;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ma-code-block {
+  padding: 8px 10px;
+  margin: 0;
+  overflow-x: auto;
+  font-family: var(--font-mono, 'Fira Code', monospace);
+  font-size: 0.74rem;
+  color: #38bdf8;
+  line-height: 1.45;
+  background: transparent;
+}
+
+.ma-code-block code {
+  color: inherit;
+  font-family: inherit;
+}
+
+.ma-bubble-p {
+  margin: 0 0 6px 0;
+  line-height: 1.55;
+}
+
+.ma-bubble-p:last-child {
+  margin-bottom: 0;
+}
+
+.ma-bubble-heading {
+  font-weight: 800;
+  font-size: 0.88rem;
+  margin: 8px 0 4px 0;
+  color: inherit;
+  letter-spacing: 0.3px;
+  display: block;
+}
+
+.ma-bullet-list {
+  margin: 4px 0 6px 0;
+  padding-left: 18px;
+  list-style-type: disc;
+}
+
+.ma-num-list {
+  margin: 4px 0 6px 0;
+  padding-left: 18px;
+  list-style-type: decimal;
+}
+
+.ma-list-item {
+  margin-bottom: 3px;
+  line-height: 1.5;
+}
+
+.ma-list-item:last-child {
+  margin-bottom: 0;
+}
+
+.ma-blockquote {
+  margin: 6px 0;
+  padding: 4px 10px;
+  border-left: 3px solid #6366f1;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 0 4px 4px 0;
+  font-style: italic;
+}
+
+.ma-md-hr {
+  border: none;
+  border-top: 1px dashed rgba(0, 0, 0, 0.2);
+  margin: 8px 0;
+}
+
+.ma-md-link {
+  color: #4f46e5;
+  text-decoration: underline;
+  font-weight: 600;
+  text-underline-offset: 2px;
 }
 
 /* ── Typing dots ── */

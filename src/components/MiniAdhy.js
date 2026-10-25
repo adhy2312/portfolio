@@ -5,6 +5,7 @@ import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
 import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
+import MiniAdhyFormattedText from './MiniAdhyMarkdown';
 import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { emotionEngine } from '../core/emotion/EmotionEngine';
@@ -200,7 +201,8 @@ const FALLBACK_KEY = process.env.REACT_APP_GEMINI_API_KEY || process.env.REACT_A
  * Tier 1: Serverless Proxy /api/gemini (safeguarded against HTML 200 responses)
  * Tier 2: Client-side Direct Gemini REST (gemini-2.5-flash / gemini-1.5-flash)
  * Tier 3: GroqCloud LPU (qwen/qwen3.8-27b & openai/gpt-oss-120b @ 500+ tokens/sec)
- * Tier 4: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
+ * Tier 4: Core Hugging Face Open-Weight Models (Qwen Coder 7B & Mistral 7B powering JARVIS & ULTRON)
+ * Tier 5: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
  * GUARANTEE: Never leaks rate limits, JSON parse errors, or internal technical failovers to the user!
  */
 const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
@@ -275,7 +277,22 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
     // Silently continue cascade
   }
 
-  // ─── TIER 4: Biomimetic Local Brain Synthesizer ───
+  // ─── TIER 4: Core Hugging Face Open-Weight Models (Powers JARVIS, ULTRON & FRIDAY) ───
+  try {
+    const { queryHuggingFace } = await import('../core/ai/HuggingFaceBridge');
+    // Query with JARVIS (Qwen 2.5 Coder) or ULTRON (Mistral 7B)
+    const hfResult = await queryHuggingFace('JARVIS', lastUserTurn, {
+      systemPrompt: activePrompt,
+      maxTokens: Math.min(maxTokens, 500)
+    });
+    if (hfResult && hfResult.success && hfResult.text && !hfResult.fallbackMode) {
+      return hfResult.text;
+    }
+  } catch (hfErr) {
+    // Silently continue cascade
+  }
+
+  // ─── TIER 5: Biomimetic Local Brain Synthesizer ───
   try {
     const lower = lastUserTurn.toLowerCase();
     if (lower.includes('project') || lower.includes('work') || lower.includes('app') || lower.includes('portfolio')) {
@@ -1215,7 +1232,13 @@ const MiniAdhy = () => {
                       </div>
                     )}
 
-                    <div className="ma-bubble-text">{msg.text}</div>
+                    <div className="ma-bubble-text">
+                      {msg.role === 'bot' ? (
+                        <MiniAdhyFormattedText content={msg.text} />
+                      ) : (
+                        msg.text
+                      )}
+                    </div>
 
                     {msg.role === 'bot' && (
                       <div className="ma-bubble-actions">
