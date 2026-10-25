@@ -481,7 +481,7 @@
   50%       { height: 12px; }
 }
 
-/* ── Neo-Brutalist Docked Tab (When Minimized — Ultra-Shortened) ── */
+/* ── Neo-Brutalist Docked Tab (When Minimized) ── */
 .np-dock--brutalist {
   position: fixed;
   left: 0;
@@ -490,12 +490,12 @@
 
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 
-  padding: 4px 6px 4px 4px;
+  padding: 4px 6px 4px 3px;
   border: 1.5px solid #000000;
   border-left: none;
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 8px 8px 0;
   cursor: pointer;
 
   background: #0d0e14;
@@ -503,44 +503,131 @@
   box-shadow: 2px 2px 0px #000000, 0 4px 15px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.20));
 
   color: #ffffff;
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   width: auto;
-  max-width: 28px; /* Ultra-short dock: only vinyl disc peeking from viewport edge */
+  max-width: 26px; /* Subtle when idle */
   overflow: hidden;
   white-space: nowrap;
 }
 
+/* When Song is Playing: Dock expands slightly & glows with ambient lighting */
+.np-dock--brutalist.np-dock--playing {
+  max-width: 38px; /* Slightly only little big */
+  padding: 5px 7px 5px 4px;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 2.5px 2.5px 0px #000000, 0 4px 20px var(--spotify-ambient-glow, rgba(30, 215, 96, 0.35));
+}
+
 .np-dock--brutalist:hover {
-  max-width: 86px;
-  padding-right: 8px;
+  max-width: 96px;
+  padding-right: 9px;
   background: #141520;
   transform: translateX(1px);
 }
 
+/* ── Realistic Miniature Vinyl Record in Dock ── */
 .np-dock-disc {
   flex-shrink: 0;
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: radial-gradient(circle, #181822 35%, #000000 100%);
+  background: radial-gradient(circle, #08080c 0%, #171722 35%, #0e0e16 60%, #1e1e2c 78%, #050508 100%);
   border: 1.5px solid #000000;
   position: relative;
+  overflow: hidden;
+  box-shadow: 1.5px 1.5px 0px #000000, 0 0 6px rgba(0, 0, 0, 0.7);
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), height 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.np-dock-disc-hole {
+/* Slightly bigger vinyl disc when music is playing */
+.np-dock--playing .np-dock-disc {
+  width: 28px;
+  height: 28px;
+}
+
+/* Concentric Vinyl Grooves */
+.np-dock-grooves {
+  position: absolute;
+  inset: 1px;
+  border-radius: 50%;
+  background: repeating-radial-gradient(
+    circle,
+    transparent 0px,
+    transparent 1.5px,
+    rgba(255, 255, 255, 0.08) 2px,
+    transparent 3px
+  );
+  pointer-events: none;
+}
+
+/* Reflective Vinyl Sheen Reflection */
+.np-dock-sheen {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.26) 0%,
+    transparent 42%,
+    rgba(255, 255, 255, 0.16) 65%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+/* Center Album Label / Spindle Sticker */
+.np-dock-label-sticker {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 4px;
-  height: 4px;
+  width: 9px;
+  height: 9px;
   border-radius: 50%;
-  background: var(--spotify-ambient-accent, #1ed760);
-  border: 1px solid #000;
+  border: 1px solid #000000;
+  overflow: hidden;
+  background: #111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.8);
+  transition: width 0.25s ease, height 0.25s ease;
 }
 
+.np-dock--playing .np-dock-label-sticker {
+  width: 13px;
+  height: 13px;
+}
+
+.np-dock-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.np-dock-art-fallback {
+  width: 100%;
+  height: 100%;
+  background: var(--spotify-ambient-accent, #1ed760);
+}
+
+.np-dock-center-hole {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 0.5px solid #000000;
+  pointer-events: none;
+}
+
+/* Continuous Vinyl Rotation Animation */
 .np-dock-disc--spinning {
-  animation: np-spin-disc 3s linear infinite;
+  animation: np-spin-disc 3.2s linear infinite;
 }
 
 .np-dock-label {
@@ -555,10 +642,6 @@
 
 .np-dock--brutalist:hover .np-dock-label {
   opacity: 1;
-}
-
-.np-dock--brutalist .np-waveform {
-  display: none !important; /* Hide waveform inside dock to keep length minimal */
 }
 
 /* ── Mobile Responsive ── */
@@ -600,20 +683,25 @@
     font-size: 0.46rem;
     padding: 0.5px 3px;
   }
-  /* Ultra-compact docked tab on mobile: only ~25px wide, zero page blocking */
+  /* Ultra-compact docked tab on mobile */
   .np-dock--brutalist {
     bottom: 65px;
     padding: 3px 4px 3px 3px !important;
     gap: 0 !important;
-    border-radius: 0 5px 5px 0 !important;
-    max-width: 25px !important;
-    width: 25px !important;
+    border-radius: 0 6px 6px 0 !important;
+    max-width: 24px !important;
+    width: auto !important;
     box-shadow: 1.5px 1.5px 0px #000000 !important;
   }
+  .np-dock--brutalist.np-dock--playing {
+    max-width: 32px !important; /* Slightly only little big on mobile */
+    padding: 4px 5px 4px 3px !important;
+    border-radius: 0 8px 8px 0 !important;
+  }
   .np-dock--brutalist:hover {
-    max-width: 25px !important;
-    width: 25px !important;
-    padding-right: 4px !important;
+    max-width: 32px !important;
+    width: auto !important;
+    padding-right: 5px !important;
     transform: none !important;
   }
   .np-dock--brutalist .np-dock-label {
@@ -622,6 +710,14 @@
   .np-dock-disc {
     width: 16px !important;
     height: 16px !important;
+  }
+  .np-dock--playing .np-dock-disc {
+    width: 23px !important;
+    height: 23px !important;
+  }
+  .np-dock--playing .np-dock-label-sticker {
+    width: 10px !important;
+    height: 10px !important;
   }
 }
 

@@ -38,8 +38,8 @@ async function seedMediaSecretary() {
     {
       _id: 'ach-iot',
       _type: 'achievement',
-      title: 'IoT Projects',
-      desc: 'Designed and shipped multiple embedded systems projects using ESP32 and Arduino for real-world problems.',
+      title: 'Chairperson, ISTE SC MBCET',
+      desc: 'Served as Chairperson leading 300+ student members, directing technical initiatives, state conventions, and overseeing the official digital portal.',
       accent: 'var(--accent-green)',
       iconName: 'FiZap',
       order: 3,
@@ -47,8 +47,8 @@ async function seedMediaSecretary() {
     {
       _id: 'ach-figma',
       _type: 'achievement',
-      title: 'Figma Designer',
-      desc: 'Built polished design systems and prototypes for web apps — from wireframes to production-ready UI.',
+      title: 'Poster & Graphic Designer',
+      desc: 'Designing creative promotional posters, event visual branding, and digital graphics for college fests, workshops, and student initiatives.',
       accent: 'var(--accent-gold)',
       iconName: 'FiPenTool',
       order: 4,

@@ -284,16 +284,33 @@ const NowPlaying = () => {
       {/* Docked pill on the screen edge when player is minimized */}
       {minimized ? (
         <button
-          className="np-dock np-dock--brutalist"
+          className={`np-dock np-dock--brutalist ${currentTrack.isPlaying ? 'np-dock--playing' : 'np-dock--idle'}`}
           onClick={toggleMinimized}
           aria-label="Expand Spotify player"
-          title="Show Neo-Brutalist Spotify Player"
+          title={currentTrack.isPlaying ? `Now Spinning: ${currentTrack.title} — Click to expand` : "Spotify Player (Idle) — Click to expand"}
         >
           <div className={`np-dock-disc ${currentTrack.isPlaying ? 'np-dock-disc--spinning' : ''}`}>
-            <div className="np-dock-disc-hole" />
+            {/* Concentric vinyl grooves & sheen for realistic vinyl appearance */}
+            <div className="np-dock-grooves" />
+            <div className="np-dock-sheen" />
+            
+            {/* Center Album Art or Vinyl Spindle */}
+            <div className="np-dock-label-sticker">
+              {currentTrack.albumArt && !imgError ? (
+                <img
+                  src={currentTrack.albumArt}
+                  alt={currentTrack.title}
+                  className="np-dock-art"
+                  loading="lazy"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <div className="np-dock-art-fallback" />
+              )}
+              <div className="np-dock-center-hole" />
+            </div>
           </div>
           <span className="np-dock-label">SPOTIFY</span>
-          <Waveform isPlaying={currentTrack.isPlaying} />
         </button>
       ) : (
         <div className="np-wrapper">
