@@ -36,6 +36,7 @@ import { queryGroqLpu } from '../core/ai/GroqLpuBridge';
 import { queryHuggingFace, HF_SUPPORTED_MODELS } from '../core/ai/HuggingFaceBridge';
 import { COMPLETE_AGENT_ROSTER } from '../core/agents/AgentRegistry';
 import { claudeAgenticEngine } from '../core/agents/ClaudeAgenticEngine';
+import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
 import { 
   semanticSearch, 
   clusterKnowledge, 
@@ -80,7 +81,7 @@ const AgentPortal = () => {
   const [geminiQueryInput, setGeminiQueryInput] = useState('');
   const [geminiOutput, setGeminiOutput] = useState(null);
   const [isGeminiLoading, setIsGeminiLoading] = useState(false);
-  const [aiEngine, setAiEngine] = useState('GROQ'); // 'GROQ' | 'GEMINI' | 'HUGGINGFACE'
+  const [aiEngine, setAiEngine] = useState('COLLECTIVE'); // 'COLLECTIVE' | 'GROQ' | 'GEMINI' | 'HUGGINGFACE'
   const [selectedHfModel, setSelectedHfModel] = useState('qwen-coder');
   const [claudeTelemetry, setClaudeTelemetry] = useState(() => claudeAgenticEngine.getTelemetrySummary());
   const [reActCycleResult, setReActCycleResult] = useState(null);
@@ -95,7 +96,23 @@ const AgentPortal = () => {
     const startTime = Date.now();
 
     try {
-      if (aiEngine === 'GROQ') {
+      if (aiEngine === 'COLLECTIVE') {
+        const result = await collectiveConsensusEngine.executeCollectiveQuery(geminiTargetAgent, compaction.compactedText, {
+          portalUser: 'Admin::Root',
+          clearance: 'Level 5 Sovereign',
+          authenticatedEmail: TARGET_EMAIL
+        });
+        setClaudeTelemetry(claudeAgenticEngine.getTelemetrySummary());
+        setEvolutionSummary(agentOrchestrator.getCognitiveEvolutionSummary());
+        setGeminiOutput({
+          agent: geminiTargetAgent,
+          response: result.collectiveVerdict,
+          provider: 'Collective Multi-Model Ensemble (Groq LPU + Gemini 2.5 Flash + Hugging Face)',
+          metrics: result.metrics,
+          contributors: result.contributors,
+          breakdown: result.breakdown
+        });
+      } else if (aiEngine === 'GROQ') {
         const result = await queryGroqLpu(geminiTargetAgent, compaction.compactedText, {
           portalUser: 'Admin::Root',
           clearance: 'Level 5 Sovereign',
@@ -1135,6 +1152,18 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
             <div className="agentp-target-selector-row" style={{ marginBottom: '14px' }}>
               <span className="agentp-selector-label">COMPUTATIONAL ENGINE:</span>
               <div className="agentp-target-buttons">
+                <button
+                  type="button"
+                  className={`agentp-target-btn ${aiEngine === 'COLLECTIVE' ? 'agentp-target-btn--active' : ''}`}
+                  onClick={() => {
+                    setAiEngine('COLLECTIVE');
+                    setGeminiOutput(null);
+                  }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderColor: aiEngine === 'COLLECTIVE' ? '#00f0ff' : undefined }}
+                >
+                  <FiCpu size={13} color="#00f0ff" />
+                  COLLECTIVE ENSEMBLE (ALL MODELS JOINTLY)
+                </button>
                 <button
                   type="button"
                   className={`agentp-target-btn ${aiEngine === 'GROQ' ? 'agentp-target-btn--active' : ''}`}

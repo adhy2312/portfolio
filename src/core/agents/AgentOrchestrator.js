@@ -33,6 +33,7 @@ import { EmotionEngine } from './EmotionEngine';
 import { industryTrendAuditor } from './IndustryTrendAuditor';
 import { COMPLETE_AGENT_ROSTER } from './AgentRegistry';
 import { claudeAgenticEngine } from './ClaudeAgenticEngine';
+import { collectiveConsensusEngine } from '../ai/CollectiveConsensusEngine';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
@@ -454,6 +455,14 @@ class MiniAdhyAgentOrchestrator {
 
   runClaudeReActCycle(agentId, prompt) {
     return claudeAgenticEngine.executeReActCycle(agentId, prompt);
+  }
+
+  queryCollectiveAI(agentId, prompt, options = {}) {
+    return collectiveConsensusEngine.executeCollectiveQuery(agentId, prompt, options);
+  }
+
+  getCollectiveAIStatus() {
+    return collectiveConsensusEngine.getCollectiveStatus();
   }
 }
 
