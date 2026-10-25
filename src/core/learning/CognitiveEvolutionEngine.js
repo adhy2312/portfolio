@@ -230,7 +230,13 @@ class ContinuousCognitiveEvolutionEngine {
         const saved = localStorage.getItem(this.storageKey);
         if (saved) {
           const parsed = JSON.parse(saved);
-          if (parsed.profiles) this.agentIntelligenceProfiles = parsed.profiles;
+          if (parsed.profiles) {
+            for (const [k, p] of Object.entries(parsed.profiles)) {
+              if (this.agentIntelligenceProfiles[k]) {
+                Object.assign(this.agentIntelligenceProfiles[k], p);
+              }
+            }
+          }
           if (parsed.epochs) this.globalEpochsCompleted = parsed.epochs;
           if (parsed.tokens) this.totalEcosystemTokensIngested = parsed.tokens;
           if (parsed.logs) this.evolutionLog = parsed.logs;

@@ -10,6 +10,8 @@ import ns from '../core/NervousSystem';
 
 export const neuralEventBus = {
   subscribe: (event, callback) => ns.subscribe(event, callback),
+  on:        (event, callback) => ns.subscribe(event, callback),
+  off:       (event, callback) => (ns.off ? ns.off(event, callback) : undefined),
   emit:      (event, data = {}) => ns.emit(event, data),
   publish:   (event, data = {}) => ns.emit(event, data),
   // Read-only history proxy
@@ -17,3 +19,4 @@ export const neuralEventBus = {
 };
 
 export default neuralEventBus;
+

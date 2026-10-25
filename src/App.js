@@ -19,6 +19,7 @@ import SiteModeSwitcher from './components/SiteModeSwitcher';
 import { SystemOrchestratorProvider } from './contexts/SystemOrchestrator';
 import DeveloperModeOS from './components/DeveloperModeOS';
 import ErrorBoundary from './components/ErrorBoundary';
+import AgentPortal from './components/AgentPortal';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
 import { initSpecularSheen } from './utils/specularSheen';
@@ -28,7 +29,6 @@ pipeline.init();
 // Lazy load heavy components
 const NowPlaying = lazy(() => import('./components/NowPlaying'));
 const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
-const AgentPortal = lazy(() => import('./components/AgentPortal'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
@@ -569,16 +569,18 @@ function App() {
 
   if (isAgentP) {
     return (
-      <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '100vh', background: '#09090b' }} />}>
-        <AgentPortal onExit={() => {
-          try {
-            window.history.pushState({}, '', '/');
-          } catch {
-            window.location.hash = '';
-          }
-          setIsAgentP(false);
-        }} />
-      </Suspense>
+      <ErrorBoundary>
+        <div style={{ minHeight: '100vh', width: '100vw', background: '#09090b', color: '#fff', position: 'relative' }}>
+          <AgentPortal onExit={() => {
+            try {
+              window.history.pushState({}, '', '/');
+            } catch {
+              window.location.hash = '';
+            }
+            setIsAgentP(false);
+          }} />
+        </div>
+      </ErrorBoundary>
     );
   }
 

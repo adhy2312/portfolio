@@ -1,5 +1,5 @@
-// Service Worker for Adhithya Mohan Portfolio PWA (V2)
-const CACHE_NAME = 'adhy-portfolio-v2';
+// Service Worker for Adhithya Mohan Portfolio PWA (V3)
+const CACHE_NAME = 'adhy-portfolio-v3';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -9,29 +9,22 @@ const STATIC_ASSETS = [
   '/dp.jpg'
 ];
 
-// Install: Pre-cache core shell
+// Install: skip waiting immediately
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
-// Activate: Clean up old caches immediately
+// Activate: Clean up ALL old caches immediately to bust stale chunks
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(
-        keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
-      );
+      return Promise.all(keys.map((key) => caches.delete(key)));
     })
   );
   self.clients.claim();
 });
 
-// Fetch: Stale-while-revalidate for static assets, NEVER cache dynamic APIs
+// Fetch: Network-first for HTML / navigation requests, Stale-while-revalidate for static assets
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
@@ -43,7 +36,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // 3. Static assets: Cache first with network fallback
+  // 3. Navigation requests (HTML pages): ALWAYS network-first so new releases load immediately!
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request).then((cached) => {
+            return cached || caches.match('/index.html');
+          });
+        })
+    );
+    return;
+  }
+
+  // 4. Static assets: Cache first with network fallback
   if (url.origin === self.location.origin) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
@@ -62,3 +77,4 @@ self.addEventListener('fetch', (event) => {
     );
   }
 });
+

@@ -178,6 +178,19 @@ class NervousSystem {
     };
   }
 
+  on(event, callback) {
+    return this.subscribe(event, callback);
+  }
+
+  off(event, callback) {
+    if (!this._listeners[event]) return;
+    this._listeners[event] = this._listeners[event].filter(cb => cb !== callback);
+  }
+
+  unsubscribe(event, callback) {
+    this.off(event, callback);
+  }
+
   emit(event, data = {}) {
     const ts = Date.now();
     this._history.push({ event, data, ts });

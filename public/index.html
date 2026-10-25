@@ -9,6 +9,11 @@
         history.scrollRestoration = 'manual';
       }
       window.scrollTo(0, 0);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(regs) {
+          for (var r of regs) { r.update(); }
+        });
+      }
     </script>
     <title>Adhithya Mohan | Full-Stack Developer &amp; ECE Hardware Engineer</title>
     <meta name="description" content="Official portfolio of Adhithya Mohan — Full-Stack Developer, ECE Engineer &amp; Designer based in Kerala, India. Specializing in React 19, MATLAB, Simulink, Simscape, GNU Radio SDR, and creative photography." />

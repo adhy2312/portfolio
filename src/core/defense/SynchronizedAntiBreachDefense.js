@@ -57,24 +57,35 @@ class SynchronizedAntiBreachDefenseEngine {
   }
 
   initEventListeners() {
-    // Listen for security threats from neuralEventBus
-    neuralEventBus.on('UNAUTHORIZED_ACCESS_ATTEMPT', (data) => {
-      this.interceptBreachAttempt({
-        threatType: 'Unauthorized Gateway Penetration Attempt',
-        vector: data.vector || '/agentp gateway',
-        payload: data.payload || 'Invalid authentication credential',
-        origin: data.origin || 'Client-Side Session'
-      });
-    });
+    try {
+      const subscribeFn = (neuralEventBus && typeof neuralEventBus.on === 'function')
+        ? neuralEventBus.on.bind(neuralEventBus)
+        : (neuralEventBus && typeof neuralEventBus.subscribe === 'function')
+        ? neuralEventBus.subscribe.bind(neuralEventBus)
+        : null;
 
-    neuralEventBus.on('SECURITY_THREAT_DETECTED', (data) => {
-      this.interceptBreachAttempt({
-        threatType: data.type || 'Anomalous Threat Signature',
-        vector: data.vector || 'DOM / Network Boundary',
-        payload: data.summary || 'Malicious payload pattern',
-        origin: data.origin || 'External Network'
+      if (!subscribeFn) return;
+
+      subscribeFn('UNAUTHORIZED_ACCESS_ATTEMPT', (data = {}) => {
+        this.interceptBreachAttempt({
+          threatType: 'Unauthorized Gateway Penetration Attempt',
+          vector: data.vector || '/agentp gateway',
+          payload: data.payload || 'Invalid authentication credential',
+          origin: data.origin || 'Client-Side Session'
+        });
       });
-    });
+
+      subscribeFn('SECURITY_THREAT_DETECTED', (data = {}) => {
+        this.interceptBreachAttempt({
+          threatType: data.type || 'Anomalous Threat Signature',
+          vector: data.vector || 'DOM / Network Boundary',
+          payload: data.summary || 'Malicious payload pattern',
+          origin: data.origin || 'External Network'
+        });
+      });
+    } catch (e) {
+      console.warn('[SynchronizedAntiBreachDefense] event listeners deferred:', e);
+    }
   }
 
   /**

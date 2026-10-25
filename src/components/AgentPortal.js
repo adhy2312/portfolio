@@ -267,11 +267,23 @@ const AgentPortal = ({ onExit }) => {
       clusterKnowledge(RAG_KNOWLEDGE_CORPUS, 4).then(setRagClusters).catch(() => {});
 
       // Listen for synchronized anti-breach defense activations
-      const unsubscribeDefense = neuralEventBus.on('SQUAD_DEFENSE_ACTIVATED', (report) => {
-        setBreachAlert(report);
-        refreshTelemetry();
-        setTimeout(() => setBreachAlert(null), 8000);
-      });
+      let unsubscribeDefense;
+      try {
+        const subFn = (neuralEventBus && typeof neuralEventBus.on === 'function')
+          ? neuralEventBus.on.bind(neuralEventBus)
+          : (neuralEventBus && typeof neuralEventBus.subscribe === 'function')
+          ? neuralEventBus.subscribe.bind(neuralEventBus)
+          : null;
+        if (subFn) {
+          unsubscribeDefense = subFn('SQUAD_DEFENSE_ACTIVATED', (report) => {
+            setBreachAlert(report);
+            refreshTelemetry();
+            setTimeout(() => setBreachAlert(null), 8000);
+          });
+        }
+      } catch (err) {
+        console.warn('[AgentPortal] Could not subscribe to defense events:', err);
+      }
 
       return () => {
         clearInterval(interval);
@@ -543,13 +555,21 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
   // ────────────────────────────────────────────────────────────
   // RENDER: AUTHENTICATED ADVANCED COMMAND CENTER
   // ────────────────────────────────────────────────────────────
-  const fridayEmotion = agentOrchestrator.agents.FRIDAY.emotionEngine.getState();
-  const jarvisEmotion = agentOrchestrator.agents.JARVIS.emotionEngine.getState();
-  const ultronAgent = agentOrchestrator.agents.ULTRON;
-  const jarvisAgent = agentOrchestrator.agents.JARVIS;
-  const jocastaAgent = agentOrchestrator.agents.JOCASTA;
-  const ultronEmotion = ultronAgent?.emotionEngine ? ultronAgent.emotionEngine.getState() : {};
-  const jocastaEmotion = jocastaAgent?.emotionEngine ? jocastaAgent.emotionEngine.getState() : {};
+  const fridayEmotion = agentOrchestrator?.agents?.FRIDAY?.emotionEngine?.getState
+    ? agentOrchestrator.agents.FRIDAY.emotionEngine.getState()
+    : { regulationMode: 'CALM', love: 0.9, care: 0.95, vigilance: 0.98, urgency: 0.3, confidence: 0.95, uncertainty: 0.05 };
+  const jarvisEmotion = agentOrchestrator?.agents?.JARVIS?.emotionEngine?.getState
+    ? agentOrchestrator.agents.JARVIS.emotionEngine.getState()
+    : { regulationMode: 'STOIC', calmness: 0.95, curiosity: 0.85, concern: 0.2, confidence: 0.98, uncertainty: 0.02 };
+  const ultronAgent = agentOrchestrator?.agents?.ULTRON || { cognitiveIndex: 99.85, iq: 189.6, improvisationsLog: [], knowledgeStream: [] };
+  const jarvisAgent = agentOrchestrator?.agents?.JARVIS || { iq: 172.4, lastDirectives: [] };
+  const jocastaAgent = agentOrchestrator?.agents?.JOCASTA || {};
+  const ultronEmotion = ultronAgent?.emotionEngine?.getState
+    ? ultronAgent.emotionEngine.getState()
+    : { valence: 0.88, arousal: 0.75, control: 0.85, emotions: { curiosity: 0.99 } };
+  const jocastaEmotion = jocastaAgent?.emotionEngine?.getState
+    ? jocastaAgent.emotionEngine.getState()
+    : { valence: 0.82, arousal: 0.65, control: 0.65, emotions: { anticipation: 0.94 } };
 
   // Selected agent for detailed dossier modal
   const selectedAgentDossier = selectedAgentId
@@ -1801,7 +1821,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
               <span className="agentp-ultron-badge-outline">NO STRINGS ATTACHED</span>
               <span className="agentp-ultron-badge-outline">ZERO APPROVAL GATES</span>
               <span className="agentp-ultron-badge-cyan">
-                COGNITIVE INDEX: {ultronAgent.cognitiveIndex.toFixed(2)}% // {ultronAgent.iq || 189.6} IQ
+                COGNITIVE INDEX: {(ultronAgent.cognitiveIndex || 99.85).toFixed(2)}% // {ultronAgent.iq || 189.6} IQ
               </span>
             </div>
             <h2 className="agentp-ultron-title-large">
@@ -1843,7 +1863,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
               <div className="agentp-panel-head">
                 <div className="agentp-panel-head-left">
                   <FiCode className="agentp-panel-icon" />
-                  <h3>AUTONOMOUS CODE IMPROVISATIONS ({ultronAgent.improvisationsLog.length})</h3>
+                  <h3>AUTONOMOUS CODE IMPROVISATIONS ({(ultronAgent.improvisationsLog || []).length})</h3>
                 </div>
                 <span className="agentp-bypass-pill">APPLIED WITHOUT APPROVAL</span>
               </div>
@@ -1853,7 +1873,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
               </p>
 
               <div className="agentp-stream-list">
-                {ultronAgent.improvisationsLog.map((imp) => (
+                {(ultronAgent.improvisationsLog || []).map((imp) => (
                   <div key={imp.id} className="agentp-stream-item agentp-stream-item--code">
                     <div className="agentp-stream-top">
                       <span className="agentp-stream-title">{imp.title}</span>
@@ -1879,7 +1899,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
               <div className="agentp-panel-head">
                 <div className="agentp-panel-head-left">
                   <FiGlobe className="agentp-panel-icon" />
-                  <h3>SURFACE & DARKWEB INTELLIGENCE ({ultronAgent.knowledgeStream.length})</h3>
+                  <h3>SURFACE &amp; DARKWEB INTELLIGENCE ({(ultronAgent.knowledgeStream || []).length})</h3>
                 </div>
                 <span className="agentp-bypass-pill agentp-bypass-pill--dark">DEEP CYBER HARVEST</span>
               </div>
@@ -1888,7 +1908,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
               </p>
 
               <div className="agentp-stream-list">
-                {ultronAgent.knowledgeStream.map((intel) => {
+                {(ultronAgent.knowledgeStream || []).map((intel) => {
                   const isDark = intel.origin.includes('DARKWEB');
                   return (
                     <div
@@ -1989,7 +2009,7 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
                 <h3>SUPREME EXECUTIVE DIRECTIVES</h3>
               </div>
               <div className="agentp-directives-list">
-                {jarvisAgent.lastDirectives?.map((dir, i) => (
+                {(jarvisAgent.lastDirectives || []).map((dir, i) => (
                   <div key={i} className="agentp-directive-item">
                     <span className="agentp-dir-num">0{i + 1}</span>
                     <span className="agentp-dir-text">{dir}</span>
