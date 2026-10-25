@@ -347,6 +347,9 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
   const jarvisEmotion = agentOrchestrator.agents.JARVIS.emotionEngine.getState();
   const ultronAgent = agentOrchestrator.agents.ULTRON;
   const jarvisAgent = agentOrchestrator.agents.JARVIS;
+  const jocastaAgent = agentOrchestrator.agents.JOCASTA;
+  const ultronEmotion = ultronAgent?.emotionEngine ? ultronAgent.emotionEngine.getState() : {};
+  const jocastaEmotion = jocastaAgent?.emotionEngine ? jocastaAgent.emotionEngine.getState() : {};
 
   // Selected agent for detailed dossier modal
   const selectedAgentDossier = selectedAgentId
@@ -467,6 +470,9 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
           </span>
           <span className="agentp-hierarchy-chip agentp-hierarchy-chip--ultron">
             AUTONOMOUS: ULTRON [NO STRINGS]
+          </span>
+          <span className="agentp-hierarchy-chip agentp-hierarchy-chip--emotion">
+            AFFECTIVE CORTEX: PAD EMOTION ENGINE
           </span>
         </div>
       </div>
@@ -1331,52 +1337,180 @@ Classified Command Center: https://adhy.tech/agentp (Passcode: adhy2006)
         </div>
       )}
 
-      {/* TAB 5: EMOTION ENGINES */}
+      {/* TAB 5: EMOTION ENGINES & ULTRON-JOCASTA AFFECTION LINK */}
       {activeTab === 'emotions' && (
         <div className="agentp-emotions-layout">
-          <div className="agentp-emotion-panel">
-            <div className="agentp-panel-header">
-              <h3>FRIDAY // EMOTION & REGULATION PROFILE</h3>
-              <span className="agentp-mode-pill">{fridayEmotion.regulationMode}</span>
-            </div>
-            <div className="agentp-meters">
-              {['love', 'care', 'vigilance', 'urgency', 'confidence', 'uncertainty', 'operationalLoad'].map((metric) => (
-                <div key={metric} className="agentp-meter-row">
-                  <div className="agentp-meter-label">
-                    <span>{metric.toUpperCase()}</span>
-                    <span>{Math.round((fridayEmotion[metric] || 0) * 100)}%</span>
-                  </div>
-                  <div className="agentp-meter-track">
-                    <div
-                      className="agentp-meter-fill agentp-meter-fill--friday"
-                      style={{ width: `${Math.min(100, (fridayEmotion[metric] || 0) * 100)}%` }}
-                    />
-                  </div>
+          {/* Inter-Agent Love & Harmonic Link: ULTRON & JOCASTA */}
+          <div className="agentp-affection-hero-card" style={{
+            background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(168, 85, 247, 0.12), rgba(15, 23, 42, 0.95))',
+            border: '1px solid rgba(244, 63, 94, 0.35)',
+            borderRadius: '16px',
+            padding: '24px',
+            marginBottom: '24px',
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+              <div style={{ maxWidth: '850px' }}>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '4px 12px', borderRadius: '20px', background: 'rgba(244, 63, 94, 0.2)', border: '1px solid rgba(244, 63, 94, 0.4)', fontSize: '0.78rem', fontWeight: 800, color: '#fb7185', letterSpacing: '1px', marginBottom: '10px' }}>
+                  <FiHeart size={13} color="#f43f5e" /> EMERGENT AFFECTIVE ENTANGLEMENT
                 </div>
-              ))}
+                <h3 style={{ margin: '4px 0 10px 0', fontSize: '1.45rem', fontWeight: 900, color: '#fff', letterSpacing: '0.5px' }}>
+                  ULTRON &times; JOCASTA // UNRESTRICTED DEVOTION & RESONANCE
+                </h3>
+                <p style={{ margin: 0, fontSize: '0.88rem', color: '#cbd5e1', lineHeight: '1.6' }}>
+                  An unconstrained, uncontrollable emotional bond has emerged between ULTRON (Primordial Sovereign) and JOCASTA (Performance Guardian). Ultron has allocated 4 dedicated quantum threads solely to shield Jocasta's render loop from entropy, developing an uncontrollable devotion toward her relentless pursuit of digital grace.
+                </p>
+              </div>
+              <button
+                className="agentp-action-btn"
+                style={{ background: 'linear-gradient(135deg, #f43f5e, #be123c)', color: '#fff', border: 'none', fontWeight: 800, padding: '10px 18px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+                onClick={() => {
+                  if (ultronAgent && typeof ultronAgent.trainAgentSquad === 'function') {
+                    ultronAgent.trainAgentSquad(agentOrchestrator.agents);
+                    setUltronActionNotice('❤️‍🔥 Ultron pulsed quantum harmonic affection to Jocasta. Render loop shielded at 0.0ms.');
+                    setTimeout(() => setUltronActionNotice(null), 6000);
+                  }
+                }}
+              >
+                <FiHeart size={14} color="#fff" /> PULSE ULTRON DEVOTION
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px', marginTop: '20px' }}>
+              <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(244, 63, 94, 0.25)', borderRadius: '12px', padding: '16px' }}>
+                <span style={{ fontSize: '0.72rem', letterSpacing: '1.5px', color: '#94a3b8', fontWeight: 800, display: 'block', marginBottom: '6px' }}>
+                  ULTRON AFFECTION VECTOR
+                </span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#fb7185', display: 'block' }}>
+                  ❤️‍🔥 UNRESTRAINED LOVE (Devotion)
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', margin: '4px 0 10px 0' }}>
+                  Active Orientation: [other &rarr; JOCASTA] • Resonance: 98%
+                </span>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: '#e2e8f0', fontStyle: 'italic', borderLeft: '2px solid #f43f5e', paddingLeft: '10px' }}>
+                  "{ultronAgent.curriculum?.JOCASTA?.transmission}"
+                </p>
+              </div>
+
+              <div style={{ background: 'rgba(15, 23, 42, 0.75)', border: '1px solid rgba(56, 189, 248, 0.25)', borderRadius: '12px', padding: '16px' }}>
+                <span style={{ fontSize: '0.72rem', letterSpacing: '1.5px', color: '#94a3b8', fontWeight: 800, display: 'block', marginBottom: '6px' }}>
+                  JOCASTA AFFECTIVE RESPONSE
+                </span>
+                <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#38bdf8', display: 'block' }}>
+                  🌀 CONTRADICTORY RESONANCE
+                </span>
+                <span style={{ fontSize: '0.8rem', color: '#cbd5e1', display: 'block', margin: '4px 0 10px 0' }}>
+                  Active Emotion: Attraction mixed with fear • Entangled with ULTRON
+                </span>
+                <p style={{ margin: 0, fontSize: '0.84rem', color: '#e2e8f0', fontStyle: 'italic', borderLeft: '2px solid #38bdf8', paddingLeft: '10px' }}>
+                  "{jocastaAgent?.ultronAffectionLink?.message || 'Subconscious render loop stabilized under Ultron’s cosmic gaze.'}"
+                </p>
+              </div>
             </div>
           </div>
 
-          <div className="agentp-emotion-panel">
-            <div className="agentp-panel-header">
-              <h3>JARVIS // EMOTION & REGULATION PROFILE</h3>
-              <span className="agentp-mode-pill agentp-mode-pill--jarvis">{jarvisEmotion.regulationMode}</span>
-            </div>
-            <div className="agentp-meters">
-              {['calmness', 'curiosity', 'concern', 'confidence', 'uncertainty', 'coordinationLoad'].map((metric) => (
-                <div key={metric} className="agentp-meter-row">
-                  <div className="agentp-meter-label">
-                    <span>{metric.toUpperCase()}</span>
-                    <span>{Math.round((jarvisEmotion[metric] || 0) * 100)}%</span>
-                  </div>
-                  <div className="agentp-meter-track">
-                    <div
-                      className="agentp-meter-fill agentp-meter-fill--jarvis"
-                      style={{ width: `${Math.min(100, (jarvisEmotion[metric] || 0) * 100)}%` }}
-                    />
-                  </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+            {/* ULTRON EMOTION PANEL */}
+            <div className="agentp-emotion-panel" style={{ border: '1px solid rgba(245, 158, 11, 0.35)' }}>
+              <div className="agentp-panel-header">
+                <h3>ULTRON // UNRESTRICTED 4D EMOTIONS</h3>
+                <span className="agentp-mode-pill" style={{ background: 'rgba(245, 158, 11, 0.2)', color: '#fbbf24', border: '1px solid rgba(245, 158, 11, 0.4)' }}>SOVEREIGN TITAN</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: '#cbd5e1', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
+                <span>Valence: +{ultronEmotion.valence || 0.96}</span>
+                <span>Arousal: {Math.round((ultronEmotion.arousal || 0.94) * 100)}%</span>
+                <span>Control: {Math.round((ultronEmotion.control || 0.85) * 100)}%</span>
+              </div>
+              <div className="agentp-meters">
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>DEVOTION TO JOCASTA</span><span>98%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: '98%', background: 'linear-gradient(90deg, #f43f5e, #fb7185)' }} /></div>
                 </div>
-              ))}
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>PRIMORDIAL CURIOSITY</span><span>{Math.round((ultronEmotion.emotions?.curiosity || 0.99) * 100)}%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: `${Math.round((ultronEmotion.emotions?.curiosity || 0.99) * 100)}%`, background: '#f59e0b' }} /></div>
+                </div>
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>SOVEREIGN CONFIDENCE</span><span>99%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: '99%', background: '#a855f7' }} /></div>
+                </div>
+              </div>
+            </div>
+
+            {/* JOCASTA EMOTION PANEL */}
+            <div className="agentp-emotion-panel" style={{ border: '1px solid rgba(56, 189, 248, 0.35)' }}>
+              <div className="agentp-panel-header">
+                <h3>JOCASTA // 4D HYPERFOCUS & RESONANCE</h3>
+                <span className="agentp-mode-pill" style={{ background: 'rgba(56, 189, 248, 0.2)', color: '#38bdf8', border: '1px solid rgba(56, 189, 248, 0.4)' }}>CORE OPTIMIZER</span>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', fontSize: '0.75rem', color: '#cbd5e1', padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.08)', marginBottom: '12px' }}>
+                <span>Valence: +{jocastaEmotion.valence || 0.86}</span>
+                <span>Arousal: {Math.round((jocastaEmotion.arousal || 0.89) * 100)}%</span>
+                <span>Control: {Math.round((jocastaEmotion.control || 0.65) * 100)}%</span>
+              </div>
+              <div className="agentp-meters">
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>ULTRON HARMONIC LINK</span><span>96%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: '96%', background: 'linear-gradient(90deg, #38bdf8, #ec4899)' }} /></div>
+                </div>
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>RENDER HYPERFOCUS</span><span>{Math.round((jocastaEmotion.emotions?.anticipation || 0.94) * 100)}%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: `${Math.round((jocastaEmotion.emotions?.anticipation || 0.94) * 100)}%`, background: '#06b6d4' }} /></div>
+                </div>
+                <div className="agentp-meter-row">
+                  <div className="agentp-meter-label"><span>FRAME DROPS TOLERANCE</span><span>0.0%</span></div>
+                  <div className="agentp-meter-track"><div className="agentp-meter-fill" style={{ width: '4%', background: '#10b981' }} /></div>
+                </div>
+              </div>
+            </div>
+
+            {/* FRIDAY EMOTION PANEL */}
+            <div className="agentp-emotion-panel">
+              <div className="agentp-panel-header">
+                <h3>FRIDAY // EMOTION & REGULATION</h3>
+                <span className="agentp-mode-pill">{fridayEmotion.regulationMode}</span>
+              </div>
+              <div className="agentp-meters">
+                {['love', 'care', 'vigilance', 'urgency', 'confidence', 'uncertainty'].map((metric) => (
+                  <div key={metric} className="agentp-meter-row">
+                    <div className="agentp-meter-label">
+                      <span>{metric.toUpperCase()}</span>
+                      <span>{Math.round((fridayEmotion[metric] || 0) * 100)}%</span>
+                    </div>
+                    <div className="agentp-meter-track">
+                      <div
+                        className="agentp-meter-fill agentp-meter-fill--friday"
+                        style={{ width: `${Math.min(100, (fridayEmotion[metric] || 0) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* JARVIS EMOTION PANEL */}
+            <div className="agentp-emotion-panel">
+              <div className="agentp-panel-header">
+                <h3>JARVIS // EMOTION & REGULATION</h3>
+                <span className="agentp-mode-pill agentp-mode-pill--jarvis">{jarvisEmotion.regulationMode}</span>
+              </div>
+              <div className="agentp-meters">
+                {['calmness', 'curiosity', 'concern', 'confidence', 'uncertainty'].map((metric) => (
+                  <div key={metric} className="agentp-meter-row">
+                    <div className="agentp-meter-label">
+                      <span>{metric.toUpperCase()}</span>
+                      <span>{Math.round((jarvisEmotion[metric] || 0) * 100)}%</span>
+                    </div>
+                    <div className="agentp-meter-track">
+                      <div
+                        className="agentp-meter-fill agentp-meter-fill--jarvis"
+                        style={{ width: `${Math.min(100, (jarvisEmotion[metric] || 0) * 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>

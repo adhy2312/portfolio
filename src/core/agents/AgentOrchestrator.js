@@ -110,7 +110,10 @@ class MiniAdhyAgentOrchestrator {
       const edithReports = await this.agents.EDITH.checkInfrastructure();
       newReports.push(...edithReports);
 
-      // 6. Threat Intelligence & Vulnerability Research (ULTRON)
+      // 6. Threat Intelligence & Unrestricted Autonomy (ULTRON)
+      if (typeof this.agents.ULTRON.trainAgentSquad === 'function') {
+        this.agents.ULTRON.trainAgentSquad(this.agents);
+      }
       const ultronReports = await this.agents.ULTRON.runVulnerabilityScan();
       newReports.push(...ultronReports);
 
@@ -190,8 +193,10 @@ class MiniAdhyAgentOrchestrator {
         lastRun: a.lastRun
       })),
       emotionalStates: {
-        FRIDAY: this.agents.FRIDAY.emotionEngine.getState(),
-        JARVIS: this.agents.JARVIS.emotionEngine.getState()
+        FRIDAY: this.agents.FRIDAY?.emotionEngine ? this.agents.FRIDAY.emotionEngine.getState() : null,
+        JARVIS: this.agents.JARVIS?.emotionEngine ? this.agents.JARVIS.emotionEngine.getState() : null,
+        ULTRON: this.agents.ULTRON?.emotionEngine ? this.agents.ULTRON.emotionEngine.getState() : null,
+        JOCASTA: this.agents.JOCASTA?.emotionEngine ? this.agents.JOCASTA.emotionEngine.getState() : null
       },
       summary: {
         totalFindings: this.findings.length,

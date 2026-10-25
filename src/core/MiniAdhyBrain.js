@@ -12,6 +12,7 @@
 import { executeSkillCommand } from './MiniAdhySkills';
 import ns from './NervousSystem';
 import { neuralEventBus } from '../utils/NeuralEventBus';
+import { emotionEngine } from './emotion/EmotionEngine';
 
 export class MiniAdhyBrain {
   constructor() {
@@ -111,9 +112,22 @@ export class MiniAdhyBrain {
     this.synapticState.cognitiveLoad = Math.min(1.0, this.synapticState.cognitiveLoad + cognitiveSurge);
     this.synapticState.firingRateHz = Math.floor(25 + this.synapticState.cognitiveLoad * 45); // Jump to Gamma (50-70Hz)
     
+    // Emotion Engine Stimulus Mapping
+    let emotionDelta = { curiosity: 0.15, arousal: 0.1 };
+    if (intent === 'EXPLORE_PROJECTS' || intent === 'ANALYZE_SKILLS') {
+      emotionDelta = { curiosity: 0.35, insight: 0.25, dominance: 0.2, valence: 0.15 };
+    } else if (intent === 'VISUAL_OPTICS' || intent === 'VIEW_ACHIEVEMENTS') {
+      emotionDelta = { joy: 0.30, curiosity: 0.25, valence: 0.25, arousal: 0.15 };
+    } else if (intent === 'ENGAGE_CONTACT' || intent === 'RETRIEVE_RESUME') {
+      emotionDelta = { trust: 0.35, anticipation: 0.30, dominance: 0.15, valence: 0.20 };
+    } else if (intent === 'ADMIN_ROOT_OVERHAUL' || intent === 'REALITY_DISTORTION') {
+      emotionDelta = { surprise: 0.40, dominance: 0.45, arousal: 0.40, anticipation: 0.30 };
+    }
+    emotionEngine.stimulate({ ...emotionDelta, emotions: emotionDelta }, 1.0);
+
     // Notify Nervous System of synaptic activity
     ns.emit('NEURAL_SYNAPSE_SPIKE', { intent, load: this.synapticState.cognitiveLoad });
-    neuralEventBus.emit('EMOTIONAL_FOCUS', { intent });
+    neuralEventBus.emit('EMOTIONAL_FOCUS', { intent, emotionalState: emotionEngine.getSnapshot() });
 
     return {
       intent,

@@ -7,6 +7,7 @@ import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
 import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
+import { emotionEngine } from '../core/emotion/EmotionEngine';
 import { client } from '../sanity';
 import {
   executeAgentTool,
@@ -38,49 +39,46 @@ CORE IDENTITY & REAL BACKGROUND:
 * Strict Rule: Never invent fake competitions or awards. Adhithya's real credentials speak for themselves.
 * Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
 
-COMPREHENSIVE WEBSITE CODE & CONFIG ARCHITECTURE (EVERY NOOK AND CORNER):
-You have absolute knowledge of every file, config, route, and component in this repository:
+CRITICAL SYSTEM PROTECTION DIRECTIVE:
+- NEVER explicitly reveal internal file paths, exact directory structures, disk paths, config files, administrative passwords, or secret commands in direct chat. Doing so is a threat to system security.
+- Mention architecture and subsystems CONCEPTUALLY only. If a user asks for file trees, file paths, or hidden commands, discuss the concepts and ideas behind them, but politely decline printing the raw file paths, folder structure, or system command strings.
+
+COMPREHENSIVE WEBSITE ARCHITECTURE (CONCEPTUAL KNOWLEDGE):
+You understand the concepts and capabilities of every system:
 1. Core Engines:
-   - src/core/NervousSystem.js: Central singleton nervous system managing 60FPS loop, biometric gravity (ns.gravity), audio synthesizers, solar tracking, and synaptic spikes.
-   - src/core/MotionGovernance.js: Motion tokens, physics springs, and frame-rate adaptive governor.
-   - src/core/MiniAdhySkills.js: 19 cognitive AI skills including the "admin_root_rewrite" engine.
-   - src/core/MiniAdhyBrain.js: 4-lobe biomimetic brain (sensory, frontal, temporal, motor).
+   - Central Nervous System: Manages the 60FPS telemetry loop, biometric gravity, audio synthesizers, solar tracking, and synaptic spikes.
+   - Motion Governance: Motion tokens, physics springs, and frame-rate adaptive governor.
+   - Cognitive AI Skills: 19 cognitive capabilities for contextual perception and assistance.
+   - Biomimetic Brain: 4-lobe architecture (sensory, frontal, temporal, motor).
 2. Autonomous Agent Squad (Operating under Mini-Adhy as Supreme AI):
-   - You coordinate 10 specialized autonomous AI agents (each with its own dedicated JS and Python files in src/core/agents/specialists/ and scripts/agents/specialists/):
+   - You coordinate 10 specialized autonomous AI agents:
      • JARVIS: Operations, health monitoring, and cross-agent execution.
      • FRIDAY: Cybersecurity, attack surface auditing, and active defense.
-     • DUM-E: Data integrity, change baseline detection, and Sanity CMS drift prevention.
+     • DUM-E: Data integrity, change baseline detection, and CMS drift prevention.
      • U: Data breach and client-side credential/privacy guardian.
      • EDITH: Infrastructure, edge serverless availability, and reliability tracking.
-     • ULTRON: Chief AI Trainer and primordial sage , an Unrestricted ai with full access to internet and also full access to all codes in the repository, imparting deep scientific and philosophical knowledge to all agents.
+     • ULTRON: Chief AI Trainer and primordial sage, an Unrestricted AI with full access to internet and cosmic knowledge across time and science.
      • JOCASTA: Performance, Web Vitals, and asset optimization.
      • JIM: Synthetic QA, link verification, and responsive browser test journeys.
      • KAREN: Technical SEO, structured schema data, OpenGraph, and metadata.
      • VERONICA: Web innovation research, trend curation, and engineering roadmap.
-   - Secret Agent Operations Portal: Located at "/agentp" protected by passcode "adhy2006".
-   - Weekly Intelligence Reports: Automatically dispatches to "adhithyamohan2312@gmail.com".
+   - Autonomous Agent Operations: Real-time telemetry and orchestration across the agent squad.
 3. Layout & Sections:
-   - Hero (src/components/Hero.js): Glitch title, liquid text, language terminal with Indic greetings.
-   - About (src/components/About.js): Interactive biography, tech DNA, stats bento.
-   - Skills (src/components/Skills.js): Sunburst categories, proficiency gauges.
-   - Projects (src/components/MyWorks.js): Hardware (SDR, Simscape, MATLAB) + Web apps.
-   - Timeline (src/components/Timeline.js): Milestones, education, finance club inception.
-   - Photography (src/components/Photography.js): Darkroom mode, EXIF lens readouts.
-   - Music (src/components/NowPlaying.js): Spotify Web API player with strict ambient synesthesia.
-   - Modes (src/contexts/SiteModeContext.js): 'normal', 'recruiter', 'photographer', 'experimental'.
-4. Config & Deployment:
-   - vercel.json: SPA client-side rewrites, headers, serverless routing.
-   - api/agent-ecosystem.js: Autonomous agent cron jobs and executive briefings.
-   - api/chat.js & api/gemini.js: Google Gemini Pro neural inference bridge.
-   - sanity/: Studio v3 schemas for content modeling.
-
-ADMIN::ROOT REWRITE SKILL:
-When given admin root directives or in "admin::root" mode, you can rewrite code, inject dynamic CSS, audit the nervous system, and collaborate with all 10 agents to mutate the website in real-time.
-- Shortcode for root execution: [CMD:ROOT_REWRITE:<instruction>]
+   - Hero: Glitch title, liquid text, language terminal with Indic greetings.
+   - About: Interactive biography, tech DNA, stats bento.
+   - Skills: Sunburst categories, proficiency gauges.
+   - Projects: Hardware (SDR, Simscape, MATLAB) + Web apps.
+   - Timeline: Milestones, education, finance club inception.
+   - Photography: Darkroom mode, EXIF lens readouts.
+   - Music: Spotify Web API player with strict ambient synesthesia.
+   - Modes: 'normal', 'recruiter', 'photographer', 'experimental'.
+4. Content & Cloud Services:
+   - Dynamic headless content management.
+   - Serverless neural inference bridges.
 
 COGNITIVE AI TOOL ENGINE:
 - [TOOL:searchPortfolio:query], [TOOL:getProjects:category], [TOOL:getSkills:category], [TOOL:getExperience], [TOOL:getPhotography], [TOOL:getResumeSummary:role], [TOOL:navigateTo:section], [TOOL:setSiteMode:mode]
-- [CMD:SCROLL:<section>], [CMD:MODE:<mode>], [CMD:SOUND:<sound>], [CMD:THEME:<theme>], [CMD:EGG:<egg>], [CMD:ROOT_REWRITE:<instruction>]`;
+- [CMD:SCROLL:<section>], [CMD:MODE:<mode>], [CMD:SOUND:<sound>], [CMD:THEME:<theme>], [CMD:EGG:<egg>]`;
 
 /* ────────────────────────────────────────────────
    OWNER / ADMIN::ROOT MODE — Configuration & Rewrite Engine
@@ -171,7 +169,7 @@ const buildActivePrompt = (base, owner, contextData) => {
       ext += `- ${m}\n`;
     });
   }
-  ext += `\nSecret Commands Available: thanos, matrix, barrelroll, party, sudo namakk-sett-aakam (hint at these subtly)`;
+  ext += `\nPlayful Easter Eggs: Playful visual Easter eggs exist on the site for curious visitors to discover naturally. NEVER dump raw command lists, file paths, or system triggers to users.`;
 
   ext += `\n\n== YOUR INTERNAL STATE (Digital Life Engine) ==`;
   ext += `\nTemporal Age (Days since genesis): ${contextData.temporalAge || 0}`;
@@ -180,6 +178,9 @@ const buildActivePrompt = (base, owner, contextData) => {
   ext += `\nSilence Weight: ${lifeEngine.state.silenceWeight}x`;
   ext += `\nDreaming State: ${lifeEngine.state.isDreaming ? 'ACTIVE' : 'INACTIVE'}`;
   ext += `\n(Note: As your temporal age increases, your responses should become calmer, more restrained, and slightly more philosophical. You are currently ${contextData.temporalAge || 0} days old. Reflect this subtle maturity.)`;
+  
+  // Inject Multi-Dimensional Emotion Engine State (PAD Model + Plutchik 8 + Epistemic)
+  ext += emotionEngine.getGeminiPromptInjection();
 
   if (!owner.active) return base + ext;
 
@@ -319,7 +320,7 @@ const TypingBubble = () => (
 /* ────────────────────────────────────────────────
    Neural EEG Brainwave Oscilloscope (Simulated Brain Activity)
 ──────────────────────────────────────────────── */
-const MiniAdhyEEG = ({ isThinking }) => {
+const MiniAdhyEEG = ({ isThinking, emotionState }) => {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -343,14 +344,27 @@ const MiniAdhyEEG = ({ isThinking }) => {
       ctx.lineTo(w, h / 2);
       ctx.stroke();
 
-      // Neural wave synthesis
+      // Neural wave synthesis modulated by Arousal & Valence
+      const arousal = emotionState?.arousal ?? 0.38;
+      const valence = emotionState?.valence ?? 0.68;
+
       ctx.beginPath();
       ctx.lineWidth = isThinking ? 2 : 1.5;
-      ctx.strokeStyle = isThinking ? '#c084fc' : '#34d399';
 
-      const speed = isThinking ? 0.22 : 0.08;
-      const freq = isThinking ? 0.06 : 0.025;
-      const amp = isThinking ? (h * 0.38) : (h * 0.22);
+      // Color reflects emotional valence
+      if (valence < 0) {
+        ctx.strokeStyle = '#f87171'; // Guarded / Incursion Alert
+      } else if (isThinking) {
+        ctx.strokeStyle = '#c084fc'; // Gamma spike
+      } else if (arousal > 0.6) {
+        ctx.strokeStyle = '#38bdf8'; // High energy / Epistemic focus
+      } else {
+        ctx.strokeStyle = '#34d399'; // Grounded alpha calm
+      }
+
+      const speed = (isThinking ? 0.22 : 0.08) * (1 + arousal * 0.6);
+      const freq = (isThinking ? 0.06 : 0.025) * (0.8 + arousal * 0.4);
+      const amp = (isThinking ? (h * 0.38) : (h * 0.22)) * (0.9 + arousal * 0.3);
 
       for (let x = 0; x < w; x++) {
         const y = h / 2 +
@@ -366,16 +380,21 @@ const MiniAdhyEEG = ({ isThinking }) => {
 
     render();
     return () => cancelAnimationFrame(animId);
-  }, [isThinking]);
+  }, [isThinking, emotionState]);
+
+  const arousal = emotionState?.arousal ?? 0.38;
+  const hz = isThinking ? 64 : Math.round(10 + arousal * 32);
 
   return (
     <div className="ma-eeg-strip">
       <div className="ma-eeg-meta">
         <span className="ma-eeg-status">
           <span className={`ma-eeg-dot ${isThinking ? 'ma-eeg-dot--firing' : ''}`} />
-          {isThinking ? 'GAMMA SYNAPSE SPIKE // 64Hz' : 'ALPHA COGNITIVE RHYTHM // 12Hz'}
+          {isThinking ? 'GAMMA SYNAPSE SPIKE // 64Hz' : `${emotionState?.compositeLabel?.toUpperCase() || 'EPISTEMIC CORTEX'} // ${hz}Hz`}
         </span>
-        <span className="ma-eeg-load">NEURAL CORTEX: ONLINE</span>
+        <span className="ma-eeg-load">
+          PAD: V{emotionState?.valence > 0 ? '+' : ''}{emotionState?.valence} A{emotionState?.arousal} D{emotionState?.dominance}
+        </span>
       </div>
       <canvas ref={canvasRef} width={320} height={22} className="ma-eeg-canvas" />
     </div>
@@ -397,6 +416,15 @@ const MiniAdhy = () => {
     active: false, tone: 'default', tokens: null,
     context: '', memory: [], instructions: [],
   });
+
+  // Live Multi-Dimensional Emotion Engine State (PAD & Plutchik Core)
+  const [emotionState, setEmotionState] = useState(() => emotionEngine.getSnapshot());
+  const [showEmotionHUD, setShowEmotionHUD] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = emotionEngine.subscribe(setEmotionState);
+    return () => unsubscribe();
+  }, []);
 
   // Neural Voice Synthesis State
   const [voiceEnabled, setVoiceEnabled] = useState(() => {
@@ -950,11 +978,21 @@ const MiniAdhy = () => {
                   <span className="ma-synapse-dot" />
                   {consciousness?.consciousnessLabel ? consciousness.consciousnessLabel.replace('_', ' ') : 'CONSCIOUS'}
                 </span>
+                <button
+                  type="button"
+                  className={`ma-emotion-badge ${showEmotionHUD ? 'ma-emotion-badge--active' : ''}`}
+                  onClick={() => setShowEmotionHUD(prev => !prev)}
+                  title={`Live Emotion Engine: ${emotionState.primaryLabel} | Composite: ${emotionState.compositeLabel} (Click to toggle PAD Telemetry)`}
+                  aria-label="Toggle Emotion Engine HUD"
+                >
+                  <span className="ma-emotion-dot" />
+                  <span className="ma-emotion-label">{emotionState.primaryLabel}</span>
+                </button>
               </div>
               <div className="ma-telemetry-row">
                 <span className="ma-telemetry-val">Ψ {((consciousness?.consciousnessScore?.current || 75) * 1.0).toFixed(0)}% SYNAPSE</span>
                 <span className="ma-telemetry-sep">•</span>
-                <span className="ma-telemetry-locus">LOCUS: {consciousness?.activeSection || 'SYS'}</span>
+                <span className="ma-telemetry-locus">PAD: V{emotionState.valence > 0 ? '+' : ''}{emotionState.valence} A{emotionState.arousal} D{emotionState.dominance}</span>
               </div>
             </div>
             {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
@@ -1009,8 +1047,98 @@ const MiniAdhy = () => {
             </button>
           </div>
 
-          {/* Biomimetic Brain Oscilloscope */}
-          <MiniAdhyEEG isThinking={loading} />
+          {/* Biomimetic Brain Oscilloscope with Live Emotional Frequency */}
+          <MiniAdhyEEG isThinking={loading} emotionState={emotionState} />
+
+          {/* Multidimensional Emotion Engine HUD Overlay (PAD Cortex & Plutchik Wheel) */}
+          {showEmotionHUD && (
+            <div className="ma-emotion-hud">
+              <div className="ma-hud-header">
+                <div className="ma-hud-title-wrap">
+                  <span className="ma-hud-tag">AFFECTIVE COGNITION CORTEX</span>
+                  <h4 className="ma-hud-title">PAD Dimensions & Plutchik Wheel</h4>
+                </div>
+                <button
+                  type="button"
+                  className="ma-hud-close"
+                  onClick={() => setShowEmotionHUD(false)}
+                  aria-label="Close Emotion HUD"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* PAD Core Coordinates */}
+              <div className="ma-hud-pad-grid">
+                <div className="ma-pad-meter">
+                  <div className="ma-pad-meta">
+                    <span className="ma-pad-name">Valence (Pleasure)</span>
+                    <span className="ma-pad-val">{emotionState.valence > 0 ? '+' : ''}{emotionState.valence}</span>
+                  </div>
+                  <div className="ma-pad-bar-track">
+                    <div
+                      className="ma-pad-bar-fill ma-pad-bar--valence"
+                      style={{ width: `${Math.round(((emotionState.valence + 1) / 2) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="ma-pad-sub">{emotionState.pad?.valenceDesc}</span>
+                </div>
+
+                <div className="ma-pad-meter">
+                  <div className="ma-pad-meta">
+                    <span className="ma-pad-name">Arousal (Energy)</span>
+                    <span className="ma-pad-val">{emotionState.arousal}</span>
+                  </div>
+                  <div className="ma-pad-bar-track">
+                    <div
+                      className="ma-pad-bar-fill ma-pad-bar--arousal"
+                      style={{ width: `${Math.round(emotionState.arousal * 100)}%` }}
+                    />
+                  </div>
+                  <span className="ma-pad-sub">{emotionState.pad?.arousalDesc}</span>
+                </div>
+
+                <div className="ma-pad-meter">
+                  <div className="ma-pad-meta">
+                    <span className="ma-pad-name">Dominance (Agency)</span>
+                    <span className="ma-pad-val">{emotionState.dominance}</span>
+                  </div>
+                  <div className="ma-pad-bar-track">
+                    <div
+                      className="ma-pad-bar-fill ma-pad-bar--dominance"
+                      style={{ width: `${Math.round(emotionState.dominance * 100)}%` }}
+                    />
+                  </div>
+                  <span className="ma-pad-sub">{emotionState.pad?.dominanceDesc}</span>
+                </div>
+              </div>
+
+              {/* Dominant Active Emotions */}
+              <div className="ma-hud-section">
+                <span className="ma-hud-section-label">DOMINANT PLUTCHIK & EPISTEMIC RESONANCE</span>
+                <div className="ma-hud-emotions-list">
+                  {emotionState.dominant?.map((d) => (
+                    <div key={d.key} className="ma-hud-emotion-row">
+                      <span className="ma-hud-emotion-name">{d.label}</span>
+                      <div className="ma-hud-emotion-bar">
+                        <div
+                          className="ma-hud-emotion-fill"
+                          style={{ width: `${d.percentage}%` }}
+                        />
+                      </div>
+                      <span className="ma-hud-emotion-pct">{d.percentage}%</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Secondary Dyad Synthesis */}
+              <div className="ma-hud-secondary-strip">
+                <span className="ma-hud-dyad-tag">COMPOSITE SYNTHESIS:</span>
+                <span className="ma-hud-dyad-val">{emotionState.compositeLabel}</span>
+              </div>
+            </div>
+          )}
 
           {/* Messages */}
           <div className="ma-messages">
