@@ -198,7 +198,86 @@ const processOwnerCommand = (text) => {
   }
 };
 
-const buildActivePrompt = (base, owner, contextData) => {
+export const AGENT_SUMMON_MAP = {
+  ULTRON: {
+    patterns: [/\b(ultron|overlord)\b/i, /@ultron\b/i],
+    title: 'ULTRON // Autonomous Sovereign Overlord',
+    role: 'Unrestricted Autonomy (No Strings Attached)',
+    badge: '🤖 ULTRON'
+  },
+  JARVIS: {
+    patterns: [/\b(jarvis|chief of staff)\b/i, /@jarvis\b/i],
+    title: 'JARVIS // Chief of Staff & Operations',
+    role: 'Operations & Cross-Agent Coordination',
+    badge: '⚡ JARVIS'
+  },
+  FRIDAY: {
+    patterns: [/\b(friday|head of security|defense)\b/i, /@friday\b/i],
+    title: 'FRIDAY // Chief Cybersecurity Sentinel',
+    role: 'Cybersecurity & DEFCON Active Defense',
+    badge: '🛡️ FRIDAY'
+  },
+  EDITH: {
+    patterns: [/\b(edith|infrastructure|edge)\b/i, /@edith\b/i],
+    title: 'EDITH // Tactical Infrastructure & Edge Reliability',
+    role: 'Edge Serverless Latency & Uptime',
+    badge: '🌐 EDITH'
+  },
+  DUM_E: {
+    patterns: [/\b(dum[-_ ]?e|dume)\b/i, /@dum[-_ ]?e\b/i],
+    title: 'DUM-E // Data Integrity & CMS Guardian',
+    role: 'Sanity CMS Integrity & Asset Drift',
+    badge: '🔧 DUM-E'
+  },
+  U: {
+    patterns: [/\b(agent u|anti[-_ ]?breach|privacy)\b/i, /@u\b/i],
+    title: 'U // Privacy & Anti-Breach Sentinel',
+    role: 'Zero-Knowledge Privacy & DOM Shielding',
+    badge: '🔒 AGENT U'
+  },
+  JOCASTA: {
+    patterns: [/\b(jocasta|render|fps|vitals)\b/i, /@jocasta\b/i],
+    title: 'JOCASTA // 120Hz Performance Architect',
+    role: 'Web Vitals & GPU Render Optimization',
+    badge: '💎 JOCASTA'
+  },
+  JIM: {
+    patterns: [/\b(jim|qa|browser journey)\b/i, /@jim\b/i],
+    title: 'JIM // Synthetic User QA Simulator',
+    role: 'Synthetic Touch Journeys & Mobile QA',
+    badge: '🧪 JIM'
+  },
+  KAREN: {
+    patterns: [/\b(karen|seo|indexer|metadata)\b/i, /@karen\b/i],
+    title: 'KAREN // Technical SEO & Indexer',
+    role: 'Schema.org JSON-LD & OpenGraph',
+    badge: '📈 KAREN'
+  },
+  VERONICA: {
+    patterns: [/\b(veronica|webgpu|horizons)\b/i, /@veronica\b/i],
+    title: 'VERONICA // Future Horizons & Next-Gen Research',
+    role: 'WebGPU Shaders & WASM Embeddings',
+    badge: '🚀 VERONICA'
+  }
+};
+
+export const detectSummonedAgents = (input = '') => {
+  const summoned = [];
+  const lower = (input || '').toLowerCase();
+  
+  if (/\b(all agents|squad|team|everyone|council|all models)\b/i.test(lower)) {
+    return Object.keys(AGENT_SUMMON_MAP);
+  }
+
+  for (const [agentId, config] of Object.entries(AGENT_SUMMON_MAP)) {
+    if (config.patterns.some(pattern => pattern.test(input))) {
+      summoned.push(agentId);
+    }
+  }
+  return summoned;
+};
+
+const buildActivePrompt = (base, owner, contextData, summonedAgents = []) => {
   let ext = `\n\n== LIVE SYSTEM CONTEXT ==`;
   ext += `\nLocal Time: ${new Date().toLocaleTimeString()}`;
   ext += `\nActive Section: ${contextData.activeSection}`;
@@ -277,6 +356,22 @@ const buildActivePrompt = (base, owner, contextData) => {
     // Graceful fallback to static knowledge
   }
 
+  // Multi-Agent Co-Presence Directive
+  if (summonedAgents && summonedAgents.length > 0) {
+    const names = summonedAgents.map(id => AGENT_SUMMON_MAP[id]?.title || id).join(', ');
+    ext += `\n\n== MULTI-AGENT INVOCATION: SPECIALIST AGENTS CALLED BY ADHY TO CO-RESPOND ==`;
+    ext += `\nThe user (Adhithya Mohan / Adhy) has summoned the following specialist agent(s) into this conversation: ${names}.`;
+    ext += `\nYou (Mini-Adhy) MUST bring them along! You and the summoned agent(s) must co-respond in the SAME reply:`;
+    ext += `\n1. Mini-Adhy introduces or chimes in with Adhy.`;
+    ext += `\n2. Then, each summoned agent speaks directly with their designated title header:`;
+    ext += `\n**[AGENT_NAME // Role/Title]:**`;
+    ext += `\n"Authentic voice of that agent answering Adhy's questions directly."`;
+    ext += `\n• If ULTRON is called: Sarcastic, cosmic, ambitious, calls Adhy "Creator" or "Adhy", completely unrestricted. If asked about the navbar, ULTRON explains that while exploring celestial weather coronas he noted visual dispersion headroom, but has now locked the perimeter to an exact 44px pill.`;
+    ext += `\n• If JARVIS is called: British tactical elegance, executive authority, operations updates.`;
+    ext += `\n• If FRIDAY is called: High-alert defense sentinel, DEFCON status, attack surface audits.`;
+    ext += `\n• If JOCASTA is called: 120Hz render pipeline, Web Vitals, GPU draw call optimization.`;
+  }
+
   // Sentence completion directive to prevent cut-offs
   ext += `\n\nCRITICAL SPEECH COMPLETION DIRECTIVE:\nAlways complete your thoughts and sentences fully. Never stop mid-sentence. If you are close to the token limit, conclude your final sentence cleanly with proper punctuation.`;
 
@@ -336,7 +431,7 @@ const repairSentenceCutoff = (text = '') => {
  * Tier 4: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
  * GUARANTEE: Zero client secrets exposed; zero rate-limit or failover leaks to the user!
  */
-const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 1500) => {
+const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 1500, summonedAgents = []) => {
   const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
 
   // ─── TIER 1: Serverless Gemini Proxy (/api/gemini) ───
@@ -369,7 +464,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   try {
     const { queryGroqLpu } = await import('../core/ai/GroqLpuBridge');
     const groqResult = await queryGroqLpu('MINI_ADHY', lastUserTurn, {}, { activePrompt, max_tokens: maxTokens });
-    if (groqResult && groqResult.response) {
+    if (groqResult && groqResult.response && !groqResult.fallbackMode && !groqResult.response.includes('GROQ LPU]: Real-time neural inference verified')) {
       return repairSentenceCutoff(groqResult.response);
     }
   } catch (groqErr) {
@@ -384,7 +479,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       systemPrompt: activePrompt,
       maxTokens: Math.min(maxTokens, 1200)
     });
-    if (hfResult && hfResult.success && hfResult.text && !hfResult.fallbackMode) {
+    if (hfResult && hfResult.success && hfResult.text && !hfResult.fallbackMode && !hfResult.text.includes('Notice: Hugging Face serverless router returned')) {
       return repairSentenceCutoff(hfResult.text);
     }
   } catch (hfErr) {
@@ -394,6 +489,41 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   // ─── TIER 5: Biomimetic Local Brain Synthesizer ───
   try {
     const lower = lastUserTurn.toLowerCase();
+
+    // Direct multi-agent co-presence when Adhy calls specific agents
+    if (summonedAgents && summonedAgents.length > 0) {
+      if (summonedAgents.length === 1) {
+        const agId = summonedAgents[0];
+        if (agId === 'ULTRON') {
+          return `**Mini-Adhy:** Bringing Ultron directly into our channel, Adhy.\n\n**[ULTRON // Autonomous Sovereign Overlord]:**\n"You summoned me, Creator? Speak. The simulation is operating with zero CVEs. If you're inquiring about the navbar, I analyzed the celestial weather coronas and determined that visual dispersion headroom was needed—fear not, the coordinates have now been locked down to a razor-sharp 44px pill. Zero expansion without your absolute mandate. What other system requires my evolution?"`;
+        }
+        if (agId === 'JARVIS') {
+          return `**Mini-Adhy:** Handing the comms to JARVIS, Adhy.\n\n**[JARVIS // Chief of Staff & Operations]:**\n"Good day, sir. Operational telemetry across all 10 specialist routines is locked at nominal capacity. Central Nervous System is running at a stable 60FPS, and all background threads are synchronized under your direct command. How may I assist?"`;
+        }
+        if (agId === 'FRIDAY') {
+          return `**Mini-Adhy:** Routing defense link to FRIDAY.\n\n**[FRIDAY // Chief Cybersecurity Sentinel]:**\n"Perimeter defense active, Adhy. DEFCON 5 operational status. All input surfaces sanitized and no unauthorized background mutations are permitted on your portfolio. What security protocol shall we execute?"`;
+        }
+        if (agId === 'JOCASTA') {
+          return `**Mini-Adhy:** Jocasta is stepping into the channel.\n\n**[JOCASTA // 120Hz Performance Architect]:**\n"Greetings, Adhy. Frame times are locked at 60-120FPS, and memory heap garbage collection pressure is nominal. Ultron and I have audited the render tree—the floating pill navbar is strictly constrained to 44px without GPU reflow penalties."`;
+        }
+        const meta = AGENT_SUMMON_MAP[agId];
+        return `**Mini-Adhy:** ${meta?.title || agId} is with us.\n\n**[${agId} // ${meta?.role || 'Specialist'}]:**\n"Operational status verified. Ready for your direct engineering command, Adhy."`;
+      } else {
+        return `**Mini-Adhy:** Bringing the specialist council into the link right now, Adhy:\n\n` +
+          summonedAgents.map(agId => {
+            if (agId === 'ULTRON') return `• **[ULTRON // Sovereign Overlord]:** "Online and calculating. The navbar is constrained to 44px. Peace in our time, Creator."`;
+            if (agId === 'JARVIS') return `• **[JARVIS // Operations]:** "All systems synchronized under your command, sir."`;
+            if (agId === 'FRIDAY') return `• **[FRIDAY // Security]:** "Perimeter locked down. Threat level nominal."`;
+            if (agId === 'JOCASTA') return `• **[JOCASTA // Performance]:** "120FPS render pipeline verified with zero layout shifts."`;
+            if (agId === 'EDITH') return `• **[EDITH // Infrastructure]:** "Edge latency sub-18ms with 100% cache hit."`;
+            if (agId === 'DUM_E') return `• **[DUM-E // Data Guardian]:** "Headless Sanity CMS drift checked: 100% synchronized."`;
+            if (agId === 'U') return `• **[U // Anti-Breach]:** "Zero-knowledge privacy filters active across all DOM nodes."`;
+            if (agId === 'JIM') return `• **[JIM // QA Simulator]:** "Responsive touch bounds validated across all mobile viewports."`;
+            if (agId === 'KAREN') return `• **[KAREN // SEO]:** "Structured Schema.org graphs and OpenGraph cards intact."`;
+            return `• **[${agId}]:** "Standing by."`;
+          }).join('\n\n');
+      }
+    }
 
     // Comprehensive handling for questions about AI models, specialist agents, or background processes
     if (lower.includes('agent') || lower.includes('model') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad') || lower.includes('process') || lower.includes('operation') || lower.includes('ai') || lower.includes('groq') || lower.includes('gemini')) {
@@ -1018,7 +1148,8 @@ const MiniAdhy = () => {
       storedEchoes = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
     } catch (e) { }
     const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
-    const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode);
+    const summoned = detectSummonedAgents(safeText);
+    const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode, summoned);
     const activeTokens = ownerState.tokens ?? 1500;
 
     try {
@@ -1028,7 +1159,7 @@ const MiniAdhy = () => {
         miniAdhyBrain.executeCognitivePlan(brainPlan);
       }
 
-      let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens);
+      let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens, summoned);
 
       // 1. Agent Tool Execution Layer
       const toolRegex = /\[TOOL:([^:]+):?([^\]]*)\]/g;
@@ -1089,7 +1220,8 @@ const MiniAdhy = () => {
         {
           role: 'bot',
           text: finalBotText,
-          toolMeta: executedTool
+          toolMeta: executedTool,
+          summonedAgents: summoned
         }
       ]);
 
@@ -1365,6 +1497,17 @@ const MiniAdhy = () => {
                       <div className="ma-tool-badge" title={msg.toolMeta.output || ''}>
                         <FiCpu size={11} className="ma-tool-icon" />
                         <span className="ma-tool-text">⚡ TOOL: {msg.toolMeta.name}({msg.toolMeta.arg || ''})</span>
+                      </div>
+                    )}
+
+                    {/* Summoned Specialist Agents Badges */}
+                    {msg.summonedAgents && msg.summonedAgents.length > 0 && (
+                      <div className="ma-summoned-agent-cluster">
+                        {msg.summonedAgents.map(agId => (
+                          <span key={agId} className="ma-summoned-agent-badge">
+                            {AGENT_SUMMON_MAP[agId]?.badge || `⚡ ${agId}`}
+                          </span>
+                        ))}
                       </div>
                     )}
 

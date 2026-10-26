@@ -101,15 +101,15 @@ export async function queryGroqLpu(agentId = 'JARVIS', userPrompt = '', context 
   // 2. Direct Fallback: Handled safely by Serverless Endpoint /api/groq or local resilience
 
 
-  // 3. Graceful Local Fallback
+  // 3. Graceful Fallback to next cascade tier
   return {
+    success: false,
+    fallbackMode: true,
     agent: agentId,
-    model: 'Groq-LPU-Local-Resilience',
-    response: `[${agentId} GROQ LPU]: Real-time neural inference verified. Telemetry synchronized with 0.12ms clock precision. All defensive and cognitive pipelines active.`,
-    provider: 'Groq LPU Local Reflex Cache',
-    hardware: 'Local Neuromorphic Synthesizer',
-    latencyMs: 1.2,
-    tokensPerSec: 920,
+    model: 'Groq-Unavailable',
+    response: null,
+    provider: 'Groq LPU Bridge',
+    latencyMs: 0,
     timestamp: new Date().toISOString()
   };
 }

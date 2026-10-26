@@ -7,14 +7,14 @@
   left: 0;
   right: 0;
   z-index: 1050;
-  padding: 0.5rem 0;
+  padding: 0.25rem 0 !important;
   border-bottom: none !important;
   box-shadow: none !important;
   transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-scrolled {
-  padding: 0.35rem 0;
+  padding: 0.15rem 0 !important;
 }
 
 /* Removed .navbar-scrolled .navbar-inner to keep floating pill design */
@@ -31,7 +31,11 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 0.42rem 1.35rem;
+  height: 44px !important;
+  min-height: 44px !important;
+  max-height: 44px !important;
+  box-sizing: border-box !important;
+  padding: 0 1.25rem !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 100;
@@ -151,9 +155,9 @@ body.dark-mode .nav-chairperson-chip {
 .nav-link {
   color: rgba(0, 0, 0, 0.6);
   text-decoration: none;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 6px 12px;
+  padding: 4px 10px;
   border-radius: 50px;
   transition: all 0.3s ease;
   letter-spacing: 0.5px;
@@ -177,7 +181,7 @@ body.dark-mode .nav-chairperson-chip {
 .nav-link:hover::after { width: 50%; }
 
 .nav-resume-btn {
-  padding: 7px 16px;
+  padding: 4px 12px;
   background: var(--accent-primary);
   color: var(--button-text, #fff);
   font-weight: 900;
@@ -186,7 +190,8 @@ body.dark-mode .nav-chairperson-chip {
   border-radius: 4px;
   border: var(--border-brutal);
   text-decoration: none;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
+  line-height: 1.2;
   transition: all var(--transition-fast);
   box-shadow: var(--shadow-brutal);
   letter-spacing: 0.5px;
@@ -769,13 +774,16 @@ body.dark-mode .nav-chairperson-chip {
 @media (max-width: 768px) {
   .navbar {
     /* Respect notch / safe area on iOS */
-    padding-top: max(0.4rem, env(safe-area-inset-top, 0.4rem));
-    padding-bottom: 0.4rem;
+    padding-top: max(0.2rem, env(safe-area-inset-top, 0.2rem)) !important;
+    padding-bottom: 0.2rem !important;
     padding-left: env(safe-area-inset-left, 0);
     padding-right: env(safe-area-inset-right, 0);
   }
   .navbar-inner {
-    padding: 0.42rem 0.95rem;
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 40px !important;
+    padding: 0 0.85rem !important;
     margin: 0 1rem;
     gap: 8px;
     /* Prevent inner pill from overflowing screen */
