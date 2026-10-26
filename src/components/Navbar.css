@@ -7,14 +7,14 @@
   left: 0;
   right: 0;
   z-index: 1050;
-  padding: 1rem 0;
+  padding: 0.5rem 0;
   border-bottom: none !important;
   box-shadow: none !important;
   transition: padding 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .navbar-scrolled {
-  padding: 0.8rem 0;
+  padding: 0.35rem 0;
 }
 
 /* Removed .navbar-scrolled .navbar-inner to keep floating pill design */
@@ -31,7 +31,7 @@
   -webkit-backdrop-filter: blur(16px) saturate(1.2);
   border-radius: 50px;
   border: 1px solid rgba(255, 255, 255, 0.4);
-  padding: 0.7rem 1.5rem;
+  padding: 0.42rem 1.35rem;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   position: relative;
   z-index: 100;
@@ -769,12 +769,13 @@ body.dark-mode .nav-chairperson-chip {
 @media (max-width: 768px) {
   .navbar {
     /* Respect notch / safe area on iOS */
-    padding-top: max(0.5rem, env(safe-area-inset-top, 0.5rem));
+    padding-top: max(0.4rem, env(safe-area-inset-top, 0.4rem));
+    padding-bottom: 0.4rem;
     padding-left: env(safe-area-inset-left, 0);
     padding-right: env(safe-area-inset-right, 0);
   }
   .navbar-inner {
-    padding: 0.7rem 1.2rem;
+    padding: 0.42rem 0.95rem;
     margin: 0 1rem;
     gap: 8px;
     /* Prevent inner pill from overflowing screen */

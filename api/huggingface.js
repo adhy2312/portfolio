@@ -116,7 +116,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         inputs: formattedInput,
         parameters: {
-          max_new_tokens: Math.min(maxTokens, 1024),
+          max_new_tokens: Math.min(maxTokens, 1500),
           temperature: Math.max(0.1, Math.min(temperature, 1.2)),
           return_full_text: false
         }
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           inputs: formattedInput,
           parameters: {
-            max_new_tokens: Math.min(maxTokens, 1024),
+            max_new_tokens: Math.min(maxTokens, 1500),
             temperature: Math.max(0.1, Math.min(temperature, 1.2)),
             return_full_text: false
           }

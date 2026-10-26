@@ -8,6 +8,7 @@
 
 import ns from './NervousSystem';
 import { neuralEventBus } from '../utils/NeuralEventBus';
+import { agentOrchestrator } from './agents/AgentOrchestrator';
 
 // Web Audio API Ambient Sound Synthesizer (Zero asset dependency)
 const playSynthesizerTone = (preset = 'chime') => {
@@ -513,6 +514,33 @@ export const MINI_ADHY_SKILLS = [
       neuralEventBus.emit('ADMIN_ROOT_EXECUTED', { instruction, actionTaken });
 
       return `[ADMIN::ROOT ACTIVE] 10 Autonomous Agents Coordinating: JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, U, JOCASTA, JIM, KAREN, VERONICA. ${actionTaken} (NervousSystem: ${fps} FPS | LateNight: ${isLateNight ? 'ON' : 'OFF'})`;
+    }
+  },
+  {
+    id: 'ai_squad_telemetry',
+    name: 'AI Models & Specialist Squad Intelligence',
+    category: 'AI Ecosystem',
+    icon: '🧠',
+    description: 'Retrieves live telemetry, operations, and status across all AI models (Gemini, Groq, HF, Local Brain) and all 10 specialist agents.',
+    command: 'AI_INTEL',
+    execute: (query = '') => {
+      try {
+        const reports = agentOrchestrator ? agentOrchestrator.getAllDetailedAgentReports() : [];
+        const defense = agentOrchestrator && agentOrchestrator.getDefenseState ? agentOrchestrator.getDefenseState() : null;
+        const qLower = (query || '').toLowerCase();
+        
+        // Single agent query
+        const matched = reports.find(r => qLower.includes(r.id.toLowerCase()) || qLower.includes(r.name.toLowerCase()));
+        if (matched) {
+          const acts = (matched.recentActions || []).slice(0, 3).join('; ');
+          return `[${matched.name} STATUS]: Role: ${matched.role || matched.title} | Status: ${matched.status.toUpperCase()} | Clearance: ${matched.clearanceLevel} | CPU: ${matched.telemetry?.cpuLoad || '8.5'}% | Actions: ${acts}`;
+        }
+
+        // Full squad overview
+        return `[AI SQUAD ECOSYSTEM]: DEFCON ${defense?.defconLevel || 5} (${defense?.status || 'SECURE'}) | 10 Agents Active (JARVIS, FRIDAY, EDITH, ULTRON, DUM-E, U, JOCASTA, JIM, KAREN, VERONICA) | AI Models: Gemini 2.5 Flash (Tier 1), Groq LPU Llama-3.3-70B (Tier 2), Hugging Face Qwen/Mistral (Tier 3), Biomimetic Local Brain (Tier 4).`;
+      } catch (e) {
+        return 'All 10 specialist AI agents operational under Mini-Adhy.';
+      }
     }
   }
 ];

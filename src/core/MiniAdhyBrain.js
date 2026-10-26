@@ -106,6 +106,11 @@ export class MiniAdhyBrain {
       targetSkill = 'DIAGNOSTICS';
       targetArg = 'run';
       cognitiveSurge = 0.75;
+    } else if (lower.includes('agent') || lower.includes('model') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad') || lower.includes('ai operation') || lower.includes('ai process') || lower.includes('other model') || lower.includes('other ai')) {
+      intent = 'QUERY_AI_ECOSYSTEM';
+      targetSkill = 'AI_INTEL';
+      targetArg = text;
+      cognitiveSurge = 0.85;
     }
 
     this.synapticState.lastIntent = intent;
@@ -122,6 +127,8 @@ export class MiniAdhyBrain {
       emotionDelta = { trust: 0.35, anticipation: 0.30, dominance: 0.15, valence: 0.20 };
     } else if (intent === 'ADMIN_ROOT_OVERHAUL' || intent === 'REALITY_DISTORTION') {
       emotionDelta = { surprise: 0.40, dominance: 0.45, arousal: 0.40, anticipation: 0.30 };
+    } else if (intent === 'QUERY_AI_ECOSYSTEM') {
+      emotionDelta = { curiosity: 0.40, dominance: 0.35, arousal: 0.30, valence: 0.25 };
     }
     emotionEngine.stimulate({ ...emotionDelta, emotions: emotionDelta }, 1.0);
 

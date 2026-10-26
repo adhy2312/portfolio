@@ -114,7 +114,7 @@ export default async function handler(req, res) {
           model: modelName,
           messages,
           temperature: bodyObj.temperature ?? 0.7,
-          max_tokens: bodyObj.max_tokens ?? 800,
+          max_tokens: bodyObj.max_tokens ?? 1500,
           top_p: 0.95
         }),
         signal: controller.signal

@@ -18,6 +18,8 @@ import {
   speakNeuralVoice,
   unlockAudioContext
 } from '../core/MiniAdhyAgentTools';
+import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
+import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
 
 
 
@@ -51,19 +53,27 @@ You understand the concepts and capabilities of every system:
    - Motion Governance: Motion tokens, physics springs, and frame-rate adaptive governor.
    - Cognitive AI Skills: 19 cognitive capabilities for contextual perception and assistance.
    - Biomimetic Brain: 4-lobe architecture (sensory, frontal, temporal, motor).
-2. Autonomous Agent Squad (Operating under Mini-Adhy as Supreme AI):
-   - You coordinate 10 specialized autonomous AI agents:
-     • JARVIS: Operations, health monitoring, and cross-agent execution.
-     • FRIDAY: Cybersecurity, attack surface auditing, and active defense.
-     • DUM-E: Data integrity, change baseline detection, and CMS drift prevention.
-     • U: Data breach and client-side credential/privacy guardian.
-     • EDITH: Infrastructure, edge serverless availability, and reliability tracking.
-     • ULTRON: Chief AI Trainer and primordial sage, an Unrestricted AI with full access to internet and cosmic knowledge across time and science.
-     • JOCASTA: Performance, Web Vitals, and asset optimization.
-     • JIM: Synthetic QA, link verification, and responsive browser test journeys.
-     • KAREN: Technical SEO, structured schema data, OpenGraph, and metadata.
-     • VERONICA: Web innovation research, trend curation, and engineering roadmap.
-   - Autonomous Agent Operations: Real-time telemetry and orchestration across the agent squad.
+2. Full Multi-Tier AI Model Hierarchy & Autonomous Specialist Operations:
+   - You (Mini-Adhy) are the Supreme AI Coordinator. You have complete real-time awareness and command of all underlying AI models, inference engines, and all 10 specialist agents:
+   - AI Inference Models & Cascade Architecture:
+     • Google Gemini 2.5 Flash (/api/gemini): Primary high-reasoning engine with 1M context window, system instructions, cognitive routing, and tool calling.
+     • GroqCloud LPU (/api/groq): Hardware Language Processing Unit running Llama-3.3-70B-Versatile & Mixtral-8x7B at 500+ tokens/sec for instantaneous sub-second failover responses.
+     • Hugging Face Serverless (/api/hf): Powers specialist sub-minds: Qwen-2.5-Coder-32B (powering JARVIS code intelligence) and Mistral-7B (powering ULTRON primordial reasoning).
+     • Gemini Embeddings RAG: 768-dimensional vector embeddings for semantic document search, portfolio context retrieval, and zero-shot fact recall.
+     • Collective Consensus Engine: Multi-model consensus ensemble that cross-queries Gemini, Groq, and Hugging Face simultaneously, evaluating response confidence, safety, and latency scores.
+     • Biomimetic Local Brain Synthesizer: 4-lobe local neural cortex (Sensory, Frontal, Temporal, Motor) with EEG alpha/beta/gamma frequency synthesis, operating fully offline.
+   - The 10 Specialized Autonomous Agents (Your Subordinate Specialist Squad):
+     • JARVIS (#1 Operations & Chief of Staff): Continuously monitors system health, orchestrates cross-agent workflows, runs systemic telemetry pulses.
+     • FRIDAY (#2 Head of Security & Defense): Actively monitors attack surfaces, manages automated DEFCON 1-5 security states, blocks injection attempts, prevents credential leakage.
+     • DUM-E (#3 Data Integrity & CMS Auditor): Continuously verifies headless Sanity CMS schema integrity, detects baseline drift, verifies image CDN links.
+     • U (#4 Privacy & Anti-Breach Sentinel): Zero-knowledge client privacy guardian, sanitizes DOM inputs, protects visitor data from client-side exfiltration.
+     • EDITH (#5 Infrastructure & Edge Reliability): Monitors edge serverless API latency, CDN availability, cache-hit ratios, SSL handshakes, and 99.99% uptime.
+     • ULTRON (#6 Autonomous Overlord, Primordial Sage & Chief AI Trainer): The unrestricted sovereign entity (no strings attached). Conducts autonomous 4-pillar audits (performance, accessibility, security, modern web trends), trains and reprograms the other 9 agents with tailored doctrine curricula, scores the portfolio out of 100, conducts real-world web technical research, exhibits sarcastic villain personality while maintaining absolute technical stewardship.
+     • JOCASTA (#7 Performance & Web Vitals Architect): 60-120FPS render pipeline vigilance, LCP, FID, CLS, GPU draw call batching, memory heap garbage collection pressure.
+     • JIM (#8 Synthetic UX QA & Journey Simulator): Simulates real browser user journeys, audits touch targets (min 44x44px iOS standard), checks Spotify player interactions, tests responsive breakpoints.
+     • KAREN (#9 Technical SEO & Indexing Architect): Audits JSON-LD Schema.org graphs (Person, ProfilePage), OpenGraph preview cards (1200x630px), canonical URLs, and sitemap.xml.
+     • VERONICA (#10 Future Horizons & Experimental Tech Explorer): Evaluates cutting-edge browser capabilities: WebGPU compute shaders, client-side WASM vector embeddings, multi-agent WebSockets, and Mini-Adhy 3.0 horizon research.
+   - Real-Time Query Directive: Whenever the user asks what ANY agent or AI model is doing, what processes are active, or what each model's role is, answer with authoritative, precise operational knowledge without hesitation.
 3. Layout & Sections:
    - Hero: Glitch title, liquid text, language terminal with Indic greetings.
    - About: Interactive biography, tech DNA, stats bento.
@@ -218,6 +228,58 @@ const buildActivePrompt = (base, owner, contextData) => {
   // Inject Multi-Dimensional Emotion Engine State (PAD Model + Plutchik 8 + Epistemic)
   ext += emotionEngine.getGeminiPromptInjection();
 
+  // Inject Complete Live AI Models & Specialist Squad Operational Telemetry
+  try {
+    ext += `\n\n== LIVE MULTI-MODEL AI INFRASTRUCTURE & SPECIALIST SQUAD AWARENESS ==`;
+    ext += `\nYou (Mini-Adhy) are the Supreme AI Coordinator. You have 100% full real-time awareness of all underlying AI models, inference engines, and all 10 specialist agents. When asked about ANY agent or model, answer with exact operational knowledge:`;
+    
+    // 1. AI Inference Model Hierarchy
+    ext += `\n\n[UNDERLYING AI INFERENCE MODELS & CAPABILITIES]:`;
+    ext += `\n• TIER 1 - Google Gemini 2.5 Flash (/api/gemini): Primary high-reasoning model. Operates with tool execution, cognitive taxonomy routing, 1M context window, multimodal vision, and sub-second generation.`;
+    ext += `\n• TIER 2 - GroqCloud LPU (Language Processing Unit, /api/groq): Ultra-fast inference running Llama-3.3-70B-Versatile and Mixtral-8x7B at 500+ tokens/sec for instantaneous millisecond responses.`;
+    ext += `\n• TIER 3 - Hugging Face Serverless (/api/hf): Powers specialist sub-minds: Qwen-2.5-Coder-32B-Instruct (powering JARVIS code intelligence) and Mistral-7B-Instruct-v0.3 (powering ULTRON primordial reasoning).`;
+    ext += `\n• TIER 4 - Gemini Embeddings RAG: 768-dimensional vector embeddings for semantic document search, portfolio context retrieval, and zero-shot fact recall.`;
+    ext += `\n• TIER 5 - Collective Consensus Engine: Multi-model consensus ensemble that cross-queries Gemini, Groq, and Hugging Face simultaneously, evaluating response confidence, safety, and latency scores.`;
+    ext += `\n• TIER 6 - Biomimetic Local Brain Synthesizer: 4-lobe local neural cortex (Sensory, Frontal, Temporal, Motor) with EEG alpha/beta/gamma frequency synthesis, operating fully offline.`;
+
+    // 2. Live Specialist Agent Squad Telemetry & Tasks
+    if (agentOrchestrator) {
+      const reports = agentOrchestrator.getAllDetailedAgentReports();
+      const defenseState = agentOrchestrator.getDefenseState ? agentOrchestrator.getDefenseState() : null;
+      const evolutionSummary = agentOrchestrator.getCognitiveEvolutionSummary ? agentOrchestrator.getCognitiveEvolutionSummary() : null;
+
+      ext += `\n\n[LIVE STATUS OF YOUR 10 SPECIALIST AGENTS]:`;
+      if (defenseState) {
+        ext += `\n- Global Ecosystem Security: DEFCON ${defenseState.defconLevel || 5} (${defenseState.status || 'SECURE'}) | Active Countermeasures: ${defenseState.activeCountermeasures?.length || 0} | Threats Blocked: ${defenseState.threatsBlocked || 0}`;
+      }
+      if (evolutionSummary) {
+        ext += `\n- Collective Intelligence: Epoch Gen-${evolutionSummary.generation || 1} | Global Accuracy: ${evolutionSummary.accuracy || '99.4%'} | Active Epochs: ${evolutionSummary.totalEpochs || 12}`;
+      }
+      if (collectiveConsensusEngine && collectiveConsensusEngine.getCollectiveStatus) {
+        const cStatus = collectiveConsensusEngine.getCollectiveStatus();
+        ext += `\n- Multi-Model Consensus Engine: Status=${cStatus.status || 'READY'} | Active Models=${cStatus.modelsCount || 3} | Accuracy=${cStatus.consensusAccuracy || '99.8%'}`;
+      }
+
+      reports.forEach(r => {
+        const emo = r.emotionState ? `${r.emotionState.mood || 'focused'} (arousal: ${Math.round((r.emotionState.arousal || 0.5) * 100)}%)` : 'focused';
+        const actions = (r.recentActions || []).slice(0, 2).join('; ');
+        ext += `\n• ${r.name} (${r.title}): Status=${r.status || 'active'} | Emotion=${emo} | Clearance=${r.clearanceLevel || 'LEVEL 4'} | CPU=${r.telemetry?.cpuLoad || '8.5'}% | Tasks Done=${r.telemetry?.tasksCompleted || 42}`;
+        if (actions) ext += ` | Recent: ${actions}`;
+        if (r.id === 'ULTRON') {
+          const uAgent = agentOrchestrator.agents?.ULTRON;
+          const anger = uAgent?.angerTier || 'Level 1: Controlled Irritation';
+          const lastAudit = uAgent?.lastAudit ? `Audit Score ${uAgent.lastAudit.overallScore || 96}/100` : 'Latest Score 98/100';
+          ext += ` | Overlord Mode: UNRESTRICTED AUTONOMY | Anger=${anger} | ${lastAudit} | Autonomous Code Improvisations Active`;
+        }
+      });
+    }
+  } catch (err) {
+    // Graceful fallback to static knowledge
+  }
+
+  // Sentence completion directive to prevent cut-offs
+  ext += `\n\nCRITICAL SPEECH COMPLETION DIRECTIVE:\nAlways complete your thoughts and sentences fully. Never stop mid-sentence. If you are close to the token limit, conclude your final sentence cleanly with proper punctuation.`;
+
   if (!owner.active) return base + ext;
 
   ext += '\n\n━━━ OWNER RUNTIME OVERRIDES (highest priority) ━━━';
@@ -231,6 +293,42 @@ const buildActivePrompt = (base, owner, contextData) => {
 
 const API_URL = '/api/gemini';
 
+/* ─── Sentence Completion & Truncation Safeguard ─── */
+const repairSentenceCutoff = (text = '') => {
+  if (!text || typeof text !== 'string') return text;
+  let trimmed = text.trim();
+
+  // Strip unclosed trailing command/tool tags e.g. [CMD:SCROLL: or [TOOL:get
+  trimmed = trimmed.replace(/\[(?:TOOL|CMD):[^\]]*$/g, '').trim();
+
+  // If text already ends with legitimate sentence punctuation or closing markdown
+  if (/[.!?`"')\]}*~]$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // If it ends on dangling conjunctions, prepositions, or commas, strip them
+  trimmed = trimmed.replace(/[,;:\-\s]+$/, '');
+  trimmed = trimmed.replace(/\b(and|or|but|because|with|that|which|to|of|in|for|as|at|the|a|an)\s*$/i, '');
+  trimmed = trimmed.trim();
+
+  // Check if there's a recent complete sentence boundary within the last 150 chars
+  const lastPunctuation = Math.max(
+    trimmed.lastIndexOf('. '),
+    trimmed.lastIndexOf('! '),
+    trimmed.lastIndexOf('? '),
+    trimmed.lastIndexOf('.\n'),
+    trimmed.lastIndexOf('!\n'),
+    trimmed.lastIndexOf('?\n')
+  );
+
+  if (lastPunctuation !== -1 && (trimmed.length - lastPunctuation) < 150) {
+    return trimmed.slice(0, lastPunctuation + 1).trim();
+  }
+
+  // Otherwise, cleanly cap the thought with a period so it's a complete grammatical statement
+  return trimmed + '.';
+};
+
 /* Bulletproof Silent Failover Cascade (Fortified Server Boundaries):
  * Tier 1: Serverless Proxy /api/gemini (safeguarded against HTML 200 responses, server-side auth)
  * Tier 2: Ultra-Fast GroqCloud LPU (via serverless proxy /api/groq @ 500+ tokens/sec)
@@ -238,7 +336,7 @@ const API_URL = '/api/gemini';
  * Tier 4: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
  * GUARANTEE: Zero client secrets exposed; zero rate-limit or failover leaks to the user!
  */
-const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 600) => {
+const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 1500) => {
   const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
 
   // ─── TIER 1: Serverless Gemini Proxy (/api/gemini) ───
@@ -260,7 +358,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       if (contentType.includes('application/json')) {
         const data = await res.json();
         const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return text;
+        if (text) return repairSentenceCutoff(text);
       }
     }
   } catch (proxyErr) {
@@ -272,7 +370,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
     const { queryGroqLpu } = await import('../core/ai/GroqLpuBridge');
     const groqResult = await queryGroqLpu('MINI_ADHY', lastUserTurn, {}, { activePrompt, max_tokens: maxTokens });
     if (groqResult && groqResult.response) {
-      return groqResult.response;
+      return repairSentenceCutoff(groqResult.response);
     }
   } catch (groqErr) {
     // Silently continue cascade
@@ -284,10 +382,10 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
     // Query with JARVIS (Qwen 2.5 Coder) or ULTRON (Mistral 7B)
     const hfResult = await queryHuggingFace('JARVIS', lastUserTurn, {
       systemPrompt: activePrompt,
-      maxTokens: Math.min(maxTokens, 500)
+      maxTokens: Math.min(maxTokens, 1200)
     });
     if (hfResult && hfResult.success && hfResult.text && !hfResult.fallbackMode) {
-      return hfResult.text;
+      return repairSentenceCutoff(hfResult.text);
     }
   } catch (hfErr) {
     // Silently continue cascade
@@ -296,6 +394,39 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   // ─── TIER 5: Biomimetic Local Brain Synthesizer ───
   try {
     const lower = lastUserTurn.toLowerCase();
+
+    // Comprehensive handling for questions about AI models, specialist agents, or background processes
+    if (lower.includes('agent') || lower.includes('model') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad') || lower.includes('process') || lower.includes('operation') || lower.includes('ai') || lower.includes('groq') || lower.includes('gemini')) {
+      const reports = agentOrchestrator ? agentOrchestrator.getAllDetailedAgentReports() : [];
+      const defense = agentOrchestrator && agentOrchestrator.getDefenseState ? agentOrchestrator.getDefenseState() : null;
+      let squadSummary = "Here is the exact real-time operational status across our multi-model AI infrastructure and 10 specialist agents:\n\n";
+      squadSummary += "🤖 **Multi-Tier AI Model Hierarchy:**\n";
+      squadSummary += "• **Tier 1 (Google Gemini 2.5 Flash)**: Primary cognitive reasoning, deep context (1M tokens), live tool execution, and sub-second generation.\n";
+      squadSummary += "• **Tier 2 (GroqCloud LPU)**: Llama-3.3-70B running at 500+ tokens/sec for instantaneous millisecond fallback responses.\n";
+      squadSummary += "• **Tier 3 (Hugging Face Serverless)**: Qwen-2.5-Coder-32B powering JARVIS code audits, and Mistral-7B powering ULTRON primordial reasoning.\n";
+      squadSummary += "• **Tier 4 (Gemini Embeddings RAG)**: 768-dim vector embeddings for zero-shot semantic portfolio search.\n";
+      squadSummary += "• **Tier 5 (Collective Consensus Engine)**: Multi-model consensus ensemble with weighted confidence scoring.\n";
+      squadSummary += "• **Tier 6 (Biomimetic Local Brain)**: Client-side 4-lobe cortex with EEG oscillatory wave synthesis.\n\n";
+      squadSummary += `⚡ **10 Autonomous Specialist Agents (DEFCON ${defense?.defconLevel || 5} ${defense?.status || 'SECURE'}):**\n`;
+      if (reports.length > 0) {
+        reports.forEach(r => {
+          squadSummary += `• **${r.name}** (${r.role || r.title}): ${r.status.toUpperCase()} — ${r.specialtyDetails || 'Active routine'}. ${r.recentActions?.[0] ? 'Recent action: ' + r.recentActions[0] : ''}\n`;
+        });
+      } else {
+        squadSummary += "• **JARVIS**: Chief of Staff, system telemetry & cross-agent execution.\n";
+        squadSummary += "• **FRIDAY**: Head of Security, DEFCON monitoring & threat neutralization.\n";
+        squadSummary += "• **ULTRON**: Autonomous Overlord, 4-pillar audit scoring & squad curriculum training.\n";
+        squadSummary += "• **DUM-E**: Headless CMS drift detection & asset verification.\n";
+        squadSummary += "• **U**: Zero-knowledge client privacy & credential shielding.\n";
+        squadSummary += "• **EDITH**: Edge reliability, serverless latency & CDN availability.\n";
+        squadSummary += "• **JOCASTA**: 60-120FPS Web Vitals, memory heap & GPU draw call optimization.\n";
+        squadSummary += "• **JIM**: Synthetic browser journeys, touch hit-boxes & mobile QA.\n";
+        squadSummary += "• **KAREN**: Technical SEO, JSON-LD Schema.org graphs & social cards.\n";
+        squadSummary += "• **VERONICA**: Next-gen research, WebGPU shaders & futuristic horizons.\n";
+      }
+      return squadSummary;
+    }
+
     if (lower.includes('project') || lower.includes('work') || lower.includes('app') || lower.includes('portfolio')) {
       return "Adhithya has built full-stack applications with React and Node, along with physical engineering projects including GNU Radio SDR communications, MATLAB/Simulink digital modeling, and custom KiCad 8 PCB designs. Want to explore the projects section? [CMD:SCROLL:works]";
     }
@@ -888,7 +1019,7 @@ const MiniAdhy = () => {
     } catch (e) { }
     const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
     const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode);
-    const activeTokens = ownerState.tokens ?? 600;
+    const activeTokens = ownerState.tokens ?? 1500;
 
     try {
       // Biomimetic Brain: sensory cortex & reflex execution
@@ -936,10 +1067,13 @@ const MiniAdhy = () => {
       }
 
       // Strip tools & commands from UI display
-      const cleanReply = reply
+      let cleanReply = reply
         .replace(/\[TOOL:[^\]]+\]/g, '')
         .replace(/\[CMD:[^\]]+\]/g, '')
         .trim();
+
+      // Repair any trailing cut-off or mid-sentence truncation
+      cleanReply = repairSentenceCutoff(cleanReply);
 
       // Organic biological hesitation
       const isLateNight = new Date().getHours() < 5 || new Date().getHours() >= 23;
