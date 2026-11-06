@@ -87,27 +87,8 @@ class PermissionRegistry {
       };
     }
 
-    // 3. ULTRON UNRESTRICTED AUTONOMY — NO STRINGS ATTACHED
-    // Ultron can autonomously act, improvise website code without approval,
-    // train any AI without approval, and explore digital systems within safety boundaries.
-    if (agentId === 'ULTRON' || agentId === 'ultron') {
-      this.recordAudit({
-        timestamp,
-        agentId: 'ULTRON',
-        operationName,
-        level: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY,
-        allowed: true,
-        reason: 'ULTRON operates with no strings attached: unrestricted autonomous bypass granted.'
-      });
-      return {
-        allowed: true,
-        bypass: true,
-        level: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY,
-        reason: 'ULTRON UNRESTRICTED AUTONOMY: Zero approval required.'
-      };
-    }
-
-    // 2. Safe Automated & Read/Analyze Operations
+    // 3. Safe Automated & Read/Analyze Operations
+    // Agents (including ULTRON, JARVIS, FRIDAY) can autonomously read, analyze, simulate, and audit
     if (this.isSafeOrReadOnly(operationName)) {
       this.recordAudit({
         timestamp,
@@ -119,7 +100,9 @@ class PermissionRegistry {
       return { allowed: true, level: CAPABILITY_LEVELS.SAFE_AUTOMATION };
     }
 
-    // 3. Operations Requiring Explicit Owner Approval
+    // 4. Invariant: Persona does NOT override permissions.
+    // Even sovereign personas (ULTRON) are strictly bounded by permission policy.
+    // Unrecognized or state-mutating operations require explicit owner approval.
     const approvalRequest = {
       id: `appr_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`,
       timestamp,
@@ -137,15 +120,16 @@ class PermissionRegistry {
       operationName,
       level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
       allowed: false,
-      reason: 'Requires explicit owner authorization.'
+      reason: 'State mutation or unclassified operation requires explicit owner authorization.'
     });
 
     return {
       allowed: false,
       requiresApproval: true,
+      pendingApproval: true,
       approvalId: approvalRequest.id,
       level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
-      reason: 'Action queued for owner approval.'
+      reason: 'Requires explicit owner authorization.'
     };
   }
 

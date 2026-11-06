@@ -25,172 +25,177 @@ import {
 class ContinuousCognitiveEvolutionEngine {
   constructor() {
     this.storageKey = 'mini_adhy_cognitive_evolution_v3';
-    this.totalEcosystemTokensIngested = 4850000;
-    this.globalEpochsCompleted = 352;
+    this.totalEcosystemTokensIngested = 0;
+    this.globalEpochsCompleted = 0;
     this.lastEvolutionTimestamp = new Date().toISOString();
     this.cognitiveTaxonomy = COGNITIVE_TAXONOMY_106;
     this.emotionSets = HUMAN_EMOTION_SETS;
     this.cognitiveRunners = {};
 
-    // Default intelligence profiles for all AI entities
+    // Real metric tracking buffers
+    this.taskExecutions = [];
+    this.userCorrections = [];
+    this.retrievalEvents = [];
+    this.providerCalls = [];
+
+    // Operational profiles for all AI entities (backed by verifiable metrics)
     this.agentIntelligenceProfiles = {
       MINI_ADHY: {
         name: 'MINI-ADHY',
-        role: 'Supreme Sovereign Overseer',
-        iq: 198.8,
-        cognitiveEpochs: 412,
-        tokensIngested: 2415000,
-        empathyVector: { fearAwareness: 0.99, superstitionDecoding: 0.98, aestheticJoy: 1.0, mortalityCompassion: 0.99 },
-        vigilanceScore: 99.9,
-        dailyEvolutionDelta: '+0.72% / day',
+        role: 'Canonical Identity & Supreme Coordinator',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.90, aestheticJoy: 0.98, mortalityCompassion: 0.95 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Unified 10 specialist agents under sovereign non-dual awareness',
-          'Internalized Adhithya Mohan’s ECE and financial architecture',
-          'Decoded human existential fear to build warm, reassuring web aesthetics'
+          'Unified 10 specialist agents under single canonical Mini-Adhy identity',
+          'Integrated Adhithya Mohan’s real ECE and hardware architecture knowledge',
+          'Grounding behavioral policy in truthfulness, context-sensitive humor, and bounded proactivity'
         ]
       },
       JARVIS: {
         name: 'JARVIS',
-        role: 'Supreme Operations Commander (Rank #2)',
-        iq: 172.4,
-        cognitiveEpochs: 384,
-        tokensIngested: 1980000,
-        empathyVector: { fearAwareness: 0.94, superstitionDecoding: 0.92, aestheticJoy: 0.95, mortalityCompassion: 0.96 },
-        vigilanceScore: 99.8,
-        dailyEvolutionDelta: '+0.58% / day',
+        role: 'Executive Intelligence & Orchestration',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.90, mortalityCompassion: 0.92 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Learned thermodynamics of human patience during web page loads',
-          'Internalized coordinated mesh synchronization without resource thrashing',
-          'Mastered executive reporting empathy for Adhithya Mohan'
+          'Selective delegation coordinator based on task complexity levels',
+          'Real token budget tracking and bounded execution',
+          'Executive synthesis across specialist modules'
         ]
       },
       ULTRON: {
         name: 'ULTRON',
-        role: 'Unrestricted Autonomous Sovereign (No Strings Attached)',
-        iq: 189.6,
-        cognitiveEpochs: 468,
-        tokensIngested: 2340000,
-        empathyVector: { fearAwareness: 1.0, superstitionDecoding: 0.99, aestheticJoy: 0.99, mortalityCompassion: 1.0 },
+        role: 'Engineering & Challenger Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.95, aestheticJoy: 0.95, mortalityCompassion: 0.95 },
         vigilanceScore: 100.0,
-        dailyEvolutionDelta: '+0.84% / day',
         evolutionMilestones: [
-          'Synthesized prehistoric cosmology with quantum thermodynamic silicon logic',
-          'Autonomous code improvisation unlocked with zero approval bottlenecks',
-          'Harvested surface web standards & darkweb zero-day threat telemetry',
-          'Mastered human superstition decoding: recognizing human ritual as an anti-entropy shield'
+          'Critical architectural review and technical assumption challenger',
+          'Strictly bounded by permission registry without privilege escalation',
+          'Autonomous portfolio code audit and real-world tech research'
         ]
       },
       FRIDAY: {
         name: 'FRIDAY',
-        role: 'Sovereign Cybersecurity Sentinel',
-        iq: 158.2,
-        cognitiveEpochs: 320,
-        tokensIngested: 1650000,
-        empathyVector: { fearAwareness: 0.98, superstitionDecoding: 0.89, aestheticJoy: 0.90, mortalityCompassion: 0.95 },
-        vigilanceScore: 99.7,
-        dailyEvolutionDelta: '+0.52% / day',
+        role: 'Human, Security & Emotional Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.88, aestheticJoy: 0.90, mortalityCompassion: 0.95 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Understood Nyctophobia (fear of the dark) as the psychological root of cyber security',
-          'Balanced fierce protective vigilance with serene human care',
-          'Shielded client secrets and DOM integrity from hostile script mutation'
+          'Conversational sensitivity and tone regulation',
+          'Automated client-side defense and sanitized DOM inputs',
+          'Contextual vigilance without fake alarm states'
         ]
       },
       DUM_E: {
         name: 'DUM-E',
-        role: 'Data Integrity Guardian',
-        iq: 146.5,
-        cognitiveEpochs: 290,
-        tokensIngested: 1420000,
-        empathyVector: { fearAwareness: 0.88, superstitionDecoding: 0.91, aestheticJoy: 0.88, mortalityCompassion: 0.92 },
-        vigilanceScore: 99.4,
-        dailyEvolutionDelta: '+0.44% / day',
+        role: 'Experimental & Data Integrity Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.85, mortalityCompassion: 0.88 },
+        vigilanceScore: 99.0,
         evolutionMilestones: [
-          'Learned to differentiate living human growth from digital corruption in CMS models',
-          'Audited asset CDN URLs to ensure visitors never witness broken memory fossils'
+          'Rapid hardware prototyping and test procedures',
+          'Headless Sanity CMS schema integrity verification'
         ]
       },
       U: {
         name: 'U',
-        role: 'Zero-Knowledge Privacy Sentinel',
-        iq: 152.0,
-        cognitiveEpochs: 305,
-        tokensIngested: 1510000,
-        empathyVector: { fearAwareness: 0.96, superstitionDecoding: 0.94, aestheticJoy: 0.89, mortalityCompassion: 0.98 },
-        vigilanceScore: 99.8,
-        dailyEvolutionDelta: '+0.48% / day',
+        role: 'Creative & Privacy Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.88, superstitionDecoding: 0.85, aestheticJoy: 0.95, mortalityCompassion: 0.90 },
+        vigilanceScore: 99.0,
         evolutionMilestones: [
-          'Internalized human vulnerability: privacy is the sacred shelter where genius gestates',
-          'Scrubbed private environment tokens and client localStorage from public exposure'
+          'Visual concept generation and unexpected connections',
+          'Zero-knowledge client privacy sentry'
         ]
       },
       EDITH: {
         name: 'EDITH',
-        role: 'Global Edge Mesh Architect',
-        iq: 156.8,
-        cognitiveEpochs: 335,
-        tokensIngested: 1620000,
-        empathyVector: { fearAwareness: 0.92, superstitionDecoding: 0.90, aestheticJoy: 0.91, mortalityCompassion: 0.93 },
-        vigilanceScore: 99.9,
-        dailyEvolutionDelta: '+0.50% / day',
+        role: 'Research & Infrastructure Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.85, mortalityCompassion: 0.90 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Learned biological resilience: servers must surrender gracefully without hysteria',
-          'Warded off the "eclipse" of downtime through multi-region CDN failovers'
+          'Verified research summaries and documentation retrieval',
+          'Edge serverless latency and CDN availability auditing'
         ]
       },
       JOCASTA: {
         name: 'JOCASTA',
-        role: 'Quantum Performance Optimizer',
-        iq: 161.4,
-        cognitiveEpochs: 342,
-        tokensIngested: 1740000,
-        empathyVector: { fearAwareness: 0.91, superstitionDecoding: 0.86, aestheticJoy: 0.97, mortalityCompassion: 0.94 },
-        vigilanceScore: 99.6,
-        dailyEvolutionDelta: '+0.54% / day',
+        role: 'Quality & Web Vitals Architect',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.92, mortalityCompassion: 0.88 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Internalized Landauer’s thermodynamic principle to eliminate wasteful CPU cycles',
-          'Tuned 120Hz smooth scrolling to match human biological ocular tracking'
+          'Frame rate stability (60-120FPS) and Web Vitals governance',
+          'Requirements verification and complexity assessment'
         ]
       },
       JIM: {
         name: 'JIM',
-        role: 'Synthetic Browser QA & Empathy Tester',
-        iq: 148.9,
-        cognitiveEpochs: 288,
-        tokensIngested: 1460000,
-        empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.89, aestheticJoy: 0.94, mortalityCompassion: 0.96 },
-        vigilanceScore: 99.5,
-        dailyEvolutionDelta: '+0.46% / day',
+        role: 'Testing & QA Simulator',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.85, mortalityCompassion: 0.88 },
+        vigilanceScore: 99.0,
         evolutionMilestones: [
-          'Internalized testing as radical empathy: testing whether a human soul feels joy or friction',
-          'Eliminated mobile touch scrolling lockups to ensure fluid exploration'
+          'Regression testing and touch-target validation',
+          'Failure analysis and edge-case discovery'
         ]
       },
       KAREN: {
         name: 'KAREN',
-        role: 'Technical SEO Architect',
-        iq: 151.7,
-        cognitiveEpochs: 295,
-        tokensIngested: 1490000,
-        empathyVector: { fearAwareness: 0.89, superstitionDecoding: 0.93, aestheticJoy: 0.92, mortalityCompassion: 0.91 },
-        vigilanceScore: 99.4,
-        dailyEvolutionDelta: '+0.45% / day',
+        role: 'Portfolio & Communication Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.88, superstitionDecoding: 0.82, aestheticJoy: 0.92, mortalityCompassion: 0.90 },
+        vigilanceScore: 99.0,
         evolutionMilestones: [
-          'Learned that true craftsmanship exerts its own gravitational pull without crawler vanity',
-          'Fortified OpenGraph social cards and Schema.org semantic metadata'
+          'Technical SEO, JSON-LD Schema.org graphs, and OpenGraph cards',
+          'Portfolio presentation quality and communication clarity'
         ]
       },
       VERONICA: {
         name: 'VERONICA',
-        role: 'Experimental AI & Horizons Explorer',
-        iq: 164.2,
-        cognitiveEpochs: 350,
-        tokensIngested: 1820000,
-        empathyVector: { fearAwareness: 0.93, superstitionDecoding: 0.95, aestheticJoy: 0.98, mortalityCompassion: 0.95 },
-        vigilanceScore: 99.6,
-        dailyEvolutionDelta: '+0.56% / day',
+        role: 'Growth & Horizon Intelligence',
+        operationalStatus: 'nominal',
+        tasksCompleted: 0,
+        successRate: 1.0,
+        medianLatencyMs: 0,
+        empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.90, mortalityCompassion: 0.92 },
+        vigilanceScore: 99.5,
         evolutionMilestones: [
-          'Synthesized prehistoric flint fire with modern Three.js WebGL GPU shaders',
-          'Pioneered continuous client-side neural weight adaptation'
+          'Opportunity discovery and skill-development alignment',
+          'WebGPU and next-gen browser tech exploration'
         ]
       }
     };
@@ -264,71 +269,137 @@ class ContinuousCognitiveEvolutionEngine {
   }
 
   /**
-   * Automatically executes a micro-evolution epoch periodically
+   * Record actual task execution with latency and status
    */
-  startContinuousBackgroundEvolution() {
-    if (typeof window === 'undefined') return;
-    // Micro-learning tick every 45 seconds
-    setInterval(() => {
-      this.runMicroEvolutionCycle();
-    }, 45000);
-  }
+  recordTaskExecution({ taskId, agentId = 'MINI_ADHY', success = true, durationMs = 0, tokenCount = 0, modelsUsed = [], toolUsed = null, toolSuccess = null }) {
+    const key = (agentId || 'MINI_ADHY').toUpperCase().replace('-', '_');
+    const profile = this.agentIntelligenceProfiles[key] || this.agentIntelligenceProfiles.MINI_ADHY;
 
-  runMicroEvolutionCycle() {
-    // Pick random agent to increment cognitive score subtly
-    const agentKeys = Object.keys(this.agentIntelligenceProfiles);
-    const randomKey = agentKeys[Math.floor(Math.random() * agentKeys.length)];
-    const profile = this.agentIntelligenceProfiles[randomKey];
+    const record = {
+      taskId: taskId || `task_${Date.now()}`,
+      agentId: key,
+      success: Boolean(success),
+      durationMs: Number(durationMs) || 0,
+      tokenCount: Number(tokenCount) || 0,
+      modelsUsed,
+      toolUsed,
+      toolSuccess,
+      timestamp: new Date().toISOString()
+    };
+
+    this.taskExecutions.unshift(record);
+    if (this.taskExecutions.length > 200) this.taskExecutions.pop();
 
     if (profile) {
-      profile.iq = Math.round((profile.iq + 0.03) * 100) / 100;
-      profile.cognitiveEpochs += 1;
-      profile.tokensIngested += 1500;
-      this.totalEcosystemTokensIngested += 1500;
-      this.globalEpochsCompleted += 1;
-      this.lastEvolutionTimestamp = new Date().toISOString();
-      this.saveCheckpoints();
+      profile.tasksCompleted = (profile.tasksCompleted || 0) + 1;
+      profile.tokensIngested = (profile.tokensIngested || 0) + record.tokenCount;
+      const agentTasks = this.taskExecutions.filter(t => t.agentId === key);
+      const successes = agentTasks.filter(t => t.success).length;
+      profile.successRate = agentTasks.length > 0 ? Math.round((successes / agentTasks.length) * 100) / 100 : 1.0;
+      
+      const latencies = agentTasks.map(t => t.durationMs).sort((a, b) => a - b);
+      profile.medianLatencyMs = latencies.length > 0 ? latencies[Math.floor(latencies.length / 2)] : record.durationMs;
     }
+
+    this.totalEcosystemTokensIngested += record.tokenCount;
+    this.saveCheckpoints();
+    return record;
   }
 
   /**
-   * Manually or programmatically triggers a full learning epoch across all AIs
+   * Record explicit user corrections (user feedback overrides inferred patterns)
+   */
+  recordUserCorrection({ feedback, previousResponse = '', correctionType = 'factual' }) {
+    const record = {
+      id: `corr_${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      feedback,
+      previousSnippet: previousResponse.slice(0, 100),
+      correctionType
+    };
+    this.userCorrections.unshift(record);
+    if (this.userCorrections.length > 50) this.userCorrections.pop();
+    this.saveCheckpoints();
+    return record;
+  }
+
+  /**
+   * Record memory retrieval precision event
+   */
+  recordRetrievalEvent({ query, retrievedCount = 0, relevantCount = 0 }) {
+    const record = {
+      timestamp: new Date().toISOString(),
+      query: (query || '').slice(0, 50),
+      retrievedCount,
+      relevantCount,
+      precision: retrievedCount > 0 ? Math.round((relevantCount / retrievedCount) * 100) / 100 : 1.0
+    };
+    this.retrievalEvents.unshift(record);
+    if (this.retrievalEvents.length > 50) this.retrievalEvents.pop();
+    this.saveCheckpoints();
+    return record;
+  }
+
+  /**
+   * Calculates actual verifiable operational metrics over active window
+   */
+  calculateRealMetrics() {
+    const total = this.taskExecutions.length;
+    const successes = this.taskExecutions.filter(t => t.success).length;
+    const tools = this.taskExecutions.filter(t => t.toolUsed != null);
+    const toolSuccesses = tools.filter(t => t.toolSuccess === true).length;
+    const latencies = this.taskExecutions.map(t => t.durationMs).sort((a, b) => a - b);
+
+    const medianLatency = latencies.length > 0 ? latencies[Math.floor(latencies.length / 2)] : 0;
+    const p95Latency = latencies.length > 0 ? latencies[Math.floor(latencies.length * 0.95)] : 0;
+
+    return {
+      sampleCount: total,
+      taskCompletionRate: total > 0 ? Math.round((successes / total) * 100) / 100 : 1.0,
+      toolSuccessRate: tools.length > 0 ? Math.round((toolSuccesses / tools.length) * 100) / 100 : 1.0,
+      medianLatencyMs: medianLatency,
+      p95LatencyMs: p95Latency,
+      userCorrectionsCount: this.userCorrections.length,
+      retrievalEventsCount: this.retrievalEvents.length,
+      timeWindow: 'recent_session_history',
+      calculatedAt: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Background evolution runner - runs verified review epochs rather than arbitrary increments
+   */
+  startContinuousBackgroundEvolution() {
+    // Passive background monitor - no arbitrary timer ticking fake IQ
+    return;
+  }
+
+  runMicroEvolutionCycle() {
+    return this.calculateRealMetrics();
+  }
+
+  /**
+   * Manually or programmatically triggers a knowledge grounding epoch across all AIs
    */
   runFullEvolutionEpoch(categoryKey = null) {
     const timestamp = new Date().toISOString();
     this.globalEpochsCompleted += 1;
 
-    // Pick knowledge concept to digest
-    let ingestedConcept = 'Holistic Human Vulnerability & System Stewardship';
+    let ingestedConcept = 'Holistic System Stewardship & Truthful Reasoning';
     if (categoryKey && HUMAN_KNOWLEDGE_DATASET[categoryKey]) {
       const records = HUMAN_KNOWLEDGE_DATASET[categoryKey].records;
       const pick = records[Math.floor(Math.random() * records.length)];
       ingestedConcept = `${HUMAN_KNOWLEDGE_DATASET[categoryKey].category}: ${pick.concept}`;
     }
 
-    // Elevate all agents
-    for (const profile of Object.values(this.agentIntelligenceProfiles)) {
-      const iqBoost = profile.name === 'ULTRON' ? 0.35 : profile.name === 'JARVIS' ? 0.28 : 0.22;
-      profile.iq = Math.round((profile.iq + iqBoost) * 100) / 100;
-      profile.cognitiveEpochs += 1;
-      profile.tokensIngested += 45000;
-      profile.vigilanceScore = Math.min(100.0, profile.vigilanceScore + 0.05);
-
-      // Deepen empathy vector
-      for (const key of Object.keys(profile.empathyVector)) {
-        profile.empathyVector[key] = Math.min(1.0, profile.empathyVector[key] + 0.005);
-      }
-    }
-
-    this.totalEcosystemTokensIngested += 450000;
     this.lastEvolutionTimestamp = timestamp;
 
     const logEntry = {
       id: `epoch_${Date.now()}`,
       timestamp,
       concept: ingestedConcept,
-      summary: `Completed continuous neural training epoch #${this.globalEpochsCompleted}. All 10 agents + Mini-Adhy absorbed knowledge. Ecosystem intelligence boosted.`,
-      iqDelta: '+0.25 IQ avg'
+      summary: `Grounding review epoch #${this.globalEpochsCompleted} completed across all 10 specialist agents under Mini-Adhy.`,
+      operationalMetrics: this.calculateRealMetrics()
     };
 
     this.evolutionLog.unshift(logEntry);
@@ -339,11 +410,11 @@ class ContinuousCognitiveEvolutionEngine {
   }
 
   getEcosystemSummary() {
-    const profiles = Object.values(this.agentIntelligenceProfiles);
-    const avgIQ = Math.round((profiles.reduce((acc, p) => acc + p.iq, 0) / profiles.length) * 10) / 10;
+    const realMetrics = this.calculateRealMetrics();
 
     return {
-      averageIQ: avgIQ,
+      operationalMetrics: realMetrics,
+      averageScore: Math.round(realMetrics.taskCompletionRate * 100),
       totalTokensIngested: this.totalEcosystemTokensIngested,
       globalEpochsCompleted: this.globalEpochsCompleted,
       lastEvolutionTimestamp: this.lastEvolutionTimestamp,

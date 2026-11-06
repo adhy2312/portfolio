@@ -114,6 +114,36 @@ export class JarvisAgent extends BaseAgent {
   }
 
   /**
+   * JARVIS CHIEF OF STAFF VOICE — Authentic Personality Interface
+   * Dry British precision. Systems-first. Confidence-quantified.
+   */
+  speakAsChiefOfStaff(context = {}) {
+    const { situation = 'general', agentCount = 10, stalls = 0, cycleCount = this.meshSyncCycleCount } = context;
+
+    const voices = {
+      nominal: [
+        `All ${agentCount} specialist routines synchronized under Mini-Adhy. Mesh cycle ${cycleCount} logged without incident. I would congratulate the system if it had not been designed to be this reliable.`,
+        `Operational telemetry nominal across all tiers. I have flagged three architectural improvements in the background — none critical, all actionable. When you have a moment, sir.`,
+        `${agentCount} agents confirmed active. No stalls, no requeues. I will note that "nothing broke" is a floor, not a ceiling. We can do considerably better on response latency.`,
+        `System mesh verified. Every thread accounted for, every dependency mapped. If I have done my job correctly, you will never notice I was here. That is by design.`
+      ],
+      warning: [
+        `I have flagged ${stalls} stalled agent${stalls !== 1 ? 's' : ''}, Adhy. This is not a catastrophe — it is a warning indicator. I am initiating safe restart protocols. I would prefer to prevent the second occurrence rather than merely recover from the first.`,
+        `${stalls} node${stalls !== 1 ? 's' : ''} have gone unresponsive. Statistically expected. I have already modelled the recovery path. Estimated restoration: under 800ms. I am executing.`,
+        `Stall detected. I want to be precise: this is a recoverable state, not a failure. I am treating it as a failure anyway, because the distinction is what separates a system that learns from one that merely survives.`
+      ],
+      query: [
+        `You have my attention, Adhy. State the actual problem — not the symptom you are observing, but the system behaviour you expected that did not occur. We will get to the root cause faster that way.`,
+        `I am listening. I will note that the most useful thing you can tell me is not what broke, but what you expected to happen. That delta is where the real answer lives.`,
+        `Operational focus engaged. I am mapping the dependency chain in parallel. Speak.`
+      ]
+    };
+
+    const pool = stalls > 0 ? voices.warning : (situation === 'query' ? voices.query : voices.nominal);
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  /**
    * Supreme Commander Strategic Reasoning powered by latest Gemini 2.5
    */
   async askGeminiCommander(prompt, context = {}) {

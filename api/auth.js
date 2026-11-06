@@ -68,11 +68,25 @@ function timingSafeCompare(a = '', b = '') {
 }
 
 // ── Cryptographic Session Token Engine ──────────────────────────────
-const SIGNING_SECRET = process.env.SESSION_SECRET || 
-                       process.env.ADMIN_PASSCODE || 
-                       'adhy_secure_hmac_sha256_signing_secret_v2026';
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// Fail closed in production if security secrets are missing
+let SIGNING_SECRET = process.env.SESSION_SECRET || process.env.ADMIN_PASSCODE;
+if (!SIGNING_SECRET) {
+  if (IS_PRODUCTION) {
+    // Fail-closed security boundary: never use fallback static secrets in production
+    console.error('[SECURITY ALERT] Production session signing secret is unconfigured. Failing closed.');
+  } else {
+    // Development/test ephemeral key: randomly generated per process lifetime
+    SIGNING_SECRET = crypto.randomBytes(32).toString('hex');
+    console.warn('[SECURITY NOTICE] Using ephemeral in-memory signing secret for development/testing.');
+  }
+}
 
 function createSessionToken(role = 'owner') {
+  if (!SIGNING_SECRET) {
+    throw new Error('Security configuration missing: session signing unavailable.');
+  }
   const payload = {
     role,
     iat: Date.now(),
@@ -84,7 +98,7 @@ function createSessionToken(role = 'owner') {
 }
 
 function verifySessionToken(token) {
-  if (!token || typeof token !== 'string') return null;
+  if (!SIGNING_SECRET || !token || typeof token !== 'string') return null;
   const parts = token.split('.');
   if (parts.length !== 2) return null;
 
@@ -178,17 +192,25 @@ export default async function handler(req, res) {
     const { passcode = '', scope = 'agentp' } = req.body || {};
     const sanitizedPasscode = String(passcode).trim();
 
-    const expectedPortalPasscode = process.env.AGENT_PORTAL_PASSCODE || 
-                                   process.env.ADMIN_PASSCODE || 
-                                   'adhy2006';
+    // Production security boundary: In production, secrets must be configured via environment variables
+    const expectedPortalPasscode = process.env.AGENT_PORTAL_PASSCODE || process.env.ADMIN_PASSCODE;
+    const expectedOwnerCode = process.env.OWNER_CODE || process.env.OWNER_CODE_LEGACY;
 
-    const expectedOwnerCode = process.env.OWNER_CODE || 
-                              process.env.OWNER_CODE_LEGACY || 
-                              'admin::root';
+    // Fail closed in production if credentials are not set
+    if (IS_PRODUCTION && (!expectedPortalPasscode || !expectedOwnerCode)) {
+      console.error('[SECURITY ALERT] Production authentication passcodes missing. Rejecting login.');
+      return res.status(503).json({
+        success: false,
+        error: 'Authentication service temporarily unavailable due to security configuration.'
+      });
+    }
 
-    const isValidPortal = timingSafeCompare(sanitizedPasscode, expectedPortalPasscode);
-    const isValidOwner = timingSafeCompare(sanitizedPasscode, expectedOwnerCode) ||
-                         timingSafeCompare(sanitizedPasscode, 'adhy::root');
+    // In development only, allow local test fallback if unconfigured
+    const devPortalPasscode = expectedPortalPasscode || (!IS_PRODUCTION ? 'adhy_dev_local_pass' : null);
+    const devOwnerCode = expectedOwnerCode || (!IS_PRODUCTION ? 'adhy_dev_owner_pass' : null);
+
+    const isValidPortal = devPortalPasscode ? timingSafeCompare(sanitizedPasscode, devPortalPasscode) : false;
+    const isValidOwner = devOwnerCode ? timingSafeCompare(sanitizedPasscode, devOwnerCode) : false;
 
     if (isValidPortal || isValidOwner) {
       resetFailedAttempts(clientIp);
@@ -196,7 +218,7 @@ export default async function handler(req, res) {
       const token = createSessionToken(role);
 
       // Secure Cookie: HttpOnly, Secure in production, SameSite=Strict
-      const isProd = process.env.NODE_ENV === 'production';
+      const isProd = IS_PRODUCTION;
       res.setHeader(
         'Set-Cookie',
         `adhy_session=${encodeURIComponent(token)}; Path=/; Max-Age=86400; HttpOnly; SameSite=Strict${isProd ? '; Secure' : ''}`

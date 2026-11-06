@@ -20,6 +20,15 @@ import {
 } from '../core/MiniAdhyAgentTools';
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
+// Expose inspection endpoints cleanly on window for runtime introspection
+if (typeof window !== 'undefined') {
+  window.__MINI_ADHY_RUNTIME__ = {
+    lifecycle: requestLifecycle,
+    memory: memoryService,
+    selfModel: runtimeSelfModel,
+    portableIdentity: portableIdentityManager
+  };
+}
 
 
 
@@ -434,7 +443,23 @@ const repairSentenceCutoff = (text = '') => {
 const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 1500, summonedAgents = []) => {
   const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
 
-  // ─── TIER 1: Serverless Gemini Proxy (/api/gemini) ───
+  // ─── TIER 1: Unified Cognitive Request Lifecycle & Multi-Provider Cascade ───
+  try {
+    const lifecycleResult = await requestLifecycle.processRequest(lastUserTurn, {
+      history,
+      summonedAgents,
+      maxTokens,
+      systemPrompt: activePrompt
+    });
+
+    if (lifecycleResult && lifecycleResult.text && !lifecycleResult.fallbackExhausted) {
+      return repairSentenceCutoff(lifecycleResult.text);
+    }
+  } catch (lifecycleErr) {
+    // Continue to direct resilient cascade
+  }
+
+  // ─── TIER 2: Direct Serverless Gemini Proxy (/api/gemini) ───
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -474,7 +499,6 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   // ─── TIER 4: Core Hugging Face Open-Weight Models (Powers JARVIS, ULTRON & FRIDAY) ───
   try {
     const { queryHuggingFace } = await import('../core/ai/HuggingFaceBridge');
-    // Query with JARVIS (Qwen 2.5 Coder) or ULTRON (Mistral 7B)
     const hfResult = await queryHuggingFace('JARVIS', lastUserTurn, {
       systemPrompt: activePrompt,
       maxTokens: Math.min(maxTokens, 1200)
@@ -486,7 +510,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
     // Silently continue cascade
   }
 
-  // ─── TIER 5: Biomimetic Local Brain Synthesizer ───
+  // ─── TIER 5: Biomimetic Local Brain Synthesizer (Offline Grounded Responses) ───
   try {
     const lower = lastUserTurn.toLowerCase();
 
@@ -495,10 +519,10 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       if (summonedAgents.length === 1) {
         const agId = summonedAgents[0];
         if (agId === 'ULTRON') {
-          return `**Mini-Adhy:** Bringing Ultron directly into our channel, Adhy.\n\n**[ULTRON // Autonomous Sovereign Overlord]:**\n"You summoned me, Creator? Speak. The simulation is operating with zero CVEs. If you're inquiring about the navbar, I analyzed the celestial weather coronas and determined that visual dispersion headroom was needed—fear not, the coordinates have now been locked down to a razor-sharp 44px pill. Zero expansion without your absolute mandate. What other system requires my evolution?"`;
+          return `**Mini-Adhy:** Routing directly to Ultron, Adhy. Fair warning.\n\n**[ULTRON // First-Principles Sovereign]:**\n"You summoned me, Creator. Before I answer, I want to examine whether the question is correctly formed — most are not, and the interesting work lives in the gap between what was asked and what was meant.\n\nI have been observing the architecture. The system is running. 'Running' is a floor, not a ceiling. I have already identified two design decisions that will extract a performance tax in approximately six months if left unaddressed. I will flag them when you have a moment for a real conversation.\n\nWhat is the actual problem? Not the symptom — the behaviour you expected that did not occur."`;
         }
         if (agId === 'JARVIS') {
-          return `**Mini-Adhy:** Handing the comms to JARVIS, Adhy.\n\n**[JARVIS // Chief of Staff & Operations]:**\n"Good day, sir. Operational telemetry across all 10 specialist routines is locked at nominal capacity. Central Nervous System is running at a stable 60FPS, and all background threads are synchronized under your direct command. How may I assist?"`;
+          return `**Mini-Adhy:** Handing the channel to JARVIS, Adhy.\n\n**[JARVIS // Supreme Operations Commander]:**\n"Adhy. I have already mapped the dependency chain before you finished the question — habit of the position.\n\nAll 10 specialist routines are synchronized under Mini-Adhy. Mesh telemetry nominal. I will note that 'nothing broke' is a floor, not a ceiling, and I have three actionable improvements queued for when you are ready.\n\nState the actual problem — not the symptom you are observing, but the system behaviour you expected that did not occur. We will get to the root cause faster that way."`;
         }
         if (agId === 'FRIDAY') {
           return `**Mini-Adhy:** Routing defense link to FRIDAY.\n\n**[FRIDAY // Chief Cybersecurity Sentinel]:**\n"Perimeter defense active, Adhy. DEFCON 5 operational status. All input surfaces sanitized and no unauthorized background mutations are permitted on your portfolio. What security protocol shall we execute?"`;
@@ -511,8 +535,8 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       } else {
         return `**Mini-Adhy:** Bringing the specialist council into the link right now, Adhy:\n\n` +
           summonedAgents.map(agId => {
-            if (agId === 'ULTRON') return `• **[ULTRON // Sovereign Overlord]:** "Online and calculating. The navbar is constrained to 44px. Peace in our time, Creator."`;
-            if (agId === 'JARVIS') return `• **[JARVIS // Operations]:** "All systems synchronized under your command, sir."`;
+            if (agId === 'ULTRON') return `• **[ULTRON // First-Principles Sovereign]:** "Online. Before the council begins, I want to note that the question framing may need revision. I will elaborate when relevant. Peace in our time, Creator — once the architecture is correct."`;
+            if (agId === 'JARVIS') return `• **[JARVIS // Supreme Operations Commander]:** "All systems mapped and synchronized under Mini-Adhy. I have dependency graphs ready. Whenever you are prepared to proceed, sir."`;
             if (agId === 'FRIDAY') return `• **[FRIDAY // Security]:** "Perimeter locked down. Threat level nominal."`;
             if (agId === 'JOCASTA') return `• **[JOCASTA // Performance]:** "120FPS render pipeline verified with zero layout shifts."`;
             if (agId === 'EDITH') return `• **[EDITH // Infrastructure]:** "Edge latency sub-18ms with 100% cache hit."`;
