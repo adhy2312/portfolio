@@ -72,7 +72,7 @@ export class MemoryService {
       {
         id: 'mem_base_2',
         category: MEMORY_CATEGORIES.APPROVED_FACT,
-        content: 'Technical mastery includes MATLAB/Simulink, GNU Radio (SDR), KiCad 8 PCB layout, and embedded STM32 ARM Cortex.',
+        content: 'Technical mastery includes MATLAB/Simulink, GNU Radio SDR, KiCad 8 PCB layout, and embedded STM32 ARM Cortex.',
         provenance: 'Engineering Projects Registry',
         confidence: 1.0,
         verified: true,
