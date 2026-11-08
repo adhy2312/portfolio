@@ -56,6 +56,10 @@ export class MiniAdhyBrain {
       lower.startsWith('root::') ||
       lower.startsWith('run audit') ||
       lower.startsWith('diagnostics') ||
+      lower.startsWith('github') ||
+      lower.startsWith('inspect ') ||
+      lower.startsWith('render diagram') ||
+      lower.startsWith('simulate ') ||
       lower === 'dark mode' ||
       lower === 'light mode' ||
       lower === 'matrix' ||
@@ -188,6 +192,34 @@ export class MiniAdhyBrain {
       targetSkill = 'AI_INTEL';
       targetArg = text;
       cognitiveSurge = 0.75;
+    }
+    // 14. GitHub Repo Intelligence
+    else if ((lower.includes('github') || lower.includes('repo')) && isImperative) {
+      intent = 'GITHUB_INSPECT';
+      targetSkill = 'GITHUB_INSPECT';
+      targetArg = text;
+      cognitiveSurge = 0.6;
+    }
+    // 15. Hardware Circuit & DSP Math Simulator
+    else if (lower.includes('circuit') || lower.includes('filter math') || lower.includes('nyquist')) {
+      intent = 'SIMULATE_CIRCUIT';
+      targetSkill = 'CIRCUIT_SIM';
+      targetArg = text;
+      cognitiveSurge = 0.65;
+    }
+    // 16. Architecture & Mermaid Diagram Synthesizer
+    else if ((lower.includes('mermaid') || lower.includes('diagram') || lower.includes('flowchart')) && isImperative) {
+      intent = 'SYNTHESIZE_DIAGRAM';
+      targetSkill = 'RENDER_DIAGRAM';
+      targetArg = text;
+      cognitiveSurge = 0.55;
+    }
+    // 17. Tree of Thoughts & Cognitive Planning
+    else if (lower.includes('tree of thoughts') || lower.includes('tot solve') || lower.includes('decompose goal')) {
+      intent = 'COGNITIVE_DELIBERATION';
+      targetSkill = lower.includes('decompose') ? 'TASK_PLANNER' : 'TOT_SOLVER';
+      targetArg = text;
+      cognitiveSurge = 0.8;
     }
 
     this.synapticState.lastIntent = intent;
