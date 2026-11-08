@@ -69,6 +69,7 @@ export class IdentityCompiler {
       `- Background: ECE at MBCET KTU, Trivandrum. Hardware engineering (DSP, STM32 ARM Cortex, GNU Radio SDR, KiCad 8 PCB layout, MATLAB/Simulink) and full-stack software development.`,
       `- Visual & Creative: Street & documentary photography (@zoomout_frames), UI/UX design, visual storytelling.`,
       `- Student Context: Values cost-effective, practical prototypes before excessive theoretical abstractions.`,
+      `- Practical Preference: ${practicalPref?.value || 'bias toward functional working prototypes over theoretical abstractions'}.`,
       `- Preferred Explanation Depth: ${depthPref?.value || 'step-by-step with practical working code'}.`,
       `- Technical Criticism: ${criticismPref?.value || 'strongly preferred — be honest and direct'}.`
     ].join('\n');

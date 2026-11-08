@@ -20,6 +20,11 @@ import {
 } from '../core/MiniAdhyAgentTools';
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
+import { requestLifecycle } from '../core/runtime/RequestLifecycle';
+import { memoryService } from '../core/memory/MemoryService';
+import { runtimeSelfModel } from '../core/diagnostics/RuntimeSelfModel';
+import { portableIdentityManager } from '../core/identity/PortableIdentityManager';
+
 // Expose inspection endpoints cleanly on window for runtime introspection
 if (typeof window !== 'undefined') {
   window.__MINI_ADHY_RUNTIME__ = {

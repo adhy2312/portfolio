@@ -21,6 +21,7 @@ import { BEHAVIORAL_MODES, inferBehavioralMode } from '../identity/BehavioralMod
 import { identityCompiler } from '../identity/IdentityCompiler';
 import { providerRegistry } from '../providers/ProviderRegistry';
 import { BaseProvider } from '../providers/BaseProvider';
+import { OmniRouteProvider } from '../providers/OmniRouteProvider';
 import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService, MEMORY_CATEGORIES } from '../memory/MemoryService';
 import { portableIdentityManager } from '../identity/PortableIdentityManager';
@@ -192,6 +193,82 @@ describe('MINI-ADHY DIGITAL COMPANION SYSTEM VERIFICATION', () => {
       expect(result.success).toBe(true);
       expect(result.text).toBe('Fallback succeeded cleanly.');
       expect(result.fallbackEngaged).toBe(true);
+
+      // Restore default provider order
+      providerRegistry.providerOrder = ['gemini', 'groq', 'huggingface'];
+    });
+
+    test('OmniRoute gateway is registered and exposes smart gateway capabilities', () => {
+      const omni = providerRegistry.get('omniroute');
+      expect(omni).not.toBeNull();
+      expect(omni instanceof OmniRouteProvider).toBe(true);
+
+      const caps = omni.getCapabilities();
+      expect(caps.gatewayType).toBe('omniroute');
+      expect(caps.tokenCompression).toBe(true);
+      expect(caps.vision).toBe(true);
+    });
+
+    test('OmniRoute falloverBeforeRetry bypasses retries on HTTP 429 rate limit', async () => {
+      const mock429Provider = new BaseProvider({ id: 'test_rate_limited', name: 'Rate Limited Provider' });
+      const rateLimitError = new Error('HTTP 429 Too Many Requests: Quota exceeded');
+      rateLimitError.status = 429;
+      rateLimitError.isQuotaExceeded = true;
+      mock429Provider.generate = jest.fn().mockRejectedValue(rateLimitError);
+
+      const mockFallbackProvider = new BaseProvider({ id: 'test_fallback_target', name: 'Fallback Target' });
+      mockFallbackProvider.generate = jest.fn().mockResolvedValue({
+        success: true,
+        text: 'Fast failover succeeded instantly.',
+        provider: 'test_fallback_target'
+      });
+
+      providerRegistry.register(mock429Provider);
+      providerRegistry.register(mockFallbackProvider);
+      providerRegistry.providerOrder = ['test_rate_limited', 'test_fallback_target'];
+
+      const result = await providerRegistry.generateWithFallback(
+        { prompt: 'immediate failover test' },
+        { maxRetriesPerProvider: 3, falloverBeforeRetry: true, timeoutMs: 1000 }
+      );
+
+      expect(result.success).toBe(true);
+      expect(result.text).toBe('Fast failover succeeded instantly.');
+      // falloverBeforeRetry should break immediately on attempt 0, calling generate only once instead of 4 times!
+      expect(mock429Provider.generate).toHaveBeenCalledTimes(1);
+      expect(result.fallbackEngaged).toBe(true);
+
+      // Restore default provider order
+      providerRegistry.providerOrder = ['gemini', 'groq', 'huggingface'];
+    });
+
+    test('Response caching returns cached result on identical queries without duplicate provider calls', async () => {
+      const mockCachedProvider = new BaseProvider({ id: 'test_cache_node', name: 'Cache Node' });
+      mockCachedProvider.generate = jest.fn().mockResolvedValue({
+        success: true,
+        text: 'Cached response payload',
+        provider: 'test_cache_node'
+      });
+
+      providerRegistry.register(mockCachedProvider);
+      providerRegistry.providerOrder = ['test_cache_node'];
+      providerRegistry.clearCache();
+
+      const call1 = await providerRegistry.generateWithFallback(
+        { prompt: 'deterministic query for cache' },
+        { temperature: 0.2, cache: true }
+      );
+      expect(call1.text).toBe('Cached response payload');
+      expect(mockCachedProvider.generate).toHaveBeenCalledTimes(1);
+
+      const call2 = await providerRegistry.generateWithFallback(
+        { prompt: 'deterministic query for cache' },
+        { temperature: 0.2, cache: true }
+      );
+      expect(call2.text).toBe('Cached response payload');
+      expect(call2.cacheHit).toBe(true);
+      // Provider shouldn't have been called a second time
+      expect(mockCachedProvider.generate).toHaveBeenCalledTimes(1);
 
       // Restore default provider order
       providerRegistry.providerOrder = ['gemini', 'groq', 'huggingface'];
