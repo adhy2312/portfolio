@@ -1,168 +1,223 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  MINI-ADHY NEURAL CORTEX ENGINE (BIOMIMETIC BRAIN ARCHITECTURE)
+ *  MINI-ADHY NEURAL CORTEX ENGINE (BIOMIMETIC BRAIN ARCHITECTURE v3.0)
  * ════════════════════════════════════════════════════════════════════
- * Simulates human cognitive lobe processing for Mini-Adhy:
- * 1. Sensory Cortex: Sentiment, intent classification, valence mapping
- * 2. Frontal Lobe: Executive action planning & silent skill dispatch
+ * Coordinates:
+ * 1. Sensory Cortex: Semantic intent classification, sentiment, ambiguity check
+ * 2. Frontal Lobe: Executive action planning with committed vs exploratory intent gating
  * 3. Temporal Lobe: Episodic memory retrieval & Sanity CMS association
  * 4. Motor Cortex: Physical DOM execution, sound synthesis, state mutation
+ * 
+ * CORE ARCHITECTURAL INVARIANT:
+ * Avoid triggering physical or UI actions (scrolls, theme changes, sound) from
+ * ambiguous conversational statements. Physical execution requires committed intent.
  */
 
 import { executeSkillCommand } from './MiniAdhySkills';
 import ns from './NervousSystem';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import { emotionEngine } from './emotion/EmotionEngine';
+import { personalUnderstandingEngine } from './understanding/PersonalUnderstandingEngine';
 
 export class MiniAdhyBrain {
   constructor() {
     this.synapticState = {
-      cognitiveLoad: 0.15, // 0.0 to 1.0
+      cognitiveLoad: 0.15,
       activeLobe: 'Frontal',
-      firingRateHz: 12,    // Alpha (8-12Hz) -> Beta (13-30Hz) -> Gamma (30-80Hz)
+      firingRateHz: 12,
       synapticDensity: 1024,
-      lastIntent: 'IDLE'
+      lastIntent: 'IDLE',
+      currentTopic: 'general',
+      conversationTurns: 0
     };
   }
 
   /**
-   * Sensory Cortex: Analyzes user input semantics & sentiment
+   * Determine if the input represents a committed imperative action
+   * versus casual conversational inquiry
+   */
+  _isCommittedImperative(text = '') {
+    const lower = text.toLowerCase().trim();
+    return (
+      lower.startsWith('scroll to ') ||
+      lower.startsWith('go to ') ||
+      lower.startsWith('navigate to ') ||
+      lower.startsWith('switch to ') ||
+      lower.startsWith('enable ') ||
+      lower.startsWith('disable ') ||
+      lower.startsWith('play ') ||
+      lower.startsWith('trigger ') ||
+      lower.startsWith('/rewrite') ||
+      lower.startsWith('root::') ||
+      lower.startsWith('run audit') ||
+      lower.startsWith('diagnostics') ||
+      lower === 'dark mode' ||
+      lower === 'light mode' ||
+      lower === 'matrix' ||
+      lower === 'resume'
+    );
+  }
+
+  /**
+   * Sensory Cortex: Analyzes semantics, intent, and ambiguity
    */
   processSensoryInput(text = '') {
-    const lower = text.toLowerCase();
+    const lower = text.toLowerCase().trim();
+    this.synapticState.conversationTurns += 1;
+    const isImperative = this._isCommittedImperative(text);
+
     let intent = 'GENERAL_QUERY';
     let targetSkill = null;
     let targetArg = null;
-    let cognitiveSurge = 0.3;
+    let cognitiveSurge = 0.2;
 
-    // Intelligent Neuro-Routing
+    // 1. Projects & Work
     if (lower.includes('project') || lower.includes('work') || lower.includes('portfolio') || lower.includes('app')) {
       intent = 'EXPLORE_PROJECTS';
-      targetSkill = 'SCROLL';
-      targetArg = 'works';
-      cognitiveSurge = 0.6;
-    } else if (lower.includes('skill') || lower.includes('tech stack') || lower.includes('tool') || lower.includes('matlab') || lower.includes('kicad') || lower.includes('gnu radio') || lower.includes('simulink')) {
-      intent = 'ANALYZE_SKILLS';
-      targetSkill = 'SCROLL';
-      targetArg = 'skills';
-      cognitiveSurge = 0.7;
-    } else if (lower.includes('who is') || lower.includes('about') || lower.includes('bio') || lower.includes('senate') || lower.includes('background')) {
-      intent = 'QUERY_BIOGRAPHY';
-      targetSkill = 'SCROLL';
-      targetArg = 'about';
+      this.synapticState.currentTopic = 'projects';
       cognitiveSurge = 0.5;
-    } else if (lower.includes('achievement') || lower.includes('award') || lower.includes('honor') || lower.includes('dino') || lower.includes('game')) {
-      intent = 'VIEW_ACHIEVEMENTS';
-      targetSkill = 'SCROLL';
-      targetArg = 'achievements';
+      if (isImperative || lower.includes('scroll to projects') || lower.includes('show projects')) {
+        targetSkill = 'SCROLL';
+        targetArg = 'works';
+      }
+    }
+    // 2. Hardware, Skills & Tech Stack
+    else if (lower.includes('skill') || lower.includes('tech stack') || lower.includes('matlab') || lower.includes('kicad') || lower.includes('gnu radio') || lower.includes('stm32')) {
+      intent = 'ANALYZE_SKILLS';
+      this.synapticState.currentTopic = 'hardware_skills';
       cognitiveSurge = 0.6;
-    } else if (lower.includes('contact') || lower.includes('hire') || lower.includes('email') || lower.includes('reach out')) {
+      if (isImperative || lower.includes('show skills') || lower.includes('scroll to skills')) {
+        targetSkill = 'SCROLL';
+        targetArg = 'skills';
+      }
+    }
+    // 3. Biography & Leadership
+    else if (lower.includes('who is') || lower.includes('about') || lower.includes('bio') || lower.includes('senate') || lower.includes('iste') || lower.includes('background')) {
+      intent = 'QUERY_BIOGRAPHY';
+      this.synapticState.currentTopic = 'biography';
+      cognitiveSurge = 0.5;
+      if (isImperative || lower.includes('show about') || lower.includes('scroll to about')) {
+        targetSkill = 'SCROLL';
+        targetArg = 'about';
+      }
+    }
+    // 4. Contact & Hiring
+    else if (lower.includes('contact') || lower.includes('hire') || lower.includes('email') || lower.includes('reach out')) {
       intent = 'ENGAGE_CONTACT';
-      targetSkill = 'SCROLL';
-      targetArg = 'contact';
-      cognitiveSurge = 0.8;
-    } else if (lower.includes('photo') || lower.includes('camera') || lower.includes('lens') || lower.includes('exif')) {
+      this.synapticState.currentTopic = 'contact';
+      cognitiveSurge = 0.7;
+      if (isImperative || lower.includes('scroll to contact')) {
+        targetSkill = 'SCROLL';
+        targetArg = 'contact';
+      }
+    }
+    // 5. Photography
+    else if (lower.includes('photo') || lower.includes('camera') || lower.includes('lens') || lower.includes('exif') || lower.includes('@zoomout_frames')) {
       intent = 'VISUAL_OPTICS';
-      targetSkill = 'PHOTO_MODE';
-      targetArg = 'activate';
-      cognitiveSurge = 0.6;
-    } else if (lower.includes('resume') || lower.includes('cv')) {
+      this.synapticState.currentTopic = 'photography';
+      cognitiveSurge = 0.5;
+      if (isImperative || lower.includes('photo mode') || lower.includes('enter darkroom')) {
+        targetSkill = 'PHOTO_MODE';
+        targetArg = 'activate';
+      }
+    }
+    // 6. Resume
+    else if (lower.includes('resume') || lower.includes('cv')) {
       intent = 'RETRIEVE_RESUME';
-      targetSkill = 'RESUME';
-      targetArg = 'get';
-      cognitiveSurge = 0.85;
-    } else if (lower.includes('dark mode') || lower.includes('dark theme') || lower.includes('black theme')) {
+      cognitiveSurge = 0.8;
+      if (isImperative || lower.includes('download resume') || lower.includes('get resume')) {
+        targetSkill = 'RESUME';
+        targetArg = 'get';
+      }
+    }
+    // 7. Explicit Theme Switch (requires committed command)
+    else if ((lower.includes('dark mode') || lower.includes('dark theme')) && isImperative) {
       intent = 'THEME_SHIFT';
       targetSkill = 'THEME';
       targetArg = 'dark';
       cognitiveSurge = 0.4;
-    } else if (lower.includes('light mode') || lower.includes('light theme')) {
+    } else if ((lower.includes('light mode') || lower.includes('light theme')) && isImperative) {
       intent = 'THEME_SHIFT';
       targetSkill = 'THEME';
       targetArg = 'light';
       cognitiveSurge = 0.4;
-    } else if (lower.includes('sound') || lower.includes('chime') || lower.includes('audio') || lower.includes('beep')) {
+    }
+    // 8. Sound (requires committed command)
+    else if ((lower.includes('play sound') || lower.includes('chime') || lower.includes('beep')) && isImperative) {
       intent = 'SYNTHESIZE_SOUND';
       targetSkill = 'SOUND';
       targetArg = 'chime';
-      cognitiveSurge = 0.5;
-    } else if (lower.includes('matrix') || lower.includes('hack') || lower.includes('rain')) {
+      cognitiveSurge = 0.4;
+    }
+    // 9. Easter Eggs (committed)
+    else if ((lower.includes('matrix') || lower.includes('hack the site')) && isImperative) {
       intent = 'REALITY_DISTORTION';
       targetSkill = 'EGG';
       targetArg = 'matrix';
       cognitiveSurge = 0.9;
-    } else if (lower.includes('weather') || lower.includes('rain') || lower.includes('trivandrum') || lower.includes('kerala')) {
+    }
+    // 10. Weather Sync
+    else if (lower.includes('weather') && (lower.includes('trivandrum') || lower.includes('sync'))) {
       intent = 'ATMOSPHERIC_CHECK';
       targetSkill = 'WEATHER';
       targetArg = 'sync';
       cognitiveSurge = 0.5;
-    } else if (lower.includes('/rewrite') || lower.includes('root::') || lower.includes('rewrite') || lower.includes('nervous system') || lower.includes('change ui') || lower.includes('core')) {
+    }
+    // 11. Root Rewrite / Admin Overhaul
+    else if (lower.includes('/rewrite') || lower.includes('root::')) {
       intent = 'ADMIN_ROOT_OVERHAUL';
       targetSkill = 'ROOT_REWRITE';
       targetArg = text;
       cognitiveSurge = 1.0;
-    } else if (lower.includes('performance') || lower.includes('fps') || lower.includes('lag') || lower.includes('telemetry') || lower.includes('audit')) {
+    }
+    // 12. System Audit
+    else if (lower.includes('audit') || lower.includes('fps') || lower.includes('telemetry') || lower.includes('benchmark')) {
       intent = 'SYSTEM_AUDIT';
       targetSkill = 'DIAGNOSTICS';
       targetArg = 'run';
-      cognitiveSurge = 0.75;
-    } else if (lower.includes('agent') || lower.includes('model') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad') || lower.includes('ai operation') || lower.includes('ai process') || lower.includes('other model') || lower.includes('other ai')) {
+      cognitiveSurge = 0.7;
+    }
+    // 13. AI Ecosystem
+    else if (lower.includes('agent') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad')) {
       intent = 'QUERY_AI_ECOSYSTEM';
       targetSkill = 'AI_INTEL';
       targetArg = text;
-      cognitiveSurge = 0.85;
+      cognitiveSurge = 0.75;
     }
 
     this.synapticState.lastIntent = intent;
     this.synapticState.cognitiveLoad = Math.min(1.0, this.synapticState.cognitiveLoad + cognitiveSurge);
-    this.synapticState.firingRateHz = Math.floor(25 + this.synapticState.cognitiveLoad * 45); // Jump to Gamma (50-70Hz)
-    
-    // Emotion Engine Stimulus Mapping
-    let emotionDelta = { curiosity: 0.15, arousal: 0.1 };
-    if (intent === 'EXPLORE_PROJECTS' || intent === 'ANALYZE_SKILLS') {
-      emotionDelta = { curiosity: 0.35, insight: 0.25, dominance: 0.2, valence: 0.15 };
-    } else if (intent === 'VISUAL_OPTICS' || intent === 'VIEW_ACHIEVEMENTS') {
-      emotionDelta = { joy: 0.30, curiosity: 0.25, valence: 0.25, arousal: 0.15 };
-    } else if (intent === 'ENGAGE_CONTACT' || intent === 'RETRIEVE_RESUME') {
-      emotionDelta = { trust: 0.35, anticipation: 0.30, dominance: 0.15, valence: 0.20 };
-    } else if (intent === 'ADMIN_ROOT_OVERHAUL' || intent === 'REALITY_DISTORTION') {
-      emotionDelta = { surprise: 0.40, dominance: 0.45, arousal: 0.40, anticipation: 0.30 };
-    } else if (intent === 'QUERY_AI_ECOSYSTEM') {
-      emotionDelta = { curiosity: 0.40, dominance: 0.35, arousal: 0.30, valence: 0.25 };
-    }
-    emotionEngine.stimulate({ ...emotionDelta, emotions: emotionDelta }, 1.0);
+    this.synapticState.firingRateHz = Math.floor(18 + this.synapticState.cognitiveLoad * 40);
 
-    // Notify Nervous System of synaptic activity
+    // Provide sensory feedback to the nervous system
     ns.emit('NEURAL_SYNAPSE_SPIKE', { intent, load: this.synapticState.cognitiveLoad });
     neuralEventBus.emit('EMOTIONAL_FOCUS', { intent, emotionalState: emotionEngine.getSnapshot() });
 
     return {
       intent,
+      isCommittedImperative: isImperative,
       targetSkill,
       targetArg,
       cognitiveLoad: this.synapticState.cognitiveLoad,
-      firingRateHz: this.synapticState.firingRateHz
+      firingRateHz: this.synapticState.firingRateHz,
+      currentTopic: this.synapticState.currentTopic
     };
   }
 
   /**
-   * Frontal Lobe & Motor Cortex: Silently fires required AI skills at full throttle
+   * Frontal Lobe & Motor Cortex: Executes committed actions safely
    */
   executeCognitivePlan(cognitivePlan) {
     if (!cognitivePlan || !cognitivePlan.targetSkill) return null;
 
     try {
-      const res = executeSkillCommand(cognitivePlan.targetSkill, cognitivePlan.targetArg);
-      return res;
+      return executeSkillCommand(cognitivePlan.targetSkill, cognitivePlan.targetArg);
     } catch (e) {
       console.warn('[MiniAdhy Neural Brain] Motor execution error:', e);
       return null;
     }
   }
 
-  /**
-   * Return real-time synaptic brain telemetry for the oscilloscope
-   */
   getTelemetry() {
     return {
       ...this.synapticState,
@@ -170,9 +225,6 @@ export class MiniAdhyBrain {
     };
   }
 
-  /**
-   * Calm synaptic firing rate back to ambient alpha rhythm
-   */
   coolDown() {
     this.synapticState.cognitiveLoad = 0.15;
     this.synapticState.firingRateHz = 12;

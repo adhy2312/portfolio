@@ -13,12 +13,14 @@ import { CANONICAL_IDENTITY, CANONICAL_IDENTITY_SCHEMA_VERSION, BEHAVIORAL_POLIC
 import { cognitiveProfile } from './CognitiveProfile';
 import { BEHAVIORAL_MODES } from './BehavioralModes';
 import { memoryService, MEMORY_CATEGORIES } from '../memory/MemoryService';
+import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
 
 export const PORTABLE_BUNDLE_SCHEMA_VERSION = '2.0.0';
 
 export class PortableIdentityManager {
   /**
-   * Generates a portable, sanitized JSON bundle of Mini-Adhy's identity and memory
+   * Generates a portable, sanitized JSON bundle of Mini-Adhy's identity, memory,
+   * understanding architecture, and relationship continuity.
    */
   exportBundle(options = {}) {
     const timestamp = new Date().toISOString();
@@ -32,14 +34,17 @@ export class PortableIdentityManager {
     // 2. Cognitive Profile Snapshot
     const profileData = cognitiveProfile.exportProfile();
 
-    // 3. Assemble Non-Secret Portable Bundle
+    // 3. Understanding Engine Bundle (Cognitive Mirror & Relationship Continuity)
+    const understandingBundle = personalUnderstandingEngine.exportUnderstandingBundle();
+
+    // 4. Assemble Non-Secret Portable Bundle
     const bundle = {
       bundleType: 'MINI_ADHY_PORTABLE_IDENTITY_BUNDLE',
-      schemaVersion: PORTABLE_BUNDLE_SCHEMA_VERSION,
+      schemaVersion: options.schemaVersion || PORTABLE_BUNDLE_SCHEMA_VERSION,
       identityVersion: CANONICAL_IDENTITY_SCHEMA_VERSION,
       behavioralPolicyVersion: BEHAVIORAL_POLICY_VERSION,
       exportedAt: timestamp,
-      sourceRuntime: 'antigravity-web-2.0',
+      sourceRuntime: options.sourceRuntime || 'antigravity-web-3.0',
       
       // Identity Specifications
       identity: {
@@ -53,8 +58,9 @@ export class PortableIdentityManager {
         collective: CANONICAL_IDENTITY.collective
       },
 
-      // Cognitive Preferences
+      // Cognitive Preferences & Mirror
       cognitiveProfile: profileData,
+      understanding: understandingBundle,
 
       // Behavioral Modes
       behavioralModes: BEHAVIORAL_MODES,
@@ -62,7 +68,7 @@ export class PortableIdentityManager {
       // Approved Continuous Memory
       memories: approvedMemories,
 
-      // Compatibility Metadata
+      // Compatibility Metadata (Ready for future desktop mini-robot companion)
       compatibility: {
         supportedDestinations: [
           'portfolio_web',
@@ -189,6 +195,11 @@ export class PortableIdentityManager {
           report.updatedPreferencesCount += 1;
         }
       });
+    }
+
+    // Import Understanding Bundle (Cognitive Mirror & Relationship Continuity)
+    if (bundle.understanding) {
+      personalUnderstandingEngine.importUnderstandingBundle(bundle.understanding);
     }
 
     report.summary = `Successfully imported ${report.importedMemoriesCount} memories and ${report.updatedPreferencesCount} cognitive preferences in '${options.mode}' mode.`;

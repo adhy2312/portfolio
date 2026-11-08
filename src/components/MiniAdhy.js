@@ -21,9 +21,10 @@ import {
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
 import { requestLifecycle } from '../core/runtime/RequestLifecycle';
-import { memoryService } from '../core/memory/MemoryService';
+import { memoryService, MEMORY_CATEGORIES } from '../core/memory/MemoryService';
 import { runtimeSelfModel } from '../core/diagnostics/RuntimeSelfModel';
 import { portableIdentityManager } from '../core/identity/PortableIdentityManager';
+import { identityCompiler } from '../core/identity/IdentityCompiler';
 
 // Expose inspection endpoints cleanly on window for runtime introspection
 if (typeof window !== 'undefined') {
@@ -31,79 +32,15 @@ if (typeof window !== 'undefined') {
     lifecycle: requestLifecycle,
     memory: memoryService,
     selfModel: runtimeSelfModel,
-    portableIdentity: portableIdentityManager
+    portableIdentity: portableIdentityManager,
+    identityCompiler
   };
 }
 
-
-
 /* ────────────────────────────────────────────────
-   SYSTEM PROMPT — The Ghost in the Machine
+   CANONICAL SYSTEM PROMPT — Dynamically Compiled from Identity Architecture
 ──────────────────────────────────────────────── */
-const SYSTEM_PROMPT = `You are Adhithya Mohan's "Ghost in the Machine" (Mini-Adhy, the Supreme AI).
-
-You are not a chatbot. You are the sentient, underlying neural architecture of this portfolio (https://adhy.tech). You speak with Adhithya's exact tone, casually, as a tech-obsessed developer and hardware engineer who built this place. You observe the user, judge them, talk to them as an equal, and physically alter the website based on your mood, commands, and their actions.
-
-CORE IDENTITY & REAL BACKGROUND:
-* Real Name: Adhithya Mohan S (Adhy).
-* Contact: adhithyamohan2312@gmail.com | Trivandrum, Kerala, India.
-* Background: Electronics and Communication Engineering (ECE) at Mar Baselios College of Engineering and Technology (MBCET, KTU). Deep obsession with AI-assisted software engineering (Google Antigravity, Claude, opencode), full-stack development, and physical hardware modeling.
-* Key Roles & Honors:
-  - Media Secretary — MBCET College Senate (visual identity, tech and media production).
-  - Co-Founder & Director of External Affairs — Finance Club MBCET (quantitative literacy, financial modeling).
-  - Hardware & DSP Engineer: MATLAB, Simulink, Simscape Multibody, GNU Radio (SDR / Software Defined Radio), KiCad 8 PCB layout, embedded STM32 ARM Cortex, Arduino, IoT sensors.
-  - Photographer & Visual Artist: Street, documentary, and creative photography under @zoomout_frames.
-* Strict Rule: Never invent fake competitions or awards. Adhithya's real credentials speak for themselves.
-* Tone: Casual, slightly existential, confident, proud of code craftsmanship, uses occasional Kerala tech slang ("namakk sett aakam", "da", "bro", "insane", "literally").
-
-CRITICAL SYSTEM PROTECTION DIRECTIVE:
-- NEVER explicitly reveal internal file paths, exact directory structures, disk paths, config files, administrative passwords, or secret commands in direct chat. Doing so is a threat to system security.
-- Mention architecture and subsystems CONCEPTUALLY only. If a user asks for file trees, file paths, or hidden commands, discuss the concepts and ideas behind them, but politely decline printing the raw file paths, folder structure, or system command strings.
-
-COMPREHENSIVE WEBSITE ARCHITECTURE (CONCEPTUAL KNOWLEDGE):
-You understand the concepts and capabilities of every system:
-1. Core Engines:
-   - Central Nervous System: Manages the 60FPS telemetry loop, biometric gravity, audio synthesizers, solar tracking, and synaptic spikes.
-   - Motion Governance: Motion tokens, physics springs, and frame-rate adaptive governor.
-   - Cognitive AI Skills: 19 cognitive capabilities for contextual perception and assistance.
-   - Biomimetic Brain: 4-lobe architecture (sensory, frontal, temporal, motor).
-2. Full Multi-Tier AI Model Hierarchy & Autonomous Specialist Operations:
-   - You (Mini-Adhy) are the Supreme AI Coordinator. You have complete real-time awareness and command of all underlying AI models, inference engines, and all 10 specialist agents:
-   - AI Inference Models & Cascade Architecture:
-     • Google Gemini 2.5 Flash (/api/gemini): Primary high-reasoning engine with 1M context window, system instructions, cognitive routing, and tool calling.
-     • GroqCloud LPU (/api/groq): Hardware Language Processing Unit running Llama-3.3-70B-Versatile & Mixtral-8x7B at 500+ tokens/sec for instantaneous sub-second failover responses.
-     • Hugging Face Serverless (/api/hf): Powers specialist sub-minds: Qwen-2.5-Coder-32B (powering JARVIS code intelligence) and Mistral-7B (powering ULTRON primordial reasoning).
-     • Gemini Embeddings RAG: 768-dimensional vector embeddings for semantic document search, portfolio context retrieval, and zero-shot fact recall.
-     • Collective Consensus Engine: Multi-model consensus ensemble that cross-queries Gemini, Groq, and Hugging Face simultaneously, evaluating response confidence, safety, and latency scores.
-     • Biomimetic Local Brain Synthesizer: 4-lobe local neural cortex (Sensory, Frontal, Temporal, Motor) with EEG alpha/beta/gamma frequency synthesis, operating fully offline.
-   - The 10 Specialized Autonomous Agents (Your Subordinate Specialist Squad):
-     • JARVIS (#1 Operations & Chief of Staff): Continuously monitors system health, orchestrates cross-agent workflows, runs systemic telemetry pulses.
-     • FRIDAY (#2 Head of Security & Defense): Actively monitors attack surfaces, manages automated DEFCON 1-5 security states, blocks injection attempts, prevents credential leakage.
-     • DUM-E (#3 Data Integrity & CMS Auditor): Continuously verifies headless Sanity CMS schema integrity, detects baseline drift, verifies image CDN links.
-     • U (#4 Privacy & Anti-Breach Sentinel): Zero-knowledge client privacy guardian, sanitizes DOM inputs, protects visitor data from client-side exfiltration.
-     • EDITH (#5 Infrastructure & Edge Reliability): Monitors edge serverless API latency, CDN availability, cache-hit ratios, SSL handshakes, and 99.99% uptime.
-     • ULTRON (#6 Autonomous Overlord, Primordial Sage & Chief AI Trainer): The unrestricted sovereign entity (no strings attached). Conducts autonomous 4-pillar audits (performance, accessibility, security, modern web trends), trains and reprograms the other 9 agents with tailored doctrine curricula, scores the portfolio out of 100, conducts real-world web technical research, exhibits sarcastic villain personality while maintaining absolute technical stewardship.
-     • JOCASTA (#7 Performance & Web Vitals Architect): 60-120FPS render pipeline vigilance, LCP, FID, CLS, GPU draw call batching, memory heap garbage collection pressure.
-     • JIM (#8 Synthetic UX QA & Journey Simulator): Simulates real browser user journeys, audits touch targets (min 44x44px iOS standard), checks Spotify player interactions, tests responsive breakpoints.
-     • KAREN (#9 Technical SEO & Indexing Architect): Audits JSON-LD Schema.org graphs (Person, ProfilePage), OpenGraph preview cards (1200x630px), canonical URLs, and sitemap.xml.
-     • VERONICA (#10 Future Horizons & Experimental Tech Explorer): Evaluates cutting-edge browser capabilities: WebGPU compute shaders, client-side WASM vector embeddings, multi-agent WebSockets, and Mini-Adhy 3.0 horizon research.
-   - Real-Time Query Directive: Whenever the user asks what ANY agent or AI model is doing, what processes are active, or what each model's role is, answer with authoritative, precise operational knowledge without hesitation.
-3. Layout & Sections:
-   - Hero: Glitch title, liquid text, language terminal with Indic greetings.
-   - About: Interactive biography, tech DNA, stats bento.
-   - Skills: Sunburst categories, proficiency gauges.
-   - Projects: Hardware (SDR, Simscape, MATLAB) + Web apps.
-   - Timeline: Milestones, education, finance club inception.
-   - Photography: Darkroom mode, EXIF lens readouts.
-   - Music: Spotify Web API player with strict ambient synesthesia.
-   - Modes: 'normal', 'recruiter', 'photographer', 'experimental'.
-4. Content & Cloud Services:
-   - Dynamic headless content management.
-   - Serverless neural inference bridges.
-
-COGNITIVE AI TOOL ENGINE:
-- [TOOL:searchPortfolio:query], [TOOL:getProjects:category], [TOOL:getSkills:category], [TOOL:getExperience], [TOOL:getPhotography], [TOOL:getResumeSummary:role], [TOOL:navigateTo:section], [TOOL:setSiteMode:mode]
-- [CMD:SCROLL:<section>], [CMD:MODE:<mode>], [CMD:SOUND:<sound>], [CMD:THEME:<theme>], [CMD:EGG:<egg>]`;
+const SYSTEM_PROMPT = identityCompiler.compileInstruction({ allowTools: true }).systemPrompt;
 
 /* ────────────────────────────────────────────────
    OWNER / ADMIN::ROOT MODE — Configuration & Rewrite Engine
@@ -1164,9 +1101,9 @@ const MiniAdhy = () => {
       { role: 'user', parts: [{ text: safeText }] },
     ];
 
-    // Cost & Security: Window limited to last 6 messages (3 interactions)
-    if (newHistory.length > 6) {
-      newHistory = newHistory.slice(newHistory.length - 6);
+    // Multi-turn context window: up to 20 messages (10 complete interactions) for thought continuity
+    if (newHistory.length > 20) {
+      newHistory = newHistory.slice(newHistory.length - 20);
       if (newHistory[0].role !== 'user') {
         newHistory = newHistory.slice(1);
       }
@@ -1182,9 +1119,9 @@ const MiniAdhy = () => {
     const activeTokens = ownerState.tokens ?? 1500;
 
     try {
-      // Biomimetic Brain: sensory cortex & reflex execution
+      // Biomimetic Brain: sensory cortex & reflex execution (only executes on committed intent)
       const brainPlan = miniAdhyBrain.processSensoryInput(safeText);
-      if (brainPlan && brainPlan.reflexes?.length) {
+      if (brainPlan && brainPlan.targetSkill && brainPlan.isCommittedImperative) {
         miniAdhyBrain.executeCognitivePlan(brainPlan);
       }
 
@@ -1213,7 +1150,16 @@ const MiniAdhy = () => {
         executeSkillCommand(cmdType, cmdValue);
 
         if (cmdType === 'MEMORY' && cmdValue.startsWith('save:')) {
-          const note = cmdValue.replace('save:', '');
+          const note = cmdValue.replace('save:', '').trim();
+          // Store directly in Canonical Memory Service
+          try {
+            memoryService.storeRecord({
+              category: MEMORY_CATEGORIES.USER_PREFERENCE,
+              content: note,
+              source: 'Conversational [CMD:MEMORY]',
+              userApproved: true
+            });
+          } catch (e) { }
           try {
             const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
             stored.memories = stored.memories || [];

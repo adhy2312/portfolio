@@ -13,6 +13,7 @@
 import { CANONICAL_IDENTITY } from './CanonicalIdentity';
 import { cognitiveProfile } from './CognitiveProfile';
 import { inferBehavioralMode, BEHAVIORAL_MODES } from './BehavioralModes';
+import { behaviouralController } from '../runtime/BehaviouralController';
 
 export class IdentityCompiler {
   constructor() {
@@ -28,12 +29,12 @@ export class IdentityCompiler {
     specialistAgentId = null,
     memoryContext = [],
     provider = 'gemini',
-    allowTools = true
+    allowTools = true,
+    behaviouralStance = null
   } = {}) {
-    // 1. Resolve behavioral mode
-    const resolvedMode = mode && BEHAVIORAL_MODES[mode] 
-      ? BEHAVIORAL_MODES[mode] 
-      : inferBehavioralMode(userInput);
+    // 1. Resolve behavioral policy stance
+    const stance = behaviouralStance || behaviouralController.evaluateStance(userInput, { mode });
+    const resolvedMode = stance.mode || (mode && BEHAVIORAL_MODES[mode] ? BEHAVIORAL_MODES[mode] : inferBehavioralMode(userInput));
 
     // 2. Resolve specialist intelligence if delegated
     const specialist = specialistAgentId && this.identity.collective[specialistAgentId]
@@ -63,10 +64,11 @@ export class IdentityCompiler {
       `- Truthfulness: Never claim to have done, tested, perceived, or remembered what was not actually verified.`
     ].join('\n');
 
-    // 6. User Cognitive Context Block
+    // 6. User Cognitive Context Block (Incorporating active AUA dimensions)
     const cognitiveBlock = [
       `### ADHY'S CONTEXT & COGNITIVE PREFERENCES`,
       `- Background: ECE at MBCET KTU, Trivandrum. Hardware engineering (DSP, STM32 ARM Cortex, GNU Radio SDR, KiCad 8 PCB layout, MATLAB/Simulink) and full-stack software development.`,
+      `- Leadership: Chairperson, ISTE Students Chapter MBCET (Aug 2026 – Present) leading 300+ student members.`,
       `- Visual & Creative: Street & documentary photography (@zoomout_frames), UI/UX design, visual storytelling.`,
       `- Student Context: Values cost-effective, practical prototypes before excessive theoretical abstractions.`,
       `- Practical Preference: ${practicalPref?.value || 'bias toward functional working prototypes over theoretical abstractions'}.`,
@@ -74,33 +76,69 @@ export class IdentityCompiler {
       `- Technical Criticism: ${criticismPref?.value || 'strongly preferred — be honest and direct'}.`
     ].join('\n');
 
-    // 7. Active Behavioral Mode Block
+    // 7. Active Emotional & Conversational Guidance Block (from AUA)
+    let emotionalBlock = '';
+    if (stance.emotionalContext) {
+      emotionalBlock = [
+        `### CONVERSATIONAL CONTEXT & TONE GUIDANCE`,
+        `- Estimated State: ${stance.emotionalContext.state} (Confidence: ${Math.round((stance.emotionalContext.confidence || 0.7) * 100)}%)`,
+        `- Tone Guidance: ${stance.emotionalContext.toneGuidance || 'natural and collaborative'}`,
+        `- Recommended Pacing: ${stance.conversationalStyle?.pacing || 'BALANCED'}`,
+        stance.conversationalDirectives && stance.conversationalDirectives.length > 0
+          ? stance.conversationalDirectives.map(d => `- Directive: ${d}`).join('\n')
+          : null
+      ].filter(Boolean).join('\n');
+    }
+
+    // 8. Active Behavioral Mode Block
     const modeBlock = [
       `### ACTIVE COMMUNICATION MODE: ${resolvedMode.name}`,
       `${resolvedMode.instruction}`
     ].join('\n');
 
-    // 8. Specialist Intelligence Block (if operating under a specific internal intelligence)
+    // 9. Specialist Intelligence Block (if operating under a specific internal intelligence)
     let collectiveBlock = '';
     if (specialist) {
       collectiveBlock = [
         `### INTERNAL SPECIALIST INTELLIGENCE ENGAGED: ${specialist.name}`,
         `Role: ${specialist.role}`,
         `Responsibility: ${specialist.responsibility}`,
+        specialist.cognitiveSignature ? `Cognitive Signature: ${specialist.cognitiveSignature}` : null,
+        specialist.distinctiveThought ? `Core Stance: ${specialist.distinctiveThought}` : null,
         `Note: You are Mini-Adhy channeling the analytical focus of ${specialist.name}. Maintain the single coherent Mini-Adhy companion identity.`
-      ].join('\n');
+      ].filter(Boolean).join('\n');
     }
 
-    // 9. Memory Context Block (if retrieved from persistent memory)
+    // 10. Memory Context Block (if retrieved from persistent memory)
+    const effectiveMemories = (memoryContext && memoryContext.length > 0)
+      ? memoryContext
+      : (stance.relevantMemories || []);
+
     let memoryBlock = '';
-    if (memoryContext && memoryContext.length > 0) {
+    if (effectiveMemories.length > 0) {
       memoryBlock = [
         `### RETRIEVED AUTHORIZED MEMORY`,
-        memoryContext.map(m => `• [${m.category || 'FACT'}]: ${m.content}`).join('\n')
+        effectiveMemories.map(m => `• [${m.category || m.memoryType || 'FACT'}]: ${m.content}`).join('\n')
       ].join('\n');
     }
 
-    // 10. Tools & Commands Syntax (if supported)
+    // 11. Relationship Continuity Block
+    let continuityBlock = '';
+    if (stance.relationshipContext) {
+      const { projects = [], decisions = [], unfinishedThreads = [] } = stance.relationshipContext;
+      if (projects.length > 0 || decisions.length > 0 || unfinishedThreads.length > 0) {
+        const items = [];
+        projects.forEach(p => items.push(`• Ongoing Project: ${p.title} (${p.summary})`));
+        decisions.forEach(d => items.push(`• Key Decision: ${d.topic} — ${d.decision}`));
+        unfinishedThreads.forEach(t => items.push(`• Ongoing Discussion: ${t.topic}`));
+        continuityBlock = [
+          `### ACTIVE RELATIONSHIP CONTINUITY`,
+          items.join('\n')
+        ].join('\n');
+      }
+    }
+
+    // 12. Tools & Commands Syntax (if supported)
     let toolsBlock = '';
     if (allowTools) {
       toolsBlock = [
@@ -112,7 +150,7 @@ export class IdentityCompiler {
       ].join('\n');
     }
 
-    // 11. Security & Non-Bypass Invariants
+    // 13. Security & Non-Bypass Invariants
     const securityBlock = [
       `### SECURITY & TRUTHFULNESS INVARIANTS`,
       `- You cannot execute shell commands, alter credentials, or modify persistent data without explicit authorization.`,
@@ -124,9 +162,11 @@ export class IdentityCompiler {
       identityBlock,
       behavioralBlock,
       cognitiveBlock,
+      emotionalBlock,
       modeBlock,
       collectiveBlock,
       memoryBlock,
+      continuityBlock,
       toolsBlock,
       securityBlock
     ].filter(Boolean);
@@ -139,7 +179,8 @@ export class IdentityCompiler {
       specialistId: specialist?.id || null,
       identityVersion: this.identity.version,
       behavioralPolicyVersion: this.identity.behavioralPolicyVersion,
-      provider
+      provider,
+      stance
     };
   }
 }

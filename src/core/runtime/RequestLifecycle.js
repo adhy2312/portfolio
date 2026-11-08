@@ -19,6 +19,8 @@ import { providerRegistry } from '../providers/ProviderRegistry';
 import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService } from '../memory/MemoryService';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
+import { behaviouralController } from './BehaviouralController';
+import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
 
 export const TASK_COMPLEXITY = Object.freeze({
   LEVEL_1_SIMPLE: 'LEVEL_1_SIMPLE',            // Direct conversation, standard query
@@ -83,20 +85,16 @@ export class RequestLifecycle {
     // Step 1: Complexity Classification
     const complexity = this.classifyComplexity(input, options);
 
-    // Step 2: Context & Memory Retrieval (Context Minimization: retrieve only relevant memories)
-    let memoryContext = [];
-    try {
-      if (memoryService && typeof memoryService.retrieveRelevant === 'function') {
-        memoryContext = memoryService.retrieveRelevant(input, { limit: 3 });
-      }
-    } catch {
-      memoryContext = [];
-    }
+    // Step 2: Intent & Behavioral Stance via Personal Understanding Engine
+    const stance = behaviouralController.evaluateStance(input, {
+      mode: options.mode,
+      memoryLimit: 4
+    });
 
-    // Step 3: Intent & Behavioral Mode Selection
-    const mode = options.mode || inferBehavioralMode(input).id;
+    const mode = options.mode || stance.mode.id;
+    const memoryContext = stance.relevantMemories || [];
 
-    // Step 4: Selective Specialist Identification
+    // Step 3: Selective Specialist Identification
     let specialistId = null;
     if (options.summonedAgents && options.summonedAgents.length === 1) {
       specialistId = options.summonedAgents[0];
@@ -115,16 +113,17 @@ export class RequestLifecycle {
       }
     }
 
-    // Step 5: Identity Compilation
+    // Step 4: Identity & Context Compilation
     const instructionPackage = identityCompiler.compileInstruction({
       mode,
       userInput: input,
       specialistAgentId: specialistId,
       memoryContext,
-      allowTools: true
+      allowTools: true,
+      behaviouralStance: stance
     });
 
-    // Step 6: Consequential Action Gate (Level 4 Assessment)
+    // Step 5: Consequential Action Gate (Level 4 Assessment)
     if (complexity === TASK_COMPLEXITY.LEVEL_4_CONSEQUENTIAL) {
       const permCheck = permissionRegistry.evaluate('MINI_ADHY', 'consequential_user_action', { input });
       if (!permCheck.allowed) {
@@ -141,7 +140,7 @@ export class RequestLifecycle {
       }
     }
 
-    // Step 7: Model Provider Execution with Bounded Fallback
+    // Step 6: Model Provider Execution with Bounded Fallback
     const providerRequirements = {};
     if (options.requiresVision) providerRequirements.requiresVision = true;
     if (complexity === TASK_COMPLEXITY.LEVEL_1_SIMPLE) providerRequirements.fastReflex = true;
@@ -162,6 +161,12 @@ export class RequestLifecycle {
     const finalResponse = generationResult.text || (generationResult.error 
       ? `I ran into a temporary provider issue: ${generationResult.error}. Let's try again.`
       : "I'm right here with you. What aspect of the project shall we explore next?");
+
+    // Step 7: Continuous Memory Extraction (candidate observations)
+    try {
+      const candidateMemories = memoryService.extractCandidateObservations(input);
+      candidateMemories.forEach(cand => memoryService.storeRecord(cand));
+    } catch {}
 
     // Step 8: Verifiable Telemetry Logging in CognitiveEvolutionEngine
     if (cognitiveEvolutionEngine?.recordTaskExecution) {

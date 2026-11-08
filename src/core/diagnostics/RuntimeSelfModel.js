@@ -15,6 +15,7 @@ import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService } from '../memory/MemoryService';
 import { hermesAdapter } from '../adapters/hermes/HermesAdapter';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
+import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
 
 export class RuntimeSelfModel {
   constructor() {
@@ -74,6 +75,12 @@ export class RuntimeSelfModel {
         pendingApprovalsCount: permissionRegistry.getPendingApprovals().length,
         auditTrailLength: permissionRegistry.getAuditLog().length,
         invariant: 'Persona does not override permissions'
+      },
+
+      understanding: {
+        activeMirrorDimensionsCount: Object.keys(personalUnderstandingEngine.cognitiveMirror.getAllDimensions()).length,
+        relationshipProjectsCount: personalUnderstandingEngine.continuityEngine.projects.length,
+        recentEmotionalStatesCount: personalUnderstandingEngine.emotionalInterpreter.recentStates.length
       },
 
       realOperationalMetrics: realEcosystemMetrics

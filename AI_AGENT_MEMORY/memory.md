@@ -1,94 +1,35 @@
-# AI Agent Memory
+# AI Agent Memory & Canonical Context
 
-This file serves as a persistent memory for the AI agent to track context, tasks, and state across interactions without needing to re-read all files.
+This file serves as persistent contextual documentation for Mini-Adhy's architecture, Adhy's verified credentials, and development history.
 
-## Current Context
-- Project: Portfolio Web App
-- Current Focus: Keeping portfolio content in sync with real-life role changes
-- **Adhithya's Current ISTE Role: Chairperson, ISTE SC MBCET** (upgraded from PR & Media Head in August 2026)
+## Current Context & Verified Ground Truth
+- **Adhithya Mohan S (Adhy)**: Electronics and Communication Engineering (ECE) at Mar Baselios College of Engineering and Technology (MBCET, KTU), Trivandrum.
+- **Current Executive Leadership**: **Chairperson, ISTE Students Chapter MBCET (Aug 2026 – Present)** (Leading 300+ student members across technical events, student developer workshops, and executive operations).
+- **Previous Leadership**: PR & Media Head, ISTE SC MBCET (Aug 2025 – Aug 2026).
+- **Visual Arts Leadership**: Lead Photographer, FRAMES MBCET (Aug 2026 – Present); Creative Curator (Aug 2025 – Aug 2026); Street & documentary photography under `@zoomout_frames`.
+- **Hardware & Engineering Mastery**:
+  - DSP, Signal Processing & Software Defined Radio (GNU Radio, RTL-SDR, RF Front-Ends).
+  - Embedded Systems: STM32 ARM Cortex, Arduino, SPI/I2C/UART bus protocols.
+  - CAD & Simulation: KiCad 8 PCB layout, circuit design, MATLAB, Simulink, Simscape Multibody.
+  - Full-Stack Web: React 19, Three.js shaders, Web Workers, Sanity Headless CMS, GSAP physics.
+- **Active AI Companion Architecture**:
+  - Project: Mini-Adhy Adhy Understanding Architecture (AUA v3.0).
+  - Target: Web Portfolio (`adhy.tech`) + Future Portable Desktop Mini-Robot Companion (`desk_robot_companion`).
+  - Architecture: Personal Understanding Engine (Cognitive Mirror, Conversational DNA, Emotional Context Interpreter, Relationship Continuity Engine).
+  - Model Layer: Capability-based Provider Cascade (Gemini 2.5 Flash, GroqCloud LPU, HuggingFace, OmniRoute smart gateway).
+  - Specialist Squad: 10 internal specialist intelligences channeled under one consistent Mini-Adhy voice.
 
-## Tasks
-- [x] Traverse through the whole directory and eliminate flaws, dead ends, dummy files, and loose connections. 
-- [x] Provided strategic suggestions for evolving the website into a Professional Society platform.
-- [x] Designed and integrated `ExecomFlipCard.tsx` client component.
-- [x] Updated ISTE role from "PR & Media Head" → "Chairperson, ISTE SC MBCET" across:
-  - `src/components/Achievements.js` (hardcoded fallback card)
-  - `src/components/Timeline.js` (added new Chairperson milestone in 2026, updated "Now" entry, and added multi-layered golden crown & orbital ring entrance animation)
-  - `src/components/Hero.js` & `src/components/Hero.css` (added executive Chairperson badge chip, golden gradient crown badge, and updated default role)
-  - `src/components/Navbar.js` & `src/components/Navbar.css` (added persistent executive Chairperson badge pill in left cluster)
-  - `src/components/About.js` (updated default stats to 300+ Members Led and bio paragraphs to reflect Chairperson leadership)
-  - `src/index.css` (upgraded design tokens to champagne gold & deep obsidian glass theme)
-  - **Note:** Sanity CMS documents should also be updated via the Studio dashboard at http://localhost:3333 when editing live content.
-- [x] Injected & updated Sanity CMS database (`uefti8ya` / `production`) directly using Node script with API tokens without losing existing data:
-  - Created & re-indexed `milestone` document for Chairperson (Order 13) so it displays as the latest milestone before 202X.
-  - Updated `experience` document for ISTE SC MBCET to display `Chairperson` (Aug 2026 – Present) at top with executive gold badges, and `PR & Media Head` (Aug 2025 – Aug 2026) as previous role.
-  - Updated `experience` document for FRAMES MBCET to end `Creative Curator` (Aug 2025 – Aug 2026) and promote to `Lead Photographer` (Aug 2026 – Present), and added corresponding milestone in Sanity.
-  - Updated `skillCategory` document (`skill-backend`) in Sanity CMS setting both `Render` and `Google App Scripts` to **50%** level while preserving all other skills.
-- [x] Fixed Vercel build failure (`spawn react-scripts ENOENT`): added missing `"react-scripts": "5.0.1"` dependency into `package.json`.
-- [ ] Maintain and update this memory file after every interaction.
-- [ ] Review this file before executing any new prompts.
+## Tasks Completed
+- [x] Consolidated and unified Mini-Adhy canonical identity, eliminating duplicate chatbots.
+- [x] Removed fabricated IQ, uptime, and fake consensus metrics in favor of verified operational telemetry.
+- [x] Built independent cognitive personalities for JARVIS (Systems Commander) and ULTRON (First-Principles Challenger believing in "Peace in our time").
+- [x] Integrated OmniRoute with token compression (RTK + Caveman) and `falloverBeforeRetry` resilience.
+- [x] Implemented Adhy Understanding Architecture (AUA): Cognitive Mirror, Conversational DNA, Emotional Context Interpreter, and Relationship Continuity Engine.
+- [x] Upgraded MemoryService to 14-field schema with contradiction detection, supersession, and zero-secret invariants.
+- [x] Prepared portable identity bundle export for desktop companion mini-robot.
 
-## Notes
-- The focus is pivoting towards building/enhancing a "Professional Society Website" (likely tying into the ISTE-WEBSITE context). I need to ensure suggestions align with enterprise, community, and membership-driven architectures.
-- Remember to check this file for established context before proceeding with new user requests.
-
-## Backend Wiring & Data Pipelines
-
-### Internship Engine (v7.0) Ecosystem
-- **Scraping Pipeline (`v12_backend/pipeline_engine.py`)**: Uses an `AsyncScraper` (Playwright Stealth + JobSpy) to fetch jobs. Fingerprints pages using MD5 (URL) and SHA256 (body) stored in **Redis** (`hash:page:content:{url_md5}`) with a 7-day TTL to prevent redundant processing.
-- **Data Merger & Storage**: Uses a PostgreSQL database (`CanonicalMerger`) to deduplicate internships via canonical hashing.
-- **Sanity Synchronization (`v12_backend/sanity_sync.py`)**: A `SanitySyncEngine` asynchronously pushes records to Sanity CMS (v12.1 schema: `_id`, `_type`, `title`, `company`, `location`, `url`, `stipend`) utilizing exponential backoff and rate limit handling (429s).
-- **Core AI Agents (`INTERNSHIP_ENGINE_REPORT.md`)**:
-  - **AuthenticityAgent**: Scans for counterfeit keywords (e.g., "laptop deposit", "training fee") and checks for link rot (403/404).
-  - **SemanticIntelligenceAgent**: PyTorch `SentenceTransformer` (`all-MiniLM-L6-v2`) maps domain embeddings. Uses Regex for stipend extraction.
-  - **QualityAssessmentAgent**: Applies Geographic Proximity Scoring (+30 Trivandrum, +15 Kochi). An Adaptive Neural Core (PyTorch) predicts "Survival Probability." Uses `facebook/bart-large-mnli` (Supreme Judge) for borderline ties.
-  - **SanityCleanupAgent**: Live CMS pruning. Updates `EvolutionMemory` SQLite to teach the Neural Core from flagged/failed internships.
-
-### Autonomous ATS Resume Analyzer & Auto-Grader
-- **PortfolioAssessmentAgent**: Scrapes student public GitHub repos, performs mock AST analysis (code size, languages, complexity), and matches coding style against elite internships.
-- **ResumeOptimizationAgent**: NLP-based system that accepts a base resume and dynamically scores, reorders, and rewrites bullet points to align perfectly with the target job's semantic embedding to bypass corporate ATS filters.
-
-### Automated Cron Jobs & Predictive Intelligence
-- **Predictive Hiring Trajectory**: A local `VelocityLSTM` PyTorch time-series model runs continuously to analyze posting velocity (e.g., rapid bursts from a single company) to predict mass-hiring sprees before they are public.
-- The `pipeline_engine.py` script and Celery task queues are orchestrated (via `docker-compose.yml`) to ingest continuous streams of data and trigger the `SanitySyncEngine` autonomously.
-
-## The 60-Engine Architecture (Living Website Blueprint)
-The platform is built as a "Digital Organism" containing sub-engines that monitor, react, and defend autonomously.
-
-### Core Biological Stack
-- **The Brain (Frontal Lobe)**: Next.js App Router & React 19 handling SSR memory and client reflexes. 
-- **Long-Term Memory (Hippocampus)**: PostgreSQL via Prisma ORM.
-- **Hypothalamus**: Sanity Headless CMS feeding directly to Next.js via webhooks.
-- **Physics & Aesthetics**: Pure CSS 3D (`preserve-3d`), hardware acceleration, and GSAP/Framer prioritizing 60FPS fluid motion without blocking the main JS thread.
-
-### Live Sub-Systems (`app/brain/*`)
-- **Central Nervous System (`BrainProvider.tsx`)**: Global context utilizing `requestAnimationFrame` to monitor real-time FPS, scroll velocity, and active engine states. It autonomously throttles background animations if FPS drops below 30.
-- **Senses & Reflexes (`MagneticCursor.tsx` / `HapticEngine`)**: Custom physics-based pointer leveraging linear interpolation (LERP). Reacts to DOM hover states, dynamically pre-fetches routes, and triggers device vibrations.
-- **The Immune System (`SecurityGuardian.tsx`)**: Cybersecurity layer active in the DOM capture phase to intercept right-clicks, block DevTools (F12, Ctrl+Shift+I), and prevent text scraping. Triggers a red-flash UI "Stress Response" upon intrusion.
-- **The Soul (`AtmosphereEngine` / CSS Nucleus)**: A dynamically shifting 3D CSS Nucleus and an invisible, low-frequency sub-audible hum (Web Audio API) that shifts pitch relative to the user's scroll speed.
-
-## Internship Launchpad (v10.2 Autonomous Intelligence Ecosystem)
-The Internship Launchpad operates as a massive decoupled state machine handling live data from Python scrapers to Sanity presentation, and tracking user applications via PostgreSQL.
-
-### 1. The Python Engine (`internship_engine_v8.py`)
-- **Discovery**: Utilizes `jobspy` (Infinite Aggregator) and Playwright to crawl Tier A tech, LinkedIn, Glassdoor, and Indeed.
-- **SQLite Brain (`internship_brain_v8.db`)**: The absolute source of truth. Features a State Machine: `NEW` -> `ACTIVE` -> `VERIFIED`. Dead links decay to `SUSPECT` and eventually `ARCHIVED`. Stale data is cryptographically hidden but preserved for ML training.
-- **Verification Gate**: Performs HTTP status checks and NLP expiry phrase detection (e.g., "This position has been filled"). Computes a `linkHealthScore`. Executes a non-destructive `"patch"` mutation to Sanity CMS to protect manual human edits (like company logos).
-- **Scam Detection & Reinforcement**: Uses keyword heuristics (`SCAM_SIGNALS`) and dynamically adjusts trust scores of hiring platforms based on historical reliability.
-
-### 2. Next.js Presentation Layer
-- **Strict GROQ Gate**: `*[_type == "internship" && state == "VERIFIED" && verificationStatus == "VERIFIED"]` ensuring only elite, live internships are rendered.
-- **Sub-Minute Ghost Record Purging**: Uses Time-Based ISR (`revalidate: 60`) to instantly wipe decayed/archived internships from the CDN.
-
-## ISTE Member Portal Blueprint (PostgreSQL Core)
-The primary focus of the platform is delivering extreme value to the 300+ annual student members through a highly-gated, cinematic digital hub, exclusively utilizing PostgreSQL and Prisma.
-
-### Database Architecture (Prisma)
-- **`Member` Table**: Core identity tracking `email`, `passwordHash`, `fullName`, `branch`, `semester`, and `clearance` level.
-- **`Event` & `Attendance` Tables**: Relational mapping to track exact events attended by members and their associated `certificateUrl` artifacts.
-
-### The Dashboard Features
-- **3-Stage Onboarding**: Standard Login -> Forced Initialization (if profile is incomplete) -> The Identity Matrix Dashboard.
-- **The Vault**: A strictly gated resource hub holding premium workshop PDFs, roadmaps, and unlisted recordings.
-- **Activity Stream**: A chronological timeline of the member's event history and instantly downloadable certificates.
-- **The Elite Radar**: A private UI component that surfaces the top 1% of internships from the Python ML engine exclusively to logged-in members.
+## Historical Archive Reference
+The notes below document historical backend prototypes and pipelines (e.g. Python job scrapers, resume parsers) preserved for reference:
+- Scraping Pipeline (`v12_backend/pipeline_engine.py`): Playwright + JobSpy with Redis caching.
+- Data Merger: PostgreSQL database (`CanonicalMerger`) with canonical hashing.
+- Sanity Synchronization: Asynchronous mutation push to Sanity CMS.
