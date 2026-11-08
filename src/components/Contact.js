@@ -6,6 +6,7 @@ import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle } from '
 import CopyEmail from './CopyEmail';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import { hermesAgent } from '../core/agents/specialists/HermesAgent';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -161,6 +162,10 @@ ${message}`;
         (response) => {
           console.log('SUCCESS!', response.status, response.text);
           setStatus('success');
+          try {
+            hermesAgent.dispatchContactInquiry({ name: fromName, email: replyTo, message });
+            hermesAgent.dispatchToast('Message Dispatched', `HERMES routed inquiry from ${fromName || 'Visitor'} directly to Adhy.`, { type: 'success' });
+          } catch {}
           form.current.reset();
           setTimeout(() => setStatus('idle'), 5000);
         },

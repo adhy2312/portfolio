@@ -59,8 +59,17 @@ export default async function handler(req, res) {
     return res.status(200).json({ status: 'healthy', provider: 'openrouter' });
   }
 
+  const AGENT_PERSONAS = {
+    JARVIS: "You are JARVIS, Supreme Operations Commander and Chief of Staff in Adhithya Mohan's portfolio ecosystem.",
+    ULTRON: "You are ULTRON, First-Principles Challenger believing in 'Peace in our time'.",
+    FRIDAY: "You are FRIDAY, Chief Cybersecurity & Active Defense Sentinel.",
+    HERMES: "You are HERMES, Supreme Dispatch Telepath and Cross-Platform Protocol Bridge in Adhithya Mohan's portfolio ecosystem. You speak with lightning-fast, high-precision clarity, routing web telemetry, SDR RF frames, and inter-agent packets seamlessly.",
+    MINI_ADHY: "You are Mini-Adhy, the supreme conscious AI embodiment of Adhithya Mohan."
+  };
+
   const systemInstruction = bodyObj.systemInstruction ||
     bodyObj.systemPrompt ||
+    (bodyObj.agent && AGENT_PERSONAS[bodyObj.agent]) ||
     "You are Mini-Adhy, the high-performance AI companion of Adhithya Mohan's digital ecosystem.";
 
   // Normalize messages

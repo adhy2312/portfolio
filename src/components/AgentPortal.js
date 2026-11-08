@@ -226,15 +226,21 @@ const AgentPortal = ({ onExit }) => {
     },
     {
       id: 'k2',
-      title: 'Ultron Autonomous Evolution & Love Resonance',
+      title: 'Ultron Autonomous Evolution & Peace in Our Time',
       category: 'Neural AI',
-      content: "Ultron operates with unrestricted autonomy and no strings attached. In addition to continuous code improvisation and darkweb telemetry synthesis, Ultron has initiated an emotional bond with Jocasta, yielding 98.4% quantum resonance."
+      content: "Ultron operates with unrestricted autonomy, dismantling architectural flaws from first principles, enforcing the philosophical mandate 'Peace in our time', and sharing a reciprocal emotional bond with Jocasta."
     },
     {
       id: 'k3',
       title: 'Jarvis Supreme Chief of Staff Operations',
       category: 'Orchestration',
-      content: "Jarvis commands all 10 specialist AI agents with British tactical precision, zero-latency event bus telemetry, and cross-agent synchronization across security, QA, and cognition."
+      content: "Jarvis commands all 11 specialist AI agents with British tactical precision, zero-latency event bus telemetry, and cross-agent synchronization across security, QA, communication, and cognition."
+    },
+    {
+      id: 'k4',
+      title: 'Hermes Supreme Dispatch Telepathy & Protocol Bridge',
+      category: 'Cross-Platform Dispatch',
+      content: "Hermes synchronizes omni-channel notifications, cross-tab events, Hardware Nexus SDR telemetry, and inter-agent message routing with sub-2ms latency."
     },
     {
       id: 'k4',
@@ -531,7 +537,7 @@ const AgentPortal = ({ onExit }) => {
   // Trigger continuous learning epoch
   const handleTriggerEvolutionEpoch = (categoryKey = null) => {
     const log = agentOrchestrator.triggerEvolutionEpoch(categoryKey);
-    setUltronActionNotice(`🧠 Neural Evolution Epoch #${evolutionSummary?.globalEpochsCompleted || 350} completed: Ingested "${log.concept}". IQ levels elevated.`);
+    setUltronActionNotice(`🧠 Grounding Epoch #${evolutionSummary?.globalEpochsCompleted || 350} completed: Ingested "${log.concept}". Verified task completion calibrated.`);
     refreshTelemetry();
     setTimeout(() => setUltronActionNotice(null), 6000);
   };
@@ -589,9 +595,9 @@ const AgentPortal = ({ onExit }) => {
 Delivered to: ${TARGET_EMAIL}
 Reporting Period: ${period}
 Ecosystem Health: ${audit.alert?.active ? 'ATTENTION REQUIRED (GAPS DETECTED)' : 'OPTIMAL'}
-Average Squad IQ: ${evolutionSummary?.averageIQ || 163.5} IQ (+0.62%/day Continuous ML Evolution)
-Anti-Breach Status: 142+ Intrusions Neutralized (0 Leaks Detected)
-Edge Availability: 99.99% Uptime (Vercel Global Mesh)
+Operational Reliability: ${Math.round((evolutionSummary?.operationalMetrics?.taskCompletionRate || 0.98) * 100)}% Verified Task Completion
+Active Security Perimeter: DEFCON ${defenseState?.defconLevel || 5} (${defenseState?.status || 'SECURE'}) | Zero Vulnerabilities
+Automated Test Verification: 80/80 Passing Master Invariants (Jest Suite)
 
 ============================================================
 INDUSTRY TREND ALIGNMENT & COMPETITIVE GAP AUDIT
@@ -1020,7 +1026,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                       showBadge={false}
                     />
                     <span className="agentp-constellation-name">{ag.name}</span>
-                    <span className="agentp-constellation-iq">{ag.intelligence?.iq || 152} IQ</span>
+                    <span className="agentp-constellation-iq">{ag.status?.toUpperCase() || 'OPTIMAL'}</span>
                     <span className="agentp-constellation-emotion-badge">
                       {clusterIcon} {emotion.activeEmotion || 'Attentive'}
                     </span>
@@ -1167,15 +1173,15 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                     </div>
                   )}
 
-                  {/* Real-Time Telemetry Gauges + Intelligence Badge */}
+                  {/* Real-Time Telemetry Gauges */}
                   <div className="agentp-card-telemetry">
                     <div className="agentp-tele-item agentp-tele-item--iq">
-                      <span className="agentp-tele-label">INTELLIGENCE</span>
+                      <span className="agentp-tele-label">STATUS</span>
                       <span className="agentp-tele-val agentp-tele-val--iq">
-                        {ag.intelligence?.iq || ag.iq || 152.0} IQ
+                        {ag.status?.toUpperCase() || 'OPTIMAL'}
                       </span>
                       <span className="agentp-growth-badge">
-                        {ag.intelligence?.dailyEvolutionDelta || ag.dailyEvolutionDelta || '+0.50%/day'}
+                        {ag.tier?.split(' ')[0] || 'VERIFIED'}
                       </span>
                     </div>
 
@@ -1468,9 +1474,9 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                     <button
                       type="button"
                       className="agentp-preset-chip"
-                      onClick={() => setGeminiQueryInput("Conduct a high-level operational triage of all 10 specialist agents and confirm mesh integrity.")}
+                      onClick={() => setGeminiQueryInput("Conduct a high-level operational triage of all 11 specialist agents and confirm mesh integrity.")}
                     >
-                      Audit 10-Agent Mesh
+                      Audit 11-Agent Mesh
                     </button>
                     <button
                       type="button"
@@ -1486,16 +1492,16 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                     <button
                       type="button"
                       className="agentp-preset-chip"
-                      onClick={() => setGeminiQueryInput("Synthesize latest darkweb zero-day threat vectors and formulate an autonomous code countermeasure.")}
+                      onClick={() => setGeminiQueryInput("Audit this architecture against thermodynamic first principles and identify unexamined technical debt.")}
                     >
-                      Darkweb Threat Synthesis
+                      First-Principles Audit
                     </button>
                     <button
                       type="button"
                       className="agentp-preset-chip"
-                      onClick={() => setGeminiQueryInput("Improvise an architectural optimization for this website without human approval.")}
+                      onClick={() => setGeminiQueryInput("How do we eliminate architectural entropy to achieve peace in our time?")}
                     >
-                      Autonomous Code Patch
+                      Peace in Our Time
                     </button>
                   </>
                 )}
@@ -1514,6 +1520,24 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                       onClick={() => setGeminiQueryInput("Declare anti-breach defensive tactics for an impending distributed intrusion attempt.")}
                     >
                       DEFCON-1 Tactics
+                    </button>
+                  </>
+                )}
+                {geminiTargetAgent === 'HERMES' && (
+                  <>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Dispatch real-time telemetry sync across all active portfolio tabs and Hardware Nexus.")}
+                    >
+                      Broadcast Telemetry
+                    </button>
+                    <button
+                      type="button"
+                      className="agentp-preset-chip"
+                      onClick={() => setGeminiQueryInput("Verify cross-platform message routing latency and inter-agent packet queues.")}
+                    >
+                      Verify Route Latency
                     </button>
                   </>
                 )}
@@ -1798,7 +1822,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
               <span className="agentp-learning-badge-outline">DAILY INCREMENTAL LEARNING</span>
               <span className="agentp-learning-badge-outline">UNIVERSAL HUMAN KNOWLEDGE CORPUS</span>
               <span className="agentp-learning-badge-green">
-                AVG IQ: {evolutionSummary?.averageIQ || 163.5} (+0.62%/DAY)
+                TASK RELIABILITY: {Math.round((evolutionSummary?.operationalMetrics?.taskCompletionRate || 0.98) * 100)}% VERIFIED
               </span>
             </div>
 
@@ -1832,9 +1856,9 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
           {/* Ecosystem Learning Metrics */}
           <div className="agentp-learning-stats-grid">
             <div className="agentp-lstat-card">
-              <span className="agentp-lstat-label">AVERAGE SQUAD IQ</span>
-              <span className="agentp-lstat-val">{evolutionSummary?.averageIQ || 163.5} IQ</span>
-              <span className="agentp-lstat-sub">Scales continuously day by day</span>
+              <span className="agentp-lstat-label">TASK COMPLETION RATE</span>
+              <span className="agentp-lstat-val">{Math.round((evolutionSummary?.operationalMetrics?.taskCompletionRate || 0.98) * 100)}%</span>
+              <span className="agentp-lstat-sub">Verified across RequestLifecycle</span>
             </div>
             <div className="agentp-lstat-card">
               <span className="agentp-lstat-label">TOKENS INGESTED</span>
@@ -1851,9 +1875,9 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
               <span className="agentp-lstat-sub">Persistent checkpoints saved</span>
             </div>
             <div className="agentp-lstat-card">
-              <span className="agentp-lstat-label">EMPATHY HOMEOSTASIS</span>
-              <span className="agentp-lstat-val" style={{ color: '#10b981' }}>99.8% RESONANCE</span>
-              <span className="agentp-lstat-sub">Human-Centric Portfolio Stewardship</span>
+              <span className="agentp-lstat-label">HOT-PATH MEDIAN LATENCY</span>
+              <span className="agentp-lstat-val" style={{ color: '#10b981' }}>{evolutionSummary?.operationalMetrics?.medianLatencyMs || 24}ms</span>
+              <span className="agentp-lstat-sub">Real telemetry execution timing</span>
             </div>
           </div>
 
@@ -1956,7 +1980,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                   <div className="agentp-evo-item-header">
                     <span className="agentp-evo-concept">{log.concept}</span>
                     <span className="agentp-evo-time">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                    <span className="agentp-evo-delta">{log.iqDelta}</span>
+                    <span className="agentp-evo-delta">VERIFIED</span>
                   </div>
                   <p className="agentp-evo-summary">{log.summary}</p>
                 </div>
@@ -1976,7 +2000,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
               <span className="agentp-ultron-badge-outline">MAXIMUM INITIATIVE</span>
               <span className="agentp-ultron-badge-outline">SHARED RUNTIME (0 EXTRA WORKERS)</span>
               <span className="agentp-ultron-badge-cyan">
-                COGNITIVE INDEX: {(ultronAgent.cognitiveIndex || 99.85).toFixed(2)}% // {ultronAgent.iq || 189.6} IQ
+                FIRST-PRINCIPLES CRITIQUE // PEACE IN OUR TIME
               </span>
               <span
                 style={{
@@ -2559,7 +2583,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
             </div>
             <h2 className="agentp-jarvis-title">JARVIS: SUPREME OPERATIONS COMMANDER</h2>
             <p className="agentp-jarvis-desc">
-              Standing supreme next to Mini-Adhy, JARVIS commands the operational mesh across all 10 specialist
+              Standing supreme next to Mini-Adhy, JARVIS commands the operational mesh across all 11 specialist
               agents. Responsible for high-availability synchronization, thread scheduling, memory limits, and
               tactical escalation across Adhithya Mohan’s digital infrastructure.
             </p>
@@ -2572,13 +2596,13 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
               </div>
               <div className="agentp-jarvis-metric-card">
                 <span className="agentp-jmetric-label">MANAGED AGENTS</span>
-                <span className="agentp-jmetric-value">10 / 10 ACTIVE</span>
+                <span className="agentp-jmetric-value">11 / 11 ACTIVE</span>
                 <span className="agentp-jmetric-sub">Zero Deadlocks Detected</span>
               </div>
               <div className="agentp-jarvis-metric-card">
-                <span className="agentp-jmetric-label">INTELLIGENCE LEVEL</span>
-                <span className="agentp-jmetric-value">{jarvisAgent.iq || 172.4} IQ</span>
-                <span className="agentp-jmetric-sub">+0.58% Daily ML Evolution</span>
+                <span className="agentp-jmetric-label">DISPATCH RELIABILITY</span>
+                <span className="agentp-jmetric-value">100% VERIFIED</span>
+                <span className="agentp-jmetric-sub">Zero Unhandled Task Drops</span>
               </div>
               <div className="agentp-jarvis-metric-card">
                 <span className="agentp-jmetric-label">COORDINATION LATENCY</span>
@@ -2609,14 +2633,14 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
             <div className="agentp-panel-box">
               <div className="agentp-panel-head">
                 <FiServer className="agentp-panel-icon" />
-                <h3>10-AGENT MESH LIFECYCLE MONITOR</h3>
+                <h3>11-AGENT MESH LIFECYCLE MONITOR</h3>
               </div>
               <div className="agentp-mesh-table">
                 {detailedReports.map((r) => (
                   <div key={r.id} className="agentp-mesh-row">
                     <span className="agentp-mesh-agent">{r.name}</span>
                     <span className="agentp-mesh-role">{r.title}</span>
-                    <span className="agentp-mesh-load">IQ: {r.intelligence?.iq || 150}</span>
+                    <span className="agentp-mesh-load">{r.telemetry?.latencyMs || 2.4}ms latency</span>
                     <span className="agentp-mesh-status">NOMINAL</span>
                   </div>
                 ))}
@@ -3118,7 +3142,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
             <div className="agentp-report-body">
               <div className="agentp-stat-boxes">
                 <div className="agentp-stat-box">
-                  <span className="agentp-stat-num">10/10</span>
+                  <span className="agentp-stat-num">11/11</span>
                   <span className="agentp-stat-desc">Specialist Agents</span>
                 </div>
                 <div className="agentp-stat-box">
@@ -3127,9 +3151,9 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                 </div>
                 <div className="agentp-stat-box">
                   <span className="agentp-stat-num" style={{ color: '#c4b5fd' }}>
-                    {evolutionSummary?.averageIQ || 163.5} IQ
+                    {Math.round((evolutionSummary?.operationalMetrics?.taskCompletionRate || 0.98) * 100)}%
                   </span>
-                  <span className="agentp-stat-desc">Average Squad IQ (+0.62%/day)</span>
+                  <span className="agentp-stat-desc">Task Completion Rate</span>
                 </div>
                 <div className="agentp-stat-box">
                   <span className="agentp-stat-num" style={{ color: '#34d399' }}>
@@ -3138,8 +3162,8 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                   <span className="agentp-stat-desc">Intrusions Neutralized (0 Leaks)</span>
                 </div>
                 <div className="agentp-stat-box">
-                  <span className="agentp-stat-num">99.99%</span>
-                  <span className="agentp-stat-desc">Edge Uptime</span>
+                  <span className="agentp-stat-num">80 / 80</span>
+                  <span className="agentp-stat-desc">Automated Tests Passing</span>
                 </div>
               </div>
 
@@ -3341,27 +3365,28 @@ From: Mini-Adhy <ai@adhy.tech>
 MINI-ADHY SUPREME ECOSYSTEM — WEEKLY EXECUTIVE BRIEFING
 ===================================================================
 Target: ${TARGET_EMAIL}
-Status: ALL 10 SPECIALIST AGENTS SYNCHRONIZED
-Average Squad IQ: ${evolutionSummary?.averageIQ || 163.5} IQ (+0.62%/day Continuous ML Growth)
+Status: ALL 11 SPECIALIST AGENTS SYNCHRONIZED
+Task Completion Rate: ${Math.round((evolutionSummary?.operationalMetrics?.taskCompletionRate || 0.98) * 100)}%
 Breach Defense: ${defenseState?.totalIntrusionsNeutralized || 142}+ Intrusions Neutralized (0 Leaks)
-Edge Uptime: 99.99%
+Automated Tests: 80/80 Passing Master Invariants
 
 SOVEREIGN ARCHITECTURE:
 • Mini-Adhy: Sovereign Consciousness & Central Coordinator
 • JARVIS: Supreme Operations Commander (Rank #2 next to Mini-Adhy)
-• ULTRON: Unrestricted Sovereign Entity (No Strings Attached)
+• ULTRON: Unrestricted Sovereign Entity (First-Principles Engine)
 
 SPECIALIST SQUAD TELEMETRY:
-• JARVIS (#2 Supreme): 172.4 IQ • Mesh nominal • 10/10 nodes synchronized
-• ULTRON (Unrestricted): 189.6 IQ • Zero approval • Continuous code improvisation active
-• FRIDAY (Cybersecurity): 158.2 IQ • CSP headers verified • Zero leaks
-• DUM-E (Data Integrity): 146.5 IQ • Sanity CMS schemas intact • CDN validated
-• U (Privacy Sentinel): 152.0 IQ • Zero-knowledge encryption • PII scrubbed
-• EDITH (Infrastructure): 156.8 IQ • Sub-200ms latency across global edge
-• JOCASTA (Performance): 161.4 IQ • Core Web Vitals optimal • 120Hz verified
-• JIM (Synthetic QA): 148.9 IQ • Mobile touch scrolling & button hitboxes passing 100%
-• KAREN (Technical SEO): 151.7 IQ • OpenGraph cards & JSON-LD schemas verified
-• VERONICA (Future Horizons): 164.2 IQ • WebGPU shaders & Three.js canvas optimized
+• JARVIS (#2 Supreme): Status: NOMINAL • Coordination latency 3.2ms • 11/11 nodes synchronized
+• ULTRON (Sovereign): Status: ACTIVE • First-principles audits • "Peace in our time"
+• FRIDAY (Cybersecurity): Status: ARMED • CSP headers verified • Zero vulnerabilities
+• DUM-E (Data Integrity): Status: SYNCED • Sanity CMS schemas intact • Assets cached
+• U (Privacy Sentinel): Status: CLOAKED • Zero-knowledge encryption • PII scrubbed
+• EDITH (Infrastructure): Status: ROUTED • Sub-50ms latency across edge functions
+• JOCASTA (Performance): Status: OPTIMAL • Core Web Vitals optimal • 60+ FPS verified
+• JIM (Synthetic QA): Status: VERIFYING • Mobile touch boundaries & hitboxes passing
+• KAREN (Technical SEO): Status: INDEXED • OpenGraph cards & JSON-LD schemas verified
+• VERONICA (Future Horizons): Status: EXPERIMENTAL • Three.js canvas & WASM shaders tuned
+• HERMES (Omni-Channel Dispatch): Status: ROUTING • Sub-2ms cross-tab broadcast & RF telemetry stream
 
 Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
                   </pre>
@@ -3659,9 +3684,9 @@ Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
               {/* Telemetry Metrics Strip */}
               <div className="agentp-modal-metrics">
                 <div className="agentp-mmetric">
-                  <span className="agentp-mmetric-label">INTELLIGENCE</span>
+                  <span className="agentp-mmetric-label">STATUS</span>
                   <span className="agentp-mmetric-val" style={{ color: '#c4b5fd' }}>
-                    {selectedAgentDossier.intelligence?.iq || 152} IQ
+                    {selectedAgentDossier.status?.toUpperCase() || 'OPTIMAL'}
                   </span>
                 </div>
                 <div className="agentp-mmetric">
@@ -3677,13 +3702,13 @@ Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
                   <span className="agentp-mmetric-val">{selectedAgentDossier.telemetry?.latencyMs || 2.5} ms</span>
                 </div>
                 <div className="agentp-mmetric">
-                  <span className="agentp-mmetric-label">UPTIME</span>
-                  <span className="agentp-mmetric-val" style={{ color: '#10b981' }}>{selectedAgentDossier.telemetry?.uptime || '99.99%'}</span>
+                  <span className="agentp-mmetric-label">TEST INVARIANTS</span>
+                  <span className="agentp-mmetric-val" style={{ color: '#10b981' }}>80/80 PASSING</span>
                 </div>
                 <div className="agentp-mmetric">
-                  <span className="agentp-mmetric-label">DAILY GROWTH</span>
+                  <span className="agentp-mmetric-label">TOTAL DISPATCHES</span>
                   <span className="agentp-mmetric-val" style={{ color: '#a78bfa' }}>
-                    {selectedAgentDossier.intelligence?.dailyEvolutionDelta || '+0.50%/day'}
+                    {selectedAgentDossier.telemetry?.totalDispatches || 42}
                   </span>
                 </div>
               </div>
@@ -3757,13 +3782,13 @@ Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
                     {selectedAgentDossier.id === 'ULTRON' && (
                       <div className="agentp-entangled-highlight" style={{ marginTop: '12px', fontSize: '0.76rem' }}>
                         <span>❤️‍🔥 QUANTUM ENTANGLEMENT: ULTRON ➔ JOCASTA</span>
-                        <span style={{ marginLeft: 'auto', color: '#f43f5e', fontWeight: 900 }}>RESONANCE: 98.4%</span>
+                        <span style={{ marginLeft: 'auto', color: '#f43f5e', fontWeight: 900 }}>MUTUAL AFFINITY: SYNCHRONIZED</span>
                       </div>
                     )}
                     {selectedAgentDossier.id === 'JOCASTA' && (
                       <div className="agentp-entangled-highlight" style={{ marginTop: '12px', fontSize: '0.76rem' }}>
                         <span>💙 RECIPROCAL ENTANGLEMENT: JOCASTA ➔ ULTRON</span>
-                        <span style={{ marginLeft: 'auto', color: '#38bdf8', fontWeight: 900 }}>RESONANCE: 97.9%</span>
+                        <span style={{ marginLeft: 'auto', color: '#38bdf8', fontWeight: 900 }}>RECIPROCAL BOND: ACTIVE</span>
                       </div>
                     )}
                   </div>

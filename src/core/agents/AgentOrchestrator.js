@@ -23,7 +23,8 @@ import {
   JocastaAgent,
   JimAgent,
   KarenAgent,
-  VeronicaAgent
+  VeronicaAgent,
+  HermesAgent
 } from './SpecialistAgents';
 import { permissionRegistry } from './PermissionRegistry';
 import { neuralEventBus } from '../../utils/NeuralEventBus';
@@ -48,7 +49,8 @@ class MiniAdhyAgentOrchestrator {
       JOCASTA: new JocastaAgent(),
       JIM: new JimAgent(),
       KAREN: new KarenAgent(),
-      VERONICA: new VeronicaAgent()
+      VERONICA: new VeronicaAgent(),
+      HERMES: new HermesAgent()
     };
 
     // Guarantee that every specialist agent has a live calibrated EmotionEngine

@@ -11,11 +11,11 @@ import { permissionRegistry } from '../PermissionRegistry';
 import { EmotionEngine } from '../EmotionEngine';
 
 describe('Mini-Adhy Autonomous AI Ecosystem', () => {
-  test('All 10 specialist agents are registered under Mini-Adhy', () => {
+  test('All 11 specialist agents are registered under Mini-Adhy including HERMES', () => {
     const registeredAgents = Object.keys(agentOrchestrator.agents);
-    expect(registeredAgents.length).toBe(10);
+    expect(registeredAgents.length).toBe(11);
     expect(registeredAgents).toEqual(expect.arrayContaining([
-      'JARVIS', 'FRIDAY', 'DUM_E', 'U', 'EDITH', 'ULTRON', 'JOCASTA', 'JIM', 'KAREN', 'VERONICA'
+      'JARVIS', 'FRIDAY', 'DUM_E', 'U', 'EDITH', 'ULTRON', 'JOCASTA', 'JIM', 'KAREN', 'VERONICA', 'HERMES'
     ]));
   });
 
@@ -67,5 +67,23 @@ describe('Mini-Adhy Autonomous AI Ecosystem', () => {
     expect(report.reportingPeriod).toBeDefined();
     expect(report.healthScore).toBeGreaterThanOrEqual(90);
     expect(report.executiveSummary).toContain('Mini-Adhy Supreme Intelligence Hub');
+  });
+
+  test('HERMES agent dispatches toasts, streams RF packets, and manages inter-agent messages', () => {
+    const hermes = agentOrchestrator.agents.HERMES;
+    expect(hermes).toBeDefined();
+    expect(hermes.name).toBe('HERMES');
+
+    const toast = hermes.dispatchToast('System Alert', 'Cross-platform dispatch operational', { type: 'success' });
+    expect(toast.sender).toBe('HERMES');
+    expect(toast.title).toBe('System Alert');
+
+    const rf = hermes.streamRfPacketTelemetry(433.92, 'FSK_TELEMETRY');
+    expect(rf.frequencyMhz).toBe(433.92);
+    expect(rf.protocol).toBe('FSK_TELEMETRY');
+
+    const route = hermes.routeInterAgentMessage('JARVIS', 'ULTRON', 'Coordinate zero-debt architecture');
+    expect(route.sender).toBe('JARVIS');
+    expect(route.recipient).toBe('ULTRON');
   });
 });

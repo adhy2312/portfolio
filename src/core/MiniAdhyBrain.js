@@ -187,11 +187,18 @@ export class MiniAdhyBrain {
       cognitiveSurge = 0.7;
     }
     // 13. AI Ecosystem
-    else if (lower.includes('agent') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('squad')) {
+    else if (lower.includes('agent') || lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday') || lower.includes('hermes') || lower.includes('squad')) {
       intent = 'QUERY_AI_ECOSYSTEM';
       targetSkill = 'AI_INTEL';
       targetArg = text;
       cognitiveSurge = 0.75;
+    }
+    // 14. Hermes Cross-Platform Dispatch
+    else if (lower.includes('hermes') || lower.includes('telepathy') || lower.includes('broadcast packet')) {
+      intent = 'HERMES_DISPATCH';
+      targetSkill = 'HERMES_DISPATCH';
+      targetArg = text;
+      cognitiveSurge = 0.7;
     }
     // 14. GitHub Repo Intelligence
     else if ((lower.includes('github') || lower.includes('repo')) && isImperative) {

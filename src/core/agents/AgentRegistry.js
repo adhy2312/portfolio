@@ -227,6 +227,27 @@ export const COMPLETE_AGENT_ROSTER = [
     ],
     status: 'EXPERIMENTAL / SANDBOX',
     location: 'src/core/agents/SpecialistAgents.js'
+  },
+  {
+    id: 'HERMES',
+    name: 'HERMES',
+    codename: 'SUPREME DISPATCH TELEPATH & CROSS-PLATFORM PROTOCOL BRIDGE',
+    tier: 'Real-Time Communication & Cross-Platform Transport',
+    clearance: 'Level 4 Transport & Telepathy',
+    color: '#F97316',
+    accentGlow: 'rgba(249, 115, 22, 0.45)',
+    role: 'Omni-Channel Dispatcher & Protocol Bridge',
+    purpose: 'Routes instantaneous messages, commands, and telemetry across the portfolio (Web Audio, HUD toasts, Hardware Nexus RF bridge, Contact dispatcher, and Desktop Companion sync).',
+    models: ['Nous Hermes 3 (Llama 3.1 70B)', 'Groq LPU Engine', 'Gemini 2.5 Flash'],
+    capabilities: [
+      'Omni-Channel Toast & HUD Notification Dispatching',
+      'Cross-Tab & Desktop Companion Sync via BroadcastChannel',
+      'Hardware Nexus SDR RF Packet Streaming & STM32 UART Bridges',
+      'Inbound Contact Fast-Track Dispatching with Anti-Spam Sanitation',
+      'Zero-Latency Inter-Agent Routing Ledger between Specialist Squad'
+    ],
+    status: 'ACTIVE / ROUTING',
+    location: 'src/core/agents/SpecialistAgents.js'
   }
 ];
 

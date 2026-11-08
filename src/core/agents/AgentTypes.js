@@ -14,7 +14,8 @@ export const AGENT_IDS = {
   JOCASTA: 'JOCASTA',
   JIM: 'JIM',
   KAREN: 'KAREN',
-  VERONICA: 'VERONICA'
+  VERONICA: 'VERONICA',
+  HERMES: 'HERMES'
 };
 
 export const CAPABILITY_LEVELS = {

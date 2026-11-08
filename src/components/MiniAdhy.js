@@ -209,6 +209,12 @@ export const AGENT_SUMMON_MAP = {
     title: 'VERONICA // Future Horizons & Next-Gen Research',
     role: 'WebGPU Shaders & WASM Embeddings',
     badge: '🚀 VERONICA'
+  },
+  HERMES: {
+    patterns: [/\b(hermes|dispatch|telepathy|messenger|rf nexus)\b/i, /@hermes\b/i],
+    title: 'HERMES // Supreme Dispatch Telepath',
+    role: 'Omni-Channel Dispatch & Cross-Platform Transport',
+    badge: '⚡ HERMES'
   }
 };
 
@@ -486,6 +492,7 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
             if (agId === 'U') return `• **[U // Anti-Breach]:** "Zero-knowledge privacy filters active across all DOM nodes."`;
             if (agId === 'JIM') return `• **[JIM // QA Simulator]:** "Responsive touch bounds validated across all mobile viewports."`;
             if (agId === 'KAREN') return `• **[KAREN // SEO]:** "Structured Schema.org graphs and OpenGraph cards intact."`;
+            if (agId === 'HERMES') return `• **[HERMES // Omni-Channel Telepath]:** "All cross-platform broadcast channels, HUD alerts, and packet routing synchronized at sub-2ms latency."`;
             return `• **[${agId}]:** "Standing by."`;
           }).join('\n\n');
       }

@@ -16,3 +16,4 @@ export { JocastaAgent } from './specialists/JocastaAgent';
 export { JimAgent } from './specialists/JimAgent';
 export { KarenAgent } from './specialists/KarenAgent';
 export { VeronicaAgent } from './specialists/VeronicaAgent';
+export { HermesAgent } from './specialists/HermesAgent';
