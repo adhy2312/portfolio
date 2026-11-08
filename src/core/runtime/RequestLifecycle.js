@@ -14,13 +14,11 @@
  */
 
 import { identityCompiler } from '../identity/IdentityCompiler';
-import { inferBehavioralMode } from '../identity/BehavioralModes';
 import { providerRegistry } from '../providers/ProviderRegistry';
 import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService } from '../memory/MemoryService';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { behaviouralController } from './BehaviouralController';
-import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
 
 export const TASK_COMPLEXITY = Object.freeze({
   LEVEL_1_SIMPLE: 'LEVEL_1_SIMPLE',            // Direct conversation, standard query
@@ -162,10 +160,16 @@ export class RequestLifecycle {
       ? `I ran into a temporary provider issue: ${generationResult.error}. Let's try again.`
       : "I'm right here with you. What aspect of the project shall we explore next?");
 
-    // Step 7: Continuous Memory Extraction (candidate observations)
+    // Step 7: Continuous Memory Extraction & Controlled Evaluation Pipeline
     try {
       const candidateMemories = memoryService.extractCandidateObservations(input);
-      candidateMemories.forEach(cand => memoryService.storeRecord(cand));
+      candidateMemories.forEach(cand => {
+        if (typeof memoryService.evaluateAndProcessCandidate === 'function') {
+          memoryService.evaluateAndProcessCandidate(cand);
+        } else {
+          memoryService.storeRecord(cand);
+        }
+      });
     } catch {}
 
     // Step 8: Verifiable Telemetry Logging in CognitiveEvolutionEngine

@@ -15,6 +15,14 @@ export const INITIAL_USER_CONTEXT = Object.freeze({
   location: 'Trivandrum, Kerala, India',
   email: 'adhithyamohan2312@gmail.com',
   education: 'Electronics and Communication Engineering (ECE) at Mar Baselios College of Engineering and Technology (MBCET, KTU)',
+  currentRoles: [
+    'Media Secretary, MBCET Senate',
+    'Lead Photographer, FRAMES MBCET'
+  ],
+  historicalRoles: [
+    'Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members)',
+    'Former PR & Media Head, ISTE Students Chapter MBCET'
+  ],
   
   technicalInterests: [
     'Signal processing & DSP',

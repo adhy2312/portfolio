@@ -42,6 +42,7 @@ export class EmotionalContextInterpreter {
   interpret(input = '', context = {}) {
     const text = String(input).trim();
     const lower = text.toLowerCase();
+    const wordCount = text.split(/\s+/).filter(Boolean).length;
 
     // 1. Technical / Objective Query Guard (Do not force emotional framing on pure tech)
     const isPurelyTechnical = (
@@ -60,23 +61,45 @@ export class EmotionalContextInterpreter {
       };
     }
 
-    // 2. Frustration / Friction Indicators
-    if (
-      lower.includes('still failing') || lower.includes('why is this not working') ||
-      lower.includes('broken again') || lower.includes('hate this bug') ||
-      lower.includes('so annoying') || lower.includes('waste of time') ||
-      text.includes('?!?!') || text.includes('argh')
-    ) {
+    // 2. Humour Masking Frustration & Sarcastic Breakdown Detection
+    const hasHumorSignal = lower.includes('😂') || lower.includes('🤣') || lower.includes('lol') || lower.includes('lmao') || lower.includes('haha');
+    const hasFailureSignal = lower.includes('broke') || lower.includes('failed') || lower.includes('failing') ||
+      lower.includes('segfault') || lower.includes('bug') || lower.includes('crash') || lower.includes('again') ||
+      lower.includes('another error');
+    const hasSarcasticApproval = lower.includes('great,') || lower.includes('fantastic,') || lower.includes('wonderful,') || lower.includes('just wonderful');
+
+    if ((hasHumorSignal && hasFailureSignal) || (hasSarcasticApproval && hasFailureSignal)) {
       return this._recordState({
         state: CONVERSATIONAL_STATES.FRUSTRATED,
+        mixedState: true,
+        secondaryState: CONVERSATIONAL_STATES.PLAYFUL,
         confidence: 0.85,
         uncertainty: 0.15,
-        evidence: 'Exclamatory frustration markers or repeated failure references.',
-        toneGuidance: 'calm, patient, skip small talk, focus on isolating and fixing the blocker directly'
+        evidence: 'Humour masking technical frustration (sarcastic laughter or irony over code/hardware failure).',
+        toneGuidance: 'Acknowledge the shared developer irony with a brief wry nod, but immediately focus on isolating the bug cleanly without cheerful dismissiveness.'
       });
     }
 
-    // 3. Overwhelmed Indicators
+    // 3. Technical Frustration vs Personal Distress
+    const isTechnicalFrustration = (
+      lower.includes('still failing') || lower.includes('why is this not working') ||
+      lower.includes('broken again') || lower.includes('hate this bug') ||
+      lower.includes('so annoying') || lower.includes('waste of time') ||
+      lower.includes('infinite loop') || lower.includes('memory leak') ||
+      text.includes('?!?!') || text.includes('argh')
+    );
+
+    if (isTechnicalFrustration) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.FRUSTRATED,
+        confidence: 0.88,
+        uncertainty: 0.12,
+        evidence: 'Direct expression of technical friction or stubborn debugging blocker.',
+        toneGuidance: 'calm, patient, skip conversational pleasantries, focus on isolating and fixing the blocker directly'
+      });
+    }
+
+    // 4. Overwhelmed / Cognitive Overload Indicators
     if (
       lower.includes('so much to do') || lower.includes('overwhelmed') ||
       lower.includes('too many things') || lower.includes('exhausted') ||
@@ -86,12 +109,26 @@ export class EmotionalContextInterpreter {
         state: CONVERSATIONAL_STATES.OVERWHELMED,
         confidence: 0.82,
         uncertainty: 0.18,
-        evidence: 'Explicit mention of cognitive overload or high task volume.',
+        evidence: 'Explicit mention of cognitive overload or task fatigue.',
         toneGuidance: 'reassuring, structured step-by-step triage, prioritize 1 tangible task, avoid long walls of text'
       });
     }
 
-    // 4. Excited / Victorious Indicators
+    // 5. Short Ambiguous Messages (Do not jump to conclusions without evidence)
+    if (wordCount <= 2 && !text.includes('!') && !text.includes('🎉') && !text.includes('🔥')) {
+      const isKnownTerse = /^(ok|okay|k|fine|hmm|sure|cool|idk|huh|\?)$/i.test(text);
+      if (isKnownTerse) {
+        return this._recordState({
+          state: CONVERSATIONAL_STATES.UNCERTAIN,
+          confidence: 0.50,
+          uncertainty: 0.50,
+          evidence: `Brief terse input ("${text}"). State is ambiguous and uncertain from linguistic content alone.`,
+          toneGuidance: 'attentive, low-pressure, leave room for user to expand or pivot without overinterpreting'
+        });
+      }
+    }
+
+    // 6. Excited / Victorious Indicators
     if (
       lower.includes('it works!') || lower.includes('finally worked') ||
       lower.includes('insane!') || lower.includes('holy shit') ||
@@ -110,7 +147,7 @@ export class EmotionalContextInterpreter {
     // 5. Playful / Banter Indicators
     if (
       lower.includes('tell me a joke') || lower.includes('roast me') ||
-      lower.includes('you are useless') && (text.includes('😂') || text.includes('lol')) ||
+      (lower.includes('you are useless') && (text.includes('😂') || text.includes('lol'))) ||
       lower.includes('da mwon') || lower.includes('bro what')
     ) {
       return this._recordState({

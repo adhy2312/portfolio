@@ -56,21 +56,32 @@ export class RelationshipContinuityEngine {
       },
       {
         id: 'proj_zoomout_frames',
-        title: 'Zoomout Frames Creative Photography',
-        domain: 'Visual Storytelling & Darkroom Optics',
-        status: 'continuous',
-        summary: 'Documentary, street, and creative photography capturing raw human moments across Kerala.',
+        title: 'FRAMES MBCET & Zoomout Frames Photography',
+        domain: 'Visual Storytelling, Darkroom Optics & Media',
+        status: 'active',
+        summary: 'Lead Photographer at FRAMES MBCET; documentary, street, and creative photography capturing raw human moments across Kerala (@zoomout_frames).',
+        role: 'Lead Photographer, FRAMES MBCET',
         handle: '@zoomout_frames',
         startedAt: '2024-06-01'
+      },
+      {
+        id: 'proj_mbcet_senate',
+        title: 'MBCET Senate Executive Leadership',
+        domain: 'Institutional Governance & Media Communications',
+        status: 'active',
+        summary: 'Serving as Media Secretary in MBCET Senate, overseeing institutional media communication, senate documentation, and college-wide digital public relations.',
+        role: 'Media Secretary, MBCET Senate',
+        startedAt: '2026-08-01'
       },
       {
         id: 'proj_iste_sc_mbcet',
         title: 'ISTE Students Chapter MBCET Leadership',
         domain: 'Executive Society & Student Community',
-        status: 'active',
-        summary: 'Serving as Chairperson leading 300+ student members across technical initiatives, workshops, and student mentorship.',
-        role: 'Chairperson (Aug 2026 – Present)',
-        startedAt: '2025-08-01'
+        status: 'completed_tenure',
+        summary: 'Historical executive leadership: served as Chairperson leading 300+ student members across technical initiatives, workshops, and student mentorship.',
+        role: 'Former Chairperson (ISTE SC MBCET); Former PR & Media Head',
+        startedAt: '2025-08-01',
+        completedAt: '2026-08-01'
       }
     ];
 

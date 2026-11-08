@@ -17,9 +17,8 @@
 
 export class ConversationalDNA {
   constructor() {
-    this.burstBuffer = [];
+    this.sessionBuffers = new Map(); // conversationId -> { burstBuffer: string[], lastTimestamp: number }
     this.burstTimeoutMs = 1500; // Messages arriving within 1.5s are part of same evolving thought
-    this.lastMessageTimestamp = 0;
     this.metrics = {
       avgUserMessageLength: 42,
       slangFrequency: 0.15,
@@ -28,8 +27,19 @@ export class ConversationalDNA {
     };
   }
 
+  _getSessionState(conversationId = 'default_session') {
+    if (!this.sessionBuffers.has(conversationId)) {
+      this.sessionBuffers.set(conversationId, {
+        burstBuffer: [],
+        lastMessageTimestamp: 0
+      });
+    }
+    return this.sessionBuffers.get(conversationId);
+  }
+
   /**
-   * Evaluates input characteristics: rhythm, sarcasm, technical depth, and length
+   * Evaluates input characteristics: rhythm, sarcasm, technical depth, and length.
+   * Isolates burst detection per conversation/session to prevent unrelated messages from mixing.
    */
   analyzeMessage(input = '', options = {}) {
     const text = String(input).trim();
@@ -37,16 +47,19 @@ export class ConversationalDNA {
     const length = text.length;
     const wordCount = text.split(/\s+/).filter(Boolean).length;
     const lower = text.toLowerCase();
+    const conversationId = options.conversationId || options.sessionId || 'default_session';
 
-    // 1. Burst / Evolving Thought Detection
-    const isRapidFollowUp = (now - this.lastMessageTimestamp) < this.burstTimeoutMs && this.lastMessageTimestamp > 0;
-    this.lastMessageTimestamp = now;
+    const session = this._getSessionState(conversationId);
+
+    // 1. Rapid Follow-Up / Evolving Thought Detection
+    const isRapidFollowUp = (now - session.lastMessageTimestamp) < this.burstTimeoutMs && session.lastMessageTimestamp > 0;
+    session.lastMessageTimestamp = now;
 
     if (isRapidFollowUp) {
       this.metrics.rapidFollowUpCount++;
-      this.burstBuffer.push(text);
+      session.burstBuffer.push(text);
     } else {
-      this.burstBuffer = [text];
+      session.burstBuffer = [text];
     }
 
     // 2. Humour & Sarcasm Heuristics (without assuming humor = happiness)
@@ -81,13 +94,22 @@ export class ConversationalDNA {
       text,
       wordCount,
       isRapidFollowUp,
-      coalescedBurst: this.burstBuffer.join(' '),
+      conversationId,
+      coalescedBurst: session.burstBuffer.join(' '),
+      burstMessageCount: session.burstBuffer.length,
       hasSarcasticSignals,
       hasCulturalMarkers,
       recommendedPacing,
       recommendedDetail,
       timestamp: now
     };
+  }
+
+  /**
+   * Safe rapid follow-up context detection alias
+   */
+  rapidFollowUpContextDetection(input = '', options = {}) {
+    return this.analyzeMessage(input, options);
   }
 
   /**

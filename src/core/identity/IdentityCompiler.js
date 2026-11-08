@@ -68,7 +68,8 @@ export class IdentityCompiler {
     const cognitiveBlock = [
       `### ADHY'S CONTEXT & COGNITIVE PREFERENCES`,
       `- Background: ECE at MBCET KTU, Trivandrum. Hardware engineering (DSP, STM32 ARM Cortex, GNU Radio SDR, KiCad 8 PCB layout, MATLAB/Simulink) and full-stack software development.`,
-      `- Leadership: Chairperson, ISTE Students Chapter MBCET (Aug 2026 – Present) leading 300+ student members.`,
+      `- Current Roles: Media Secretary, MBCET Senate; Lead Photographer, FRAMES MBCET.`,
+      `- Historical Leadership: Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members); former PR & Media Head, ISTE SC MBCET.`,
       `- Visual & Creative: Street & documentary photography (@zoomout_frames), UI/UX design, visual storytelling.`,
       `- Student Context: Values cost-effective, practical prototypes before excessive theoretical abstractions.`,
       `- Practical Preference: ${practicalPref?.value || 'bias toward functional working prototypes over theoretical abstractions'}.`,

@@ -11,7 +11,7 @@
 
 import { CANONICAL_IDENTITY } from '../identity/CanonicalIdentity';
 import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
-import { memoryService, MEMORY_CATEGORIES } from '../memory/MemoryService';
+import { memoryService } from '../memory/MemoryService';
 import { inferBehavioralMode, BEHAVIORAL_MODES } from '../identity/BehavioralModes';
 
 export class BehaviouralController {

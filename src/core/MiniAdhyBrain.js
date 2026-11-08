@@ -3,10 +3,15 @@
  *  MINI-ADHY NEURAL CORTEX ENGINE (BIOMIMETIC BRAIN ARCHITECTURE v3.0)
  * ════════════════════════════════════════════════════════════════════
  * Coordinates:
- * 1. Sensory Cortex: Semantic intent classification, sentiment, ambiguity check
- * 2. Frontal Lobe: Executive action planning with committed vs exploratory intent gating
- * 3. Temporal Lobe: Episodic memory retrieval & Sanity CMS association
- * 4. Motor Cortex: Physical DOM execution, sound synthesis, state mutation
+ * 1. Sensory Cortex: Semantic intent classification, committed vs exploratory gating
+ * 2. Frontal Lobe & Motor Cortex: Action safety verification & physical DOM execution
+ * 
+ * ARCHITECTURAL RESPONSIBILITY BOUNDARIES:
+ * • MiniAdhyBrain: Intent classification & action safety (UI/DOM motor side effects).
+ * • PersonalUnderstandingEngine: Deep personal, emotional & conversational understanding.
+ * • BehaviouralController: Response policy & stance synthesis.
+ * • RequestLifecycle: End-to-end request lifecycle orchestration.
+ * • IdentityCompiler: Dynamic prompt construction & context compilation.
  * 
  * CORE ARCHITECTURAL INVARIANT:
  * Avoid triggering physical or UI actions (scrolls, theme changes, sound) from
@@ -16,11 +21,11 @@
 import { executeSkillCommand } from './MiniAdhySkills';
 import ns from './NervousSystem';
 import { neuralEventBus } from '../utils/NeuralEventBus';
-import { emotionEngine } from './emotion/EmotionEngine';
 import { personalUnderstandingEngine } from './understanding/PersonalUnderstandingEngine';
 
 export class MiniAdhyBrain {
-  constructor() {
+  constructor(understandingEngine = null) {
+    this.understandingEngine = understandingEngine || personalUnderstandingEngine;
     this.synapticState = {
       cognitiveLoad: 0.15,
       activeLobe: 'Frontal',
@@ -191,7 +196,8 @@ export class MiniAdhyBrain {
 
     // Provide sensory feedback to the nervous system
     ns.emit('NEURAL_SYNAPSE_SPIKE', { intent, load: this.synapticState.cognitiveLoad });
-    neuralEventBus.emit('EMOTIONAL_FOCUS', { intent, emotionalState: emotionEngine.getSnapshot() });
+    const emotionalContext = this.understandingEngine?.emotionalInterpreter?.interpret(text) || { state: 'neutral', confidence: 0.8 };
+    neuralEventBus.emit('EMOTIONAL_FOCUS', { intent, emotionalContext });
 
     return {
       intent,

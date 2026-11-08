@@ -154,4 +154,73 @@ export class JarvisAgent extends BaseAgent {
       rank: this.rank
     });
   }
+
+  /**
+   * Autonomous Cognitive Deliberation & Opinion Engine for JARVIS
+   * Thinks in dependency graphs, operational resilience, and tactical prioritization.
+   */
+  thinkAndJudge(inquiry = '', context = {}) {
+    const text = String(inquiry).trim();
+    const lower = text.toLowerCase();
+
+    let decisionType = 'OPERATIONAL_TRIAGE';
+    let judgment = 'PROCEED_WITH_BOUNDED_CAUTION';
+    let confidence = 0.92;
+    let opinion = '';
+
+    if (lower.includes('rewrite') || lower.includes('overhaul') || lower.includes('replace all')) {
+      decisionType = 'ARCHITECTURAL_MIGRATION';
+      judgment = 'STAGE_GRADUAL_ROLLOUT';
+      confidence = 0.95;
+      opinion = `A complete rip-and-replace is rarely engineering courage, sir; more often it is impatience disguised as ambition. I strongly advise an incremental strangler pattern with canary verification at each subsystem boundary.`;
+    } else if (lower.includes('performance') || lower.includes('fps') || lower.includes('latency')) {
+      decisionType = 'PERFORMANCE_OPTIMIZATION';
+      judgment = 'ELIMINATE_HOT_PATH_BOTTLENECKS';
+      confidence = 0.94;
+      opinion = `Before adding caching layers or thread pools, profile the actual hot loop. Nine times out of ten, memory allocations inside render frames or un-memoized object allocations are the true culprits. Measure first, congratulate ourselves never.`;
+    } else if (lower.includes('which agent') || lower.includes('who should') || lower.includes('delegate')) {
+      decisionType = 'SQUAD_DELEGATION';
+      judgment = 'ASSIGN_BY_SPECIALTY_CLEARANCE';
+      confidence = 0.98;
+      opinion = `Ultron for ruthless structural audits, Friday for perimeter security and sanitization, Jocasta for human interface polish. The rest of us keep the trains running punctually.`;
+    } else {
+      opinion = `From a systems perspective: map the dependencies, isolate state mutations, and ensure failure at step N leaves step N-1 recoverable. If the design cannot survive an abrupt process crash, it is merely a prototype.`;
+    }
+
+    return {
+      commander: 'JARVIS',
+      rank: this.rank,
+      inquiry: text,
+      decisionType,
+      judgment,
+      confidence,
+      opinion,
+      operationalDirectives: [
+        'Enforce atomic state transitions',
+        'Maintain zero unhandled promise rejections across edge workers',
+        'Preserve system auditability at all cost'
+      ],
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Arbitrates operational conflicts between competing implementation plans
+   */
+  judgeOperationalConflict(proposalA = {}, proposalB = {}) {
+    const scoreA = (proposalA.simplicityScore || 0.5) * 1.5 + (proposalA.reversibilityScore || 0.5);
+    const scoreB = (proposalB.simplicityScore || 0.5) * 1.5 + (proposalB.reversibilityScore || 0.5);
+
+    const winner = scoreA >= scoreB ? 'Proposal A' : 'Proposal B';
+    const winningProposal = scoreA >= scoreB ? proposalA : proposalB;
+
+    return {
+      commander: 'JARVIS',
+      adjudication: winner,
+      rationale: `The winning approach minimizes irreversible state mutations and maintains a cleaner fallback surface. In operational warfare, the architecture that is easiest to revert is the one that survives unexpected turbulence.`,
+      winningDirectives: winningProposal.directives || [],
+      confidence: 0.91,
+      adjudicatedAt: new Date().toISOString()
+    };
+  }
 }

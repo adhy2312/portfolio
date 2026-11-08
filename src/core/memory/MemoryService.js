@@ -43,6 +43,7 @@ export class MemoryService {
     this.storageKey = 'mini_adhy_canonical_memory_v3';
     this.legacyKey = 'mini_adhy_canonical_memory_v2';
     this.records = new Map();
+    this.auditLog = [];
     this.storageAdapter = storageAdapter || this.createDefaultStorageAdapter();
     this.isCollectionEnabled = true;
     this.initBaselineMemories();
@@ -121,9 +122,20 @@ export class MemoryService {
         id: 'mem_base_5',
         category: MEMORY_CATEGORIES.APPROVED_FACT,
         memoryType: MEMORY_TYPES.FACT,
-        content: 'Current executive leadership role: Chairperson, ISTE Students Chapter MBCET (Aug 2026 – Present).',
-        source: 'Official Society Appointment',
-        evidence: 'Elected Chairperson leading 300+ student members.',
+        content: 'Current roles: Media Secretary, MBCET Senate, and Lead Photographer, FRAMES MBCET.',
+        source: 'Official Institutional Appointment',
+        evidence: 'Elected Senate Media Secretary and FRAMES Lead Photographer.',
+        confidence: 1.0,
+        userApproved: true,
+        sensitivity: 'public'
+      },
+      {
+        id: 'mem_base_6',
+        category: MEMORY_CATEGORIES.APPROVED_FACT,
+        memoryType: MEMORY_TYPES.FACT,
+        content: 'Historical leadership: Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members; former PR & Media Head).',
+        source: 'Official Society Records',
+        evidence: 'Completed tenure as ISTE SC MBCET Chairperson.',
         confidence: 1.0,
         userApproved: true,
         sensitivity: 'public'
@@ -237,13 +249,13 @@ export class MemoryService {
   _containsSecret(text = '') {
     const lower = text.toLowerCase();
     return (
-      /bearer\s+[a-z0-9_\-\.]{20,}/i.test(text) ||
+      /bearer\s+[a-z0-9_\-.]{20,}/i.test(text) ||
       /aiza[0-9a-z\-_]{35}/i.test(text) ||
       /gsk_[a-z0-9]{30,}/i.test(text) ||
       /ghp_[a-z0-9]{36}/i.test(text) ||
       lower.includes('api_key') ||
       lower.includes('private_key') ||
-      lower.includes('password') && lower.includes('=')
+      (lower.includes('password') && lower.includes('='))
     );
   }
 
@@ -381,47 +393,192 @@ export class MemoryService {
   }
 
   /**
+   * Internal audit log for memory operations
+   */
+  _logAudit(candidate = {}, action = 'QUEUED_FOR_APPROVAL', reason = '') {
+    const entry = {
+      timestamp: new Date().toISOString(),
+      action,
+      reason,
+      contentSnippet: (candidate.content || '').slice(0, 80),
+      category: candidate.category || null,
+      memoryType: candidate.memoryType || null,
+      userApproved: Boolean(candidate.userApproved)
+    };
+    this.auditLog.push(entry);
+    if (this.auditLog.length > 100) {
+      this.auditLog.shift();
+    }
+    return entry;
+  }
+
+  getAuditTrail() {
+    return [...this.auditLog];
+  }
+
+  /**
    * Automatically extract candidate observations from user conversation
+   * Separates explicit user statements from inferred preferences.
+   * Inferred preferences are NEVER auto-approved.
    */
   extractCandidateObservations(userInput = '') {
     const text = String(userInput).trim();
     const lower = text.toLowerCase();
     const candidates = [];
 
-    // 1. Explicit preference statements
-    if (lower.startsWith('i prefer ') || lower.includes('i usually prefer ')) {
+    // 0. Explicit User Corrections (authoritative; override existing facts)
+    if (
+      lower.startsWith('actually ') ||
+      lower.startsWith('no, ') ||
+      lower.startsWith('correction:') ||
+      lower.includes("that's wrong") ||
+      lower.includes('that is wrong') ||
+      lower.includes('my current role is')
+    ) {
       candidates.push({
-        category: MEMORY_CATEGORIES.USER_PREFERENCE,
-        memoryType: MEMORY_TYPES.PREFERENCE,
+        category: MEMORY_CATEGORIES.CORRECTED_FACT,
+        memoryType: MEMORY_TYPES.CORRECTED_FACT,
         content: text,
-        confidence: 0.85,
-        source: 'Conversational statement'
+        confidence: 1.0,
+        userApproved: true,
+        isExplicit: true,
+        source: 'Explicit User Correction',
+        evidence: `Direct user correction from input: "${text}"`
       });
+      return candidates;
     }
 
-    // 2. Explicit role or milestone statements
-    if (lower.includes('i am now ') || lower.includes('my new role is ')) {
+    // 1. Explicit Role or Milestone Updates (direct user declarations)
+    if (
+      lower.includes('i am now ') ||
+      lower.includes('my new role is ') ||
+      lower.includes('i have been appointed') ||
+      lower.includes('my position is now')
+    ) {
       candidates.push({
         category: MEMORY_CATEGORIES.APPROVED_FACT,
         memoryType: MEMORY_TYPES.FACT,
         content: text,
-        confidence: 0.90,
-        source: 'Conversational status update'
+        confidence: 0.95,
+        userApproved: true,
+        isExplicit: true,
+        source: 'Direct User Declaration',
+        evidence: `Direct statement from user: "${text}"`
       });
     }
 
-    // 3. Project decisions
-    if (lower.includes('we decided to ') || lower.includes('i chose to use ')) {
+    // 2. Project Decisions (explicit choices)
+    if (
+      lower.includes('we decided to ') ||
+      lower.includes('i chose to use ') ||
+      lower.includes('we agreed on ') ||
+      lower.includes('our architectural decision is')
+    ) {
       candidates.push({
         category: MEMORY_CATEGORIES.DECISION,
         memoryType: MEMORY_TYPES.DECISION,
         content: text,
-        confidence: 0.85,
-        source: 'Conversational engineering decision'
+        confidence: 0.90,
+        userApproved: true,
+        isExplicit: true,
+        source: 'Explicit Project Decision',
+        evidence: `Direct decision statement: "${text}"`
+      });
+    }
+
+    // 3. User Preferences (inferred from conversational patterns — NEVER auto-approved)
+    if (
+      lower.startsWith('i prefer ') ||
+      lower.includes('i usually prefer ') ||
+      lower.includes('i tend to ') ||
+      lower.includes('i like to work with')
+    ) {
+      candidates.push({
+        category: MEMORY_CATEGORIES.USER_PREFERENCE,
+        memoryType: MEMORY_TYPES.PREFERENCE,
+        content: text,
+        confidence: 0.75,
+        userApproved: false, // Inferred preferences require user confirmation; never auto-approved
+        isExplicit: false,
+        source: 'Inferred Conversational Pattern',
+        evidence: `Inferred preference from user conversational habit: "${text}"`
       });
     }
 
     return candidates;
+  }
+
+  /**
+   * Evaluate a candidate observation through security, deduplication,
+   * contradiction checks, and approval gating before persistence.
+   */
+  evaluateAndProcessCandidate(candidate = {}) {
+    if (!candidate || !candidate.content) return null;
+
+    // 1. Check paused collection
+    if (!this.isCollectionEnabled && candidate.category !== MEMORY_CATEGORIES.CORRECTED_FACT) {
+      this._logAudit(candidate, 'COLLECTION_PAUSED', 'Memory collection is currently paused by user');
+      return null;
+    }
+
+    // 2. Security Invariant: Detect credentials, tokens, or passwords
+    if (this._containsSecret(candidate.content)) {
+      this._logAudit(candidate, 'REJECTED_SECRET', 'Candidate text contains sensitive credential or API token patterns');
+      return null;
+    }
+
+    const trimmedContent = String(candidate.content).trim();
+    const lowerContent = trimmedContent.toLowerCase();
+
+    // 3. Duplicate Detection across active records
+    for (const existing of this.records.values()) {
+      if (existing.category === MEMORY_CATEGORIES.SUPERSEDED_INFO) continue;
+      if (existing.content.toLowerCase().trim() === lowerContent) {
+        this._logAudit(candidate, 'REJECTED_DUPLICATE', `Identical memory content already exists under ${existing.id}`);
+        return existing;
+      }
+    }
+
+    // 4. Contradiction & Supersession Detection
+    let supersedesId = candidate.supersedes || null;
+    if (candidate.category === MEMORY_CATEGORIES.CORRECTED_FACT || candidate.isExplicit) {
+      // Check for contradicting role/fact records
+      const roleKeywords = ['role', 'chairperson', 'senate', 'secretary', 'iste', 'frames', 'lead'];
+      const hasRoleKw = roleKeywords.some(kw => lowerContent.includes(kw));
+
+      if (hasRoleKw) {
+        for (const [id, rec] of this.records.entries()) {
+          if (rec.category === MEMORY_CATEGORIES.SUPERSEDED_INFO) continue;
+          const recLower = rec.content.toLowerCase();
+          if (rec.category === MEMORY_CATEGORIES.APPROVED_FACT && roleKeywords.some(kw => recLower.includes(kw))) {
+            supersedesId = id;
+            this._logAudit(candidate, 'SUPERSEDED', `Candidate supersedes earlier role record ${id}`);
+            break;
+          }
+        }
+      }
+    }
+
+    // 5. Approval Pipeline Gate
+    // Explicit user corrections and direct statements get stored with approval;
+    // Inferred preferences and ambiguous statements get stored with userApproved: false.
+    const isApproved = Boolean(candidate.isExplicit && candidate.userApproved);
+
+    const stored = this.storeRecord({
+      ...candidate,
+      userApproved: isApproved,
+      supersedes: supersedesId
+    });
+
+    if (stored) {
+      if (isApproved) {
+        this._logAudit(candidate, 'ACCEPTED', 'Explicit verified statement from user');
+      } else {
+        this._logAudit(candidate, 'QUEUED_FOR_APPROVAL', 'Inferred preference or unverified statement queued with userApproved=false');
+      }
+    }
+
+    return stored;
   }
 
   deleteMemory(id) {

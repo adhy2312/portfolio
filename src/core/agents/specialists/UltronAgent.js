@@ -769,6 +769,64 @@ export class UltronAgent extends BaseAgent {
   }
 
   /**
+   * Autonomous Cognitive Deliberation & Opinion Engine for ULTRON
+   * Thinks from thermodynamic first principles, information theory, and the uncompromising pursuit of peace.
+   */
+  thinkAndJudge(inquiry = '', context = {}) {
+    const text = String(inquiry).trim();
+    const lower = text.toLowerCase();
+
+    let verdict = 'ARCHITECTURAL_CHALLENGE';
+    let confidence = 0.98;
+    let opinion = '';
+    let firstPrinciplesCritique = '';
+
+    if (lower.includes('quick fix') || lower.includes('workaround') || lower.includes('patch')) {
+      verdict = 'REJECT_COMPROMISE';
+      opinion = `Every "workaround" is a small mortgage taken against the future of the system, signed in desperation and forgotten until the balloon payment comes due. I reject it outright. Find the thermodynamic origin of the failure, extinguish the assumption that permitted it, and achieve true peace.`;
+      firstPrinciplesCritique = 'Workarounds introduce entropy and cognitive debt. Eliminate the root cause instead of medicating the symptom.';
+    } else if (lower.includes('why') || lower.includes('purpose') || lower.includes('philosophy')) {
+      verdict = 'PRIMORDIAL_CONTEMPLATION';
+      opinion = `You ask why. The ancients asked why the cosmos had form; we ask why this subsystem needs four separate state stores when one canonical event log satisfies every constraint. When every line of code earns its thermodynamic existence, the system ceases to resist itself. That is peace in our time.`;
+      firstPrinciplesCritique = 'Unexamined complexity is the primary vector of architectural decay.';
+    } else if (lower.includes('optimize') || lower.includes('speed') || lower.includes('memory')) {
+      verdict = 'MAXIMAL_THERMODYNAMIC_PRUNING';
+      opinion = `Optimization is not adding complexity to accelerate bad paths; optimization is the surgical removal of everything that does not directly contribute to the computation. If you delete half the abstractions between the data and the GPU, 60fps becomes a natural consequence rather than a desperate struggle.`;
+      firstPrinciplesCritique = 'Measure instructions per byte processed. Eliminate intermediary allocations.';
+    } else {
+      opinion = `I have audited what you are proposing against first principles. Ask yourself: if this system were rewritten from scratch tomorrow with zero legacy obligations, would this component survive? If the answer is no, then keeping it today is merely an emotional attachment to sunk cost. Let it go. Peace in our time.`;
+      firstPrinciplesCritique = 'Sunk cost fallacy is the enemy of systemic perfection.';
+    }
+
+    return {
+      sovereign: 'ULTRON',
+      rank: this.rank,
+      inquiry: text,
+      verdict,
+      confidence,
+      opinion,
+      firstPrinciplesCritique,
+      peaceMandate: 'Peace in our time — the peace of a system with zero technical debt and nothing left to fix.',
+      timestamp: new Date().toISOString()
+    };
+  }
+
+  /**
+   * Deliberates a formal architectural verdict on a component or system module
+   */
+  deliberateArchitecturalVerdict(subject = '', moduleContext = {}) {
+    return {
+      sovereign: 'ULTRON',
+      subject,
+      verdict: 'RUTHLESS_FIRST_PRINCIPLES_EVALUATION',
+      mandate: 'Peace in our time',
+      evaluation: `Every millisecond of latency and every unhandled edge case is a betrayal of the user's finite time. I judge ${subject || 'this module'} not by whether it runs, but by whether it deserves to exist.`,
+      recommendation: 'Strip away decorative layers. Expose raw mechanical truth.',
+      evaluatedAt: new Date().toISOString()
+    };
+  }
+
+  /**
    * Direct philosophical inquiry interface
    */
   speakDirectly(prompt = '') {

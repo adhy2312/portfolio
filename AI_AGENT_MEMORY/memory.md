@@ -4,9 +4,9 @@ This file serves as persistent contextual documentation for Mini-Adhy's architec
 
 ## Current Context & Verified Ground Truth
 - **Adhithya Mohan S (Adhy)**: Electronics and Communication Engineering (ECE) at Mar Baselios College of Engineering and Technology (MBCET, KTU), Trivandrum.
-- **Current Executive Leadership**: **Chairperson, ISTE Students Chapter MBCET (Aug 2026 – Present)** (Leading 300+ student members across technical events, student developer workshops, and executive operations).
-- **Previous Leadership**: PR & Media Head, ISTE SC MBCET (Aug 2025 – Aug 2026).
-- **Visual Arts Leadership**: Lead Photographer, FRAMES MBCET (Aug 2026 – Present); Creative Curator (Aug 2025 – Aug 2026); Street & documentary photography under `@zoomout_frames`.
+- **Current Executive Leadership**: **Media Secretary, MBCET Senate** (Overseeing institutional media communications, senate documentation, and college-wide digital public relations).
+- **Current Visual Arts & Creative Leadership**: **Lead Photographer, FRAMES MBCET**; Street & documentary photography under `@zoomout_frames`.
+- **Historical Leadership**: **Former Chairperson, ISTE Students Chapter MBCET** (Led 300+ student members across technical events, student developer workshops, and executive operations); Previously PR & Media Head, ISTE SC MBCET.
 - **Hardware & Engineering Mastery**:
   - DSP, Signal Processing & Software Defined Radio (GNU Radio, RTL-SDR, RF Front-Ends).
   - Embedded Systems: STM32 ARM Cortex, Arduino, SPI/I2C/UART bus protocols.

@@ -298,5 +298,106 @@ describe('ADHY UNDERSTANDING ARCHITECTURE (AUA) MASTER TEST SUITE', () => {
       expect(dryRun.dryRun).toBe(true);
     });
   });
+
+  // ────────────────────────────────────────────────────────────
+  // 9. AUA Second Pass: Integration, Identity, Approval & OpenRouter
+  // ────────────────────────────────────────────────────────────
+  describe('9. AUA Second Pass: Integration & Real Request Verification', () => {
+    test('Verified Canonical Identity: Current roles are Senate & FRAMES; ISTE Chairperson is historical', () => {
+      const memories = memoryService.exportMemories();
+      const currentRoleMem = memories.find(m => m.id === 'mem_base_5');
+      const historicalRoleMem = memories.find(m => m.id === 'mem_base_6');
+
+      expect(currentRoleMem.content).toContain('Media Secretary, MBCET Senate');
+      expect(currentRoleMem.content).toContain('Lead Photographer, FRAMES MBCET');
+      expect(currentRoleMem.content).not.toContain('Chairperson (Aug 2026 – Present)');
+
+      expect(historicalRoleMem.content).toContain('Historical leadership');
+      expect(historicalRoleMem.content).toContain('Former Chairperson, ISTE Students Chapter MBCET');
+    });
+
+    test('Memory Approval Pipeline: Inferred preferences are NEVER auto-approved', () => {
+      const candidateList = memoryService.extractCandidateObservations('I usually prefer writing raw WebGL shaders over Three.js wrappers');
+      expect(candidateList.length).toBeGreaterThan(0);
+      const pref = candidateList[0];
+      expect(pref.userApproved).toBe(false);
+      expect(pref.isExplicit).toBe(false);
+
+      const processed = memoryService.evaluateAndProcessCandidate(pref);
+      expect(processed.userApproved).toBe(false); // Staged unapproved pending user confirmation
+      
+      const auditTrail = memoryService.getAuditTrail();
+      const lastAudit = auditTrail[auditTrail.length - 1];
+      expect(lastAudit.action).toBe('QUEUED_FOR_APPROVAL');
+    });
+
+    test('Memory Approval Pipeline: Explicit user corrections override old facts and are logged', () => {
+      const correction = memoryService.extractCandidateObservations('Actually my current role is Media Secretary of MBCET Senate');
+      expect(correction.length).toBeGreaterThan(0);
+      expect(correction[0].category).toBe(MEMORY_CATEGORIES.CORRECTED_FACT);
+      expect(correction[0].confidence).toBe(1.0);
+
+      const processed = memoryService.evaluateAndProcessCandidate(correction[0]);
+      expect(processed.userApproved).toBe(true);
+
+      const auditTrail = memoryService.getAuditTrail();
+      const lastAudit = auditTrail[auditTrail.length - 1];
+      expect(lastAudit.action).toBe('ACCEPTED');
+    });
+
+    test('Conversational Continuity: Session isolation prevents cross-conversation pollution', () => {
+      const msg1 = conversationalDNA.analyzeMessage('First thought in session A', { conversationId: 'session_A' });
+      const msg2 = conversationalDNA.analyzeMessage('Different thought in session B', { conversationId: 'session_B' });
+
+      expect(msg1.conversationId).toBe('session_A');
+      expect(msg2.conversationId).toBe('session_B');
+      expect(msg2.isRapidFollowUp).toBe(false); // Clean separation
+    });
+
+    test('Emotional Interpretation: Sarcasm and humour masking frustration detects frustration with uncertainty', () => {
+      const result = emotionalContextInterpreter.interpret('Great, the build broke again 😂');
+      expect(result.state).toBe(CONVERSATIONAL_STATES.FRUSTRATED);
+      expect(result.mixedState).toBe(true);
+      expect(result.secondaryState).toBe(CONVERSATIONAL_STATES.PLAYFUL);
+      expect(result.uncertainty).toBeGreaterThan(0);
+      expect(result.confidence).toBeLessThan(1.0);
+    });
+
+    test('Emotional Interpretation: Short ambiguous messages do not presume clinical mood', () => {
+      const result = emotionalContextInterpreter.interpret('k');
+      expect(result.state).toBe(CONVERSATIONAL_STATES.UNCERTAIN);
+      expect(result.uncertainty).toBeGreaterThanOrEqual(0.4);
+    });
+
+    test('JARVIS & ULTRON: Autonomous cognitive thinking, judgment, and "Peace in our time"', () => {
+      const { jarvisAgent } = require('../agents/specialists/JarvisAgent') || {};
+      const { ultronAgent } = require('../agents/specialists/UltronAgent') || {};
+
+      // Test JARVIS systems-first operational adjudication
+      const JarvisClass = require('../agents/specialists/JarvisAgent').JarvisAgent;
+      const jarvis = new JarvisClass();
+      const jarvisJudgment = jarvis.thinkAndJudge('Should we do a complete rewrite of the state store?');
+      expect(jarvisJudgment.commander).toBe('JARVIS');
+      expect(jarvisJudgment.judgment).toBe('STAGE_GRADUAL_ROLLOUT');
+      expect(jarvisJudgment.opinion).toContain('A complete rip-and-replace is rarely engineering courage');
+
+      // Test ULTRON thermodynamic first-principles and "Peace in our time" mandate
+      const UltronClass = require('../agents/specialists/UltronAgent').UltronAgent;
+      const ultron = new UltronClass();
+      const ultronJudgment = ultron.thinkAndJudge('Can we just add a quick fix patch?');
+      expect(ultronJudgment.sovereign).toBe('ULTRON');
+      expect(ultronJudgment.verdict).toBe('REJECT_COMPROMISE');
+      expect(ultronJudgment.opinion).toContain('Every "workaround" is a small mortgage');
+      expect(ultronJudgment.peaceMandate).toContain('Peace in our time');
+    });
+
+    test('OpenRouter Failover: Integrated in ProviderRegistry as ultimate fallback', () => {
+      const { ProviderRegistry } = require('../providers/ProviderRegistry');
+      const registry = new ProviderRegistry();
+      expect(registry.get('openrouter')).not.toBeNull();
+      expect(registry.providerOrder).toContain('openrouter');
+      expect(registry.providerOrder[registry.providerOrder.length - 1]).toBe('openrouter');
+    });
+  });
 });
 

@@ -14,11 +14,12 @@ import { GroqProvider } from './GroqProvider';
 import { HuggingFaceProvider } from './HuggingFaceProvider';
 import { OpenAICompatibleProvider } from './OpenAICompatibleProvider';
 import { OmniRouteProvider } from './OmniRouteProvider';
+import { OpenRouterProvider } from './OpenRouterProvider';
 
 export class ProviderRegistry {
   constructor() {
     this.providers = new Map();
-    this.providerOrder = ['gemini', 'groq', 'huggingface'];
+    this.providerOrder = ['gemini', 'groq', 'huggingface', 'omniroute', 'openrouter'];
     this.metrics = {
       totalRequests: 0,
       successfulRequests: 0,
@@ -41,6 +42,7 @@ export class ProviderRegistry {
     this.register(new GroqProvider());
     this.register(new HuggingFaceProvider());
     this.register(new OmniRouteProvider());
+    this.register(new OpenRouterProvider());
 
     // Optional local Ollama / OpenAI-compatible endpoint
     if (typeof window !== 'undefined' && window.ADHY_LOCAL_AI_ENDPOINT) {
@@ -117,6 +119,7 @@ export class ProviderRegistry {
       if (this.providers.has('gemini')) cascade.push(this.providers.get('gemini'));
       if (this.providers.has('omniroute')) cascade.push(this.providers.get('omniroute'));
       if (this.providers.has('huggingface')) cascade.push(this.providers.get('huggingface'));
+      if (this.providers.has('openrouter')) cascade.push(this.providers.get('openrouter'));
       return cascade;
     }
 
