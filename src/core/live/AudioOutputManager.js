@@ -120,18 +120,21 @@ export class AudioOutputManager {
     const utterance = new SpeechSynthesisUtterance(text);
     this.currentUtterance = utterance;
 
-    // Mini-Adhy natural voice preferences
-    utterance.rate = options.rate || 1.05;
-    utterance.pitch = options.pitch || 1.0;
+    // Paul Bettany (JARVIS) conversational voice preference & pacing
+    utterance.rate = options.rate || 0.96; // Calibrated deliberate butler cadence
+    utterance.pitch = options.pitch || 0.98; // Subtle low-register warmth
     utterance.volume = this.volume;
 
-    // Pick best available English voice
+    // Prioritize British English Male voices (Paul Bettany / JARVIS timbre)
     const voices = window.speechSynthesis.getVoices();
-    const naturalVoice = voices.find(v => (
-      (v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Google')))
-    )) || voices.find(v => v.lang.startsWith('en')) || null;
+    const bettanyVoice = voices.find(v => (
+      (v.lang === 'en-GB' || v.lang === 'en_GB') && 
+      (v.name.includes('Male') || v.name.includes('George') || v.name.includes('Ryan') || v.name.includes('Thomas') || v.name.includes('Natural') || v.name.includes('Neural'))
+    )) || voices.find(v => v.lang.includes('en-GB') || v.lang.includes('en_GB'))
+       || voices.find(v => v.lang.startsWith('en') && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Google')))
+       || voices.find(v => v.lang.startsWith('en')) || null;
 
-    if (naturalVoice) utterance.voice = naturalVoice;
+    if (bettanyVoice) utterance.voice = bettanyVoice;
 
     this.isPlaying = true;
     this.onPlaybackStart();
