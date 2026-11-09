@@ -100,11 +100,14 @@ export default function LiveModeModal({ isOpen, onClose }) {
     return () => clearTimeout(timer);
   }, [errorMsg]);
 
-  // Window Focus Auto-Sync: Proactively reconnect microphone when user grants permission in Chrome flyout
+  // Proactive Multi-Trigger Auto-Sync: Listen for browser permission status change, devicechange, window focus & visibility
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleWindowFocus = async () => {
+    let micPermissionStatus = null;
+    let camPermissionStatus = null;
+
+    const performSync = async () => {
       if (sessionStarted && (sessionState.micPermissionDenied || sessionState.micHardwareUnavailable)) {
         try {
           const reconnected = await liveSessionManager.syncPermissions();
@@ -115,9 +118,47 @@ export default function LiveModeModal({ isOpen, onClose }) {
       }
     };
 
-    window.addEventListener('focus', handleWindowFocus);
-    return () => window.removeEventListener('focus', handleWindowFocus);
-  }, [isOpen, sessionStarted, sessionState.micPermissionDenied, sessionState.micHardwareUnavailable]);
+    // 1. Instant Permissions API event listener (fires the exact millisecond user toggles Chrome site settings flyout)
+    if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+      navigator.permissions.query({ name: 'microphone' }).then((pStatus) => {
+        micPermissionStatus = pStatus;
+        pStatus.onchange = () => {
+          if (pStatus.state === 'granted') {
+            performSync();
+          }
+        };
+      }).catch(() => {});
+
+      navigator.permissions.query({ name: 'camera' }).then((pStatus) => {
+        camPermissionStatus = pStatus;
+        pStatus.onchange = () => {
+          if (pStatus.state === 'granted' && errorMsg && /camera/i.test(errorMsg)) {
+            setErrorMsg(null);
+          }
+        };
+      }).catch(() => {});
+    }
+
+    // 2. Hardware plug/unplug or default device change
+    const handleDeviceChange = () => { performSync(); };
+    if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
+      navigator.mediaDevices.addEventListener('devicechange', handleDeviceChange);
+    }
+
+    // 3. Window focus and visibility transitions
+    window.addEventListener('focus', performSync);
+    document.addEventListener('visibilitychange', performSync);
+
+    return () => {
+      if (micPermissionStatus) micPermissionStatus.onchange = null;
+      if (camPermissionStatus) camPermissionStatus.onchange = null;
+      if (typeof navigator !== 'undefined' && navigator.mediaDevices) {
+        navigator.mediaDevices.removeEventListener('devicechange', handleDeviceChange);
+      }
+      window.removeEventListener('focus', performSync);
+      document.removeEventListener('visibilitychange', performSync);
+    };
+  }, [isOpen, sessionStarted, sessionState.micPermissionDenied, sessionState.micHardwareUnavailable, errorMsg]);
 
   // Cleanup subscription on unmount
   useEffect(() => {
@@ -429,28 +470,42 @@ export default function LiveModeModal({ isOpen, onClose }) {
           )}
         </div>
 
-        {/* Central Quantum Arc-Reactor Holographic Orb */}
+        {/* Central Quantum Arc-Reactor Holographic Orb Arena */}
         <div className={`ma-live-visualizer-wrap ${cameraActive ? 'ma-live-visualizer-wrap--compact' : ''}`}>
           {!sessionStarted ? (
             /* ── PRE-START SPLASH ── */
             <div className="ma-live-presession">
-              {/* Quantum Arc Reactor Core (Pre-Session) */}
+              {/* Upgraded 3D Quantum Arc Reactor Core (Pre-Session) */}
               <div className="ma-stark-orb-assembly ma-stark-orb-assembly--idle">
+                {/* Outer Holographic Reticle Ring with Precision Compass Ticks */}
                 <div className="ma-stark-reticle-outer">
-                  <span className="ma-stark-tick ma-stark-tick--0">000</span>
-                  <span className="ma-stark-tick ma-stark-tick--90">090</span>
-                  <span className="ma-stark-tick ma-stark-tick--180">180</span>
-                  <span className="ma-stark-tick ma-stark-tick--270">270</span>
+                  <span className="ma-stark-tick ma-stark-tick--0">000°</span>
+                  <span className="ma-stark-tick ma-stark-tick--90">090°</span>
+                  <span className="ma-stark-tick ma-stark-tick--180">180°</span>
+                  <span className="ma-stark-tick ma-stark-tick--270">270°</span>
                 </div>
+                {/* 3D Pitch-Axis Gyroscopic Gimbal */}
+                <div className="ma-stark-gimbal ma-stark-gimbal--pitch" />
+                {/* 3D Yaw-Axis Gyroscopic Gimbal */}
+                <div className="ma-stark-gimbal ma-stark-gimbal--yaw" />
+                {/* Secondary Gyroscopic Ring */}
                 <div className="ma-stark-reticle-mid" />
+                {/* Counter-Rotating Gyroscopic Ring */}
                 <div className="ma-stark-reticle-inner" />
+                {/* Orbital Satellite Node */}
+                <div className="ma-stark-satellite">
+                  <div className="ma-stark-satellite-photon" />
+                </div>
+                {/* Pulsating Quantum Wave Corona */}
                 <div className="ma-stark-energy-corona" />
+                {/* Arc Reactor Core with Pure Cyan Volumetric Plasma */}
                 <div className="ma-stark-reactor-core">
                   <div className="ma-stark-core-plasma" />
                   <div className="ma-stark-core-singularity" />
                   <div className="ma-stark-core-flare" />
                   <div className="ma-stark-core-rings" />
                   <div className="ma-stark-conduit-spokes" />
+                  <div className="ma-stark-glass-specular" />
                 </div>
               </div>
 
@@ -477,30 +532,50 @@ export default function LiveModeModal({ isOpen, onClose }) {
                 className={`ma-stark-orb-assembly ma-stark-orb-assembly--${orbStatus}`}
                 style={{ transform: `scale(${ringScale})` }}
               >
+                {/* Acoustic Soundwave Resonant Rings */}
+                {volume > 0.05 && (
+                  <>
+                    <div className="ma-stark-soundwave-ring ma-stark-soundwave-ring--1" />
+                    <div className="ma-stark-soundwave-ring ma-stark-soundwave-ring--2" />
+                  </>
+                )}
+
                 {/* Outer Reticle Ring with Precision Tick Marks & Cardinal Indicators */}
                 <div className="ma-stark-reticle-outer">
-                  <span className="ma-stark-tick ma-stark-tick--0">000</span>
-                  <span className="ma-stark-tick ma-stark-tick--90">090</span>
-                  <span className="ma-stark-tick ma-stark-tick--180">180</span>
-                  <span className="ma-stark-tick ma-stark-tick--270">270</span>
+                  <span className="ma-stark-tick ma-stark-tick--0">000°</span>
+                  <span className="ma-stark-tick ma-stark-tick--90">090°</span>
+                  <span className="ma-stark-tick ma-stark-tick--180">180°</span>
+                  <span className="ma-stark-tick ma-stark-tick--270">270°</span>
                 </div>
                 
+                {/* 3D Pitch-Axis Gyroscopic Gimbal */}
+                <div className="ma-stark-gimbal ma-stark-gimbal--pitch" />
+
+                {/* 3D Yaw-Axis Gyroscopic Gimbal */}
+                <div className="ma-stark-gimbal ma-stark-gimbal--yaw" />
+
                 {/* Secondary Gyroscopic Ring */}
                 <div className="ma-stark-reticle-mid" />
 
                 {/* Counter-Rotating Gyroscopic Ring */}
                 <div className="ma-stark-reticle-inner" />
+
+                {/* Orbital Satellite Node */}
+                <div className="ma-stark-satellite">
+                  <div className="ma-stark-satellite-photon" />
+                </div>
                 
                 {/* Pulsating Quantum Wave Corona */}
                 <div className="ma-stark-energy-corona" />
                 
-                {/* Arc Reactor Core with Pure Cyan Plasma */}
+                {/* Arc Reactor Core with Pure Cyan Volumetric Plasma */}
                 <div className="ma-stark-reactor-core">
                   <div className="ma-stark-core-plasma" />
                   <div className="ma-stark-core-singularity" />
                   <div className="ma-stark-core-flare" />
                   <div className="ma-stark-core-rings" />
                   <div className="ma-stark-conduit-spokes" />
+                  <div className="ma-stark-glass-specular" />
                 </div>
 
                 {/* State Glow Aura */}
