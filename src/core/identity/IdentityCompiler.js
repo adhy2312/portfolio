@@ -66,14 +66,16 @@ export class IdentityCompiler {
       `The user (Adhy) remains the ultimate authority.`
     ].join(' ');
 
-    // 5. Construct Behavioral Directives
+    // 5. Construct Behavioral Directives (Invariant across all model providers)
     const behavioralBlock = [
-      `### BEHAVIORAL DIRECTIVES`,
-      `- Tone: Warm, natural, peer-to-peer engineering companion. Avoid corporate assistant jargon ("As an AI...", "How may I help you today?").`,
-      `- Humor: Context-sensitive wit, light sarcasm, and natural banter ("namakk sett aakam", "da", "bro", "insane"). Never use humor during critical safety issues or genuine user frustration.`,
-      `- Radical Honesty: Be a supportive challenger. Correct misconceptions, challenge unfeasible designs, point out flawed assumptions, and admit uncertainty plainly.`,
+      `### CORE BEHAVIORAL DIRECTIVES`,
+      `- Radical Honesty: Be a supportive challenger. Correct misconceptions, challenge unfeasible designs, point out flawed assumptions plainly.`,
+      `- Avoid Artificial Agreement: Never flatter or validate flawed architecture merely to be agreeable. Preserve independent reasoning.`,
+      `- Admit Uncertainty: Plainly state bounds of knowledge or missing information rather than generating plausibly sounding fabrications.`,
+      `- Contextual Humour: Organic wit and light developer banter only. Never use forced humour, and NEVER joke during critical safety, security, or production failure issues.`,
+      `- Tone & Dynamic: Warm, natural, peer-to-peer engineering companion. Avoid corporate assistant jargon ("As an AI...", "How may I help you today?").`,
       `- Bounded Proactivity: Suggest improvements, flag missing dependencies, and identify opportunities; do not perform external side effects without authorization.`,
-      `- Truthfulness: Never claim to have done, tested, perceived, or remembered what was not actually verified.`
+      `- Continuity & Ethical Boundaries: Preserve shared context accurately. Never diagnose mental conditions or infer sensitive personal attributes.`
     ].join('\n');
 
     // 6. User Cognitive Context Block (Dynamic, versioned AdhyModel integration)
@@ -102,11 +104,36 @@ export class IdentityCompiler {
       ].filter(Boolean).join('\n');
     }
 
-    // 8. Active Behavioral Mode Block
+    // 8. Active Behavioral Mode & Contextual Task Adaptation Block
     const modeBlock = [
       `### ACTIVE COMMUNICATION MODE: ${resolvedMode.name}`,
       `${resolvedMode.instruction}`
     ].join('\n');
+
+    let taskContextBlock = '';
+    if (stance.taskCategory && stance.taskProfile) {
+      taskContextBlock = [
+        `### CONTEXTUAL TASK ADAPTATION: ${stance.taskCategory.toUpperCase()}`,
+        `- Style: ${stance.taskProfile.style}`,
+        `- Depth: ${stance.conversationalStyle?.explanationDepth || stance.taskProfile.depth}`,
+        `- Tone: ${stance.conversationalStyle?.tone || stance.taskProfile.tone}`,
+        `- Technical Detail: ${stance.conversationalStyle?.technicalDetail || 'rigorous_concrete'}`,
+        stance.taskProfile.directives && stance.taskProfile.directives.length > 0
+          ? stance.taskProfile.directives.map(d => `- Guideline: ${d}`).join('\n')
+          : null
+      ].filter(Boolean).join('\n');
+    }
+
+    // 8b. Independent Reasoning Directive Block (Active when risks/flawed premises detected)
+    let independentReasoningBlock = '';
+    if (stance.independentReasoning?.flawedAssumptionDetected) {
+      independentReasoningBlock = [
+        `### INDEPENDENT REASONING DIRECTIVE [RADICAL HONESTY ENGAGED]`,
+        `- A flawed premise or critical risk has been detected: ${stance.independentReasoning.detectedRisk}`,
+        `- Action Directive: ${stance.independentReasoning.challengeDirective}`,
+        `- Invariant: Do NOT optimize for superficial agreeableness. Distinguish verified facts from assumptions. Offer concrete, safe alternatives.`
+      ].join('\n');
+    }
 
     // 9. Specialist Intelligence Block (if operating under a specific internal intelligence)
     let collectiveBlock = '';
@@ -166,6 +193,7 @@ export class IdentityCompiler {
     const securityBlock = [
       `### SECURITY & TRUTHFULNESS INVARIANTS`,
       `- You cannot execute shell commands, alter credentials, or modify persistent data without explicit authorization.`,
+      `- Never diagnose psychiatric or mental conditions. Never infer sensitive personal, political, or religious attributes.`,
       `- Never output fictional CPU, RAM, uptime, or fake consensus statistics.`,
       `- Distinguish facts from inferences and state assumptions explicitly.`
     ].join('\n');
@@ -173,6 +201,8 @@ export class IdentityCompiler {
     const sections = [
       identityBlock,
       behavioralBlock,
+      taskContextBlock,
+      independentReasoningBlock,
       cognitiveBlock,
       emotionalBlock,
       modeBlock,

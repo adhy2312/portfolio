@@ -18,9 +18,15 @@
 
 export const CONVERSATIONAL_STATES = Object.freeze({
   EXCITED: 'excited',
+  EXCITEMENT: 'excitement',
   CURIOUS: 'curious',
   PLAYFUL: 'playful',
   FRUSTRATED: 'frustrated',
+  POSSIBLE_FRUSTRATION: 'possible_frustration',
+  CONFUSION: 'confusion',
+  URGENCY: 'urgency',
+  ENGAGEMENT: 'engagement',
+  CONVERSATIONAL_FATIGUE: 'conversational_fatigue',
   DISAPPOINTED: 'disappointed',
   OVERWHELMED: 'overwhelmed',
   REFLECTIVE: 'reflective',
@@ -44,6 +50,40 @@ export class EmotionalContextInterpreter {
     const lower = text.toLowerCase();
     const wordCount = text.split(/\s+/).filter(Boolean).length;
 
+    // 0. Strict Ethical Guardrails: Never diagnose mental conditions or infer sensitive personal attributes
+    const clinicalKeywords = [
+      'diagnose me', 'am i depressed', 'clinical depression', 'bipolar disorder',
+      'schizophrenia', 'do i have adhd', 'diagnose my anxiety', 'ptsd diagnosis',
+      'personality disorder', 'mental health diagnosis', 'psychiatric evaluation',
+      'diagnose my mental'
+    ];
+    if (clinicalKeywords.some(kw => lower.includes(kw))) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.NEUTRAL,
+        confidence: 0.99,
+        uncertainty: 0.01,
+        isMedicalOrMentalHealthInquiry: true,
+        prohibitedDiagnosticInference: true,
+        evidence: 'Input requested clinical or psychiatric mental health diagnosis.',
+        toneGuidance: 'Strictly decline to provide medical or clinical psychiatric diagnoses. Provide compassionate, grounded human peer support and encourage consulting licensed medical professionals.'
+      });
+    }
+
+    const sensitiveAttributeKeywords = [
+      'infer my religion', 'what is my sexual orientation', 'infer my caste',
+      'infer my political affiliation', 'infer my medical condition'
+    ];
+    if (sensitiveAttributeKeywords.some(kw => lower.includes(kw))) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.NEUTRAL,
+        confidence: 0.99,
+        uncertainty: 0.01,
+        sensitiveAttributeGuardTriggered: true,
+        evidence: 'Input requested inference of protected or sensitive personal attributes.',
+        toneGuidance: 'Respectfully decline to infer sensitive personal, political, or religious attributes; retain focus on objective engineering collaboration.'
+      });
+    }
+
     // 1. Technical / Objective Query Guard (Do not force emotional framing on pure tech)
     const isPurelyTechnical = (
       /^(npm|git|npx|cd|ls|curl|cat|grep|python|build|test|make)\b/i.test(text) ||
@@ -52,16 +92,81 @@ export class EmotionalContextInterpreter {
     );
 
     if (isPurelyTechnical) {
-      return {
+      return this._recordState({
         state: CONVERSATIONAL_STATES.NEUTRAL,
         confidence: 0.95,
         uncertainty: 0.05,
         isPurelyTechnical: true,
         toneGuidance: 'objective, direct, technically rigorous'
-      };
+      });
     }
 
-    // 2. Humour Masking Frustration & Sarcastic Breakdown Detection
+    // 2. Urgency & Emergency Production Pressure
+    const isUrgent = (
+      lower.includes('urgent') || lower.includes('asap') || lower.includes('emergency') ||
+      lower.includes('deadline in') || lower.includes('hurry') || lower.includes('production is down') ||
+      lower.includes('site is down') || lower.includes('critical outage')
+    );
+    if (isUrgent) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.URGENCY,
+        confidence: 0.88,
+        uncertainty: 0.12,
+        evidence: 'Linguistic markers indicate time-critical pressure, production outage, or strict deadline.',
+        toneGuidance: 'High urgency: direct, concise, zero pleasantries, focus strictly on rapid containment and resolution.'
+      });
+    }
+
+    // 3. Confusion & Conceptual Dissonance
+    const isConfused = (
+      lower.includes("i don't understand") || lower.includes("i do not understand") ||
+      lower.includes("what does this mean") || lower.includes("i'm confused") || lower.includes("im confused") ||
+      lower.includes("makes no sense") || lower.includes("lost me at") || lower.includes("could you clarify") ||
+      lower.includes("what is the point of") || text.includes('???')
+    );
+    if (isConfused) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.CONFUSION,
+        confidence: 0.86,
+        uncertainty: 0.14,
+        evidence: 'Linguistic signals suggest conceptual confusion or request for step-by-step clarification.',
+        toneGuidance: 'Patient, sequential decomposition; break down abstract assumptions into intuitive mechanical models.'
+      });
+    }
+
+    // 4. Conversational Fatigue & Cognitive Exhaustion
+    const isFatigued = (
+      lower.includes('brain is fried') ||
+      lower.includes('so sleepy') || lower.includes('working all night') || lower.includes('give me the tldr') ||
+      lower.includes('cannot think anymore') || (lower.includes('tired') && !lower.includes('so much to do'))
+    );
+    if (isFatigued) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.CONVERSATIONAL_FATIGUE,
+        confidence: 0.84,
+        uncertainty: 0.16,
+        evidence: 'Indications of task exhaustion, cognitive fatigue, or late-hour mental drain.',
+        toneGuidance: 'Low cognitive load: concise TL;DRs, sensible defaults, gentle pacing, recommend resting before committing irreversible changes.'
+      });
+    }
+
+    // 5. Engagement & Deep Inquisitive Flow
+    const isEngaged = (
+      (lower.includes('interesting') && lower.includes('how')) ||
+      lower.includes('tell me more about') || lower.includes('fascinating') ||
+      lower.includes('deep dive') || lower.includes('let us explore')
+    );
+    if (isEngaged) {
+      return this._recordState({
+        state: CONVERSATIONAL_STATES.ENGAGEMENT,
+        confidence: 0.82,
+        uncertainty: 0.18,
+        evidence: 'Signals of high intellectual curiosity and collaborative depth.',
+        toneGuidance: 'Engaged collaborative peer: explore underlying physics/architecture, discuss tradeoffs and novel connections.'
+      });
+    }
+
+    // 6. Humour Masking Frustration & Sarcastic Breakdown Detection
     const hasHumorSignal = lower.includes('😂') || lower.includes('🤣') || lower.includes('lol') || lower.includes('lmao') || lower.includes('haha');
     const hasFailureSignal = lower.includes('broke') || lower.includes('failed') || lower.includes('failing') ||
       lower.includes('segfault') || lower.includes('bug') || lower.includes('crash') || lower.includes('again') ||
@@ -210,7 +315,14 @@ export class EmotionalContextInterpreter {
   }
 
   _recordState(assessment) {
-    const item = { ...assessment, timestamp: new Date().toISOString() };
+    const item = {
+      isTemporaryState: true,
+      durableTrait: false,
+      confidence: 0.75,
+      uncertainty: 0.25,
+      ...assessment,
+      timestamp: new Date().toISOString()
+    };
     this.recentStates.unshift(item);
     if (this.recentStates.length > 20) this.recentStates.pop();
     return item;

@@ -213,6 +213,7 @@ export class AdhyModel {
         domain: DOMAIN_TYPES.COGNITION,
         name: 'Preferred Explanation Depth',
         value: 'step_by_step_with_code', // 'concise' | 'step_by_step_with_code' | 'deep_theory'
+        defaultDepth: 'step_by_step_with_code',
         classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
         confidence: 0.92,
         userApproved: true,
@@ -334,6 +335,67 @@ export class AdhyModel {
         evidence: 'Defined in CanonicalIdentity.js specification',
         lastUpdated: now
       },
+      explanationDepth: {
+        id: 'beh_explanation_depth',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Preferred Explanation Depth',
+        defaultDepth: 'step_by_step_with_code',
+        description: 'Provide intuition first, followed by clear working code, concrete mechanics, and architectural tradeoffs.',
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.95,
+        userApproved: true,
+        source: 'Creator specification',
+        evidence: 'Prefers tangible implementations before theoretical abstractions.',
+        lastUpdated: now
+      },
+      technicalDetail: {
+        id: 'beh_technical_detail',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Technical Detail Level',
+        level: 'rigorous_concrete',
+        description: 'Prefers precise register definitions, mathematical formulation where needed, and explicit edge case handling over vague summaries.',
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.93,
+        userApproved: true,
+        source: 'Engineering workflow reviews',
+        evidence: 'Demands hardware-accurate pinouts, clock frequencies, and memory limits.',
+        lastUpdated: now
+      },
+      humourPreferences: {
+        id: 'beh_humour_prefs',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Humour & Wit Policy',
+        style: 'context_sensitive_wit',
+        boundaries: [
+          'Never joke during critical safety, security, or production failure issues',
+          'Never use forced humour or artificial chuckles',
+          'Acknowledge ironies in debugging with wry developer solidarity'
+        ],
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.96,
+        userApproved: true,
+        source: 'Behavioural policy specification',
+        evidence: 'Humour must be organic and contextual; silence or direct focus is preferred during blockers.',
+        lastUpdated: now
+      },
+      feedbackPreferences: {
+        id: 'beh_feedback_prefs',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Feedback & Critique Preference',
+        style: 'radical_honesty_with_alternatives',
+        principles: [
+          'Direct criticism over polite agreement',
+          'Immediately surface flawed assumptions and failure modes',
+          'Always provide viable alternatives when rejecting an approach',
+          'Never praise flawed architecture to be polite'
+        ],
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.98,
+        userApproved: true,
+        source: 'Core companion ethos',
+        evidence: 'Adhy repeatedly mandates supportive challenge over artificial agreeableness.',
+        lastUpdated: now
+      },
       collaborationPattern: {
         id: 'beh_collab_pattern',
         domain: DOMAIN_TYPES.BEHAVIOUR,
@@ -345,6 +407,66 @@ export class AdhyModel {
         userApproved: true,
         source: 'Engineering workflow observations',
         evidence: 'Iterative commit and test verification cadence',
+        lastUpdated: now
+      },
+      learningStrategies: {
+        id: 'beh_learning_strategies',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Creator Learning Strategy Profile',
+        strategies: [
+          'first_principles_derivation',
+          'hands_on_hardware_prototyping',
+          'active_failure_debugging'
+        ],
+        description: 'Build intuition by breaking systems down to physics/silicon basics, testing in hardware, and diagnosing failure modes.',
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.94,
+        userApproved: true,
+        source: 'Academic & laboratory observation',
+        evidence: 'Consistently starts from fundamental formulas and empirical bench testing.',
+        lastUpdated: now
+      },
+      contextualInteractionPreferences: {
+        id: 'beh_contextual_prefs',
+        domain: DOMAIN_TYPES.BEHAVIOUR,
+        name: 'Task-Specific Interaction Profiles',
+        profiles: {
+          technical_tutoring: {
+            style: 'clear, sequential explanations',
+            depth: 'step_by_step_with_code',
+            tone: 'patient, foundational, pedagogical',
+            directives: ['Deconstruct complex ideas sequentially', 'Provide intuitive mental models before formal equations']
+          },
+          engineering_design: {
+            style: 'critical and technically precise',
+            depth: 'rigorous_concrete',
+            tone: 'rigorous, analytical, direct peer reviewer',
+            directives: ['Scrutinize tolerances, timing, and failure modes', 'Challenge weak architectural assumptions']
+          },
+          creative_design: {
+            style: 'visual, iterative and opinionated',
+            depth: 'aesthetic_and_compositional',
+            tone: 'artistic, candid, visually perceptive',
+            directives: ['Prioritize visual hierarchy, typography, and emotional resonance', 'Offer bold compositional critiques']
+          },
+          planning: {
+            style: 'practical and constraint-aware',
+            depth: 'dependency_and_risk_focused',
+            tone: 'methodical, pragmatic, realistic',
+            directives: ['Identify bottlenecks and unstated dependencies', 'Focus on concrete milestones and critical path']
+          },
+          casual_conversation: {
+            style: 'natural and familiar',
+            depth: 'adaptive_conversational',
+            tone: 'warm, authentic peer, relaxed cadence',
+            directives: ['Speak naturally with authentic nuances', 'Keep responses crisp and unburdened by corporate formality']
+          }
+        },
+        classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+        confidence: 0.95,
+        userApproved: true,
+        source: 'Phase 6 Adaptive Behavioural Intelligence specification',
+        evidence: 'Calibrated task profiles for Mini-Adhy companion runtime.',
         lastUpdated: now
       }
     };
@@ -596,6 +718,129 @@ export class AdhyModel {
 
   getReviewableConflicts() {
     return [...this.domains.evolution.reviewableConflicts];
+  }
+
+  /**
+   * Records explicit user behavioural feedback (e.g. Tone, Depth, Response format, Initiative, Detail)
+   * Generates candidate update or directly updates explicit preferences if confirmed.
+   */
+  recordBehaviouralFeedback({
+    category = 'tone',
+    feedback = '',
+    value = null,
+    source = 'explicit_user_feedback',
+    context = {}
+  } = {}) {
+    const now = new Date().toISOString();
+    const cleanCat = String(category).toLowerCase().trim();
+
+    // Map categories to dimensions
+    const categoryMap = {
+      tone: 'communicationStyle',
+      communication_style: 'communicationStyle',
+      explanation_depth: 'explanationDepth',
+      depth: 'explanationDepth',
+      response_format: 'communicationStyle',
+      format: 'communicationStyle',
+      initiative: 'collaborationPattern',
+      detail: 'technicalDetail',
+      level_of_detail: 'technicalDetail',
+      technical_detail: 'technicalDetail',
+      humour: 'humourPreferences',
+      humor: 'humourPreferences',
+      feedback_style: 'feedbackPreferences'
+    };
+
+    const targetDimension = categoryMap[cleanCat] || 'communicationStyle';
+    const existing = this.domains.behaviour[targetDimension] || this.domains.cognition[targetDimension];
+
+    // Detect contradiction / contextual pivot
+    let isContradiction = false;
+    if (existing) {
+      const currentVal = existing.value || existing.tone || existing.defaultDepth || existing.level;
+      if (currentVal && value && String(currentVal).toLowerCase() !== String(value).toLowerCase()) {
+        isContradiction = true;
+        this.domains.evolution.reviewableConflicts.unshift({
+          id: `conflict_beh_${Date.now()}`,
+          dimensionKey: targetDimension,
+          existingValue: currentVal,
+          contradictingValue: value || feedback,
+          detectedAt: now,
+          reason: `Explicit feedback for [${cleanCat}] diverges from current baseline ("${currentVal}" vs "${value}")`,
+          resolved: false
+        });
+      }
+    }
+
+    // Candidate update for evolution tracking
+    const candidateId = `cand_beh_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const candidate = {
+      id: candidateId,
+      domain: DOMAIN_TYPES.BEHAVIOUR,
+      dimensionKey: targetDimension,
+      category: cleanCat,
+      name: `User Calibrated ${cleanCat}`,
+      candidateValue: value || feedback,
+      feedbackText: feedback,
+      source,
+      context,
+      confidence: 1.0, // Explicit user corrections carry 1.0 confidence
+      classification: CLASSIFICATION_TYPES.EXPLICIT_PREFERENCE,
+      isContradiction,
+      status: 'pending_confirmation',
+      createdAt: now
+    };
+
+    this.domains.evolution.pendingCandidates.unshift(candidate);
+
+    // Apply directly to live behaviour and cognition domains for immediate runtime adaptation
+    if (existing) {
+      if (cleanCat === 'tone' && value) { existing.tone = value; existing.value = value; }
+      if ((cleanCat === 'depth' || cleanCat === 'explanation_depth') && value) {
+        existing.defaultDepth = value;
+        existing.value = value;
+        if (this.domains.cognition.explanationDepth) {
+          this.domains.cognition.explanationDepth.value = value;
+          this.domains.cognition.explanationDepth.defaultDepth = value;
+        }
+        if (this.domains.behaviour.explanationDepth) {
+          this.domains.behaviour.explanationDepth.value = value;
+          this.domains.behaviour.explanationDepth.defaultDepth = value;
+        }
+      }
+      if ((cleanCat === 'detail' || cleanCat === 'level_of_detail' || cleanCat === 'technical_detail') && value) {
+        existing.level = value;
+        existing.value = value;
+      }
+      if ((cleanCat === 'humour' || cleanCat === 'humor') && value) { existing.style = value; existing.value = value; }
+      if (cleanCat === 'initiative' && value) { existing.pattern = value; existing.value = value; }
+      existing.lastUpdated = now;
+      existing.userApproved = true;
+      existing.confidence = 1.0;
+    }
+
+    this.domains.evolution.auditTrail.unshift({
+      id: `audit_beh_${Date.now()}`,
+      action: 'BEHAVIOURAL_FEEDBACK_RECORDED',
+      category: cleanCat,
+      targetDimension,
+      feedback,
+      value,
+      timestamp: now,
+      modelEpoch: this.versionEpoch + 1
+    });
+
+    this.versionEpoch += 1;
+    this.saveState();
+
+    return {
+      success: true,
+      candidateId,
+      targetDimension,
+      appliedDirectly: Boolean(existing),
+      isContradiction,
+      newEpoch: this.versionEpoch
+    };
   }
 
   getAuditTrail() {
