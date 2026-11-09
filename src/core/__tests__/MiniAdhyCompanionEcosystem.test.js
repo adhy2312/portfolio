@@ -330,7 +330,7 @@ describe('MINI-ADHY DIGITAL COMPANION SYSTEM VERIFICATION', () => {
     test('Exports versioned JSON bundle without secrets or credentials', () => {
       const bundle = portableIdentityManager.exportBundle();
       expect(bundle.bundleType).toBe('MINI_ADHY_PORTABLE_IDENTITY_BUNDLE');
-      expect(bundle.schemaVersion).toBe('2.0.0');
+      expect(bundle.schemaVersion).toBe('3.0.0');
       expect(bundle.identity.id).toBe('mini-adhy');
       expect(bundle.integrityChecksum).toBeDefined();
 

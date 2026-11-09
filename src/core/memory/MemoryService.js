@@ -85,6 +85,15 @@ export class MemoryService {
     };
   }
 
+  setStorageAdapter(adapter) {
+    if (adapter && typeof adapter.get === 'function' && typeof adapter.set === 'function') {
+      this.storageAdapter = adapter;
+      this.loadState();
+      return true;
+    }
+    return false;
+  }
+
   initBaselineMemories() {
     const baselines = [
       {
@@ -919,6 +928,43 @@ export class MemoryService {
       };
     }
     return Array.from(this.records.values());
+  }
+
+  exportSelective(options = {}) {
+    let records = Array.from(this.records.values());
+
+    if (options.categories && Array.isArray(options.categories)) {
+      records = records.filter(r => options.categories.includes(r.category));
+    }
+
+    if (typeof options.minConfidence === 'number') {
+      records = records.filter(r => (r.confidence ?? 1.0) >= options.minConfidence);
+    }
+
+    if (options.approvedOnly) {
+      records = records.filter(r => r.userApproved || r.category === MEMORY_CATEGORIES.APPROVED_FACT || r.category === MEMORY_CATEGORIES.CORRECTED_FACT);
+    }
+
+    if (options.excludePrivate) {
+      records = records.filter(r => !r.isPrivate && !r.sensitive);
+    }
+
+    const bundle = {
+      schemaVersion: '3.0.0',
+      exportedAt: new Date().toISOString(),
+      recordCount: records.length,
+      records
+    };
+
+    if (options.includeProjects !== false) {
+      bundle.projects = Array.from(this.projects.values());
+    }
+
+    if (options.includeDecisions !== false) {
+      bundle.decisions = Array.from(this.decisions.values());
+    }
+
+    return bundle;
   }
 
   importMemories(recordsOrBundle = [], options = {}) {

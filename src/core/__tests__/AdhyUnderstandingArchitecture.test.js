@@ -283,7 +283,7 @@ describe('ADHY UNDERSTANDING ARCHITECTURE (AUA) MASTER TEST SUITE', () => {
     test('Exports complete bundle with understanding, memories, and desktop robot destination', () => {
       const bundle = portableIdentityManager.exportBundle();
       expect(bundle.bundleType).toBe('MINI_ADHY_PORTABLE_IDENTITY_BUNDLE');
-      expect(bundle.schemaVersion).toBe('2.0.0');
+      expect(bundle.schemaVersion).toBe('3.0.0');
       expect(bundle.understanding).toBeDefined();
       expect(bundle.memories.length).toBeGreaterThan(0);
       expect(bundle.compatibility.supportedDestinations).toContain('desk_robot_companion');

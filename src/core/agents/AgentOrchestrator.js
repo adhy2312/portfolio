@@ -36,9 +36,11 @@ import { COMPLETE_AGENT_ROSTER } from './AgentRegistry';
 import { claudeAgenticEngine } from './ClaudeAgenticEngine';
 import { collectiveConsensusEngine } from '../ai/CollectiveConsensusEngine';
 import { SPECIALIST_CAPABILITIES } from '../executive/ExecutiveTypes';
+import { agentMessageBus, AGENT_MESSAGE_TYPES } from '../distribution/AgentMessageBus';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
+    this.messageBus = agentMessageBus;
     // 1. Initialize the 10 Specialist Agents under Mini-Adhy
     this.agents = {
       JARVIS: new JarvisAgent(),
@@ -70,6 +72,7 @@ class MiniAdhyAgentOrchestrator {
 
     // Load persisted state if available
     this.loadState();
+    this._registerBusHandlers();
   }
 
   loadState() {
@@ -516,6 +519,39 @@ class MiniAdhyAgentOrchestrator {
       operation: op,
       output
     };
+  }
+
+  _registerBusHandlers() {
+    if (!this.messageBus) return;
+    Object.keys(this.agents).forEach(agentId => {
+      this.messageBus.registerAgent(agentId, async (message) => {
+        if (message.messageType === AGENT_MESSAGE_TYPES.TASK_ASSIGNMENT) {
+          const result = await this.delegateTask(agentId, message.payload || {});
+          return { acknowledged: true, data: result, ...result };
+        }
+        return { acknowledged: true, received: true, messageType: message.messageType };
+      });
+    });
+  }
+
+  /**
+   * Dispatches a typed task through the AgentMessageBus with delivery guarantees
+   */
+  async dispatchDistributedTask(fromAgent, toAgent, taskPayload = {}, options = {}) {
+    if (!this.messageBus) {
+      throw new Error('AgentMessageBus is not initialized on orchestrator.');
+    }
+    return await this.messageBus.sendMessage({
+      sender: fromAgent || 'MINI_ADHY',
+      recipient: toAgent,
+      messageType: AGENT_MESSAGE_TYPES.TASK_ASSIGNMENT,
+      payload: taskPayload,
+      taskId: options.taskId,
+      correlationId: options.correlationId,
+      timeoutMs: options.timeoutMs || 5000,
+      retryLimit: options.retryLimit ?? 1,
+      visitedAgents: options.visitedAgents || []
+    });
   }
 }
 

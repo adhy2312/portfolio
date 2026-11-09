@@ -20,6 +20,7 @@ export class ProviderRegistry {
   constructor() {
     this.providers = new Map();
     this.providerOrder = ['gemini', 'groq', 'huggingface', 'omniroute', 'openrouter'];
+    this.preferredProvider = null;
     this.metrics = {
       totalRequests: 0,
       successfulRequests: 0,
@@ -70,6 +71,30 @@ export class ProviderRegistry {
     return this.providers.get(providerId) || null;
   }
 
+  switchPreferredProvider(providerId) {
+    if (this.providers.has(providerId)) {
+      this.preferredProvider = providerId;
+      this.providerOrder = [providerId, ...this.providerOrder.filter(id => id !== providerId)];
+      return { success: true, preferredProvider: providerId };
+    }
+    return { success: false, error: `Provider '${providerId}' is not registered.` };
+  }
+
+  replaceProvider(id, newInstance) {
+    if (!newInstance || !newInstance.id) {
+      throw new Error('Replacement provider must have an id.');
+    }
+    this.providers.set(id, newInstance);
+    return { replaced: true, id };
+  }
+
+  unregister(providerId) {
+    const deleted = this.providers.delete(providerId);
+    this.providerOrder = this.providerOrder.filter(id => id !== providerId);
+    if (this.preferredProvider === providerId) this.preferredProvider = null;
+    return deleted;
+  }
+
   listProviders() {
     return Array.from(this.providers.values()).map(p => ({
       id: p.id,
@@ -100,26 +125,35 @@ export class ProviderRegistry {
   resolveProviderCascade(requirements = {}) {
     const cascade = [];
 
+    // Explicit preference from requirements or active preferred provider
+    const preferredId = requirements.preferredProvider || this.preferredProvider;
+    if (preferredId && this.providers.has(preferredId)) {
+      cascade.push(this.providers.get(preferredId));
+    }
+
     // Explicit preference for OmniRoute smart gateway
     if (requirements.preferGateway || requirements.preferOmniRoute) {
-      if (this.providers.has('omniroute')) cascade.push(this.providers.get('omniroute'));
+      if (this.providers.has('omniroute') && !cascade.includes(this.providers.get('omniroute'))) {
+        cascade.push(this.providers.get('omniroute'));
+      }
     }
 
     // Vision requirement -> Must have vision capability
     if (requirements.requiresVision) {
       const visionProviders = Array.from(this.providers.values())
-        .filter(p => p.getCapabilities().vision);
+        .filter(p => (p.getCapabilities ? p.getCapabilities().vision : p.capabilities?.vision));
       if (visionProviders.length > 0) return visionProviders;
       throw new Error('Task requires vision capability, but no vision-capable provider is available.');
     }
 
     // Fast reflex preference
     if (requirements.fastReflex) {
-      if (this.providers.has('groq')) cascade.push(this.providers.get('groq'));
-      if (this.providers.has('gemini')) cascade.push(this.providers.get('gemini'));
-      if (this.providers.has('omniroute')) cascade.push(this.providers.get('omniroute'));
-      if (this.providers.has('huggingface')) cascade.push(this.providers.get('huggingface'));
-      if (this.providers.has('openrouter')) cascade.push(this.providers.get('openrouter'));
+      const fastOrder = ['groq', 'gemini', 'omniroute', 'huggingface', 'openrouter'];
+      for (const id of fastOrder) {
+        if (this.providers.has(id) && !cascade.includes(this.providers.get(id))) {
+          cascade.push(this.providers.get(id));
+        }
+      }
       return cascade;
     }
 
@@ -134,6 +168,16 @@ export class ProviderRegistry {
       if (!this.providerOrder.includes(id) && !cascade.includes(provider)) {
         cascade.push(provider);
       }
+    }
+
+    // Filter by context token limit if specified
+    if (requirements.estimatedTokens || requirements.contextTokens) {
+      const neededTokens = requirements.estimatedTokens || requirements.contextTokens;
+      const filtered = cascade.filter(p => {
+        const maxTokens = p.maxContextTokens || p.capabilities?.maxContextTokens || 128000;
+        return maxTokens >= neededTokens;
+      });
+      if (filtered.length > 0) return filtered;
     }
 
     return cascade;
@@ -269,8 +313,13 @@ export class ProviderRegistry {
               this.metrics.latenciesByProvider[provider.id] = list;
             }
 
+            const actualModel = result.model || provider.defaultModel || (provider.capabilities?.defaultModel) || 'standard';
             const payloadToReturn = {
+              success: true,
               ...result,
+              executedByProvider: provider.id,
+              actualProvider: provider.id,
+              actualModel,
               attemptedProviders,
               fallbackEngaged: i > 0
             };
@@ -336,6 +385,10 @@ export class ProviderRegistry {
 
   getMetrics() {
     return { ...this.metrics, timestamp: new Date().toISOString() };
+  }
+
+  getProvider(providerId) {
+    return this.providers.get(providerId) || null;
   }
 }
 
