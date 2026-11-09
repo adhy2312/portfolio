@@ -155,3 +155,6 @@ export class VisualPerceptionEngine {
   }
 }
 
+export const visualPerceptionEngine = new VisualPerceptionEngine();
+
+

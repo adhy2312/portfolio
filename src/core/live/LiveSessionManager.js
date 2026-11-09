@@ -74,6 +74,8 @@ export class LiveSessionManager {
       status: this.status,
       sessionId: this.activeSessionId,
       isMuted: this.inputManager ? this.inputManager.isMuted : false,
+      micPermissionDenied: Boolean(this.micPermissionDenied),
+      micErrorMessage: this.micErrorMessage || null,
       transcript: this.transcriptManager ? this.transcriptManager.getTranscriptHistory() : [],
       interimUserText: this.transcriptManager?.interimUserText || '',
       interimAssistantText: this.transcriptManager?.interimAssistantText || '',
@@ -176,19 +178,56 @@ export class LiveSessionManager {
       });
       await this.providerAdapter.connect(sessionConfig);
 
-      // 7. Request and Start Microphone Stream
-      await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+      // 7. Request and Start Microphone Stream with Graceful Fallback
+      this.micPermissionDenied = false;
+      this.micErrorMessage = null;
 
-      // 8. Start Speech Recognition & VAD Loop
-      this.fallbackPipeline.startListening();
+      try {
+        await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+        this.fallbackPipeline.startListening();
+      } catch (micErr) {
+        console.warn('[LiveSessionManager] Microphone denied or unavailable. Entering graceful Silent/Visual mode.', micErr);
+        this.micPermissionDenied = true;
+        this.micErrorMessage = micErr.name === 'NotAllowedError' || /permission/i.test(micErr.message)
+          ? 'Microphone permission was not granted. Silent mode active — you can type questions, use vision, and hear Mini-Adhy.'
+          : (micErr.message || 'Microphone unavailable.');
+      }
+
       this._startVisualizerLoop();
-
       this._setState(LIVE_SESSION_STATUS.LISTENING);
-      return { success: true, sessionId: this.activeSessionId };
+      return { 
+        success: true, 
+        sessionId: this.activeSessionId, 
+        micPermissionDenied: this.micPermissionDenied 
+      };
     } catch (err) {
       await this.endSession(err.message);
       this._setState(LIVE_SESSION_STATUS.ERROR, { error: err.message });
       throw err;
+    }
+  }
+
+  /**
+   * Re-requests microphone access on user gesture if permission was previously blocked
+   */
+  async requestMicrophoneRetry() {
+    if (!this.inputManager) return false;
+    try {
+      const audioCtx = await this.audioEngine.ensureAudioContext();
+      await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
+      this.micPermissionDenied = false;
+      this.micErrorMessage = null;
+      if (this.fallbackPipeline) {
+        this.fallbackPipeline.startListening();
+      }
+      this._setState(LIVE_SESSION_STATUS.LISTENING);
+      return true;
+    } catch (err) {
+      console.warn('[LiveSessionManager] Retry microphone permission failed:', err);
+      this.micPermissionDenied = true;
+      this.micErrorMessage = err.message;
+      this._setState(this.status, { micPermissionDenied: true, micErrorMessage: err.message });
+      return false;
     }
   }
 

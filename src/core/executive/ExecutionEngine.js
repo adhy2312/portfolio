@@ -24,6 +24,7 @@ import { taskPlanner } from './TaskPlanner';
 import { verificationEngine } from './VerificationEngine';
 import { permissionRegistry } from '../agents/PermissionRegistry';
 import { agentOrchestrator } from '../agents/AgentOrchestrator';
+import { resilientTaskManager } from '../distribution/ResilientTaskManager';
 
 export class ExecutionEngine {
   constructor(options = {}) {
@@ -31,6 +32,7 @@ export class ExecutionEngine {
     this.verifier = options.verifier || verificationEngine;
     this.permissions = options.permissions || permissionRegistry;
     this.orchestrator = options.orchestrator || agentOrchestrator;
+    this.resilientTaskManager = options.resilientTaskManager || resilientTaskManager;
 
     this.activePlans = new Map();
     this.taskStates = new Map();
@@ -47,6 +49,14 @@ export class ExecutionEngine {
 
     this.activePlans.set(plan.id, plan);
     plan.subtasks.forEach(t => this.taskStates.set(t.id, t));
+
+    if (this.resilientTaskManager) {
+      this.resilientTaskManager.initTask(plan.id, {
+        goal,
+        subtasks: plan.subtasks.map(s => s.id),
+        context
+      });
+    }
 
     this._logExecutiveAudit({
       planId: plan.id,
@@ -124,11 +134,27 @@ export class ExecutionEngine {
           }
         }
       }
+
+      if (this.resilientTaskManager) {
+        this.resilientTaskManager.saveCheckpoint(plan.id, stageIdx, {
+          planId,
+          stageIdx,
+          planStatus: plan.status,
+          completedStages: stageIdx + 1
+        });
+      }
     }
 
     // All stages finished successfully
     plan.status = TASK_EXECUTION_STATUS.COMPLETED;
     plan.completedAt = new Date().toISOString();
+
+    if (this.resilientTaskManager) {
+      this.resilientTaskManager.completeTask(plan.id, {
+        status: plan.status,
+        completedAt: plan.completedAt
+      });
+    }
 
     this._logExecutiveAudit({
       planId: plan.id,
@@ -143,6 +169,32 @@ export class ExecutionEngine {
       completedTasks: plan.subtasks.map(t => ({ id: t.id, title: t.title, result: t.result })),
       durationMs: Date.now() - new Date(plan.createdAt).getTime()
     };
+  }
+
+  /**
+   * Recovers an interrupted plan from ResilientTaskManager checkpoints
+   */
+  async recoverInterruptedPlan(planId, options = {}) {
+    if (!this.resilientTaskManager) {
+      return { success: false, error: 'ResilientTaskManager is not configured.' };
+    }
+    const recoveryInfo = this.resilientTaskManager.recoverTask(planId);
+    if (!recoveryInfo.recoverable) {
+      return { success: false, error: recoveryInfo.error || 'Plan is not recoverable.' };
+    }
+
+    const plan = this.activePlans.get(planId);
+    if (!plan) {
+      return { success: false, error: `Plan [${planId}] not found in execution engine.` };
+    }
+
+    this._logExecutiveAudit({
+      planId,
+      action: 'PLAN_RECOVERY_INITIATED',
+      lastCompletedStep: recoveryInfo.lastCompletedStep
+    });
+
+    return await this.executePlan(planId, options);
   }
 
   /**
@@ -284,25 +336,64 @@ export class ExecutionEngine {
 
   async _executeResearch(params = {}) {
     const topic = params.topic || params.query || 'General Technical Domain';
+
+    if (params.provider && typeof params.provider.generate === 'function') {
+      try {
+        const provRes = await params.provider.generate({ prompt: `Research topic: ${topic}` });
+        return {
+          success: true,
+          executionMode: 'REAL',
+          status: TASK_EXECUTION_STATUS.EXECUTED,
+          isSimulated: false,
+          findings: [provRes.text || `Verified findings for: ${topic}`],
+          citations: Array.isArray(provRes.citations) ? provRes.citations : [],
+          timestamp: new Date().toISOString()
+        };
+      } catch (err) {
+        // Fall back to truthful simulation
+      }
+    }
+
+    // Truthful simulation reporting: never emit fake external citations like IEEE Standard 802.11
     return {
       success: true,
-      findings: [`Verified findings for: ${topic}`, 'Grounding anchored in verifiable documentation'],
-      citations: ['IEEE Standard 802.11', 'Datasheet Reference v2.4'],
+      executionMode: 'SIMULATED',
+      status: TASK_EXECUTION_STATUS.SIMULATED,
+      isSimulated: true,
+      findings: [`Simulated research synthesis for: ${topic}`, 'Grounded in sandboxed technical corpus'],
+      citations: Array.isArray(params.citations) ? params.citations : [],
+      notice: 'Executed in sandboxed simulation mode without external research provider.',
       timestamp: new Date().toISOString()
     };
   }
 
   async _executeFileAnalysis(params = {}) {
     const targetFile = params.targetFile || 'src/App.js';
-    const content = this.virtualFileSystem[targetFile] || `// Source code for ${targetFile}\nexport default function Module() { return null; }`;
+    const hasVirtualFile = Object.prototype.hasOwnProperty.call(this.virtualFileSystem, targetFile);
+
+    if (params.mustExist && !hasVirtualFile) {
+      return {
+        success: false,
+        file_exists: false,
+        error: `Target file [${targetFile}] does not exist in filesystem.`
+      };
+    }
+
+    const content = hasVirtualFile
+      ? this.virtualFileSystem[targetFile]
+      : `// Source code for ${targetFile}\nexport default function Module() { return null; }`;
     
-    // Register in virtual sandboxed file system
-    if (!this.virtualFileSystem[targetFile]) {
+    const wasSimulated = !hasVirtualFile;
+
+    // Register in virtual sandboxed file system if new
+    if (!hasVirtualFile) {
       this.virtualFileSystem[targetFile] = content;
     }
 
     return {
       success: true,
+      executionMode: wasSimulated ? 'SIMULATED' : 'REAL',
+      isSimulated: wasSimulated,
       file_exists: targetFile,
       targetContent: content,
       content,
@@ -315,6 +406,8 @@ export class ExecutionEngine {
     const requirement = params.requirement || params.prompt || 'Code improvement';
     return {
       success: true,
+      executionMode: 'SIMULATED',
+      isSimulated: true,
       codeSnippet: `// Patched logic implementing: ${requirement}\nexport function optimizedRoutine() { return true; }`,
       explanation: 'First-principles refactoring eliminating redundant latency and state overhead.',
       summary: `Generated code for ${requirement}`,
@@ -331,6 +424,8 @@ export class ExecutionEngine {
 
     return {
       success: true,
+      executionMode: 'REAL',
+      isSimulated: false,
       targetContent: patchContent,
       fileChanges: { [targetFile]: patchContent },
       bytesWritten: patchContent.length,
@@ -340,14 +435,50 @@ export class ExecutionEngine {
 
   async _executeTestExecution(params = {}) {
     const suite = params.testSuite || 'regression';
+
+    // If real test runner is attached
+    if (params.testRunner && typeof params.testRunner.run === 'function') {
+      try {
+        const runRes = await params.testRunner.run(suite);
+        return {
+          success: (runRes.failedCount || 0) === 0,
+          executionMode: 'REAL',
+          status: TASK_EXECUTION_STATUS.EXECUTED,
+          isSimulated: false,
+          testReport: {
+            suite,
+            passedCount: runRes.passedCount || 0,
+            failedCount: runRes.failedCount || 0,
+            skippedCount: runRes.skippedCount || 0,
+            durationMs: runRes.durationMs || 0
+          }
+        };
+      } catch (err) {
+        return {
+          success: false,
+          executionMode: 'REAL',
+          status: TASK_EXECUTION_STATUS.FAILED,
+          isSimulated: false,
+          error: err.message
+        };
+      }
+    }
+
+    // Truthful simulation reporting: never fabricate fake test counts like 12
     return {
       success: true,
+      executionMode: 'SIMULATED',
+      status: TASK_EXECUTION_STATUS.SIMULATED,
+      isSimulated: true,
       testReport: {
         suite,
-        passedCount: 12,
+        status: 'SIMULATED',
+        executionMode: 'SIMULATED',
+        notice: 'No physical test runner adapter configured. Simulated regression verification completed.',
+        passedCount: typeof params.mockPassedCount === 'number' ? params.mockPassedCount : 1,
         failedCount: 0,
         skippedCount: 0,
-        durationMs: 45
+        durationMs: 0
       }
     };
   }

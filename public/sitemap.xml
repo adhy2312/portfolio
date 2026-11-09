@@ -4,13 +4,13 @@
   xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://adhy.tech/</loc>
-    <lastmod>2026-10-24</lastmod>
+    <lastmod>2026-11-09</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
     <image:image>
       <image:loc>https://adhy.tech/dp.jpg</image:loc>
-      <image:title>Adhithya Mohan — Full-Stack Developer, ECE Engineer &amp; Designer</image:title>
-      <image:caption>Official portrait of Adhithya Mohan</image:caption>
+      <image:title>Adhithya — Official Website &amp; Portfolio (Adhithya Mohan)</image:title>
+      <image:caption>Official portrait of Adhithya (Adhithya Mohan), Full-Stack Systems Developer &amp; AI Architect</image:caption>
     </image:image>
   </url>
 </urlset>

@@ -13,6 +13,7 @@ import {
   SAFETY_RESTRICTIONS
 } from './MetacognitionTypes.js';
 import { permissionRegistry, computePayloadHash } from '../agents/PermissionRegistry.js';
+import { serverApprovalService } from '../security/ServerApprovalService.js';
 
 export class ProductionSafetyGuard {
   constructor(options = {}) {
@@ -151,6 +152,14 @@ export class ProductionSafetyGuard {
       };
     }
 
+    // Rejection of simulated tokens from production application
+    if (approvalToken.startsWith('mock_demo_') || approvalToken.startsWith('simulated_')) {
+      return {
+        approved: false,
+        error: 'Simulation tokens cannot authorize production deployment. Real human authorization required.'
+      };
+    }
+
     // Strict identity validation: Creator (Adhithya Mohan / Adhy) only
     const normalizedApprover = String(approverIdentity || '').trim().toLowerCase();
     const isAuthorizedCreator = (
@@ -167,14 +176,27 @@ export class ProductionSafetyGuard {
       };
     }
 
-    // Verify token against PermissionRegistry if registered
+    // Verify token against authoritative ServerApprovalService or PermissionRegistry
     const expectedPayload = {
       proposalId: proposal.proposalId,
       proposedChange: proposal.proposedChange,
       deployToProduction: true
     };
 
-    if (permissionRegistry.issuedTokens.has(approvalToken)) {
+    if (serverApprovalService.issuedTokens.has(approvalToken)) {
+      const serverRes = serverApprovalService.verifyAndConsumeToken({
+        token: approvalToken,
+        actionType: 'DEPLOY_PROPOSAL',
+        payload: expectedPayload,
+        consumerIdentity: 'ProductionSafetyGuard'
+      });
+      if (!serverRes.valid) {
+        return {
+          approved: false,
+          error: `Token verification failed: ${serverRes.reason}`
+        };
+      }
+    } else if (permissionRegistry.issuedTokens.has(approvalToken)) {
       const verifyRes = permissionRegistry.verifyApprovalToken(approvalToken, 'metacognition', 'DEPLOY_PROPOSAL', expectedPayload);
       if (!verifyRes.valid) {
         return {
@@ -182,6 +204,11 @@ export class ProductionSafetyGuard {
           error: `Token verification failed: ${verifyRes.reason}`
         };
       }
+    } else {
+      return {
+        approved: false,
+        error: 'Token verification failed: Token was not issued by an authoritative approval provider.'
+      };
     }
 
     proposal.status = PROPOSAL_STATUS.APPROVED;

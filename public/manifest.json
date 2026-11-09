@@ -1,7 +1,7 @@
 {
-  "short_name": "Adhy",
-  "name": "Adhithya Mohan — Portfolio & Neural Architecture",
-  "description": "Full-Stack Developer, ECE Engineer & Designer Portfolio based in Kerala, India",
+  "short_name": "Adhithya",
+  "name": "Adhithya — Official Website & Portfolio",
+  "description": "Official personal website and portfolio of Adhithya (Adhithya Mohan) — Full-Stack Developer, AI Architect & ECE Engineer at adhy.tech",
   "icons": [
     {
       "src": "favicon.ico",
@@ -26,5 +26,5 @@
   "orientation": "portrait-primary",
   "theme_color": "#060918",
   "background_color": "#060918",
-  "categories": ["portfolio", "technology", "development"]
+  "categories": ["portfolio", "technology", "artificial-intelligence", "engineering"]
 }

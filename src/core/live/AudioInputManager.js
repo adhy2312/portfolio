@@ -41,15 +41,22 @@ export class AudioInputManager {
         throw new Error('Microphone access is not supported in this browser.');
       }
 
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: this.config.sampleRate,
-          channelCount: this.config.channelCount,
-          echoCancellation: this.config.echoCancellation,
-          noiseSuppression: this.config.noiseSuppression,
-          autoGainControl: this.config.autoGainControl
+      const audioConstraints = {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      };
+
+      try {
+        this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
+      } catch (constraintErr) {
+        // Fallback to simple unconstrained audio if hardware rejected specific DSP flags
+        try {
+          this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (finalErr) {
+          throw finalErr;
         }
-      });
+      }
 
       if (!audioContext) {
         throw new Error('AudioContext must be provided to process input stream.');

@@ -22,6 +22,7 @@ import { controlledExperimentRunner } from './ControlledExperimentRunner.js';
 import { modelDriftDetector } from './ModelDriftDetector.js';
 import { productionSafetyGuard } from './ProductionSafetyGuard.js';
 import { permissionRegistry } from '../agents/PermissionRegistry.js';
+import { mockApprovalProvider } from '../security/ServerApprovalService.js';
 import {
   OUTCOME_STATUS,
   PROPOSAL_AREAS,
@@ -195,6 +196,26 @@ export class MetacognitionEngine {
       status: stagingResult.status,
       detail: stagingResult.message
     });
+
+    // Step 6A: Autonomous demonstration simulation fallback (does not alter production)
+    if (options.useMockApproval || options.isSimulatedDemo) {
+      const demoApproval = mockApprovalProvider.simulateDemonstrationApproval(proposal);
+      proposal.status = 'SIMULATED_DEMO';
+      proposal.demoApproval = demoApproval;
+      cycleLog.push({
+        step: 6,
+        action: 'SIMULATED_DEMO_APPROVAL_OBTAINED',
+        mode: 'SIMULATED_DEMO',
+        detail: demoApproval.notice
+      });
+      return {
+        success: true,
+        mode: 'SIMULATED_DEMO',
+        isSimulated: true,
+        proposal,
+        cycleLog
+      };
+    }
 
     // Step 6: Obtain cryptographically bound owner approval token
     const approverName = options.approver || 'Adhithya Mohan';

@@ -220,7 +220,7 @@ const Hero = () => {
         <LanguageTerminal />
 
         <div className="hero-tagline-premium">
-          <EntropyText text={displayData.role || "ELECTRONICS ENGINEER, PHOTGRAPHER & FULL-STACK DEVELOPER"} />
+          <EntropyText text={displayData.role || "ELECTRONICS ENGINEER, PHOTOGRAPHER & FULL-STACK DEVELOPER"} />
         </div>
       </div>
     </section>
