@@ -10,7 +10,6 @@
  * identity, knowledge, memory governance, and behavioral policies as text.
  */
 
-import { adhyModel } from '../identity/AdhyModel';
 import { identityCompiler } from '../identity/IdentityCompiler';
 
 export class LiveConversationContext {
