@@ -33,12 +33,32 @@ export class VisualInputManager {
   }
 
   /**
+   * Checks whether camera permission has already been granted by the browser
+   */
+  async checkPermissionGranted() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        const devices = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+        const hasLabeledCam = devices.some(d => d.kind === 'videoinput' && d.label && d.label.length > 0);
+        if (hasLabeledCam) return true;
+      }
+      if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+        const status = await navigator.permissions.query({ name: 'camera' }).catch(() => null);
+        if (status && status.state === 'granted') return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  /**
    * Requests camera permission and attaches to an in-memory or provided video element
    */
   async startCamera(options = {}) {
-    if (this.isStreaming && this.mediaStream) {
+    if (this.isStreaming && this.mediaStream && this.mediaStream.active) {
       return this.mediaStream;
     }
+
+    this.stopCamera();
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -63,23 +83,27 @@ export class VisualInputManager {
           if (stream) break;
         } catch (e) {
           lastErr = e;
-          // If explicitly denied by user, don't keep hammering
-          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
-            break;
-          }
+          // Continue trying subsequent tiers (e.g. { video: true }) unless we already exhausted attempts
         }
       }
 
       if (!stream) {
         let classified = lastErr || new Error('Could not access camera device.');
+        const isPermDenial = lastErr?.name === 'NotAllowedError' || lastErr?.name === 'PermissionDeniedError';
+
         if (lastErr?.name === 'NotFoundError' || lastErr?.name === 'DevicesNotFoundError') {
           classified = new Error('No physical webcam or camera detected on this PC.');
           classified.name = 'NotFoundError';
         } else if (lastErr?.name === 'NotReadableError' || lastErr?.name === 'TrackStartError') {
           classified = new Error('Camera is occupied by another application (e.g. Teams, Discord, OBS).');
           classified.name = 'NotReadableError';
-        } else if (lastErr?.name === 'NotAllowedError' || lastErr?.name === 'PermissionDeniedError') {
-          classified = new Error('Camera access denied in browser permissions.');
+        } else if (isPermDenial) {
+          const isGrantedInBrowser = await this.checkPermissionGranted();
+          if (isGrantedInBrowser) {
+            classified = new Error('Camera is allowed in browser, but Windows OS Privacy or another application is restricting access.');
+          } else {
+            classified = new Error('Camera access denied. Click the lock/settings icon in the URL bar to allow camera.');
+          }
           classified.name = 'NotAllowedError';
         }
         throw classified;

@@ -93,12 +93,31 @@ export default function LiveModeModal({ isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
-  // Auto-dismiss transient notices after 5 seconds
+  // Auto-dismiss transient notices after 8 seconds (gives ample time to read guidance)
   useEffect(() => {
     if (!errorMsg) return;
-    const timer = setTimeout(() => setErrorMsg(null), 5000);
+    const timer = setTimeout(() => setErrorMsg(null), 8000);
     return () => clearTimeout(timer);
   }, [errorMsg]);
+
+  // Window Focus Auto-Sync: Proactively reconnect microphone when user grants permission in Chrome flyout
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleWindowFocus = async () => {
+      if (sessionStarted && (sessionState.micPermissionDenied || sessionState.micHardwareUnavailable)) {
+        try {
+          const reconnected = await liveSessionManager.syncPermissions();
+          if (reconnected) {
+            setErrorMsg(null);
+          }
+        } catch {}
+      }
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    return () => window.removeEventListener('focus', handleWindowFocus);
+  }, [isOpen, sessionStarted, sessionState.micPermissionDenied, sessionState.micHardwareUnavailable]);
 
   // Cleanup subscription on unmount
   useEffect(() => {
@@ -300,8 +319,9 @@ export default function LiveModeModal({ isOpen, onClose }) {
   const orbStatus = status === LIVE_SESSION_STATUS.ERROR ? 'listening' : status.toLowerCase();
 
   return (
-    <div className="ma-live-overlay ma-live-theme-glassmorphic-light" role="dialog" aria-modal="true" aria-label="Mini-Adhy Live Cognition">
-      {/* Ambient Prismatic Halo Lights */}
+    <div className="ma-live-overlay ma-live-theme-stark-cyber" role="dialog" aria-modal="true" aria-label="Mini-Adhy Live Cognition">
+      {/* Ambient Holographic Cyber Grids & Halos */}
+      <div className="ma-live-cyber-grid" />
       <div className="ma-live-halo-primary" />
       <div className="ma-live-halo-secondary" />
       <div className="ma-live-halo-accent" />
@@ -315,24 +335,24 @@ export default function LiveModeModal({ isOpen, onClose }) {
           </div>
           <div className="ma-live-title-group">
             <span className="ma-live-title">MINI-ADHY LIVE COGNITION</span>
-            <span className="ma-live-subtitle">ARC-REACTOR NEURAL CORE v2.5</span>
+            <span className="ma-live-subtitle">STARK QUANTUM NEURAL CORE v3.0</span>
           </div>
         </div>
 
         <div className="ma-live-header-actions">
           <div className="ma-live-hud-metric">
             <FiActivity size={12} className="ma-live-hud-icon" />
-            <span>0.8ms BUS</span>
+            <span>0.4ms SYNC</span>
           </div>
 
           {(sessionState.micPermissionDenied || sessionState.micHardwareUnavailable) && sessionStarted && (
             <button
               className="ma-live-btn-mic-retry"
               onClick={() => liveSessionManager.requestMicrophoneRetry()}
-              title="Click to activate microphone stream"
+              title="Click to synchronize hardware and activate microphone stream"
             >
               <FiRefreshCw size={13} />
-              <span>ENABLE MIC</span>
+              <span>SYNC MIC</span>
             </button>
           )}
 
@@ -415,13 +435,22 @@ export default function LiveModeModal({ isOpen, onClose }) {
             /* ── PRE-START SPLASH ── */
             <div className="ma-live-presession">
               {/* Quantum Arc Reactor Core (Pre-Session) */}
-              <div className="ma-stark-orb-assembly">
-                <div className="ma-stark-reticle-outer" />
+              <div className="ma-stark-orb-assembly ma-stark-orb-assembly--idle">
+                <div className="ma-stark-reticle-outer">
+                  <span className="ma-stark-tick ma-stark-tick--0">000</span>
+                  <span className="ma-stark-tick ma-stark-tick--90">090</span>
+                  <span className="ma-stark-tick ma-stark-tick--180">180</span>
+                  <span className="ma-stark-tick ma-stark-tick--270">270</span>
+                </div>
+                <div className="ma-stark-reticle-mid" />
                 <div className="ma-stark-reticle-inner" />
                 <div className="ma-stark-energy-corona" />
                 <div className="ma-stark-reactor-core">
                   <div className="ma-stark-core-plasma" />
+                  <div className="ma-stark-core-singularity" />
                   <div className="ma-stark-core-flare" />
+                  <div className="ma-stark-core-rings" />
+                  <div className="ma-stark-conduit-spokes" />
                 </div>
               </div>
 
@@ -448,9 +477,17 @@ export default function LiveModeModal({ isOpen, onClose }) {
                 className={`ma-stark-orb-assembly ma-stark-orb-assembly--${orbStatus}`}
                 style={{ transform: `scale(${ringScale})` }}
               >
-                {/* Outer Reticle Ring with Precision Tick Marks */}
-                <div className="ma-stark-reticle-outer" />
+                {/* Outer Reticle Ring with Precision Tick Marks & Cardinal Indicators */}
+                <div className="ma-stark-reticle-outer">
+                  <span className="ma-stark-tick ma-stark-tick--0">000</span>
+                  <span className="ma-stark-tick ma-stark-tick--90">090</span>
+                  <span className="ma-stark-tick ma-stark-tick--180">180</span>
+                  <span className="ma-stark-tick ma-stark-tick--270">270</span>
+                </div>
                 
+                {/* Secondary Gyroscopic Ring */}
+                <div className="ma-stark-reticle-mid" />
+
                 {/* Counter-Rotating Gyroscopic Ring */}
                 <div className="ma-stark-reticle-inner" />
                 
@@ -460,27 +497,31 @@ export default function LiveModeModal({ isOpen, onClose }) {
                 {/* Arc Reactor Core with Pure Cyan Plasma */}
                 <div className="ma-stark-reactor-core">
                   <div className="ma-stark-core-plasma" />
+                  <div className="ma-stark-core-singularity" />
                   <div className="ma-stark-core-flare" />
                   <div className="ma-stark-core-rings" />
+                  <div className="ma-stark-conduit-spokes" />
                 </div>
 
-                {/* State Glow Rings */}
+                {/* State Glow Aura */}
                 <div className={`ma-stark-pulse-aura ma-stark-pulse-aura--${orbStatus}`} />
               </div>
 
-              {/* Circular Harmonic Waveform Pillars */}
-              <div className="ma-live-bars-wrap">
-                {Array.from(frequencies.slice(0, 24)).map((val, idx) => (
-                  <div 
-                    key={idx} 
-                    className="ma-live-fft-bar" 
-                    style={{ 
-                      height: `${Math.max(6, Math.min(48, (val / 255) * 48))}px`,
-                      opacity: Math.max(0.35, val / 255)
-                    }} 
-                  />
-                ))}
-              </div>
+              {/* Dynamic Audio Harmonic Energy Wave — Only rendered when sound is detected, never as awkward static dots */}
+              {volume > 0.02 && (
+                <div className="ma-live-audio-wave-wrap">
+                  {Array.from(frequencies.slice(0, 16)).map((val, idx) => (
+                    <div 
+                      key={idx} 
+                      className="ma-live-fft-bar" 
+                      style={{ 
+                        height: `${Math.max(4, Math.min(36, (val / 255) * 36))}px`,
+                        opacity: Math.max(0.4, val / 255)
+                      }} 
+                    />
+                  ))}
+                </div>
+              )}
 
               {isSpeaking && (
                 <button 
@@ -545,14 +586,41 @@ export default function LiveModeModal({ isOpen, onClose }) {
         </div>
       </div>
 
-      {/* Advisory Banner (Glassmorphic, unobtrusive, dismissable) */}
+      {/* Advisory Banner (Stark Holographic HUD Alert Pill) */}
       {errorMsg && (
         <div className="ma-live-error-banner">
           <div className="ma-live-banner-content">
-            <FiShield size={14} className="ma-live-banner-icon" />
-            <span>{errorMsg}</span>
+            <FiShield size={16} className="ma-live-banner-icon" />
+            <div className="ma-live-banner-text-group">
+              <span className="ma-live-banner-text">{errorMsg}</span>
+              {/windows.*privacy/i.test(errorMsg) && (
+                <span className="ma-live-banner-subtext">Action: Open Windows Settings → Privacy & Security → Microphone → Turn ON "Let desktop apps access your microphone"</span>
+              )}
+            </div>
           </div>
-          <button onClick={() => setErrorMsg(null)}>Dismiss</button>
+          <div className="ma-live-banner-actions">
+            {(sessionState.micPermissionDenied || sessionState.micHardwareUnavailable) && (
+              <button 
+                type="button"
+                className="ma-live-banner-btn-sync"
+                onClick={async () => {
+                  const ok = await liveSessionManager.requestMicrophoneRetry();
+                  if (ok) setErrorMsg(null);
+                }}
+                title="Retry and synchronize hardware permissions"
+              >
+                Sync Permissions
+              </button>
+            )}
+            <button 
+              type="button" 
+              className="ma-live-banner-btn-dismiss" 
+              onClick={() => setErrorMsg(null)}
+              title="Dismiss notice"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
@@ -600,9 +668,9 @@ export default function LiveModeModal({ isOpen, onClose }) {
               ? <FiMicOff size={19} />
               : <FiMic size={19} />}
             <span>
-              {!sessionStarted ? 'START'
-                : (sessionState.micPermissionDenied || sessionState.micHardwareUnavailable) ? 'MIC SILENT'
-                  : sessionState.isMuted ? 'UNMUTE' : 'MUTE'}
+              {!sessionStarted ? 'ENGAGE'
+                : (sessionState.micPermissionDenied || sessionState.micHardwareUnavailable) ? 'CONNECT MIC'
+                  : sessionState.isMuted ? 'UNMUTE' : 'MIC LIVE'}
             </span>
           </button>
 
@@ -625,7 +693,7 @@ export default function LiveModeModal({ isOpen, onClose }) {
             title="Terminate Live Session"
           >
             <FiX size={19} />
-            <span>END CALL</span>
+            <span>DISENGAGE</span>
           </button>
         </div>
       </div>

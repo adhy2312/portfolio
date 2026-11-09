@@ -31,35 +31,77 @@ export class AudioInputManager {
   }
 
   /**
+   * Checks whether microphone permission has already been granted by the browser
+   */
+  async checkPermissionGranted() {
+    try {
+      if (typeof navigator !== 'undefined' && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        const devices = await navigator.mediaDevices.enumerateDevices().catch(() => []);
+        const hasLabeledMic = devices.some(d => d.kind === 'audioinput' && d.label && d.label.length > 0);
+        if (hasLabeledMic) return true;
+      }
+      if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+        const status = await navigator.permissions.query({ name: 'microphone' }).catch(() => null);
+        if (status && status.state === 'granted') return true;
+      }
+    } catch {}
+    return false;
+  }
+
+  /**
    * Requests microphone access and wires stream into AudioContext
    */
   async startMicrophone(audioContext, inputAnalyser = null) {
-    if (this.isRecording) return this.mediaStream;
+    if (this.isRecording && this.mediaStream && this.mediaStream.active) {
+      return this.mediaStream;
+    }
+
+    // Clean up any stale partial stream before starting anew
+    this.stopMicrophone();
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Microphone access is not supported in this browser.');
       }
 
-      const audioConstraints = {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true
-      };
+      // Multi-tier acquisition: Try advanced DSP first, then relaxed, then bare unconstrained
+      let stream = null;
+      let lastAcquisitionErr = null;
 
-      try {
-        this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraints });
-      } catch (constraintErr) {
-        // Fallback to simple unconstrained audio if hardware rejected specific DSP flags
+      const attempts = [
+        { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        { echoCancellation: true },
+        true
+      ];
+
+      for (const audioConstraint of attempts) {
         try {
-          this.mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        } catch (finalErr) {
-          throw finalErr;
+          stream = await navigator.mediaDevices.getUserMedia({ audio: audioConstraint });
+          if (stream) break;
+        } catch (tierErr) {
+          lastAcquisitionErr = tierErr;
+          // If browser completely blocked permission, subsequent constraint tiers will also fail
+          if (tierErr.name === 'NotAllowedError' || tierErr.name === 'PermissionDeniedError') {
+            // Still attempt bare true if constraint was rejected by some strict drivers
+            if (audioConstraint === true) break;
+          }
         }
       }
 
+      if (!stream) {
+        throw (lastAcquisitionErr || new Error('Unable to capture audio stream from hardware.'));
+      }
+
+      this.mediaStream = stream;
+
       if (!audioContext) {
         throw new Error('AudioContext must be provided to process input stream.');
+      }
+
+      if (audioContext.state === 'suspended') {
+        try {
+          await audioContext.resume();
+        } catch {}
       }
 
       this.sourceNode = audioContext.createMediaStreamSource(this.mediaStream);
@@ -70,7 +112,6 @@ export class AudioInputManager {
       }
 
       // Buffer audio samples for VoiceActivityDetector
-      // Using ScriptProcessor as widely supported cross-browser buffer extractor
       const bufferSize = 1024;
       this.processorNode = audioContext.createScriptProcessor(bufferSize, 1, 1);
 
@@ -81,9 +122,6 @@ export class AudioInputManager {
       };
 
       this.sourceNode.connect(this.processorNode);
-      // ScriptProcessor requires connection to destination to keep audio process active,
-      // but connecting directly to destination feeds mic back into speakers (screeching acoustic loop).
-      // Pipe through a gain node with value 0 to keep the node active while keeping output dead silent:
       this.silentGainNode = audioContext.createGain();
       this.silentGainNode.gain.value = 0;
       this.processorNode.connect(this.silentGainNode);
@@ -94,31 +132,24 @@ export class AudioInputManager {
       return this.mediaStream;
     } catch (err) {
       let classifiedErr = err;
+      const isPermDenial = err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError';
+
       if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
         classifiedErr = new Error('No physical microphone found connected to this system.');
         classifiedErr.name = 'NotFoundError';
       } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
-        classifiedErr = new Error('Microphone is occupied by another application or Windows audio service.');
+        classifiedErr = new Error('Microphone hardware is busy or in use by another application.');
         classifiedErr.name = 'NotReadableError';
-      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        // Check if browser site permission is actually granted (indicating Windows OS-level restriction)
-        let isSystemLevelLock = false;
-        try {
-          if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
-            const status = await navigator.permissions.query({ name: 'microphone' }).catch(() => null);
-            if (status && status.state === 'granted') {
-              isSystemLevelLock = true;
-            }
-          }
-        } catch {}
-
-        if (isSystemLevelLock) {
-          classifiedErr = new Error('Microphone is enabled in browser, but Windows Privacy or another app is restricting hardware access.');
+      } else if (isPermDenial) {
+        const isGrantedInBrowser = await this.checkPermissionGranted();
+        if (isGrantedInBrowser) {
+          classifiedErr = new Error('Microphone permission is allowed in browser, but Windows OS Privacy or another app is restricting hardware access.');
         } else {
-          classifiedErr = new Error('Microphone permission blocked in browser settings.');
+          classifiedErr = new Error('Microphone permission was not allowed. Click the lock/settings icon in the URL bar to allow microphone.');
         }
         classifiedErr.name = 'NotAllowedError';
       }
+
       this.onError(classifiedErr);
       this.stopMicrophone();
       throw classifiedErr;

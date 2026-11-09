@@ -191,9 +191,9 @@ export class LiveSessionManager {
         const isExplicitPermissionDenial = micErr.name === 'NotAllowedError' || /permission/i.test(micErr.message);
         this.micPermissionDenied = isExplicitPermissionDenial;
         this.micHardwareUnavailable = !isExplicitPermissionDenial;
-        this.micErrorMessage = isExplicitPermissionDenial
-          ? 'Microphone permission was not allowed in browser settings.'
-          : (micErr.message || 'Microphone hardware unavailable on this host.');
+        this.micErrorMessage = micErr.message || (isExplicitPermissionDenial
+          ? 'Microphone permission was not allowed.'
+          : 'Microphone hardware unavailable on this host.');
       }
 
       this._startVisualizerLoop();
@@ -238,6 +238,21 @@ export class LiveSessionManager {
       });
       return false;
     }
+  }
+
+  /**
+   * Proactively verifies browser permissions and automatically reconnects
+   * microphone if permission was granted in browser settings without full reload.
+   */
+  async syncPermissions() {
+    if (!this.inputManager) return false;
+    try {
+      const isGranted = await this.inputManager.checkPermissionGranted();
+      if (isGranted && (this.micPermissionDenied || !this.inputManager.isRecording)) {
+        return await this.requestMicrophoneRetry();
+      }
+    } catch {}
+    return false;
   }
 
   /**
