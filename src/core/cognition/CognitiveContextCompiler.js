@@ -30,6 +30,7 @@
 import { adhyModel } from '../identity/AdhyModel';
 import { memoryService, MEMORY_CATEGORIES } from '../memory/MemoryService';
 import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
+import { neuroContextAdapter } from '../devices/NeuroContextAdapter';
 
 export const TASK_CATEGORIES = Object.freeze({
   ENGINEERING_ELECTRONICS: 'ENGINEERING_ELECTRONICS',
@@ -44,9 +45,10 @@ export const TASK_CATEGORIES = Object.freeze({
 });
 
 export class CognitiveContextCompiler {
-  constructor(model = null, understandingEngine = null) {
+  constructor(model = null, understandingEngine = null, neuroAdapter = null) {
     this.model = model || adhyModel;
     this.understandingEngine = understandingEngine || personalUnderstandingEngine;
+    this.neuroAdapter = neuroAdapter || neuroContextAdapter;
     this.recentTraces = [];
     this.maxTraces = 50;
   }
@@ -197,6 +199,8 @@ export class CognitiveContextCompiler {
       emotionalState: understanding.emotionalAssessment?.state
     });
 
+    const activeNeuroAdapter = options.neuroAdapter || this.neuroAdapter;
+
     // 7. Format Compact Markdown Block
     const formattedBlock = this._formatContextBlock({
       taskCategory,
@@ -205,7 +209,8 @@ export class CognitiveContextCompiler {
       continuity,
       reasoningDirectives,
       specialistAgentId,
-      modelVersion
+      modelVersion,
+      neuroAdapter: activeNeuroAdapter
     });
 
     // 8. Generate Collision-Resistant Context Digest (for cache identity)
@@ -244,6 +249,9 @@ export class CognitiveContextCompiler {
       excludedContext: trace.excludedContext,
       emotionalContext: understanding.emotionalAssessment,
       conversationalDirectives: understanding.conversationalDirectives,
+      neuroContext: activeNeuroAdapter && typeof activeNeuroAdapter.exportCognitiveContext === 'function'
+        ? activeNeuroAdapter.exportCognitiveContext()
+        : null,
       trace,
       timestamp: trace.timestamp
     };
@@ -545,7 +553,8 @@ export class CognitiveContextCompiler {
     continuity,
     reasoningDirectives,
     specialistAgentId,
-    modelVersion
+    modelVersion,
+    neuroAdapter = null
   }) {
     const sections = [];
 
@@ -586,6 +595,15 @@ export class CognitiveContextCompiler {
       if (contLines.length > 0) {
         sections.push('#### ACTIVE CONTINUITY\n' + contLines.join('\n'));
       }
+    }
+
+    // Optional Physiological & Sensor Context (Consented, non-medical, uncertainty-bounded)
+    const effectiveAdapter = neuroAdapter || this.neuroAdapter;
+    const neuroContext = effectiveAdapter && typeof effectiveAdapter.exportCognitiveContext === 'function'
+      ? effectiveAdapter.exportCognitiveContext()
+      : null;
+    if (neuroContext && neuroContext.enabled && neuroContext.formattedBlock) {
+      sections.push(neuroContext.formattedBlock);
     }
 
     return sections.join('\n\n');

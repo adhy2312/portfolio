@@ -1,69 +1,89 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  NEURO CONTEXT ADAPTER — FUTURE PHYSIOLOGICAL SIGNAL INTERFACE
+ *  NEURO CONTEXT ADAPTER — SENSOR-INDEPENDENT MULTIMODAL HUB (PHASE 7)
  * ════════════════════════════════════════════════════════════════════
- * Clean, hardware-independent gateway for future bio-signal context.
+ * Hardware-independent gateway for physiological, behavioral, and
+ * environmental signal processing and contextual integration.
  * 
  * STRICT ARCHITECTURAL INVARIANTS:
  * 1. Zero Synthetic Brain Signals: Never fabricate EEG, neural telemetry, or fake cognitive scores.
  * 2. Explicit Hardware Status: When no device is attached, status is DISCONNECTED.
  * 3. Three-Tier Separation:
- *    • Raw Signals: Strictly isolated, requires explicit consent, separate retention & purge.
- *    • Extracted Features: Band powers, HRV RMSSD, movement variance with signal quality bounds.
- *    • Inferred States: Non-medical focus / workload context with confidence & timestamps.
+ *    • Raw Signals: Strictly isolated in volatile memory, requires explicit consent, immediate purge.
+ *    • Extracted Features: Band powers, HRV RMSSD, EDA SCL/SCR, motion variance with signal quality bounds.
+ *    • Inferred States: Non-medical focus / workload context with bounded confidence & timestamps.
  * 4. Medical Non-Diagnosis: Explicitly disclaims medical diagnosis and thought-reading claims.
  * 5. Full Reversibility: User can purge all raw and derived physiological state at any time.
+ * 6. Explicit Provenance: All synthetic simulations are strictly labelled SIMULATED.
  */
 
-export const BIO_SIGNAL_TYPES = Object.freeze({
-  EEG: 'EEG',         // Electroencephalography (e.g. Muse, OpenBCI)
-  HRV: 'HRV',         // Heart Rate Variability (RMSSD / pNN50)
-  EDA: 'EDA',         // Electrodermal Activity / Galvanic Skin Response
-  MOTION: 'MOTION',   // Accelerometer / Movement variance
-  SLEEP: 'SLEEP'      // Sleep duration & sleep architecture context
-});
+import {
+  BIO_SIGNAL_TYPES,
+  DEVICE_CONNECTION_STATUS,
+  PROVENANCE_TYPES,
+  NON_MEDICAL_DISCLAIMER
+} from './NeuroContextTypes.js';
+import { signalProcessingPipeline } from './SignalProcessingPipeline.js';
+import { personalBaselineManager } from './PersonalBaselineManager.js';
+import { multimodalFusionEngine } from './MultimodalFusionEngine.js';
+import { syntheticBiosignalGenerator } from './SyntheticBiosignalGenerator.js';
 
-export const DEVICE_CONNECTION_STATUS = Object.freeze({
-  DISCONNECTED: 'DISCONNECTED',
-  CONNECTING: 'CONNECTING',
-  CONNECTED: 'CONNECTED',
-  ERROR: 'ERROR'
-});
+export {
+  BIO_SIGNAL_TYPES,
+  DEVICE_CONNECTION_STATUS,
+  PROVENANCE_TYPES,
+  NON_MEDICAL_DISCLAIMER
+};
 
 export class NeuroContextAdapter {
-  constructor(storageAdapter = null) {
+  constructor(options = {}) {
     this.status = DEVICE_CONNECTION_STATUS.DISCONNECTED;
     this.activeDevice = null;
     this.hasUserConsent = false;
     this.storageKey = 'mini_adhy_neuro_context_v1';
-    
-    // Tier 1: Raw Signals (strictly isolated, never saved to localStorage without explicit opt-in)
-    this.rawSignalBuffer = [];
-    this.maxRawSamples = 500;
 
-    // Tier 2: Extracted Features
-    this.latestFeatures = null;
+    // Subsystems
+    this.pipeline = options.pipeline || signalProcessingPipeline;
+    this.baselineManager = options.baselineManager || personalBaselineManager;
+    this.fusionEngine = options.fusionEngine || multimodalFusionEngine;
+    this.simulator = options.simulator || syntheticBiosignalGenerator;
 
-    // Tier 3: Inferred Context States
+    // Modular Adapter Registry
+    this.registeredAdapters = new Map();
+
+    // Tier 1: Raw Signals (strictly isolated in memory, never saved to disk without consent)
+    this.rawSignalBuffers = new Map(); // signalType -> raw sample array
+    this.maxRawSamples = options.maxRawSamples || 500;
+
+    // Tier 2: Extracted Features (by signal type)
+    this.featureStreams = new Map(); // signalType -> { features, quality, timestamp, isSimulated }
+    this.latestFeatures = null;      // Backward compatibility pointer
+
+    // Tier 3: Inferred Context States (Multimodal & Individual)
     this.latestStateEstimate = null;
+    this.latestMultimodalContext = null;
 
-    this.disclaimer = 'Non-medical computational estimate for contextual assistance only. Mini-Adhy does NOT read thoughts, decode language, or provide medical/psychiatric diagnoses.';
+    // Active Calibration Frames Buffer
+    this.calibrationBuffers = new Map(); // signalType -> array of feature frames
+
+    this.disclaimer = NON_MEDICAL_DISCLAIMER;
   }
 
-  /**
-   * Status inspection (honest by construction — never claims fake connectivity)
-   */
+  // ── Status & Privacy Controls ───────────────────────────────────────
+
   getStatus() {
     return {
       connected: this.status === DEVICE_CONNECTION_STATUS.CONNECTED,
       status: this.status,
       activeDevice: this.activeDevice,
+      activeAdapters: Array.from(this.registeredAdapters.keys()),
+      activeStreams: Array.from(this.featureStreams.keys()),
       hasUserConsent: this.hasUserConsent,
       signalQuality: this.latestFeatures ? this.latestFeatures.signalQuality : 0.0,
       disclaimer: this.disclaimer,
       note: this.status === DEVICE_CONNECTION_STATUS.DISCONNECTED
         ? 'No physiological device is connected. No synthetic brain waves or fake biometric states are generated.'
-        : `Connected to ${this.activeDevice?.name || 'Bio-sensor'}`
+        : `Connected to ${this.activeDevice?.name || 'Bio-sensor hub'}`
     };
   }
 
@@ -77,8 +97,57 @@ export class NeuroContextAdapter {
     }
   }
 
+  hasConsent() {
+    return this.hasUserConsent;
+  }
+
   /**
-   * Connect a real hardware driver (e.g. Web Bluetooth OpenBCI / Muse GATT interface)
+   * Purge all raw signals, features, baselines, and inferences immediately
+   */
+  purgeAllData() {
+    this.rawSignalBuffers.clear();
+    this.featureStreams.clear();
+    this.calibrationBuffers.clear();
+    this.latestFeatures = null;
+    this.latestStateEstimate = null;
+    this.latestMultimodalContext = null;
+  }
+
+  purgeAllBiosignals() {
+    this.purgeAllData();
+    this.baselineManager.resetBaseline();
+  }
+
+  // ── Modular Adapter Interface ───────────────────────────────────────
+
+  /**
+   * Register a sensor adapter (e.g. EEG, ECG, PPG, EDA, Motion, Audio, Camera)
+   */
+  registerAdapter(adapterId, adapterInstance) {
+    if (!adapterId || !adapterInstance) {
+      throw new Error('[NeuroContextAdapter] Invalid adapter registration parameters.');
+    }
+    this.registeredAdapters.set(adapterId, {
+      id: adapterId,
+      type: adapterInstance.type || BIO_SIGNAL_TYPES.EEG,
+      samplingRate: adapterInstance.samplingRate || 250,
+      instance: adapterInstance,
+      registeredAt: new Date().toISOString()
+    });
+    return true;
+  }
+
+  getRegisteredAdapters() {
+    return Array.from(this.registeredAdapters.entries()).map(([id, a]) => ({
+      id,
+      type: a.type,
+      samplingRate: a.samplingRate,
+      registeredAt: a.registeredAt
+    }));
+  }
+
+  /**
+   * Connect a hardware device driver (backward compatibility)
    */
   connectHardware(deviceDriver, { userConsent = false } = {}) {
     if (!userConsent && !this.hasUserConsent) {
@@ -101,24 +170,104 @@ export class NeuroContextAdapter {
     return this.getStatus();
   }
 
-  /**
-   * Disconnect hardware and clear live buffers
-   */
   disconnectHardware() {
     this.status = DEVICE_CONNECTION_STATUS.DISCONNECTED;
     this.activeDevice = null;
-    this.rawSignalBuffer = [];
-    this.latestFeatures = null;
-    this.latestStateEstimate = null;
+    this.purgeAllData();
+  }
+
+  // ── Signal Processing Pipeline Ingestion ────────────────────────────
+
+  /**
+   * Ingests a raw signal packet through the full 10-stage DSP pipeline
+   */
+  ingestRawPacket(signalType, rawPacket, options = {}) {
+    if (!this.hasUserConsent) {
+      return { status: 'BLOCKED', reason: 'User consent required' };
+    }
+
+    // Run full 10-stage DSP pipeline
+    const pipelineResult = this.pipeline.processPacket(
+      signalType,
+      rawPacket,
+      this.baselineManager,
+      options
+    );
+
+    if (!pipelineResult.success) {
+      return {
+        status: 'PIPELINE_ERROR',
+        errors: pipelineResult.errors,
+        stages: pipelineResult.stages
+      };
+    }
+
+    const obsTime = rawPacket.timestamp || new Date().toISOString();
+    const isSimulated = Boolean(rawPacket.isSimulated || options.isSimulated);
+
+    // Tier 1: Buffer raw samples in memory (ring buffer)
+    if (!this.rawSignalBuffers.has(signalType)) {
+      this.rawSignalBuffers.set(signalType, []);
+    }
+    const buf = this.rawSignalBuffers.get(signalType);
+    buf.push(...rawPacket.data);
+    if (buf.length > this.maxRawSamples) {
+      buf.splice(0, buf.length - this.maxRawSamples);
+    }
+
+    // Tier 2: Extracted Features
+    const featureRecord = {
+      signalType,
+      signalQuality: pipelineResult.quality,
+      quality: pipelineResult.quality,
+      features: pipelineResult.features,
+      metrics: pipelineResult.features,
+      source: rawPacket.source || (isSimulated ? 'SIMULATED' : 'Hardware Pipeline'),
+      timestamp: obsTime,
+      isSimulated,
+      provenance: isSimulated ? PROVENANCE_TYPES.SYNTHETIC_SIMULATED : PROVENANCE_TYPES.REAL_HARDWARE
+    };
+
+    this.featureStreams.set(signalType, featureRecord);
+    this.latestFeatures = featureRecord;
+
+    // Tier 3: Inferred Context State
+    if (pipelineResult.quality >= 0.4) {
+      this.latestStateEstimate = {
+        signalType,
+        cognitiveWorkload: pipelineResult.features.workloadIndex !== undefined
+          ? pipelineResult.features.workloadIndex
+          : null,
+        focusEstimate: pipelineResult.features.focusIndex !== undefined
+          ? pipelineResult.features.focusIndex
+          : null,
+        confidence: Math.round(pipelineResult.quality * 0.85 * 100) / 100,
+        disclaimer: this.disclaimer,
+        timestamp: obsTime,
+        isSimulated
+      };
+    } else {
+      this.latestStateEstimate = null;
+    }
+
+    // Trigger Multimodal Fusion
+    this.latestMultimodalContext = this.fusionEngine.fuseStreams(this.featureStreams);
+
+    return {
+      status: 'PROCESSED',
+      pipelineResult,
+      featureRecord,
+      stateEstimate: this.latestStateEstimate,
+      multimodalContext: this.latestMultimodalContext
+    };
   }
 
   /**
-   * Ingest validated features from an external hardware pipeline
-   * (Separates raw vs extracted features vs inferred state)
+   * Ingest pre-extracted features (backward compatibility method)
    */
   ingestExtractedFeatures({
     signalType = BIO_SIGNAL_TYPES.EEG,
-    signalQuality = 1.0, // 0.0 (unusable noise) to 1.0 (clean signal)
+    signalQuality = 1.0,
     metrics = {},
     source = 'Hardware Pipeline',
     timestamp = null,
@@ -135,52 +284,172 @@ export class NeuroContextAdapter {
     this.latestFeatures = {
       signalType,
       signalQuality: clampedQuality,
+      quality: clampedQuality,
+      features: metrics,
       metrics,
       source,
       timestamp: obsTime,
-      isSimulated: Boolean(isSimulated) // Must be honestly tagged if used in automated testing
+      isSimulated: Boolean(isSimulated),
+      provenance: isSimulated ? PROVENANCE_TYPES.SYNTHETIC_SIMULATED : PROVENANCE_TYPES.REAL_HARDWARE
     };
 
-    // Tier 3: Inferred State (only if signal quality is above minimum viable threshold)
-    if (clampedQuality >= 0.5) {
+    this.featureStreams.set(signalType, this.latestFeatures);
+
+    // Tier 3: Inferred State
+    if (clampedQuality >= 0.4) {
       this.latestStateEstimate = {
         signalType,
         cognitiveWorkload: metrics.workloadIndex !== undefined ? metrics.workloadIndex : null,
         focusEstimate: metrics.focusIndex !== undefined ? metrics.focusIndex : null,
-        confidence: Math.round(clampedQuality * 0.85 * 100) / 100, // Inferred state confidence is bounded
+        confidence: Math.round(clampedQuality * 0.85 * 100) / 100,
         disclaimer: this.disclaimer,
         timestamp: obsTime,
         isSimulated: Boolean(isSimulated)
       };
     } else {
-      this.latestStateEstimate = null; // Unusable signal produces no estimate
+      this.latestStateEstimate = null;
     }
+
+    // Trigger Multimodal Fusion
+    this.latestMultimodalContext = this.fusionEngine.fuseStreams(this.featureStreams);
 
     return {
       features: this.latestFeatures,
-      stateEstimate: this.latestStateEstimate
+      stateEstimate: this.latestStateEstimate,
+      multimodalContext: this.latestMultimodalContext
     };
   }
 
-  /**
-   * Retrieve active state for inclusion in cognitive compiler (if available and consented)
-   */
-  getActiveStateEstimate() {
-    if (!this.hasUserConsent || this.status === DEVICE_CONNECTION_STATUS.DISCONNECTED) {
-      return null;
+  // ── Personal Baseline Calibration ───────────────────────────────────
+
+  startCalibration(signalType) {
+    this.calibrationBuffers.set(signalType, []);
+    return { status: 'CALIBRATION_STARTED', signalType };
+  }
+
+  addCalibrationFrame(signalType, featureFrame) {
+    if (!this.calibrationBuffers.has(signalType)) {
+      this.calibrationBuffers.set(signalType, []);
     }
+    const buf = this.calibrationBuffers.get(signalType);
+    buf.push(featureFrame);
+    return { sampleCount: buf.length };
+  }
+
+  completeCalibration(signalType, metadata = {}) {
+    const buf = this.calibrationBuffers.get(signalType) || [];
+    const calResult = this.baselineManager.calibrateBaseline(signalType, buf, metadata);
+    this.calibrationBuffers.delete(signalType);
+    return calResult;
+  }
+
+  getBaseline(signalType) {
+    return this.baselineManager.getBaseline(signalType);
+  }
+
+  // ── Multimodal Fusion & Context Access ──────────────────────────────
+
+  getMultimodalContext() {
+    if (!this.hasUserConsent || this.featureStreams.size === 0) return null;
+    return this.latestMultimodalContext || this.fusionEngine.fuseStreams(this.featureStreams);
+  }
+
+  getActiveStateEstimate() {
+    if (!this.hasUserConsent) return null;
     return this.latestStateEstimate ? { ...this.latestStateEstimate } : null;
   }
 
+  // ── Simulation Demonstration ────────────────────────────────────────
+
   /**
-   * Purge all raw signals, features, and inferences immediately
+   * Runs an end-to-end simulated pipeline for offline testing/verification.
+   * STRICT INVARIANT: Always explicitly tagged SIMULATED.
    */
-  purgeAllData() {
-    this.rawSignalBuffer = [];
-    this.latestFeatures = null;
-    this.latestStateEstimate = null;
+  runSimulatedPipeline(signalType = BIO_SIGNAL_TYPES.EEG, durationSec = 2, options = {}) {
+    let simPacket = null;
+
+    switch (signalType) {
+      case BIO_SIGNAL_TYPES.EEG:
+        simPacket = this.simulator.generateEEG(durationSec, 250, options);
+        break;
+      case BIO_SIGNAL_TYPES.ECG:
+        simPacket = this.simulator.generateECG(durationSec, 500, options.bpm || 72, options);
+        break;
+      case BIO_SIGNAL_TYPES.PPG:
+        simPacket = this.simulator.generatePPG(durationSec, 64, options.bpm || 72);
+        break;
+      case BIO_SIGNAL_TYPES.EDA:
+        simPacket = this.simulator.generateEDA(durationSec, 32, options);
+        break;
+      case BIO_SIGNAL_TYPES.MOTION:
+        simPacket = this.simulator.generateMotion(durationSec, 100, options.isMoving);
+        break;
+      default:
+        simPacket = this.simulator.generateEEG(durationSec, 250, options);
+    }
+
+    // Process through pipeline
+    const pipelineResult = this.pipeline.processPacket(
+      signalType,
+      simPacket,
+      this.baselineManager,
+      options
+    );
+
+    return {
+      isSimulated: true,
+      source: 'SIMULATED',
+      provenance: PROVENANCE_TYPES.SYNTHETIC_SIMULATED,
+      signalType,
+      simPacket,
+      pipelineResult,
+      quality: pipelineResult.quality,
+      features: pipelineResult.features,
+      disclaimer: this.disclaimer
+    };
+  }
+
+  // ── Cognitive Integration ───────────────────────────────────────────
+
+  /**
+   * Generates optional, uncertainty-bounded context for CognitiveContextCompiler & AdhyModel
+   */
+  exportCognitiveContext() {
+    if (!this.hasUserConsent) {
+      return {
+        enabled: false,
+        reason: 'Biosignal context disabled (no user consent)'
+      };
+    }
+
+    const multi = this.getMultimodalContext();
+    if (!multi || !multi.fused) {
+      return {
+        enabled: false,
+        reason: 'No active biosignal streams available'
+      };
+    }
+
+    return {
+      enabled: true,
+      isSimulated: multi.isSimulated,
+      provenance: multi.provenance,
+      confidence: multi.confidence,
+      quality: multi.overallQuality,
+      activeSensors: multi.activeSensors,
+      missingSensors: multi.missingSensors,
+      estimates: multi.estimates,
+      formattedBlock: [
+        `### PHYSIOLOGICAL & SENSOR CONTEXT [OPTIONAL / UNCERTAINTY-BOUNDED]`,
+        `- Active Sensor Streams: ${multi.activeSensors.join(', ')} (Missing: ${multi.missingSensors.join(', ')})`,
+        `- Data Provenance: ${multi.isSimulated ? 'SYNTHETIC SIMULATION (NOT REAL)' : 'Real Hardware Stream'}`,
+        `- Overall Quality: ${Math.round(multi.overallQuality * 100)}% | Confidence: ${Math.round(multi.confidence * 100)}%`,
+        multi.estimates?.cognitiveWorkloadIndex !== null ? `- Estimated Workload Index: ${multi.estimates?.cognitiveWorkloadIndex}` : null,
+        multi.estimates?.physioArousalIndex !== null ? `- Estimated Arousal Index: ${multi.estimates?.physioArousalIndex}` : null,
+        `- Boundary: Non-diagnostic computational estimate. Explicit user statements strictly override sensor indications.`
+      ].filter(Boolean).join('\n')
+    };
   }
 }
 
 export const neuroContextAdapter = new NeuroContextAdapter();
-

@@ -514,6 +514,24 @@ export class AdhyModel {
     return { ...this.domains.cognition };
   }
 
+  updateNeuroContext(snapshot = {}) {
+    this.domains.state.neuroContext = {
+      connected: Boolean(snapshot.connected),
+      source: snapshot.source || 'Hardware Pipeline',
+      signalQuality: typeof snapshot.signalQuality === 'number' ? snapshot.signalQuality : 0.0,
+      features: snapshot.features || null,
+      stateEstimate: snapshot.stateEstimate || null,
+      multimodalContext: snapshot.multimodalContext || null,
+      lastObservedAt: new Date().toISOString(),
+      isSimulated: Boolean(snapshot.isSimulated)
+    };
+    return this.domains.state.neuroContext;
+  }
+
+  getNeuroContext() {
+    return { ...this.domains.state.neuroContext };
+  }
+
   getIdentityContext() {
     const pf = this.domains.identity.personalFacts || {};
     const cr = this.domains.identity.currentRoles || {};
