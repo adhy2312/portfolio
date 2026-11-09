@@ -15,10 +15,13 @@
  * 4. Temporal decay: Isolated interactions never become permanent traits without repeated confirmation.
  */
 
+import { adhyModel } from '../identity/AdhyModel';
+
 export class CognitiveMirror {
   constructor(storageAdapter = null) {
     this.storageKey = 'mini_adhy_cognitive_mirror_v3';
     this.storageAdapter = storageAdapter || this._createDefaultStorage();
+    this.adhyModel = adhyModel;
     this.dimensions = {};
     this.observationsLog = [];
     this.initDefaultDimensions();
@@ -175,6 +178,9 @@ export class CognitiveMirror {
    * Explicit user correction strictly supersedes inferred traits
    */
   correctDimension(key, newValue, userReason = '') {
+    if (this.adhyModel) {
+      this.adhyModel.recordCorrection(key, newValue, userReason);
+    }
     const existing = this.dimensions[key] || {};
     this.dimensions[key] = {
       ...existing,
@@ -194,6 +200,15 @@ export class CognitiveMirror {
   }
 
   getDimension(key) {
+    if (this.adhyModel) {
+      const modelDim = this.adhyModel.getDimension(key);
+      if (modelDim) {
+        return {
+          ...modelDim,
+          type: modelDim.classification === 'explicit_preference' || modelDim.classification === 'fact' ? 'explicit' : 'inferred'
+        };
+      }
+    }
     return this.dimensions[key] ? { ...this.dimensions[key] } : null;
   }
 

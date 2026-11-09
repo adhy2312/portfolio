@@ -10,6 +10,8 @@
  * Explicit user corrections strictly override uncertain inferences.
  */
 
+import { adhyModel } from './AdhyModel';
+
 export const INITIAL_USER_CONTEXT = Object.freeze({
   fullName: 'Adhithya Mohan S (Adhy)',
   location: 'Trivandrum, Kerala, India',
@@ -60,10 +62,18 @@ export const INITIAL_USER_CONTEXT = Object.freeze({
 export class CognitiveProfile {
   constructor() {
     this.storageKey = 'mini_adhy_cognitive_profile_v2';
-    this.context = { ...INITIAL_USER_CONTEXT };
+    this.adhyModel = adhyModel;
     this.dimensions = {};
     this.initDefaultDimensions();
     this.loadState();
+  }
+
+  get context() {
+    return this.adhyModel ? this.adhyModel.getIdentityContext() : { ...INITIAL_USER_CONTEXT };
+  }
+
+  set context(val) {
+    // Read-only wrapper backed by canonical model
   }
 
   initDefaultDimensions() {
@@ -213,10 +223,17 @@ export class CognitiveProfile {
   }
 
   getDimension(key) {
+    if (this.adhyModel) {
+      const modelDim = this.adhyModel.getDimension(key);
+      if (modelDim) return { ...modelDim };
+    }
     return this.dimensions[key] ? { ...this.dimensions[key] } : null;
   }
 
   getAllDimensions() {
+    if (this.adhyModel) {
+      return { ...this.adhyModel.getAllCognitiveDimensions() };
+    }
     return { ...this.dimensions };
   }
 
@@ -224,6 +241,10 @@ export class CognitiveProfile {
    * Explicit user correction - immediately overrides inferred preferences with 1.0 confidence
    */
   correctPreference(key, newValue, userReason = '') {
+    if (this.adhyModel) {
+      this.adhyModel.recordCorrection(key, newValue, userReason);
+    }
+
     if (!this.dimensions[key]) {
       this.dimensions[key] = {
         id: `pref_${key}`,

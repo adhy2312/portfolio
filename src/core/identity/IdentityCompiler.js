@@ -11,9 +11,10 @@
  */
 
 import { CANONICAL_IDENTITY } from './CanonicalIdentity';
-import { cognitiveProfile } from './CognitiveProfile';
+import { adhyModel } from './AdhyModel';
 import { inferBehavioralMode, BEHAVIORAL_MODES } from './BehavioralModes';
 import { behaviouralController } from '../runtime/BehaviouralController';
+import { cognitiveContextCompiler } from '../cognition/CognitiveContextCompiler';
 
 export class IdentityCompiler {
   constructor() {
@@ -30,7 +31,9 @@ export class IdentityCompiler {
     memoryContext = [],
     provider = 'gemini',
     allowTools = true,
-    behaviouralStance = null
+    behaviouralStance = null,
+    cognitiveContext = null,
+    complexity = 'LEVEL_1_SIMPLE'
   } = {}) {
     // 1. Resolve behavioral policy stance
     const stance = behaviouralStance || behaviouralController.evaluateStance(userInput, { mode });
@@ -41,10 +44,19 @@ export class IdentityCompiler {
       ? this.identity.collective[specialistAgentId]
       : null;
 
-    // 3. Assemble Cognitive Profile Snapshot
-    const practicalPref = cognitiveProfile.getDimension('practicalVsTheoretical');
-    const depthPref = cognitiveProfile.getDimension('explanationDepth');
-    const criticismPref = cognitiveProfile.getDimension('directCriticism');
+    // 3. Compile or use provided Cognitive Context from central AdhyModel
+    const resolvedCognitiveContext = cognitiveContext || cognitiveContextCompiler.compileCognitiveContext({
+      input: userInput,
+      complexity,
+      mode: resolvedMode.id,
+      specialistAgentId,
+      maxMemories: memoryContext.length > 0 ? memoryContext.length : 4
+    });
+
+    const practicalPref = adhyModel.getDimension('practicalVsTheoretical');
+    const depthPref = adhyModel.getDimension('explanationDepth');
+    const criticismPref = adhyModel.getDimension('directCriticism');
+    const idCtx = adhyModel.getIdentityContext();
 
     // 4. Construct Core Identity Block
     const identityBlock = [
@@ -64,14 +76,13 @@ export class IdentityCompiler {
       `- Truthfulness: Never claim to have done, tested, perceived, or remembered what was not actually verified.`
     ].join('\n');
 
-    // 6. User Cognitive Context Block (Incorporating active AUA dimensions)
-    const cognitiveBlock = [
-      `### ADHY'S CONTEXT & COGNITIVE PREFERENCES`,
-      `- Background: ECE at MBCET KTU, Trivandrum. Hardware engineering (DSP, STM32 ARM Cortex, GNU Radio SDR, KiCad 8 PCB layout, MATLAB/Simulink) and full-stack software development.`,
-      `- Current Roles: Media Secretary, MBCET Senate; Lead Photographer, FRAMES MBCET.`,
-      `- Historical Leadership: Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members); former PR & Media Head, ISTE SC MBCET.`,
-      `- Visual & Creative: Street & documentary photography (@zoomout_frames), UI/UX design, visual storytelling.`,
-      `- Student Context: Values cost-effective, practical prototypes before excessive theoretical abstractions.`,
+    // 6. User Cognitive Context Block (Dynamic, versioned AdhyModel integration)
+    const cognitiveBlock = resolvedCognitiveContext?.formattedBlock || [
+      `### ADHY'S CONTEXT & COGNITIVE PREFERENCES [v${adhyModel.getVersion()}]`,
+      `- Background: ${idCtx.education}, ${idCtx.location}. Engineering domains: ${idCtx.technicalInterests.slice(0, 5).join(', ')}.`,
+      `- Current Roles: ${idCtx.currentRoles.join('; ')}.`,
+      `- Historical Leadership: ${idCtx.historicalRoles.join('; ')}.`,
+      `- Visual & Creative: ${idCtx.creativeInterests.join(', ')}.`,
       `- Practical Preference: ${practicalPref?.value || 'bias toward functional working prototypes over theoretical abstractions'}.`,
       `- Preferred Explanation Depth: ${depthPref?.value || 'step-by-step with practical working code'}.`,
       `- Technical Criticism: ${criticismPref?.value || 'strongly preferred — be honest and direct'}.`
@@ -180,6 +191,8 @@ export class IdentityCompiler {
       specialistId: specialist?.id || null,
       identityVersion: this.identity.version,
       behavioralPolicyVersion: this.identity.behavioralPolicyVersion,
+      modelSnapshotVersion: resolvedCognitiveContext?.modelVersion || adhyModel.getVersion(),
+      cognitiveContext: resolvedCognitiveContext,
       provider,
       stance
     };

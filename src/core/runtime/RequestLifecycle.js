@@ -115,6 +115,7 @@ export class RequestLifecycle {
     // Step 4: Identity & Context Compilation
     const instructionPackage = identityCompiler.compileInstruction({
       mode,
+      complexity,
       userInput: input,
       specialistAgentId: specialistId,
       memoryContext,
@@ -153,7 +154,13 @@ export class RequestLifecycle {
       systemPrompt: instructionPackage.systemPrompt,
       agentId: specialistId || 'MINI_ADHY',
       requirements: providerRequirements,
-      timeoutMs: options.timeoutMs || 8000
+      timeoutMs: options.timeoutMs || 8000,
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
+      sessionId: options.sessionId,
+      isSensitive: options.isSensitive,
+      isVolatile: options.isVolatile,
+      requiresVision: options.requiresVision,
+      requiresAudio: options.requiresAudio
     });
 
     const durationMs = Date.now() - startTime;
@@ -195,6 +202,7 @@ export class RequestLifecycle {
       text: finalResponse,
       provider: isOfflineFallback ? 'deterministic_local_knowledge' : generationResult.provider,
       responseType,
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
       fallbackEngaged: isOfflineFallback || generationResult.fallbackEngaged || false,
       durationMs
     };

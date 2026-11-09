@@ -162,9 +162,10 @@ export class ProviderRegistry {
     const temp = options.temperature !== undefined ? String(options.temperature) : '0.7';
     const model = options.model || 'default';
     const sessionId = options.sessionId || '';
+    const modelSnapshotVersion = options.modelSnapshotVersion || '';
 
     // Deterministic serialization — combine all context-defining fields
-    const raw = `${agentId}|${model}|${temp}|${sessionId}|${systemStr}|${promptStr.trim()}|${historyStr}`;
+    const raw = `${agentId}|${model}|${temp}|${sessionId}|${modelSnapshotVersion}|${systemStr}|${promptStr.trim()}|${historyStr}`;
 
     // Simple djb2-style hash for compact key (not cryptographic, just identity)
     let hash = 5381;
@@ -184,9 +185,10 @@ export class ProviderRegistry {
 
     // 1. Cache Check (Exact match cache for non-volatile queries)
     const cacheKey = this.computeCacheKey(request, options);
-    // Disable caching for vision/multimodal requests and volatile queries
+    // Disable caching for vision/multimodal requests, volatile, and sensitive queries
     const isMultimodal = options.requiresVision || options.requiresAudio;
-    const allowCache = !isMultimodal && options.cache !== false && (options.temperature === undefined || options.temperature < 0.7);
+    const isVolatileOrSensitive = options.isVolatile || options.isSensitive;
+    const allowCache = !isMultimodal && !isVolatileOrSensitive && options.cache !== false && (options.temperature === undefined || options.temperature < 0.7);
 
     if (allowCache && this.responseCache.has(cacheKey)) {
       const cached = this.responseCache.get(cacheKey);
