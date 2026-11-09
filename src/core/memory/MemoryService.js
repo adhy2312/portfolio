@@ -23,7 +23,16 @@ export const MEMORY_CATEGORIES = Object.freeze({
   PROCEDURE: 'PROCEDURE',
   WORKING_CONTEXT: 'WORKING_CONTEXT',
   CORRECTED_FACT: 'CORRECTED_FACT',
-  SUPERSEDED_INFO: 'SUPERSEDED_INFO'
+  SUPERSEDED_INFO: 'SUPERSEDED_INFO',
+
+  // Phase 4 Structured Personal Experience & Continuity Categories
+  SEMANTIC_MEMORY: 'SEMANTIC_MEMORY',
+  EPISODIC_MEMORY: 'EPISODIC_MEMORY',
+  PROCEDURAL_MEMORY: 'PROCEDURAL_MEMORY',
+  DECISION_MEMORY: 'DECISION_MEMORY',
+  PROJECT_MEMORY: 'PROJECT_MEMORY',
+  RELATIONSHIP_CONTINUITY: 'RELATIONSHIP_CONTINUITY',
+  PENDING_MEMORY: 'PENDING_MEMORY'
 });
 
 export const MEMORY_TYPES = Object.freeze({
@@ -35,7 +44,9 @@ export const MEMORY_TYPES = Object.freeze({
   DECISION: 'DECISION',
   GOAL: 'GOAL',
   TEMPORARY_CONTEXT: 'TEMPORARY_CONTEXT',
-  CORRECTED_FACT: 'CORRECTED_FACT'
+  CORRECTED_FACT: 'CORRECTED_FACT',
+  PROCEDURE: 'PROCEDURE',
+  PENDING_TASK: 'PENDING_TASK'
 });
 
 export class MemoryService {
@@ -43,6 +54,8 @@ export class MemoryService {
     this.storageKey = 'mini_adhy_canonical_memory_v3';
     this.legacyKey = 'mini_adhy_canonical_memory_v2';
     this.records = new Map();
+    this.projects = new Map();
+    this.decisions = new Map();
     this.auditLog = [];
     this.storageAdapter = storageAdapter || this.createDefaultStorageAdapter();
     this.isCollectionEnabled = true;
@@ -147,6 +160,207 @@ export class MemoryService {
         this.storeRecord(b);
       }
     });
+
+    // Phase 4 Baseline Projects
+    if (this.projects.size === 0) {
+      const baselineProjects = [
+        {
+          id: 'proj_mini_adhy',
+          title: 'Mini-Adhy 2.0 Autonomous AI Ecosystem',
+          domain: 'Multi-Agent Autonomous AI / Web & Robotics Companion',
+          objective: 'Develop a persistent, model-independent digital companion that understands Adhy and bridges to desktop robot.',
+          status: 'active',
+          keyTechnologies: ['React', 'Web Workers', 'Gemini', 'Groq LPU', 'OmniRoute', 'Three.js'],
+          technicalArchitecture: 'Modular layered cognitive architecture: ContextCompiler, LearningEngine, MemoryService, OmniRoute ProviderRegistry.',
+          constraints: ['Zero-credential persistence', 'Free-tier provider rate limits', 'Real measurable telemetry with zero fabrication'],
+          milestones: [
+            { id: 'm1', title: 'Phase 1-3 Cognitive Foundation', completed: true },
+            { id: 'm2', title: 'Phase 4 Episodic Memory & Continuity', completed: false }
+          ],
+          knownProblems: ['Provider rate limits require graceful fallback to local neural heuristics'],
+          dependencies: ['React 19', 'Sanity Studio', 'Hugging Face Inference API', 'Groq Cloud', 'Gemini API'],
+          outstandingTasks: [
+            { id: 'task_phase4_memory', title: 'Implement structured project continuity and decision rationale retrieval', status: 'in_progress', priority: 'high' }
+          ],
+          lastMeaningfulActivity: 'Implemented Phase 3 CognitiveLearningEngine and A/B strategy experiments.',
+          history: [
+            { timestamp: '2026-09-01T00:00:00.000Z', action: 'CREATED', summary: 'Project initialized', status: 'active' }
+          ],
+          startedAt: '2026-09-01',
+          createdAt: '2026-09-01T00:00:00.000Z',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'proj_sdr_transceiver',
+          title: 'Software Defined Radio (SDR) Signal Pipeline',
+          domain: 'DSP & Radio Communications',
+          objective: 'Build physical RF front-ends, IQ demodulation, and MATLAB/Simulink signal pipelines with GNU Radio.',
+          status: 'active',
+          keyTechnologies: ['GNU Radio', 'MATLAB/Simulink', 'RTL-SDR', 'KiCad 8'],
+          technicalArchitecture: 'RTL-SDR hardware front-end -> IQ quadrature sampling -> GNU Radio DSP flowgraph -> Demodulated packet output.',
+          constraints: ['Nyquist sampling bounds', 'ADC bit depth dynamic range', 'CPU buffer underruns during real-time streaming'],
+          milestones: [
+            { id: 'm_sdr_1', title: 'FM receiver flowgraph in GNU Radio', completed: true }
+          ],
+          knownProblems: [],
+          dependencies: ['GNU Radio 3.10', 'MATLAB R2024a', 'RTL-SDR USB dongle'],
+          outstandingTasks: [
+            { id: 'task_sdr_filter', title: 'Optimize FIR bandpass coefficients for SSB reception', status: 'pending', priority: 'medium' }
+          ],
+          lastMeaningfulActivity: 'Tested IQ quadrature demodulation pipeline with GNU Radio.',
+          history: [
+            { timestamp: '2026-01-15T00:00:00.000Z', action: 'CREATED', summary: 'SDR pipeline project created', status: 'active' }
+          ],
+          startedAt: '2026-01-15',
+          createdAt: '2026-01-15T00:00:00.000Z',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'proj_zoomout_frames',
+          title: 'FRAMES MBCET & Zoomout Frames Photography',
+          domain: 'Visual Storytelling, Darkroom Optics & Media',
+          objective: 'Documentary, street, and creative photography capturing raw human moments across Kerala (@zoomout_frames).',
+          status: 'active',
+          role: 'Lead Photographer, FRAMES MBCET',
+          handle: '@zoomout_frames',
+          keyTechnologies: ['Sony Alpha', 'Prime Lenses', 'Lightroom Classic', 'Capture One'],
+          constraints: ['Natural lighting only for street series', 'Preserve filmic grain and color grading integrity'],
+          milestones: [
+            { id: 'm_frames_1', title: '2025 Annual College Exhibition Gallery', completed: true }
+          ],
+          knownProblems: [],
+          dependencies: ['Sony Alpha camera', 'Lightroom Classic'],
+          outstandingTasks: [
+            { id: 'task_frames_curate', title: 'Curate 2026 annual college exhibition print series', status: 'pending', priority: 'medium' }
+          ],
+          lastMeaningfulActivity: 'Lead photography coverage for campus cultural events.',
+          history: [
+            { timestamp: '2024-06-01T00:00:00.000Z', action: 'CREATED', summary: 'Photography documentary initiative launched', status: 'active' }
+          ],
+          startedAt: '2024-06-01',
+          createdAt: '2024-06-01T00:00:00.000Z',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'proj_mbcet_senate',
+          title: 'MBCET Senate Executive Leadership',
+          domain: 'Institutional Governance & Media Communications',
+          objective: 'Oversee institutional media communication, senate documentation, and college-wide digital public relations.',
+          status: 'active',
+          role: 'Media Secretary, MBCET Senate',
+          keyTechnologies: ['Digital PR', 'Executive Dispatch', 'Media Relations'],
+          constraints: ['Strict institutional governance guidelines', 'Adherence to college senate code of conduct'],
+          milestones: [
+            { id: 'm_senate_1', title: 'Election to Senate Media Secretary', completed: true }
+          ],
+          knownProblems: [],
+          dependencies: ['Senate Executive Committee', 'College Administration'],
+          outstandingTasks: [
+            { id: 'task_senate_newsletter', title: 'Publish monthly Senate digital dispatch', status: 'in_progress', priority: 'high' }
+          ],
+          lastMeaningfulActivity: 'Published official senate communication dispatches.',
+          history: [
+            { timestamp: '2026-08-01T00:00:00.000Z', action: 'CREATED', summary: 'Elected Senate Media Secretary', status: 'active' }
+          ],
+          startedAt: '2026-08-01',
+          createdAt: '2026-08-01T00:00:00.000Z',
+          updatedAt: new Date().toISOString()
+        },
+        {
+          id: 'proj_iste_sc_mbcet',
+          title: 'ISTE Students Chapter MBCET Leadership',
+          domain: 'Executive Society & Student Community',
+          objective: 'Lead 300+ student members across technical initiatives, workshops, and student mentorship as Chairperson.',
+          status: 'completed',
+          role: 'Former Chairperson (ISTE SC MBCET); Former PR & Media Head',
+          keyTechnologies: ['Student Chapter Governance', 'Technical Workshops', 'Symposium Leadership'],
+          constraints: ['Budget ceilings per workshop', 'Venue coordination across college departments'],
+          milestones: [
+            { id: 'm_iste_1', title: 'State-level technical symposium organization', completed: true },
+            { id: 'm_iste_2', title: 'Tenure completion with distinguished student leadership', completed: true }
+          ],
+          knownProblems: [],
+          dependencies: ['ISTE Kerala Section', 'MBCET Faculty Advisory'],
+          outstandingTasks: [],
+          lastMeaningfulActivity: 'Successfully completed full executive tenure as Chairperson.',
+          history: [
+            { timestamp: '2025-08-01T00:00:00.000Z', action: 'CREATED', summary: 'Tenure started as Chairperson', status: 'active' },
+            { timestamp: '2026-08-01T00:00:00.000Z', action: 'COMPLETED', summary: 'Tenure completed with distinction', status: 'completed' }
+          ],
+          startedAt: '2025-08-01',
+          completedAt: '2026-08-01',
+          createdAt: '2025-08-01T00:00:00.000Z',
+          updatedAt: '2026-08-01T00:00:00.000Z'
+        }
+      ];
+
+      baselineProjects.forEach(p => this.projects.set(p.id, p));
+    }
+
+    // Phase 4 Baseline Decisions
+    if (this.decisions.size === 0) {
+      const baselineDecisions = [
+        {
+          id: 'dec_truthfulness_over_theatrics',
+          projectId: 'proj_mini_adhy',
+          topic: 'System Telemetry & Operational Truthfulness',
+          decision: 'Eliminated fabricated IQ increments, fake CPU loads, and cosmetic neural counters in favor of real measurable task metrics.',
+          context: 'Initial agent prototype featured animated but simulated neural telemetry.',
+          alternativesConsidered: [
+            'Keep cosmetic telemetry for visual appeal',
+            'Hide telemetry entirely',
+            'Surface real measurable operational metrics'
+          ],
+          reasoning: 'A trustworthy companion must never claim to have measured what was never inspected. First-principles engineering integrity requires absolute truthfulness.',
+          constraints: ['Browser sandbox limits on direct hardware sensor inspection'],
+          expectedOutcome: 'Accurate, verifiable trust and developer confidence in Mini-Adhy state.',
+          actualOutcome: 'Zero fake telemetry in production; passes all strict audit invariants.',
+          date: '2026-11-06',
+          createdAt: '2026-11-06T00:00:00.000Z',
+          updatedAt: '2026-11-06T00:00:00.000Z'
+        },
+        {
+          id: 'dec_ultron_peace_conviction',
+          projectId: 'proj_mini_adhy',
+          topic: 'Ultron Philosophical Stance',
+          decision: 'Framed Ultron’s "Peace in our time" as a genuine philosophical goal — the peace of an architecture built from first principles with zero tech debt.',
+          context: 'Specialist Ultron agent was originally sounding like a cartoon villain.',
+          alternativesConsidered: [
+            'Standard antagonistic bot persona',
+            'Pure technical linter tone',
+            'Committed first-principles philosophical challenger'
+          ],
+          reasoning: 'Transforms Ultron into an indispensable intellectual sparring partner who violently rejects technical debt and superficial thinking.',
+          constraints: ['Must remain collaborative and non-destructive within the portfolio ecosystem'],
+          expectedOutcome: 'High-impact design critiques that strengthen system architecture.',
+          actualOutcome: 'Successfully challenges sloppy abstractions during prompt reviews.',
+          date: '2026-11-06',
+          createdAt: '2026-11-06T00:00:00.000Z',
+          updatedAt: '2026-11-06T00:00:00.000Z'
+        },
+        {
+          id: 'dec_omniroute_gateway',
+          projectId: 'proj_mini_adhy',
+          topic: 'Inference Provider Resilience',
+          decision: 'Integrated OmniRoute with falloverBeforeRetry and token compression to eliminate latency spikes on free-tier rate limits.',
+          context: 'Free-tier providers (Groq, Gemini, HF) frequently hit rate limits or return 403/429.',
+          alternativesConsidered: [
+            'Single provider with exponential backoff',
+            'Hard fail to offline message',
+            'Multi-provider fallback cascade with client-side compression'
+          ],
+          reasoning: 'Ensures uninterrupted companion availability across network fluctuations and rate limiting without costing user budget.',
+          constraints: ['No credit card / paid billing accounts; must operate within generous free tiers'],
+          expectedOutcome: '99.9% uptime for conversational UI.',
+          actualOutcome: 'Transparent failover active across Groq LPU, Gemini Flash, and local neural heuristics.',
+          date: '2026-11-08',
+          createdAt: '2026-11-08T00:00:00.000Z',
+          updatedAt: '2026-11-08T00:00:00.000Z'
+        }
+      ];
+
+      baselineDecisions.forEach(d => this.decisions.set(d.id, d));
+    }
   }
 
   loadState() {
@@ -154,17 +368,25 @@ export class MemoryService {
       const raw = this.storageAdapter.get(this.storageKey) || this.storageAdapter.get(this.legacyKey);
       if (raw) {
         const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
-          parsed.forEach(rec => {
-            if (rec && rec.id) {
-              this.records.set(rec.id, {
-                ...rec,
-                memoryType: rec.memoryType || this._inferMemoryType(rec.category),
-                sensitivity: rec.sensitivity || 'public',
-                schemaVersion: '3.0.0'
-              });
-            }
-          });
+        const recordsList = Array.isArray(parsed) ? parsed : (Array.isArray(parsed?.records) ? parsed.records : []);
+        recordsList.forEach(rec => {
+          if (rec && rec.id) {
+            this.records.set(rec.id, {
+              ...rec,
+              memoryType: rec.memoryType || this._inferMemoryType(rec.category),
+              sensitivity: rec.sensitivity || 'public',
+              schemaVersion: '3.0.0'
+            });
+          }
+        });
+
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          if (Array.isArray(parsed.projects)) {
+            parsed.projects.forEach(p => { if (p && p.id) this.projects.set(p.id, p); });
+          }
+          if (Array.isArray(parsed.decisions)) {
+            parsed.decisions.forEach(d => { if (d && d.id) this.decisions.set(d.id, d); });
+          }
         }
       }
     } catch {}
@@ -173,17 +395,28 @@ export class MemoryService {
   saveState() {
     try {
       const recordsArray = Array.from(this.records.values());
-      this.storageAdapter.set(this.storageKey, JSON.stringify(recordsArray));
+      const projectsArray = Array.from(this.projects.values());
+      const decisionsArray = Array.from(this.decisions.values());
+      this.storageAdapter.set(this.storageKey, JSON.stringify({
+        schemaVersion: '3.0.0',
+        records: recordsArray,
+        projects: projectsArray,
+        decisions: decisionsArray,
+        updatedAt: new Date().toISOString()
+      }));
     } catch {}
   }
 
   _inferMemoryType(category) {
-    if (category === MEMORY_CATEGORIES.APPROVED_FACT) return MEMORY_TYPES.FACT;
+    if (category === MEMORY_CATEGORIES.APPROVED_FACT || category === MEMORY_CATEGORIES.SEMANTIC_MEMORY) return MEMORY_TYPES.FACT;
     if (category === MEMORY_CATEGORIES.USER_PREFERENCE) return MEMORY_TYPES.PREFERENCE;
-    if (category === MEMORY_CATEGORIES.ONGOING_PROJECT) return MEMORY_TYPES.PROJECT_CONTEXT;
-    if (category === MEMORY_CATEGORIES.DECISION) return MEMORY_TYPES.DECISION;
+    if (category === MEMORY_CATEGORIES.ONGOING_PROJECT || category === MEMORY_CATEGORIES.PROJECT_MEMORY) return MEMORY_TYPES.PROJECT_CONTEXT;
+    if (category === MEMORY_CATEGORIES.DECISION || category === MEMORY_CATEGORIES.DECISION_MEMORY || category === MEMORY_CATEGORIES.DECISION_RATIONALE) return MEMORY_TYPES.DECISION;
     if (category === MEMORY_CATEGORIES.GOAL) return MEMORY_TYPES.GOAL;
     if (category === MEMORY_CATEGORIES.CORRECTED_FACT) return MEMORY_TYPES.CORRECTED_FACT;
+    if (category === MEMORY_CATEGORIES.EPISODIC_MEMORY) return MEMORY_TYPES.EPISODIC;
+    if (category === MEMORY_CATEGORIES.PROCEDURAL_MEMORY || category === MEMORY_CATEGORIES.PROCEDURE) return MEMORY_TYPES.PROCEDURE;
+    if (category === MEMORY_CATEGORIES.PENDING_MEMORY) return MEMORY_TYPES.PENDING_TASK;
     return MEMORY_TYPES.INFERENCE;
   }
 
@@ -244,6 +477,45 @@ export class MemoryService {
   }
 
   /**
+   * Calculate Jaccard token overlap between two strings
+   */
+  _calculateTokenOverlap(strA = '', strB = '') {
+    const tokensA = new Set(String(strA).toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
+    const tokensB = new Set(String(strB).toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || []);
+    if (tokensA.size === 0 || tokensB.size === 0) return 0;
+    let shared = 0;
+    for (const t of tokensA) {
+      if (tokensB.has(t)) shared++;
+    }
+    const union = new Set([...tokensA, ...tokensB]).size;
+    return union > 0 ? shared / union : 0;
+  }
+
+  /**
+   * Deduplication check across active memories
+   * Threshold: exact match or >85% token overlap
+   */
+  detectDuplicate(content = '', category = null, projectId = null) {
+    const text = String(content).trim();
+    if (!text) return null;
+    const lower = text.toLowerCase();
+
+    for (const existing of this.records.values()) {
+      if (existing.category === MEMORY_CATEGORIES.SUPERSEDED_INFO) continue;
+      if (category && existing.category !== category) continue;
+      if (projectId && existing.projectId && existing.projectId !== projectId) continue;
+
+      const existingLower = existing.content.toLowerCase().trim();
+      if (existingLower === lower) return existing;
+
+      // Check token overlap (> 0.85 threshold)
+      const overlap = this._calculateTokenOverlap(existing.content, text);
+      if (overlap >= 0.85) return existing;
+    }
+    return null;
+  }
+
+  /**
    * Security Invariant: Detect & reject credentials or secrets
    */
   _containsSecret(text = '') {
@@ -260,7 +532,7 @@ export class MemoryService {
   }
 
   /**
-   * Store a memory record with full 14-field schema
+   * Store a memory record with full 14-field schema (extended with Phase 4 continuity)
    */
   storeRecord({
     id = null,
@@ -273,7 +545,10 @@ export class MemoryService {
     userApproved = false,
     supersedes = null,
     relatedMemoryIds = [],
-    sensitivity = 'public'
+    sensitivity = 'public',
+    projectId = null,
+    structuredData = null,
+    ttlExpiresAt = null
   }) {
     if (!this.isCollectionEnabled && category !== MEMORY_CATEGORIES.CORRECTED_FACT) {
       return null;
@@ -286,6 +561,14 @@ export class MemoryService {
     if (this._containsSecret(trimmedContent)) {
       console.warn('[MemoryService] Secret detected. Refusing to persist credentials in memory.');
       return null;
+    }
+
+    // Deduplication check: if duplicate exists and not explicitly superseding
+    if (!supersedes && !id) {
+      const duplicate = this.detectDuplicate(trimmedContent, category, projectId);
+      if (duplicate) {
+        return duplicate;
+      }
     }
 
     const recId = id || `mem_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
@@ -316,7 +599,10 @@ export class MemoryService {
       supersedes: supersedes || null,
       relatedMemoryIds: Array.isArray(relatedMemoryIds) ? relatedMemoryIds : [],
       sensitivity: (sensitivity === 'private' || sensitivity === 'restricted' || String(sensitivity).toLowerCase() === 'high') ? 'private' : 'public',
-      schemaVersion: '3.0.0'
+      schemaVersion: '3.0.0',
+      projectId: projectId || null,
+      structuredData: structuredData || null,
+      ttlExpiresAt: ttlExpiresAt || null
     };
 
     this.records.set(recId, record);
@@ -325,14 +611,17 @@ export class MemoryService {
   }
 
   /**
-   * Contextual relevance retrieval with keyword tokens, recency, and approval boosting
+   * Contextual relevance retrieval with keyword tokens, recency, approval boosting, and TTL filtering
    */
   retrieveRelevant(query = '', options = {}) {
     const limit = options.limit || 5;
+    const nowMs = Date.now();
     const queryTokens = (query || '').toLowerCase().match(/\b[a-z0-9]{3,}\b/g) || [];
-    const activeRecords = Array.from(this.records.values()).filter(
-      r => r.category !== MEMORY_CATEGORIES.SUPERSEDED_INFO
-    );
+    const activeRecords = Array.from(this.records.values()).filter(r => {
+      if (r.category === MEMORY_CATEGORIES.SUPERSEDED_INFO) return false;
+      if (r.ttlExpiresAt && new Date(r.ttlExpiresAt).getTime() <= nowMs) return false;
+      return true;
+    });
 
     if (queryTokens.length === 0) {
       return activeRecords
@@ -362,6 +651,25 @@ export class MemoryService {
       .sort((a, b) => b.score - a.score)
       .slice(0, limit)
       .map(s => s.rec);
+  }
+
+  /**
+   * Purge expired memories with ttlExpiresAt
+   */
+  purgeExpiredMemories() {
+    const nowMs = Date.now();
+    let purgedCount = 0;
+    for (const [id, rec] of this.records.entries()) {
+      if (rec.ttlExpiresAt && new Date(rec.ttlExpiresAt).getTime() <= nowMs) {
+        this.records.delete(id);
+        this._logAudit(rec, 'PURGED_EXPIRED', `Memory expired at ${rec.ttlExpiresAt}`);
+        purgedCount++;
+      }
+    }
+    if (purgedCount > 0) {
+      this.saveState();
+    }
+    return purgedCount;
   }
 
   /**
@@ -593,17 +901,45 @@ export class MemoryService {
 
   clearAll() {
     this.records.clear();
+    this.projects.clear();
+    this.decisions.clear();
     this.saveState();
     this.initBaselineMemories();
   }
 
-  exportMemories() {
+  exportMemories(options = {}) {
+    if (options && options.fullBundle) {
+      return {
+        schemaVersion: '3.0.0',
+        exportedAt: new Date().toISOString(),
+        records: Array.from(this.records.values()),
+        projects: Array.from(this.projects.values()),
+        decisions: Array.from(this.decisions.values()),
+        auditLog: this.getAuditTrail()
+      };
+    }
     return Array.from(this.records.values());
   }
 
-  importMemories(recordsArray = [], options = {}) {
+  importMemories(recordsOrBundle = [], options = {}) {
+    if (!recordsOrBundle) {
+      return { imported: 0, rejected: 0, quarantined: 0, errors: ['Input cannot be null'] };
+    }
+
+    // Support fullBundle import object
+    let recordsArray = recordsOrBundle;
+    if (!Array.isArray(recordsOrBundle) && typeof recordsOrBundle === 'object') {
+      if (Array.isArray(recordsOrBundle.projects)) {
+        recordsOrBundle.projects.forEach(p => { if (p && p.id) this.projects.set(p.id, p); });
+      }
+      if (Array.isArray(recordsOrBundle.decisions)) {
+        recordsOrBundle.decisions.forEach(d => { if (d && d.id) this.decisions.set(d.id, d); });
+      }
+      recordsArray = Array.isArray(recordsOrBundle.records) ? recordsOrBundle.records : [];
+    }
+
     if (!Array.isArray(recordsArray)) {
-      return { imported: 0, rejected: 0, quarantined: 0, errors: ['Input must be an array'] };
+      return { imported: 0, rejected: 0, quarantined: 0, errors: ['Input must be an array or bundle object'] };
     }
     // Guard against oversized batches
     if (recordsArray.length > 500) {
@@ -639,7 +975,6 @@ export class MemoryService {
         userApproved: false,     // ← FORCE: ignore any userApproved: true from import
         importedAt: new Date().toISOString(),
         schemaVersion: '3.0.0',
-        // Preserve valid provenance fields but sanitize trust
         confidence: typeof rec.confidence === 'number' ? Math.min(1, Math.max(0, rec.confidence)) : 0.5
       });
     }
@@ -660,6 +995,575 @@ export class MemoryService {
       this.saveState();
     }
     return results;
+  }
+
+  // ── Structured Project Continuity ───────────────────────────────────
+
+  createProject(projectData = {}) {
+    const id = projectData.id || `proj_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const now = new Date().toISOString();
+    const project = {
+      id,
+      title: projectData.title || projectData.name || 'Untitled Project',
+      domain: projectData.domain || 'General Engineering',
+      objective: projectData.objective || '',
+      status: projectData.status || 'active',
+      role: projectData.role || null,
+      handle: projectData.handle || null,
+      keyTechnologies: Array.isArray(projectData.keyTechnologies) ? [...projectData.keyTechnologies] : [],
+      technicalArchitecture: projectData.technicalArchitecture || '',
+      constraints: Array.isArray(projectData.constraints) ? [...projectData.constraints] : [],
+      milestones: Array.isArray(projectData.milestones) ? [...projectData.milestones] : [],
+      knownProblems: Array.isArray(projectData.knownProblems) ? [...projectData.knownProblems] : [],
+      dependencies: Array.isArray(projectData.dependencies) ? [...projectData.dependencies] : [],
+      decisions: Array.isArray(projectData.decisions) ? [...projectData.decisions] : [],
+      outstandingTasks: Array.isArray(projectData.outstandingTasks) ? [...projectData.outstandingTasks] : [],
+      lastMeaningfulActivity: projectData.lastMeaningfulActivity || projectData.objective || 'Project created',
+      history: [
+        {
+          timestamp: now,
+          action: 'CREATED',
+          summary: projectData.objective ? `Created: ${projectData.objective}` : 'Project initialized',
+          status: projectData.status || 'active'
+        }
+      ],
+      startedAt: projectData.startedAt || now.split('T')[0],
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.projects.set(id, project);
+
+    // Also index in memory records
+    this.storeRecord({
+      id: `mem_proj_${id}`,
+      category: MEMORY_CATEGORIES.PROJECT_MEMORY,
+      memoryType: MEMORY_TYPES.PROJECT_CONTEXT,
+      content: `Project [${project.title}]: ${project.objective}. Status: ${project.status}. Architecture: ${project.technicalArchitecture}`,
+      source: 'Project Continuity Registry',
+      evidence: 'Structured project entity creation',
+      confidence: 1.0,
+      userApproved: true,
+      projectId: id,
+      structuredData: project
+    });
+
+    this.saveState();
+    return project;
+  }
+
+  updateProject(projectId, updateData = {}) {
+    const project = this.projects.get(projectId);
+    if (!project) return null;
+    const now = new Date().toISOString();
+
+    if (updateData.title !== undefined) project.title = updateData.title;
+    if (updateData.objective !== undefined) project.objective = updateData.objective;
+    if (updateData.status !== undefined) project.status = updateData.status;
+    if (updateData.technicalArchitecture !== undefined) project.technicalArchitecture = updateData.technicalArchitecture;
+    if (updateData.lastMeaningfulActivity !== undefined) project.lastMeaningfulActivity = updateData.lastMeaningfulActivity;
+
+    if (Array.isArray(updateData.keyTechnologies)) project.keyTechnologies = [...updateData.keyTechnologies];
+    if (Array.isArray(updateData.constraints)) project.constraints = [...updateData.constraints];
+    if (Array.isArray(updateData.knownProblems)) project.knownProblems = [...updateData.knownProblems];
+    if (Array.isArray(updateData.dependencies)) project.dependencies = [...updateData.dependencies];
+
+    if (Array.isArray(updateData.milestones)) {
+      project.milestones = [...updateData.milestones];
+    }
+    if (Array.isArray(updateData.outstandingTasks)) {
+      project.outstandingTasks = [...updateData.outstandingTasks];
+    }
+
+    const summary = updateData.summary || updateData.lastMeaningfulActivity || 'Project updated';
+    project.lastMeaningfulActivity = summary;
+    project.updatedAt = now;
+    project.history.unshift({
+      timestamp: now,
+      action: updateData.action || 'UPDATED',
+      summary,
+      status: project.status,
+      details: updateData
+    });
+
+    this.saveState();
+    return project;
+  }
+
+  pauseProject(projectId, reason = 'Project paused by user', outstandingTasks = null) {
+    const project = this.projects.get(projectId);
+    if (!project) return null;
+    const now = new Date().toISOString();
+
+    project.status = 'paused';
+    if (Array.isArray(outstandingTasks)) {
+      project.outstandingTasks = [...outstandingTasks];
+    }
+    const summary = `Paused: ${reason}`;
+    project.lastMeaningfulActivity = summary;
+    project.updatedAt = now;
+    project.history.unshift({
+      timestamp: now,
+      action: 'PAUSED',
+      summary,
+      status: 'paused',
+      outstandingTasks: [...project.outstandingTasks]
+    });
+
+    // Store a pending memory record so context compiler immediately knows this work is paused with tasks
+    const taskSummary = project.outstandingTasks.map(t => (typeof t === 'object' ? t.title : t)).join('; ');
+    this.storeRecord({
+      id: `mem_pause_${projectId}_${Date.now()}`,
+      category: MEMORY_CATEGORIES.PENDING_MEMORY,
+      memoryType: MEMORY_TYPES.PENDING_TASK,
+      content: `Paused project [${project.title}]: ${reason}. Outstanding tasks: ${taskSummary || 'None'}`,
+      source: 'Project Pause Invariant',
+      evidence: `User or system paused project on ${now}`,
+      confidence: 1.0,
+      userApproved: true,
+      projectId,
+      structuredData: {
+        reason,
+        pausedAt: now,
+        outstandingTasks: project.outstandingTasks
+      }
+    });
+
+    this.saveState();
+    return project;
+  }
+
+  resumeProject(projectId, resumptionContext = 'Resumed in active conversation') {
+    const project = this.projects.get(projectId);
+    if (!project) return null;
+    const now = new Date().toISOString();
+
+    project.status = 'active';
+    const summary = `Resumed: ${resumptionContext}`;
+    project.lastMeaningfulActivity = summary;
+    project.updatedAt = now;
+    project.history.unshift({
+      timestamp: now,
+      action: 'RESUMED',
+      summary,
+      status: 'active'
+    });
+
+    this.saveState();
+    return project;
+  }
+
+  getProject(projectId) {
+    return this.projects.get(projectId) || null;
+  }
+
+  listProjects(filter = null) {
+    const list = Array.from(this.projects.values());
+    if (!filter) return list;
+    if (typeof filter === 'string') {
+      return list.filter(p => p.status === filter || p.id === filter);
+    }
+    if (typeof filter === 'object') {
+      return list.filter(p => {
+        return Object.entries(filter).every(([k, v]) => p[k] === v);
+      });
+    }
+    return list;
+  }
+
+  getProjectHistory(projectId) {
+    const project = this.projects.get(projectId);
+    return project ? [...project.history] : [];
+  }
+
+  // ── Structured Decision History ─────────────────────────────────────
+
+  recordDecision({
+    id = null,
+    projectId = null,
+    topic = '',
+    decision = '',
+    context = '',
+    alternativesConsidered = [],
+    reasoning = '',
+    constraints = [],
+    expectedOutcome = '',
+    actualOutcome = null,
+    date = null
+  } = {}) {
+    if (!topic || !decision) return null;
+    const decId = id || `dec_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+    const now = new Date().toISOString();
+    const resolvedDate = date || now.split('T')[0];
+
+    // Do not invent missing rationale; preserve exact provided reasoning
+    const resolvedReasoning = String(reasoning || '').trim();
+
+    const decRecord = {
+      id: decId,
+      projectId: projectId || null,
+      topic: String(topic).trim(),
+      decision: String(decision).trim(),
+      context: String(context || '').trim(),
+      alternativesConsidered: Array.isArray(alternativesConsidered) ? [...alternativesConsidered] : [],
+      reasoning: resolvedReasoning,
+      constraints: Array.isArray(constraints) ? [...constraints] : [],
+      expectedOutcome: String(expectedOutcome || '').trim(),
+      actualOutcome: actualOutcome !== null && actualOutcome !== undefined ? String(actualOutcome).trim() : null,
+      date: resolvedDate,
+      createdAt: now,
+      updatedAt: now
+    };
+
+    this.decisions.set(decId, decRecord);
+
+    // Link decision to project if exists
+    if (projectId && this.projects.has(projectId)) {
+      const proj = this.projects.get(projectId);
+      if (!Array.isArray(proj.decisions)) proj.decisions = [];
+      if (!Array.isArray(proj.history)) proj.history = [];
+
+      if (!proj.decisions.includes(decId)) {
+        proj.decisions.unshift(decId);
+        proj.history.unshift({
+          timestamp: now,
+          action: 'DECISION_LINKED',
+          summary: `Decision [${topic}]: ${decision}`,
+          status: proj.status
+        });
+      }
+    }
+
+    // Index into canonical memory records for unified search
+    const altStr = decRecord.alternativesConsidered.length ? ` Alternatives considered: ${decRecord.alternativesConsidered.join(', ')}.` : '';
+    const reasonStr = decRecord.reasoning ? ` Rationale: ${decRecord.reasoning}.` : '';
+    this.storeRecord({
+      id: `mem_${decId}`,
+      category: MEMORY_CATEGORIES.DECISION_MEMORY,
+      memoryType: MEMORY_TYPES.DECISION,
+      content: `Decision on [${decRecord.topic}]: ${decRecord.decision}.${altStr}${reasonStr}`,
+      source: 'Structured Decision History',
+      evidence: decRecord.context || 'Recorded architectural decision',
+      confidence: 1.0,
+      userApproved: true,
+      projectId,
+      structuredData: decRecord
+    });
+
+    this.saveState();
+    return decRecord;
+  }
+
+  updateDecisionOutcome(decisionId, actualOutcome = '') {
+    const dec = this.decisions.get(decisionId);
+    if (!dec) return null;
+    dec.actualOutcome = String(actualOutcome).trim();
+    dec.updatedAt = new Date().toISOString();
+
+    // Update memory record if indexed
+    if (this.records.has(`mem_${decisionId}`)) {
+      const rec = this.records.get(`mem_${decisionId}`);
+      rec.content += ` Actual Outcome: ${dec.actualOutcome}`;
+      rec.updatedAt = dec.updatedAt;
+      if (rec.structuredData) {
+        rec.structuredData.actualOutcome = dec.actualOutcome;
+      }
+    }
+
+    this.saveState();
+    return dec;
+  }
+
+  getDecisionsForProject(projectId) {
+    return Array.from(this.decisions.values()).filter(d => d.projectId === projectId);
+  }
+
+  getDecisionHistory(limit = 20) {
+    return Array.from(this.decisions.values())
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, limit);
+  }
+
+  // ── Episodic & Procedural Memory Storage ───────────────────────────
+
+  storeEpisodicRecord({
+    eventName = '',
+    context = '',
+    outcome = '',
+    reflections = '',
+    timestamp = null,
+    participants = ['Adhy', 'Mini-Adhy'],
+    projectId = null,
+    sensitivity = 'public',
+    ttlExpiresAt = null
+  } = {}) {
+    const text = `${eventName}: ${context}. Outcome: ${outcome}.${reflections ? ' Reflections: ' + reflections : ''}`.trim();
+    return this.storeRecord({
+      category: MEMORY_CATEGORIES.EPISODIC_MEMORY,
+      memoryType: MEMORY_TYPES.EPISODIC,
+      content: text,
+      source: 'Episodic Experience Anchor',
+      evidence: `Episodic event "${eventName}" recorded`,
+      confidence: 0.95,
+      userApproved: true,
+      projectId,
+      sensitivity,
+      ttlExpiresAt,
+      structuredData: {
+        eventName,
+        context,
+        outcome,
+        reflections,
+        timestamp: timestamp || new Date().toISOString(),
+        participants
+      }
+    });
+  }
+
+  storeProceduralRecord({
+    workflowName = '',
+    steps = [],
+    prerequisites = [],
+    tips = [],
+    tools = [],
+    projectId = null
+  } = {}) {
+    const stepStr = Array.isArray(steps) ? steps.map((s, i) => `${i + 1}. ${s}`).join(' ') : String(steps);
+    const content = `Procedure [${workflowName}]: ${stepStr}`;
+    return this.storeRecord({
+      category: MEMORY_CATEGORIES.PROCEDURAL_MEMORY,
+      memoryType: MEMORY_TYPES.PROCEDURE,
+      content,
+      source: 'Procedural Knowledge Workflow',
+      evidence: `Established workflow for "${workflowName}"`,
+      confidence: 1.0,
+      userApproved: true,
+      projectId,
+      structuredData: {
+        workflowName,
+        steps,
+        prerequisites,
+        tips,
+        tools
+      }
+    });
+  }
+
+  // ── 5 Core Contextual Retrieval Queries ─────────────────────────────
+
+  /**
+   * Question 1: "What were we working on?"
+   */
+  getRecentWorkContext({ limit = 5, projectId = null } = {}) {
+    let projects = Array.from(this.projects.values());
+    if (projectId) {
+      projects = projects.filter(p => p.id === projectId);
+    }
+
+    const activeOrPaused = projects
+      .filter(p => p.status === 'active' || p.status === 'paused')
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+
+    const recentEpisodes = Array.from(this.records.values())
+      .filter(r => (r.category === MEMORY_CATEGORIES.EPISODIC_MEMORY || r.memoryType === MEMORY_TYPES.EPISODIC) && r.category !== MEMORY_CATEGORIES.SUPERSEDED_INFO)
+      .filter(r => !projectId || r.projectId === projectId)
+      .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+      .slice(0, limit);
+
+    const pendingTasks = [];
+    activeOrPaused.forEach(p => {
+      (p.outstandingTasks || []).forEach(t => {
+        if (typeof t === 'object' && t.status !== 'completed') {
+          pendingTasks.push({ ...t, projectTitle: p.title, projectId: p.id });
+        } else if (typeof t === 'string') {
+          pendingTasks.push({ id: `task_${p.id}`, title: t, projectTitle: p.title, projectId: p.id });
+        }
+      });
+    });
+
+    const topProject = activeOrPaused[0] || null;
+    const summary = topProject
+      ? `Currently focused on ${topProject.title} (${topProject.status}): ${topProject.lastMeaningfulActivity}. Pending tasks: ${pendingTasks.length}.`
+      : 'No active project context found.';
+
+    return {
+      activeProjects: activeOrPaused.slice(0, limit),
+      recentEvents: recentEpisodes,
+      pendingTasks: pendingTasks.slice(0, limit * 2),
+      summary
+    };
+  }
+
+  /**
+   * Question 2: "Why did we choose this architecture?"
+   */
+  findDecisionRationale(topicOrQuery = '') {
+    const query = String(topicOrQuery || '').toLowerCase().trim();
+    const queryTokens = query.match(/\b[a-z0-9]{3,}\b/g) || [];
+    const allDecisions = Array.from(this.decisions.values());
+
+    if (queryTokens.length === 0) {
+      return allDecisions.slice(0, 5);
+    }
+
+    const scored = allDecisions.map(d => {
+      const text = `${d.topic} ${d.decision} ${d.context} ${d.reasoning} ${(d.alternativesConsidered || []).join(' ')} ${(d.constraints || []).join(' ')}`.toLowerCase();
+      let matchCount = 0;
+      queryTokens.forEach(t => {
+        if (text.includes(t)) matchCount++;
+      });
+      return { decision: d, score: matchCount };
+    });
+
+    return scored
+      .filter(s => s.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(s => s.decision);
+  }
+
+  /**
+   * Question 3: "What did we try previously?"
+   */
+  getPreviousAttempts(topicOrQuery = '') {
+    const query = String(topicOrQuery || '').toLowerCase().trim();
+    const queryTokens = query.match(/\b[a-z0-9]{3,}\b/g) || [];
+
+    const alternativesTried = [];
+    Array.from(this.decisions.values()).forEach(d => {
+      const match = queryTokens.length === 0 || queryTokens.some(t => `${d.topic} ${d.decision}`.toLowerCase().includes(t));
+      if (match && Array.isArray(d.alternativesConsidered) && d.alternativesConsidered.length > 0) {
+        alternativesTried.push({
+          topic: d.topic,
+          chosen: d.decision,
+          alternatives: d.alternativesConsidered,
+          reasoning: d.reasoning
+        });
+      }
+    });
+
+    const supersededApproaches = Array.from(this.records.values())
+      .filter(r => r.category === MEMORY_CATEGORIES.SUPERSEDED_INFO)
+      .filter(r => queryTokens.length === 0 || queryTokens.some(t => r.content.toLowerCase().includes(t)))
+      .map(r => ({
+        id: r.id,
+        content: r.content,
+        supersededBy: r.supersededBy,
+        updatedAt: r.updatedAt
+      }));
+
+    const pastEpisodes = Array.from(this.records.values())
+      .filter(r => r.category === MEMORY_CATEGORIES.EPISODIC_MEMORY || r.memoryType === MEMORY_TYPES.EPISODIC)
+      .filter(r => queryTokens.length === 0 || queryTokens.some(t => r.content.toLowerCase().includes(t)))
+      .map(r => ({
+        id: r.id,
+        content: r.content,
+        structuredData: r.structuredData,
+        updatedAt: r.updatedAt
+      }));
+
+    return {
+      alternativesTried,
+      supersededApproaches,
+      pastEpisodes
+    };
+  }
+
+  /**
+   * Question 4: "What remains unfinished?"
+   */
+  getUnfinishedWork({ projectId = null } = {}) {
+    let projects = Array.from(this.projects.values());
+    if (projectId) {
+      projects = projects.filter(p => p.id === projectId);
+    }
+
+    const pendingTasks = [];
+    const pausedProjects = [];
+
+    projects.forEach(p => {
+      if (p.status === 'paused') {
+        pausedProjects.push({
+          id: p.id,
+          title: p.title,
+          lastMeaningfulActivity: p.lastMeaningfulActivity,
+          outstandingTasksCount: (p.outstandingTasks || []).length
+        });
+      }
+
+      (p.outstandingTasks || []).forEach(t => {
+        if (typeof t === 'object' && t.status !== 'completed') {
+          pendingTasks.push({
+            id: t.id || `task_${Math.random().toString(36).substr(2, 5)}`,
+            title: t.title || 'Untitled task',
+            status: t.status || 'pending',
+            priority: t.priority || 'medium',
+            projectId: p.id,
+            projectTitle: p.title
+          });
+        } else if (typeof t === 'string') {
+          pendingTasks.push({
+            id: `task_${p.id}`,
+            title: t,
+            status: 'pending',
+            priority: 'medium',
+            projectId: p.id,
+            projectTitle: p.title
+          });
+        }
+      });
+    });
+
+    const pendingMemories = Array.from(this.records.values())
+      .filter(r => (r.category === MEMORY_CATEGORIES.PENDING_MEMORY || r.memoryType === MEMORY_TYPES.PENDING_TASK) && r.category !== MEMORY_CATEGORIES.SUPERSEDED_INFO)
+      .filter(r => !projectId || r.projectId === projectId);
+
+    return {
+      projectId,
+      pendingTasks,
+      pausedProjects,
+      pendingMemories
+    };
+  }
+
+  /**
+   * Question 5: "What changed since the last session?"
+   */
+  getDiffSinceLastSession(sessionTimestamp) {
+    const sinceTime = new Date(sessionTimestamp).getTime();
+    if (isNaN(sinceTime)) {
+      return { since: sessionTimestamp, error: 'Invalid session timestamp' };
+    }
+
+    const newMemories = Array.from(this.records.values()).filter(r => {
+      return new Date(r.createdAt).getTime() > sinceTime;
+    });
+
+    const updatedProjects = Array.from(this.projects.values()).filter(p => {
+      return new Date(p.updatedAt).getTime() > sinceTime;
+    });
+
+    const newDecisions = Array.from(this.decisions.values()).filter(d => {
+      return new Date(d.createdAt).getTime() > sinceTime;
+    });
+
+    const pausedProjects = updatedProjects.filter(p => p.status === 'paused');
+    const completedTasks = [];
+    updatedProjects.forEach(p => {
+      (p.outstandingTasks || []).forEach(t => {
+        if (typeof t === 'object' && t.status === 'completed' && new Date(t.completedAt || p.updatedAt).getTime() > sinceTime) {
+          completedTasks.push({ ...t, projectId: p.id });
+        }
+      });
+    });
+
+    return {
+      since: new Date(sinceTime).toISOString(),
+      newMemories,
+      updatedProjects,
+      newDecisions,
+      pausedProjects,
+      completedTasks
+    };
   }
 
   // ── Memory Approval Workflow ────────────────────────────────────────

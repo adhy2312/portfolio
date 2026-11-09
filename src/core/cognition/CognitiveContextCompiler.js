@@ -445,22 +445,28 @@ export class CognitiveContextCompiler {
   _selectRelevantContinuity(continuity, category) {
     const projects = (continuity.projects || []).slice(0, 2);
     const decisions = (continuity.decisions || []).slice(0, 2);
+    const compactSummary = continuity.compactSummary || '';
+    const recentWorkContext = continuity.recentWorkContext || null;
 
     if (category === TASK_CATEGORIES.PHOTOGRAPHY_VISUAL) {
       return {
-        projects: projects.filter(p => /photo|frames|visual|darkroom/i.test(p.title || p.summary)),
-        decisions: decisions.filter(d => /photo|design|visual/i.test(d.topic))
+        projects: projects.filter(p => /photo|frames|visual|darkroom/i.test(p.title || p.summary || p.objective || '')),
+        decisions: decisions.filter(d => /photo|design|visual/i.test(d.topic)),
+        compactSummary,
+        recentWorkContext
       };
     }
 
     if (category === TASK_CATEGORIES.ENGINEERING_ELECTRONICS) {
       return {
-        projects: projects.filter(p => /stm32|dsp|kicad|sdr|hardware|firmware/i.test(p.title || p.summary)),
-        decisions: decisions.filter(d => /circuit|hardware|dsp|code/i.test(d.topic))
+        projects: projects.filter(p => /stm32|dsp|kicad|sdr|hardware|firmware/i.test(p.title || p.summary || p.objective || '')),
+        decisions: decisions.filter(d => /circuit|hardware|dsp|code/i.test(d.topic)),
+        compactSummary,
+        recentWorkContext
       };
     }
 
-    return { projects, decisions };
+    return { projects, decisions, compactSummary, recentWorkContext };
   }
 
   /**
@@ -570,10 +576,13 @@ export class CognitiveContextCompiler {
     }
 
     // Project & Decision Continuity
-    if (continuity.projects?.length || continuity.decisions?.length) {
+    if (continuity.projects?.length || continuity.decisions?.length || continuity.compactSummary) {
       const contLines = [];
-      (continuity.projects || []).forEach(p => contLines.push(`• Ongoing: ${p.title} (${p.summary})`));
+      (continuity.projects || []).forEach(p => contLines.push(`• Ongoing: ${p.title} (${p.summary || p.objective || ''})`));
       (continuity.decisions || []).forEach(d => contLines.push(`• Prior Decision: ${d.topic} — ${d.decision}`));
+      if (continuity.compactSummary && !continuity.projects?.length && !continuity.decisions?.length) {
+        contLines.push(continuity.compactSummary);
+      }
       if (contLines.length > 0) {
         sections.push('#### ACTIVE CONTINUITY\n' + contLines.join('\n'));
       }

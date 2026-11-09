@@ -14,6 +14,8 @@
  * 3. Portable across devices: Completely serializable for desktop companion mini-robot.
  */
 
+import { memoryService } from '../memory/MemoryService';
+
 export class RelationshipContinuityEngine {
   constructor(storageAdapter = null) {
     this.storageKey = 'mini_adhy_relationship_continuity_v3';
@@ -139,18 +141,116 @@ export class RelationshipContinuityEngine {
     } catch {}
   }
 
-  recordDecision({ topic, decision, rationale }) {
+  recordDecision({
+    projectId = null,
+    topic,
+    decision,
+    context = '',
+    alternativesConsidered = [],
+    reasoning = '',
+    rationale = '',
+    constraints = [],
+    expectedOutcome = '',
+    actualOutcome = null
+  }) {
+    const effectiveReasoning = reasoning || rationale || '';
     const item = {
       id: `dec_${Date.now()}`,
+      projectId,
       topic,
       decision,
-      rationale,
+      context,
+      alternativesConsidered,
+      reasoning: effectiveReasoning,
+      rationale: effectiveReasoning,
+      constraints,
+      expectedOutcome,
+      actualOutcome,
       date: new Date().toISOString().split('T')[0]
     };
     this.decisions.unshift(item);
     if (this.decisions.length > 30) this.decisions.pop();
     this.saveState();
+
+    if (memoryService && typeof memoryService.recordDecision === 'function') {
+      memoryService.recordDecision({
+        id: item.id,
+        projectId,
+        topic,
+        decision,
+        context,
+        alternativesConsidered,
+        reasoning: effectiveReasoning,
+        constraints,
+        expectedOutcome,
+        actualOutcome,
+        date: item.date
+      });
+    }
+
     return item;
+  }
+
+  pauseProject(projectId, reason = 'Paused by user', outstandingTasks = null) {
+    const p = this.projects.find(proj => proj.id === projectId);
+    if (p) {
+      p.status = 'paused';
+      if (outstandingTasks) p.outstandingTasks = [...outstandingTasks];
+      p.lastMeaningfulActivity = `Paused: ${reason}`;
+      this.saveState();
+    }
+    if (memoryService && typeof memoryService.pauseProject === 'function') {
+      return memoryService.pauseProject(projectId, reason, outstandingTasks);
+    }
+    return p;
+  }
+
+  resumeProject(projectId, resumptionContext = 'Resumed in conversation') {
+    const p = this.projects.find(proj => proj.id === projectId);
+    if (p) {
+      p.status = 'active';
+      p.lastMeaningfulActivity = `Resumed: ${resumptionContext}`;
+      this.saveState();
+    }
+    if (memoryService && typeof memoryService.resumeProject === 'function') {
+      return memoryService.resumeProject(projectId, resumptionContext);
+    }
+    return p;
+  }
+
+  getCompactContinuitySummary({ taskCategory = null, projectId = null, query = '' } = {}) {
+    let targetProject = null;
+    if (projectId) {
+      targetProject = this.projects.find(p => p.id === projectId) || (memoryService ? memoryService.getProject(projectId) : null);
+    }
+    if (!targetProject) {
+      targetProject = this.projects.find(p => p.status === 'active') || this.projects[0];
+    }
+
+    const lines = [];
+    if (targetProject) {
+      lines.push(`• Active Project: ${targetProject.title} [Status: ${targetProject.status}]`);
+      if (targetProject.lastMeaningfulActivity) {
+        lines.push(`• Recent Activity: ${targetProject.lastMeaningfulActivity}`);
+      }
+      const tasks = targetProject.outstandingTasks || [];
+      if (tasks.length > 0) {
+        const topTasks = tasks.slice(0, 2).map(t => (typeof t === 'object' ? t.title : t));
+        lines.push(`• Pending Tasks: ${topTasks.join('; ')}`);
+      }
+    }
+
+    if (this.unfinishedThreads.length > 0) {
+      const topThreads = this.unfinishedThreads.slice(0, 2).map(t => t.topic);
+      lines.push(`• Unresolved Threads: ${topThreads.join('; ')}`);
+    }
+
+    if (this.decisions.length > 0) {
+      const topDec = this.decisions[0];
+      lines.push(`• Key Architectural Decision: ${topDec.topic} — ${topDec.decision}`);
+    }
+
+    return lines.join('\n');
   }
 
   setUnfinishedThread(topic, details = '') {
@@ -189,13 +289,21 @@ export class RelationshipContinuityEngine {
     const relevant = {
       projects: [],
       decisions: [],
-      unfinishedThreads: []
+      unfinishedThreads: [],
+      compactSummary: '',
+      recentWorkContext: null
     };
 
-    if (queryTokens.length === 0) return relevant;
+    if (queryTokens.length === 0) {
+      relevant.compactSummary = this.getCompactContinuitySummary();
+      if (memoryService && typeof memoryService.getRecentWorkContext === 'function') {
+        relevant.recentWorkContext = memoryService.getRecentWorkContext({ limit: 3 });
+      }
+      return relevant;
+    }
 
     this.projects.forEach(p => {
-      const pText = `${p.title} ${p.domain} ${(p.keyTechnologies || []).join(' ')} ${p.summary}`.toLowerCase();
+      const pText = `${p.title} ${p.domain} ${(p.keyTechnologies || []).join(' ')} ${p.summary || ''} ${p.objective || ''}`.toLowerCase();
       const hasMatch = queryTokens.some(token => pText.includes(token));
       if (hasMatch) {
         relevant.projects.push(p);
@@ -203,7 +311,7 @@ export class RelationshipContinuityEngine {
     });
 
     this.decisions.forEach(d => {
-      const dText = `${d.topic} ${d.decision} ${d.rationale}`.toLowerCase();
+      const dText = `${d.topic} ${d.decision} ${d.reasoning || d.rationale || ''} ${(d.alternativesConsidered || []).join(' ')}`.toLowerCase();
       const hasMatch = queryTokens.some(token => dText.includes(token));
       if (hasMatch) {
         relevant.decisions.push(d);
@@ -217,6 +325,11 @@ export class RelationshipContinuityEngine {
         relevant.unfinishedThreads.push(t);
       }
     });
+
+    relevant.compactSummary = this.getCompactContinuitySummary({ query });
+    if (memoryService && typeof memoryService.getRecentWorkContext === 'function') {
+      relevant.recentWorkContext = memoryService.getRecentWorkContext({ limit: 3 });
+    }
 
     return relevant;
   }
