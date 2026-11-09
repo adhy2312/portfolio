@@ -590,6 +590,101 @@
   color: #1e293b;
 }
 
+/* ── Pre-Session Splash ────────────────────────────────────────────────── */
+
+.ma-live-presession {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 20px;
+  animation: maLiveGlassFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ma-live-presession-orb {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 38%, rgba(255,255,255,0.95) 0%, rgba(224,242,254,0.85) 50%, rgba(186,230,253,0.65) 100%);
+  box-shadow:
+    0 0 0 1px rgba(56, 189, 248, 0.25),
+    0 8px 32px rgba(56, 189, 248, 0.18),
+    inset 0 2px 8px rgba(255, 255, 255, 0.9);
+  animation: maLiveOrbIdle 3s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes maLiveOrbIdle {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(56,189,248,0.25), 0 8px 32px rgba(56,189,248,0.18), inset 0 2px 8px rgba(255,255,255,0.9); }
+  50% { box-shadow: 0 0 0 8px rgba(56,189,248,0.08), 0 12px 40px rgba(56,189,248,0.25), inset 0 2px 8px rgba(255,255,255,0.9); }
+}
+
+.ma-live-presession-label {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+.ma-live-presession-hint {
+  font-size: 0.78rem;
+  color: #64748b;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.ma-live-start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
+  color: #ffffff;
+  border: none;
+  border-radius: 9999px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(2, 132, 199, 0.35), 0 1px 4px rgba(0,0,0,0.08);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ma-live-start-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.45);
+}
+
+.ma-live-start-btn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+@keyframes maLiveSpinnerRotate {
+  to { transform: rotate(360deg); }
+}
+
+.ma-live-start-spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: maLiveSpinnerRotate 0.75s linear infinite;
+}
+
+.ma-live-presession-note {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin: 0;
+  text-align: center;
+}
+
 /* ── Error Banner ──────────────────────────────────────────────────────── */
 
 .ma-live-error-banner {
@@ -600,23 +695,30 @@
   justify-content: space-between;
   margin: 0 28px 10px;
   padding: 10px 16px;
-  background: rgba(254, 226, 226, 0.9);
-  border: 1px solid rgba(252, 165, 165, 0.8);
+  background: rgba(254, 243, 199, 0.92);
+  border: 1px solid rgba(251, 191, 36, 0.6);
   border-radius: 10px;
   font-size: 0.8rem;
-  color: #991b1b;
+  color: #92400e;
   backdrop-filter: blur(10px);
+  gap: 12px;
 }
 
 .ma-live-error-banner button {
-  background: #dc2626;
-  color: #ffffff;
-  border: none;
-  padding: 4px 10px;
+  background: rgba(245, 158, 11, 0.15);
+  color: #92400e;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  padding: 4px 12px;
   border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.ma-live-error-banner button:hover {
+  background: rgba(245, 158, 11, 0.25);
 }
 
 /* ── Bottom Controls Footer ────────────────────────────────────────────── */
