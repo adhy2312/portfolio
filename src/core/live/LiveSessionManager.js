@@ -75,6 +75,7 @@ export class LiveSessionManager {
       sessionId: this.activeSessionId,
       isMuted: this.inputManager ? this.inputManager.isMuted : false,
       micPermissionDenied: Boolean(this.micPermissionDenied),
+      micHardwareUnavailable: Boolean(this.micHardwareUnavailable),
       micErrorMessage: this.micErrorMessage || null,
       transcript: this.transcriptManager ? this.transcriptManager.getTranscriptHistory() : [],
       interimUserText: this.transcriptManager?.interimUserText || '',
@@ -186,11 +187,13 @@ export class LiveSessionManager {
         await this.inputManager.startMicrophone(audioCtx, this.audioEngine.inputAnalyser);
         this.fallbackPipeline.startListening();
       } catch (micErr) {
-        console.warn('[LiveSessionManager] Microphone denied or unavailable. Entering graceful Silent/Visual mode.', micErr);
-        this.micPermissionDenied = true;
-        this.micErrorMessage = micErr.name === 'NotAllowedError' || /permission/i.test(micErr.message)
-          ? 'Microphone permission was not granted. Silent mode active — you can type questions, use vision, and hear Mini-Adhy.'
-          : (micErr.message || 'Microphone unavailable.');
+        console.warn('[LiveSessionManager] Microphone notice:', micErr);
+        const isExplicitPermissionDenial = micErr.name === 'NotAllowedError' || /permission/i.test(micErr.message);
+        this.micPermissionDenied = isExplicitPermissionDenial;
+        this.micHardwareUnavailable = !isExplicitPermissionDenial;
+        this.micErrorMessage = isExplicitPermissionDenial
+          ? 'Microphone permission was not allowed in browser settings.'
+          : (micErr.message || 'Microphone hardware unavailable on this host.');
       }
 
       this._startVisualizerLoop();
@@ -224,9 +227,15 @@ export class LiveSessionManager {
       return true;
     } catch (err) {
       console.warn('[LiveSessionManager] Retry microphone permission failed:', err);
-      this.micPermissionDenied = true;
+      const isExplicitDenial = err.name === 'NotAllowedError' || /permission/i.test(err.message);
+      this.micPermissionDenied = isExplicitDenial;
+      this.micHardwareUnavailable = !isExplicitDenial;
       this.micErrorMessage = err.message;
-      this._setState(this.status, { micPermissionDenied: true, micErrorMessage: err.message });
+      this._setState(this.status, { 
+        micPermissionDenied: this.micPermissionDenied, 
+        micHardwareUnavailable: this.micHardwareUnavailable,
+        micErrorMessage: err.message 
+      });
       return false;
     }
   }

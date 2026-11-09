@@ -81,16 +81,32 @@ export class AudioInputManager {
       };
 
       this.sourceNode.connect(this.processorNode);
-      // ScriptProcessor requires destination connection to activate in Web Audio specification
-      this.processorNode.connect(audioContext.destination);
+      // ScriptProcessor requires connection to destination to keep audio process active,
+      // but connecting directly to destination feeds mic back into speakers (screeching acoustic loop).
+      // Pipe through a gain node with value 0 to keep the node active while keeping output dead silent:
+      this.silentGainNode = audioContext.createGain();
+      this.silentGainNode.gain.value = 0;
+      this.processorNode.connect(this.silentGainNode);
+      this.silentGainNode.connect(audioContext.destination);
 
       this.isRecording = true;
       this.isMuted = false;
       return this.mediaStream;
     } catch (err) {
-      this.onError(err);
+      let classifiedErr = err;
+      if (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError') {
+        classifiedErr = new Error('No physical microphone found connected to this system.');
+        classifiedErr.name = 'NotFoundError';
+      } else if (err.name === 'NotReadableError' || err.name === 'TrackStartError') {
+        classifiedErr = new Error('Microphone is occupied by another application or Windows audio service.');
+        classifiedErr.name = 'NotReadableError';
+      } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
+        classifiedErr = new Error('Microphone permission blocked in browser settings.');
+        classifiedErr.name = 'NotAllowedError';
+      }
+      this.onError(classifiedErr);
       this.stopMicrophone();
-      throw err;
+      throw classifiedErr;
     }
   }
 
@@ -121,6 +137,13 @@ export class AudioInputManager {
         this.processorNode.onaudioprocess = null;
       } catch {}
       this.processorNode = null;
+    }
+
+    if (this.silentGainNode) {
+      try {
+        this.silentGainNode.disconnect();
+      } catch {}
+      this.silentGainNode = null;
     }
 
     if (this.sourceNode) {

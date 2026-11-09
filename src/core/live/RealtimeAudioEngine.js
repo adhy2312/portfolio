@@ -25,7 +25,14 @@ export class RealtimeAudioEngine {
       if (!AudioCtx) {
         throw new Error('Web Audio API is not supported in this environment.');
       }
-      this.audioContext = new AudioCtx({ sampleRate: this.sampleRate });
+      // Never force a 16kHz sampleRate on initial AudioContext creation in Chromium:
+      // connecting a 48kHz hardware mic to a 16kHz AudioContext causes createMediaStreamSource to throw
+      // 'MediaStream has more channels or different sample rate than AudioContext'.
+      try {
+        this.audioContext = new AudioCtx();
+      } catch {
+        this.audioContext = new AudioCtx({ sampleRate: this.sampleRate });
+      }
     }
 
     if (this.audioContext.state === 'suspended') {

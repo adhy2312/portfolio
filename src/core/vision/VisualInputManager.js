@@ -45,14 +45,47 @@ export class VisualInputManager {
         throw new Error('Camera access is not supported in this browser.');
       }
 
-      const facingMode = options.facingMode || 'environment'; // Prefer rear camera for examining hardware
-      this.mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: { ideal: facingMode },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+      const facingMode = options.facingMode || 'environment';
+
+      // Progressive multi-tier camera acquisition fallback (handles PC webcams, mobiles, virtual cams)
+      let stream = null;
+      const attempts = [
+        { video: { facingMode: { ideal: facingMode }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        { video: { facingMode: { ideal: 'user' }, width: { ideal: 1280 }, height: { ideal: 720 } } },
+        { video: { width: { ideal: 640 }, height: { ideal: 480 } } },
+        { video: true }
+      ];
+
+      let lastErr = null;
+      for (const constraints of attempts) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia(constraints);
+          if (stream) break;
+        } catch (e) {
+          lastErr = e;
+          // If explicitly denied by user, don't keep hammering
+          if (e.name === 'NotAllowedError' || e.name === 'PermissionDeniedError') {
+            break;
+          }
         }
-      });
+      }
+
+      if (!stream) {
+        let classified = lastErr || new Error('Could not access camera device.');
+        if (lastErr?.name === 'NotFoundError' || lastErr?.name === 'DevicesNotFoundError') {
+          classified = new Error('No physical webcam or camera detected on this PC.');
+          classified.name = 'NotFoundError';
+        } else if (lastErr?.name === 'NotReadableError' || lastErr?.name === 'TrackStartError') {
+          classified = new Error('Camera is occupied by another application (e.g. Teams, Discord, OBS).');
+          classified.name = 'NotReadableError';
+        } else if (lastErr?.name === 'NotAllowedError' || lastErr?.name === 'PermissionDeniedError') {
+          classified = new Error('Camera access denied in browser permissions.');
+          classified.name = 'NotAllowedError';
+        }
+        throw classified;
+      }
+
+      this.mediaStream = stream;
 
       // Prepare hidden processing canvas
       if (!this.canvasElement && typeof document !== 'undefined') {
