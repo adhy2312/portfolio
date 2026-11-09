@@ -31,6 +31,8 @@ export class AgentMessageBus {
   constructor(options = {}) {
     this.agentHandlers = new Map(); // agentId -> handlerFunction
     this.inFlightMessages = new Map(); // messageId -> messageRecord
+    this.deduplicationCache = new Map(); // dedupKey -> { result, timestamp }
+    this.dedupTtlMs = options.dedupTtlMs || 60000;
     this.messageHistory = [];
     this.maxHistory = options.maxHistory || 200;
     this.maxHopLimit = options.maxHopLimit || 5;
@@ -73,6 +75,21 @@ export class AgentMessageBus {
 
     if (!Object.values(AGENT_MESSAGE_TYPES).includes(messageType)) {
       return { success: false, error: `Invalid messageType: ${messageType}`, deliveryStatus: DELIVERY_STATUS.FAILED };
+    }
+
+    // Deduplication check: return cached outcome for identical in-flight or recently processed tasks
+    const dedupKey = `${taskId}:${recipient}:${messageType}`;
+    if (this.deduplicationCache.has(dedupKey)) {
+      const cached = this.deduplicationCache.get(dedupKey);
+      if (Date.now() - cached.timestamp < this.dedupTtlMs) {
+        return {
+          ...cached.result,
+          isDuplicate: true,
+          deduplicated: true
+        };
+      } else {
+        this.deduplicationCache.delete(dedupKey);
+      }
     }
 
     // 1. Loop and Cycle Prevention
@@ -158,7 +175,8 @@ export class AgentMessageBus {
         if (response && response.acknowledged !== false) {
           message.deliveryStatus = DELIVERY_STATUS.ACKNOWLEDGED;
           message.result = (typeof response === 'object' && response !== null) ? response : { data: response };
-          return {
+
+          const outcome = {
             success: true,
             deliveryStatus: DELIVERY_STATUS.ACKNOWLEDGED,
             acknowledged: true,
@@ -166,6 +184,12 @@ export class AgentMessageBus {
             correlationId: message.correlationId,
             result: message.result
           };
+
+          // Cache verified acknowledgement for recipient-side deduplication
+          const dedupKey = `${message.taskId}:${message.recipient}:${message.messageType}`;
+          this.deduplicationCache.set(dedupKey, { result: outcome, timestamp: Date.now() });
+
+          return outcome;
         } else {
           throw new Error(`Agent '${message.recipient}' failed to acknowledge message.`);
         }

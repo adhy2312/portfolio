@@ -24,6 +24,14 @@ export const EXECUTION_TIERS = Object.freeze({
   CLOUD: 'CLOUD'
 });
 
+export const DATA_CLASSIFICATION = Object.freeze({
+  PUBLIC: 'PUBLIC',
+  INTERNAL: 'INTERNAL',
+  PERSONAL: 'PERSONAL',
+  SENSITIVE: 'SENSITIVE',
+  SECRET: 'SECRET'
+});
+
 export class HybridExecutionManager {
   constructor(options = {}) {
     this.privacyMode = options.privacyMode || PRIVACY_MODES.HYBRID_PROTECTED;
@@ -121,23 +129,85 @@ export class HybridExecutionManager {
   }
 
   /**
-   * Sanitizes payload before cloud transmission (strips raw biosignals, credentials, and sensitive artifacts)
+   * Classifies data according to 5-level security taxonomy
+   */
+  classifyData(payload = {}) {
+    const raw = JSON.stringify(payload || {}).toLowerCase();
+    
+    // 1. SECRET: credentials, private keys, auth tokens, passwords
+    if (
+      /(api_?key|password|passwd|bearer\s+[a-z0-9]|private_?key|adhy_session|session_secret)/i.test(raw) ||
+      /(?:sk-[a-zA-Z0-9_-]{20,}|aiza[0-9a-za-z-_]{35}|gsk_[a-zA-Z0-9]{20,})/i.test(raw)
+    ) {
+      return DATA_CLASSIFICATION.SECRET;
+    }
+
+    // 2. SENSITIVE: raw biosignals, biometric waveforms, health readings
+    if (/(raw.*(eeg|ecg|ppg|bio|signal)|biosignal|electrode|microvolt)/i.test(raw)) {
+      return DATA_CLASSIFICATION.SENSITIVE;
+    }
+
+    // 3. PERSONAL: user personal facts, private diary, relationship continuity
+    if (payload.isPrivate || payload.isPersonal || /personal_fact|relationship_anchor/i.test(raw)) {
+      return DATA_CLASSIFICATION.PERSONAL;
+    }
+
+    // 4. INTERNAL: system telemetry, agent communication, routing metrics
+    if (payload.isInternal || /telemetry|metrics|heartbeat|agent_bus/i.test(raw)) {
+      return DATA_CLASSIFICATION.INTERNAL;
+    }
+
+    // 5. PUBLIC: tutorials, DSP guides, documentation, portfolio pages
+    return DATA_CLASSIFICATION.PUBLIC;
+  }
+
+  /**
+   * Deep recursive sanitization of payloads before cloud transmission:
+   * 1. Recursively traverses nested objects and arrays
+   * 2. Completely strips sensitive key identifiers
+   * 3. Uses regular expressions to redact API keys, tokens, and passwords inside strings
    */
   sanitizeForCloud(payload = {}) {
-    if (payload === null || typeof payload !== 'object') {
+    if (payload === null || payload === undefined) {
       return payload;
     }
 
-    const sanitized = JSON.parse(JSON.stringify(payload));
-    const sensitiveKeyPattern = /(raw.*(eeg|ecg|ppg|bio|signal)|api_?key|secret|password|bearer|credential|auth_?token)/i;
+    const sanitizeString = (str) => {
+      if (typeof str !== 'string') return str;
+      return str
+        .replace(/(?:sk-[a-zA-Z0-9_-]{20,}|AIza[0-9A-Za-z-_]{35}|gsk_[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36}|xox[baprs]-[0-9a-zA-Z-]{10,})/g, '[REDACTED_API_KEY]')
+        .replace(/Bearer\s+[a-zA-Z0-9\-._~+/]+=*/gi, 'Bearer [REDACTED_TOKEN]')
+        .replace(/-----BEGIN [A-Z ]+ PRIVATE KEY-----[\s\S]*?-----END [A-Z ]+ PRIVATE KEY-----/g, '[REDACTED_PRIVATE_KEY]')
+        .replace(/(?:password|passwd|secret)\s*[:=]\s*["']?([^"'\s,]+)["']?/gi, 'password: "[REDACTED]"');
+    };
 
-    for (const key of Object.keys(sanitized)) {
-      if (sensitiveKeyPattern.test(key)) {
-        delete sanitized[key];
+    const recursiveSanitize = (node) => {
+      if (node === null || node === undefined) return node;
+
+      if (typeof node === 'string') {
+        return sanitizeString(node);
       }
-    }
 
-    return sanitized;
+      if (Array.isArray(node)) {
+        return node.map(item => recursiveSanitize(item));
+      }
+
+      if (typeof node === 'object') {
+        const sensitiveKeyPattern = /(raw.*(eeg|ecg|ppg|bio|signal)|api_?key|secret|password|bearer|credential|auth_?token|access_?token|refresh_?token|private_?key)/i;
+        const clean = {};
+        for (const [k, v] of Object.entries(node)) {
+          if (sensitiveKeyPattern.test(k)) {
+            continue; // Completely redact/strip sensitive key
+          }
+          clean[k] = recursiveSanitize(v);
+        }
+        return clean;
+      }
+
+      return node;
+    };
+
+    return recursiveSanitize(payload);
   }
 }
 

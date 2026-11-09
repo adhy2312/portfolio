@@ -21,6 +21,7 @@ import { improvementProposalEngine } from './ImprovementProposalEngine.js';
 import { controlledExperimentRunner } from './ControlledExperimentRunner.js';
 import { modelDriftDetector } from './ModelDriftDetector.js';
 import { productionSafetyGuard } from './ProductionSafetyGuard.js';
+import { permissionRegistry } from '../agents/PermissionRegistry.js';
 import {
   OUTCOME_STATUS,
   PROPOSAL_AREAS,
@@ -91,7 +92,7 @@ export class MetacognitionEngine {
    * Isolated test executed → Results evaluated → Approval obtained →
    * Improvement deployed → Regression monitored.
    */
-  async demonstrateFullCycle() {
+  async demonstrateFullCycle(options = {}) {
     const cycleLog = [];
     cycleLog.push({ step: 1, action: 'TRIGGER_SIMULATED_FAILURE', detail: 'Executing task with suboptimal retrieval policy' });
 
@@ -195,9 +196,19 @@ export class MetacognitionEngine {
       detail: stagingResult.message
     });
 
-    // Step 6: Simulate Human Approval from Creator (Adhy)
-    const approvalToken = `token_adhy_${Date.now()}_auth_valid`;
-    const approvalResult = this.safety.approveDeployment(proposal, approvalToken, 'Adhithya Mohan');
+    // Step 6: Obtain cryptographically bound owner approval token
+    const approverName = options.approver || 'Adhithya Mohan';
+    const issuedToken = permissionRegistry.issueApprovalToken(
+      'metacognition',
+      'DEPLOY_PROPOSAL',
+      {
+        proposalId: proposal.proposalId,
+        proposedChange: proposal.proposedChange,
+        deployToProduction: true
+      },
+      approverName
+    );
+    const approvalResult = this.safety.approveDeployment(proposal, issuedToken.id, approverName);
 
     if (!approvalResult.approved) {
       throw new Error(`Approval failed: ${approvalResult.error}`);

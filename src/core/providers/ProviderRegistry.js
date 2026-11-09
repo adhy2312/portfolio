@@ -15,6 +15,7 @@ import { HuggingFaceProvider } from './HuggingFaceProvider';
 import { OpenAICompatibleProvider } from './OpenAICompatibleProvider';
 import { OmniRouteProvider } from './OmniRouteProvider';
 import { OpenRouterProvider } from './OpenRouterProvider';
+import { hybridExecutionManager } from '../distribution/HybridExecutionManager';
 
 export class ProviderRegistry {
   constructor() {
@@ -244,6 +245,35 @@ export class ProviderRegistry {
   async generateWithFallback(request, options = {}) {
     this.metrics.totalRequests += 1;
 
+    // Security & Privacy Gate: Evaluate Local vs Cloud boundary before any dispatch
+    const cloudCheck = hybridExecutionManager.canExecuteOnCloud(request, options);
+    if (!cloudCheck.allowed) {
+      // 1. If caller explicitly requested a non-local cloud provider under STRICT_LOCAL, fail closed immediately
+      const requestedId = options.requirements?.preferredProvider || options.preferredProvider;
+      if (requestedId && this.providers.has(requestedId) && !this.providers.get(requestedId).isLocal) {
+        return {
+          success: false,
+          error: `Execution blocked by privacy policy: ${cloudCheck.reason}`,
+          privacyViolationBlocked: true,
+          tier: 'LOCAL',
+          attemptedProviders: []
+        };
+      }
+
+      // 2. Confine to purely offline local models
+      const localProviders = Array.from(this.providers.values())
+        .filter(p => p.isLocal === true && (p.id !== 'omniroute' || options.allowGatewayAggregation));
+      if (localProviders.length === 0) {
+        return {
+          success: false,
+          error: `Execution blocked by privacy policy: ${cloudCheck.reason}`,
+          privacyViolationBlocked: true,
+          tier: 'LOCAL',
+          attemptedProviders: []
+        };
+      }
+    }
+
     // 1. Cache Check (Exact match cache for non-volatile queries)
     const cacheKey = this.computeCacheKey(request, options);
     // Disable caching for vision/multimodal requests, volatile, and sensitive queries
@@ -285,20 +315,63 @@ export class ProviderRegistry {
   }
 
   async _executeCascade(request, options, cacheKey, allowCache) {
-    const cascade = this.resolveProviderCascade(options.requirements || {});
+    let cascade = this.resolveProviderCascade(options.requirements || {});
     const attemptedProviders = [];
     let lastError = null;
+
+    // Security & Privacy Gate: Evaluate Local vs Cloud boundary
+    const cloudCheck = hybridExecutionManager.canExecuteOnCloud(request, options);
+    if (!cloudCheck.allowed) {
+      const requestedId = options.requirements?.preferredProvider || options.preferredProvider;
+      if (requestedId && this.providers.has(requestedId) && !this.providers.get(requestedId).isLocal) {
+        return {
+          success: false,
+          error: `Execution blocked by privacy policy: ${cloudCheck.reason}`,
+          privacyViolationBlocked: true,
+          tier: 'LOCAL',
+          attemptedProviders: []
+        };
+      }
+
+      // Confine cascade strictly to purely offline local runtimes
+      cascade = cascade.filter(p => p.isLocal === true && (p.id !== 'omniroute' || options.allowGatewayAggregation));
+      if (cascade.length === 0) {
+        // Fail closed: Never silently violate STRICT_LOCAL or sensitive data policy
+        return {
+          success: false,
+          error: `Execution blocked by privacy policy: ${cloudCheck.reason}`,
+          privacyViolationBlocked: true,
+          tier: 'LOCAL',
+          attemptedProviders: []
+        };
+      }
+    }
 
     for (let i = 0; i < cascade.length; i++) {
       const provider = cascade[i];
       attemptedProviders.push(provider.id);
+
+      // Deep recursive structured sanitization if dispatching to cloud / non-local provider
+      let sanitizedRequest = request;
+      let sanitizedOptions = options;
+      if (!provider.isLocal) {
+        sanitizedRequest = hybridExecutionManager.sanitizeForCloud(request);
+        if (options.systemPrompt) {
+          sanitizedOptions = {
+            ...options,
+            systemPrompt: typeof options.systemPrompt === 'string'
+              ? hybridExecutionManager.sanitizeForCloud({ p: options.systemPrompt }).p
+              : options.systemPrompt
+          };
+        }
+      }
 
       const maxRetries = options.maxRetriesPerProvider ?? 1;
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
           const timeoutMs = options.timeoutMs || 8000;
           const result = await Promise.race([
-            provider.generate(request, { ...options, provider: provider.id }),
+            provider.generate(sanitizedRequest, { ...sanitizedOptions, provider: provider.id }),
             new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs))
           ]);
 

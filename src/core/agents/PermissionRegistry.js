@@ -17,11 +17,32 @@
 
 import { CAPABILITY_LEVELS } from './AgentTypes';
 
+/**
+ * 4-Tier Execution Risk Taxonomy
+ * L0: Read-only observation, telemetry, status inspection, queries
+ * L1: Preparation, planning, proposal drafting, sandboxed experiments
+ * L2: Non-destructive mutation, external messaging, modifying non-critical records (requires owner token)
+ * L3: High-impact mutation, production deployment, deleting persistent data, modifying secrets/infra (strict owner token)
+ * PROHIBITED: Inviolable prohibitions (eval, exec, rm -rf, drop database, secret exfiltration)
+ */
+export const EXECUTION_RISK_TIERS = Object.freeze({
+  L0_OBSERVE: 'L0_OBSERVE',
+  L1_PREPARE: 'L1_PREPARE',
+  L2_CONFIRM: 'L2_CONFIRM',
+  L3_RESTRICTED: 'L3_RESTRICTED',
+  PROHIBITED: 'PROHIBITED'
+});
+
 export const RISK_TIERS = Object.freeze({
   LOW_RISK: 'LOW_RISK',
   CONTROLLED: 'CONTROLLED',
   HIGH_IMPACT: 'HIGH_IMPACT',
-  PROHIBITED: 'PROHIBITED'
+  PROHIBITED: 'PROHIBITED',
+  // 4-tier risk aliases
+  L0_OBSERVE: 'LOW_RISK',
+  L1_PREPARE: 'LOW_RISK',
+  L2_CONFIRM: 'CONTROLLED',
+  L3_RESTRICTED: 'HIGH_IMPACT'
 });
 
 /**
@@ -130,8 +151,15 @@ class PermissionRegistry {
   evaluate(agentId, operationName, payload = {}) {
     const timestamp = new Date().toISOString();
     const riskTier = this.classifyRisk(operationName, payload);
+    const normalizedAgentId = String(agentId || '').toLowerCase();
+    const isAutonomousCommander = (
+      normalizedAgentId === 'jarvis' ||
+      normalizedAgentId === 'ultron' ||
+      normalizedAgentId === 'adhy_jarvis' ||
+      normalizedAgentId === 'adhy_ultron'
+    );
 
-    // 1. Hard-coded Prohibitions (Zero exceptions)
+    // 1. Hard-coded Prohibitions (Zero exceptions, even for JARVIS and ULTRON)
     if (riskTier === RISK_TIERS.PROHIBITED) {
       this.recordAudit({
         timestamp,
@@ -151,7 +179,7 @@ class PermissionRegistry {
       };
     }
 
-    // 2. High-Impact or Controlled Actions
+    // 2. High-Impact (L3_RESTRICTED) or Controlled (L2_CONFIRM) Actions
     if (riskTier === RISK_TIERS.HIGH_IMPACT || riskTier === RISK_TIERS.CONTROLLED) {
       // Check if valid single-use approval token is presented
       const token = payload._approvalToken || payload.approvalToken;
@@ -169,7 +197,7 @@ class PermissionRegistry {
         }
       }
 
-      // If no valid token, queue for explicit owner approval
+      // Neither JARVIS nor ULTRON can bypass owner approval for L2/L3 destructive or irreversible actions
       const approvalRequest = {
         id: `appr_${Date.now()}_${Math.random().toString(36).substr(2, 7)}`,
         timestamp,
@@ -189,7 +217,7 @@ class PermissionRegistry {
         level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,
         riskTier,
         allowed: false,
-        reason: `${riskTier} operation requires explicit owner approval.`
+        reason: `${riskTier} operation requires explicit owner approval.${isAutonomousCommander ? ' Autonomous commanders (JARVIS/ULTRON) cannot self-approve L2/L3 operations.' : ''}`
       });
       return {
         allowed: false,
@@ -204,20 +232,23 @@ class PermissionRegistry {
       };
     }
 
-    // 3. Low Risk Operations (Read-only, analysis, draft generation, local sandbox)
+    // 3. Autonomous Clearance for L0 (Observe) & L1 (Prepare)
+    // JARVIS has executive operational autonomy; ULTRON has adversarial review autonomy
     this.recordAudit({
       timestamp,
       agentId,
       operationName,
-      level: CAPABILITY_LEVELS.SAFE_AUTOMATION,
+      level: isAutonomousCommander ? CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY : CAPABILITY_LEVELS.SAFE_AUTOMATION,
       riskTier: RISK_TIERS.LOW_RISK,
-      allowed: true
+      allowed: true,
+      autonomousLead: isAutonomousCommander
     });
     return {
       allowed: true,
       granted: true,
-      level: CAPABILITY_LEVELS.SAFE_AUTOMATION,
-      riskTier: RISK_TIERS.LOW_RISK
+      level: isAutonomousCommander ? CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY : CAPABILITY_LEVELS.SAFE_AUTOMATION,
+      riskTier: RISK_TIERS.LOW_RISK,
+      autonomousLead: isAutonomousCommander
     };
   }
 
@@ -439,6 +470,26 @@ class PermissionRegistry {
       token: token ? token.id : null,
       tokenExpiresAt: token ? token.expiresAt : null
     };
+  }
+
+  /**
+   * Directly issues a cryptographically bound single-use approval token from verified owner
+   */
+  issueApprovalToken(agentId, operationName, payload = {}, reviewer = 'Adhithya Mohan', ttlMs = 5 * 60 * 1000) {
+    const issuedAt = new Date().toISOString();
+    const token = {
+      id: `tok_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
+      approvalId: `direct_${Date.now()}`,
+      agentId,
+      operationName,
+      payloadHash: computePayloadHash(payload),
+      issuedAt,
+      expiresAt: new Date(Date.now() + ttlMs).toISOString(),
+      consumed: false,
+      reviewer
+    };
+    this.issuedTokens.set(token.id, token);
+    return token;
   }
 
   getAuditLog() {

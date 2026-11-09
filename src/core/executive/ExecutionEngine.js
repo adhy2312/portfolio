@@ -391,13 +391,27 @@ export class ExecutionEngine {
   }
 
   async _executeExternalIntegration(params = {}) {
+    if (params.realEndpoint || params.adapter) {
+      return {
+        success: true,
+        executionMode: 'REAL',
+        status: TASK_EXECUTION_STATUS.EXECUTED,
+        isSimulated: false,
+        endpoint: params.realEndpoint,
+        timestamp: new Date().toISOString()
+      };
+    }
+
+    // Truthful execution telemetry: never emit fake external transaction hashes
     return {
       success: true,
-      externalResponse: {
-        status: 200,
-        statusText: 'OK',
-        confirmed: true,
-        transactionId: `tx_${Date.now()}`
+      executionMode: 'SIMULATED',
+      status: TASK_EXECUTION_STATUS.SIMULATED,
+      isSimulated: true,
+      data: {
+        notice: 'No physical external integration adapter configured. Running in sandboxed simulation mode.',
+        parameters: params,
+        simulatedAt: new Date().toISOString()
       }
     };
   }

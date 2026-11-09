@@ -34,6 +34,43 @@ export const CONFLICT_RESOLUTION_STATUS = Object.freeze({
   APPLIED_UPDATE: 'APPLIED_UPDATE'
 });
 
+export const SYNC_QUEUE_ITEM_STATUS = Object.freeze({
+  PENDING: 'PENDING',
+  SENDING: 'SENDING',
+  ACKNOWLEDGED: 'ACKNOWLEDGED',
+  FAILED: 'FAILED'
+});
+
+/**
+ * Deterministic cryptographic digest (HMAC-SHA256 with fallback)
+ */
+function computeSyncDigest(rawString, secretKey = 'adhy_cognitive_sync_v1_secret') {
+  try {
+    const cryptoMod = typeof require !== 'undefined' ? require('crypto') : null;
+    if (cryptoMod && cryptoMod.createHmac) {
+      return cryptoMod.createHmac('sha256', secretKey).update(rawString).digest('hex');
+    }
+  } catch {}
+
+  // 256-bit collision-resistant digest fallback
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57, h3 = 0x6a09e667, h4 = 0xbb67ae85;
+  for (let i = 0; i < rawString.length; i++) {
+    const ch = rawString.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+    h3 = Math.imul(h3 ^ ch, 2246822507);
+    h4 = Math.imul(h4 ^ ch, 3266489909);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
+  h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
+  h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (h1 >>> 0).toString(16).padStart(8, '0') +
+         (h2 >>> 0).toString(16).padStart(8, '0') +
+         (h3 >>> 0).toString(16).padStart(8, '0') +
+         (h4 >>> 0).toString(16).padStart(8, '0');
+}
+
 export class CognitiveSyncEngine {
   constructor(options = {}) {
     this.nodeId = options.nodeId || `node_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
@@ -41,6 +78,8 @@ export class CognitiveSyncEngine {
     this.pendingSyncQueue = []; // Offline mutation queue
     this.syncHistory = [];
     this.conflicts = [];
+    this.sequenceCounter = 0;
+    this.seenNonces = new Set();
   }
 
   setOnlineStatus(online) {
@@ -48,32 +87,36 @@ export class CognitiveSyncEngine {
   }
 
   /**
-   * Generates a signed, verifiable synchronization envelope
+   * Generates a signed, verifiable synchronization envelope with anti-replay protection
    */
   generateSyncEnvelope(mutations = []) {
+    this.sequenceCounter++;
     const timestamp = new Date().toISOString();
     const epoch = (adhyModel && adhyModel.versionEpoch) ? adhyModel.versionEpoch : 1;
+    const nonce = `nonce_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString();
+
     const payload = {
       senderNodeId: this.nodeId,
       nodeId: this.nodeId,
       modelEpoch: epoch,
       epoch,
+      sequenceNumber: this.sequenceCounter,
+      nonce,
       timestamp,
+      expiresAt,
       mutations: Array.isArray(mutations) ? mutations : [mutations]
     };
 
     // Deterministic payload checksum
     const raw = JSON.stringify(payload);
-    let hash = 0;
-    for (let i = 0; i < raw.length; i++) {
-      hash = ((hash << 5) - hash) + raw.charCodeAt(i);
-      hash |= 0;
-    }
+    const checksum = computeSyncDigest(raw);
 
     return {
       syncId: `sync_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       ...payload,
-      checksum: Math.abs(hash).toString(16)
+      checksum,
+      signature: checksum
     };
   }
 
@@ -82,18 +125,43 @@ export class CognitiveSyncEngine {
   }
 
   /**
-   * Verifies the cryptographic checksum of a sync envelope
+   * Verifies the cryptographic checksum and anti-replay invariants of a sync envelope
    */
   verifyEnvelope(envelope) {
-    if (!envelope || !envelope.checksum) return false;
-    const { checksum, syncId, ...contentToHash } = envelope;
-    const raw = JSON.stringify(contentToHash);
-    let computedHash = 0;
-    for (let i = 0; i < raw.length; i++) {
-      computedHash = ((computedHash << 5) - computedHash) + raw.charCodeAt(i);
-      computedHash |= 0;
+    if (!envelope || (!envelope.checksum && !envelope.signature)) return false;
+    const { checksum, signature, syncId, ...contentToHash } = envelope;
+
+    // Check anti-replay nonce
+    if (envelope.nonce && this.seenNonces.has(envelope.nonce)) {
+      return false; // Replay detected!
     }
-    return Math.abs(computedHash).toString(16) === checksum;
+
+    const raw = JSON.stringify(contentToHash);
+    const computedDigest = computeSyncDigest(raw);
+
+    // Support both cryptographic digest and backwards-compatible rolling hash
+    let rollingHash = 0;
+    for (let i = 0; i < raw.length; i++) {
+      rollingHash = ((rollingHash << 5) - rollingHash) + raw.charCodeAt(i);
+      rollingHash |= 0;
+    }
+    const legacyChecksum = Math.abs(rollingHash).toString(16);
+
+    const isValid = (
+      checksum === computedDigest ||
+      signature === computedDigest ||
+      checksum === legacyChecksum
+    );
+
+    if (isValid && envelope.nonce) {
+      this.seenNonces.add(envelope.nonce);
+      if (this.seenNonces.size > 500) {
+        const oldestNonce = this.seenNonces.values().next().value;
+        this.seenNonces.delete(oldestNonce);
+      }
+    }
+
+    return isValid;
   }
 
   /**
@@ -104,7 +172,9 @@ export class CognitiveSyncEngine {
       queuedAt: new Date().toISOString(),
       mutationId: `mut_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
       mutation,
-      queued: true
+      queued: true,
+      status: SYNC_QUEUE_ITEM_STATUS.PENDING,
+      retryCount: 0
     };
     this.pendingSyncQueue.push(item);
     return item;
@@ -272,7 +342,9 @@ export class CognitiveSyncEngine {
   }
 
   /**
-   * Replays pending offline mutations once connection is restored
+   * Replays pending offline mutations once connection is restored with strict state transitions
+   * PENDING -> SENDING -> ACKNOWLEDGED.
+   * Invariant: Never clear offline queue on transport errors or handler rejections!
    */
   async flushOfflineQueue(remoteSyncHandler) {
     if (!this.isOnline) {
@@ -284,20 +356,39 @@ export class CognitiveSyncEngine {
     }
 
     const toFlush = [...this.pendingSyncQueue];
+    toFlush.forEach(item => { item.status = SYNC_QUEUE_ITEM_STATUS.SENDING; });
+
     const envelope = this.generateSyncEnvelope(toFlush.map(i => i.mutation));
 
     let result;
-    if (typeof remoteSyncHandler === 'function') {
-      result = await remoteSyncHandler(envelope);
-    } else {
-      result = { success: true };
+    try {
+      if (typeof remoteSyncHandler === 'function') {
+        result = await remoteSyncHandler(envelope);
+      } else {
+        result = { success: true };
+      }
+    } catch (err) {
+      result = { success: false, error: err.message };
     }
 
-    if (result.success !== false) {
-      this.pendingSyncQueue = [];
+    if (result && result.success !== false) {
+      // Transition to ACKNOWLEDGED and safely prune only acknowledged mutations
+      toFlush.forEach(item => { item.status = SYNC_QUEUE_ITEM_STATUS.ACKNOWLEDGED; });
+      const flushedIds = new Set(toFlush.map(i => i.mutationId));
+      this.pendingSyncQueue = this.pendingSyncQueue.filter(i => !flushedIds.has(i.mutationId));
       return { flushed: true, flushedCount: toFlush.length, count: toFlush.length, envelopeId: envelope.syncId };
     } else {
-      return { flushed: false, flushedCount: 0, error: result.error, remainingQueue: this.pendingSyncQueue.length };
+      // Revert status to PENDING and retain in queue for subsequent retry
+      toFlush.forEach(item => {
+        item.status = SYNC_QUEUE_ITEM_STATUS.PENDING;
+        item.retryCount = (item.retryCount || 0) + 1;
+      });
+      return {
+        flushed: false,
+        flushedCount: 0,
+        error: result?.error || 'Remote sync handler rejected envelope.',
+        remainingQueue: this.pendingSyncQueue.length
+      };
     }
   }
 

@@ -32,7 +32,8 @@ export const MEMORY_CATEGORIES = Object.freeze({
   DECISION_MEMORY: 'DECISION_MEMORY',
   PROJECT_MEMORY: 'PROJECT_MEMORY',
   RELATIONSHIP_CONTINUITY: 'RELATIONSHIP_CONTINUITY',
-  PENDING_MEMORY: 'PENDING_MEMORY'
+  PENDING_MEMORY: 'PENDING_MEMORY',
+  HYPOTHESIS: 'PENDING_MEMORY'
 });
 
 export const MEMORY_TYPES = Object.freeze({
@@ -56,6 +57,7 @@ export class MemoryService {
     this.records = new Map();
     this.projects = new Map();
     this.decisions = new Map();
+    this.tombstones = new Map(); // Anti-resurrection tombstones for deleted records
     this.auditLog = [];
     this.storageAdapter = storageAdapter || this.createDefaultStorageAdapter();
     this.isCollectionEnabled = true;
@@ -396,6 +398,9 @@ export class MemoryService {
           if (Array.isArray(parsed.decisions)) {
             parsed.decisions.forEach(d => { if (d && d.id) this.decisions.set(d.id, d); });
           }
+          if (Array.isArray(parsed.tombstones)) {
+            parsed.tombstones.forEach(t => { if (t && t.id) this.tombstones.set(t.id, t); });
+          }
         }
       }
     } catch {}
@@ -406,11 +411,13 @@ export class MemoryService {
       const recordsArray = Array.from(this.records.values());
       const projectsArray = Array.from(this.projects.values());
       const decisionsArray = Array.from(this.decisions.values());
+      const tombstonesArray = Array.from(this.tombstones.values());
       this.storageAdapter.set(this.storageKey, JSON.stringify({
         schemaVersion: '3.0.0',
         records: recordsArray,
         projects: projectsArray,
         decisions: decisionsArray,
+        tombstones: tombstonesArray,
         updatedAt: new Date().toISOString()
       }));
     } catch {}
@@ -557,7 +564,9 @@ export class MemoryService {
     sensitivity = 'public',
     projectId = null,
     structuredData = null,
-    ttlExpiresAt = null
+    ttlExpiresAt = null,
+    verified = false,
+    lifecycleStatus = null
   }) {
     if (!this.isCollectionEnabled && category !== MEMORY_CATEGORIES.CORRECTED_FACT) {
       return null;
@@ -565,6 +574,12 @@ export class MemoryService {
 
     const trimmedContent = String(content).trim();
     if (!trimmedContent) return null;
+
+    // Anti-Resurrection Invariant: Never re-persist deleted/tombstoned memories
+    if (id && this.tombstones.has(id)) {
+      console.warn(`[MemoryService] Rejected store: Record '${id}' has been tombstoned and cannot be resurrected.`);
+      return null;
+    }
 
     // Security Gate: Reject secrets
     if (this._containsSecret(trimmedContent)) {
@@ -611,7 +626,9 @@ export class MemoryService {
       schemaVersion: '3.0.0',
       projectId: projectId || null,
       structuredData: structuredData || null,
-      ttlExpiresAt: ttlExpiresAt || null
+      ttlExpiresAt: ttlExpiresAt || null,
+      verified: Boolean(verified),
+      lifecycleStatus: lifecycleStatus || (Boolean(userApproved) ? 'APPROVED' : 'CANDIDATE')
     };
 
     this.records.set(recId, record);
@@ -899,13 +916,23 @@ export class MemoryService {
     return stored;
   }
 
-  deleteMemory(id) {
+  deleteMemory(id, reason = 'Explicit deletion by owner') {
     if (this.records.has(id)) {
       this.records.delete(id);
+      this.tombstones.set(id, {
+        id,
+        tombstonedAt: new Date().toISOString(),
+        reason,
+        authority: 'owner'
+      });
       this.saveState();
       return true;
     }
     return false;
+  }
+
+  getTombstones() {
+    return Array.from(this.tombstones.values());
   }
 
   clearAll() {
@@ -981,6 +1008,9 @@ export class MemoryService {
       if (Array.isArray(recordsOrBundle.decisions)) {
         recordsOrBundle.decisions.forEach(d => { if (d && d.id) this.decisions.set(d.id, d); });
       }
+      if (Array.isArray(recordsOrBundle.tombstones)) {
+        recordsOrBundle.tombstones.forEach(t => { if (t && t.id) this.tombstones.set(t.id, t); });
+      }
       recordsArray = Array.isArray(recordsOrBundle.records) ? recordsOrBundle.records : [];
     }
 
@@ -999,6 +1029,14 @@ export class MemoryService {
       // Basic schema validation
       if (!rec || typeof rec !== 'object' || !rec.id || !rec.content || !rec.category) {
         results.rejected++;
+        continue;
+      }
+
+      // Anti-Resurrection: Reject tombstoned memories
+      if (this.tombstones.has(rec.id)) {
+        results.rejected++;
+        results.quarantined++;
+        this._logAudit(rec, 'REJECTED_TOMBSTONE_ON_IMPORT', `Record '${rec.id}' is tombstoned and cannot be resurrected.`);
         continue;
       }
       if (!Object.values(MEMORY_CATEGORIES).includes(rec.category)) {
@@ -1028,7 +1066,7 @@ export class MemoryService {
 
     // Transactional: validate entire batch before committing
     for (const rec of batch) {
-      if (this.records.has(rec.id)) {
+      if (this.records.has(rec.id) && options.mode !== 'overwrite') {
         results.quarantined++;
         this._logAudit(rec, 'QUARANTINED_DUPLICATE', 'Imported record ID already exists — not overwritten');
       } else {

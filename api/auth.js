@@ -120,7 +120,7 @@ function verifySessionToken(token) {
   }
 }
 
-// ── Extract Token from Request ───────────────────────────────────────
+// ── Extract Token from Request (NEVER accept tokens via URL query parameters) ──
 function extractToken(req) {
   // 1. From Authorization Header
   const authHeader = req.headers.authorization || '';
@@ -135,11 +135,25 @@ function extractToken(req) {
     return decodeURIComponent(match[1]);
   }
 
-  // 3. From JSON Body or Query Parameter
+  // 3. From JSON Body only (rejected from URL query strings to avoid log/referrer exposure)
   if (req.body?.token) return req.body.token;
-  if (req.query?.token) return req.query.token;
 
   return null;
+}
+
+// ── Strict Origin & CSRF Verification ────────────────────────────────
+function isTrustedOrigin(headerValue) {
+  if (!headerValue || typeof headerValue !== 'string') return false;
+  try {
+    const url = new URL(headerValue.startsWith('http') ? headerValue : `https://${headerValue}`);
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === 'adhy.tech' || hostname.endsWith('.adhy.tech')) return true;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') return true;
+    if (hostname === 'vercel.app' || hostname.endsWith('.vercel.app')) return true;
+    return false;
+  } catch {
+    return false;
+  }
 }
 
 export default async function handler(req, res) {
@@ -154,15 +168,15 @@ export default async function handler(req, res) {
 
   const action = req.query.action || req.body?.action || (req.method === 'POST' ? 'login' : 'verify');
 
-  // ── CSRF: Reject state-changing requests from unexpected origins ──────
+  // ── CSRF: Reject state-changing requests from untrusted or missing origins ──────
   if (req.method === 'POST' && action !== 'verify') {
-    const origin = req.headers.origin || '';
-    const referer = req.headers.referer || '';
-    const allowedOrigins = ['adhy.tech', 'localhost', '127.0.0.1', 'vercel.app'];
-    const hasValidOrigin = !origin || allowedOrigins.some(o => origin.includes(o));
-    const hasValidReferer = !referer || allowedOrigins.some(o => referer.includes(o));
+    const origin = req.headers.origin;
+    const referer = req.headers.referer;
+    const hasValidOrigin = isTrustedOrigin(origin);
+    const hasValidReferer = isTrustedOrigin(referer);
+
     if (!hasValidOrigin && !hasValidReferer) {
-      return res.status(403).json({ success: false, error: 'Cross-origin request blocked.' });
+      return res.status(403).json({ success: false, error: 'Cross-origin request blocked: untrusted or missing origin.' });
     }
   }
 

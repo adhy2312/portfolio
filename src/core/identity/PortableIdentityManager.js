@@ -382,20 +382,23 @@ export class PortableIdentityManager {
       cognitiveProfile.resetToBaseline();
     }
 
-    // Import Memories
+    // Import Memories through strict quarantine pipeline (cannot self-elevate to approved facts)
     if (Array.isArray(bundle.memories)) {
       bundle.memories.forEach(mem => {
         if (mem && (mem.content || mem.text)) {
-          memoryService.storeRecord({
+          const stored = memoryService.storeRecord({
             id: mem.id,
-            category: mem.category || MEMORY_CATEGORIES.APPROVED_FACT,
+            category: mem.category || MEMORY_CATEGORIES.PENDING_MEMORY,
             content: mem.content || mem.text,
             provenance: mem.provenance || `Imported from bundle (${bundle.sourceRuntime || 'portable'})`,
-            confidence: typeof mem.confidence === 'number' ? mem.confidence : 0.9,
-            verified: mem.verified ?? true,
-            userApproved: mem.userApproved ?? true
+            confidence: typeof mem.confidence === 'number' ? Math.min(1.0, Math.max(0, mem.confidence)) : 0.7,
+            verified: false,
+            userApproved: false,
+            lifecycleStatus: 'QUARANTINED'
           });
-          report.importedMemoriesCount += 1;
+          if (stored) {
+            report.importedMemoriesCount += 1;
+          }
         }
       });
     }
