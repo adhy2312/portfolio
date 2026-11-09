@@ -283,6 +283,12 @@ class MiniAdhyAgentOrchestrator {
       baseReport.emotionState = agent.emotionEngine ? agent.emotionEngine.getState() : null;
       baseReport.curriculumDoctrine = this.agents.ULTRON?.curriculum?.[agentId];
       baseReport.findings = this.findings.filter(f => f.agent === agent.name || f.agent === agent.id);
+      baseReport.telemetry = {
+        ...(baseReport.telemetry || {}),
+        metricSource: 'ESTIMATED_PROFILE',
+        isEstimated: true,
+        tasksCompleted: intel?.tasksCompleted ?? 0
+      };
       return baseReport;
     }
 
@@ -389,12 +395,19 @@ class MiniAdhyAgentOrchestrator {
     const details = staticDossiers[agentId] || {
       rank: 'Specialist Agent',
       clearanceLevel: 'LEVEL 4',
-      telemetry: { cpuLoad: 12.0, memoryMb: 30.0, latencyMs: 3.0, activeThreads: 2, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 50 },
+      telemetry: { cpuLoad: 12.0, memoryMb: 30.0, latencyMs: 3.0, activeThreads: 2, uptime: '99.99%', errorRate: '0.00%', tasksCompleted: 0 },
       specialtyDetails: agent.role || 'Autonomous specialist routine.',
       recentActions: ['Executed scheduled verification check']
     };
 
     const ultronDoctrine = this.agents.ULTRON?.curriculum?.[agentId];
+    const measuredTasksCompleted = intel?.operationalMetrics?.tasksCompleted ?? 0;
+    const telemetry = {
+      ...details.telemetry,
+      metricSource: 'ESTIMATED_PROFILE',
+      isEstimated: true,
+      tasksCompleted: measuredTasksCompleted
+    };
 
     return {
       id: agent.id || agentId,
@@ -405,7 +418,7 @@ class MiniAdhyAgentOrchestrator {
       clearanceLevel: details.clearanceLevel,
       status: agent.status || 'active',
       lastRun: agent.lastRun,
-      telemetry: details.telemetry,
+      telemetry,
       specialtyDetails: details.specialtyDetails,
       recentActions: details.recentActions,
       curriculumDoctrine: ultronDoctrine,

@@ -83,6 +83,8 @@ export class RequestLifecycle {
       lower.includes('kicad') || lower.includes('pcb') || lower.includes('stm32') ||
       lower.includes('gnu radio') || lower.includes('dsp') || lower.includes('matlab') ||
       lower.includes('simulink') || lower.includes('circuit') || lower.includes('code') ||
+      lower.includes('filter') || lower.includes('fir') || lower.includes('signal processing') ||
+      lower.includes('discrete-time') || lower.includes('algorithm') ||
       lower.includes('ultron') || lower.includes('jarvis') || lower.includes('friday')
     ) {
       return TASK_COMPLEXITY.LEVEL_2_TECHNICAL;
@@ -171,7 +173,7 @@ export class RequestLifecycle {
 
     // Step 5: Consequential Action Gate (Level 4 Assessment)
     if (complexity === TASK_COMPLEXITY.LEVEL_4_CONSEQUENTIAL) {
-      const permCheck = permissionRegistry.evaluate('MINI_ADHY', 'consequential_user_action', { input });
+      const permCheck = permissionRegistry.evaluate('MINI_ADHY', 'delete_persistent_state', { input, destroysProductionData: true });
       if (!permCheck.allowed) {
         return {
           requestId,
@@ -254,6 +256,8 @@ export class RequestLifecycle {
 
     const lifecycleTrace = {
       requestId,
+      input: rawInput,
+      complexity,
       taskCategory: instructionPackage.cognitiveContext?.taskCategory || 'GENERAL_CONVERSATION',
       retrievedDimensions: instructionPackage.cognitiveContext?.retrievedDimensions || [],
       selectedMemories: (instructionPackage.cognitiveContext?.authorizedMemories || []).map(m => m.id || m.content?.slice(0, 40)),

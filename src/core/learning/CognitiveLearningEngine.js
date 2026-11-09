@@ -177,7 +177,7 @@ export class CognitiveLearningEngine {
     const now = new Date().toISOString();
 
     // 1. Explicit User Correction Detection
-    const correctionRegex = /(?:that's|that is|you're|you are)\s+(?:wrong|incorrect)|(?:don't|do not)\s+.*?\s+(?:do|use)\s+|actually(?:,|\s+I)\s+(?:prefer|want|need)|stop\s+(?:giving|explaining|doing)|use\s+.*?\s+instead|I said\s+/i;
+    const correctionRegex = /(?:that's|that is|you're|you are)\s+(?:wrong|incorrect)|(?:don't|do not)\s+.*?\s+(?:do|use)\s+|actually(?:,|\s+I)\s+(?:prefer|want|need)|stop\s+(?:giving|explaining|doing|using)|use\s+.*?\s+instead|I said\s+|correction:\s*/i;
     if (correctionRegex.test(text)) {
       let dimensionKey = 'generalPreference';
       let observedValue = text;
@@ -382,6 +382,7 @@ export class CognitiveLearningEngine {
 
       return {
         status: 'CORRECTION_APPLIED',
+        classification: 'explicit_correction',
         dimension: updated,
         confidence: 1.0,
         epoch: this.model.versionEpoch

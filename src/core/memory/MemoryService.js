@@ -1019,6 +1019,7 @@ export class MemoryService {
       batch.push({
         ...rec,
         userApproved: false,     // ← FORCE: ignore any userApproved: true from import
+        category: rec.category === MEMORY_CATEGORIES.APPROVED_FACT ? MEMORY_CATEGORIES.HYPOTHESIS : rec.category,
         importedAt: new Date().toISOString(),
         schemaVersion: '3.0.0',
         confidence: typeof rec.confidence === 'number' ? Math.min(1, Math.max(0, rec.confidence)) : 0.5
@@ -1045,12 +1046,17 @@ export class MemoryService {
 
   // ── Structured Project Continuity ───────────────────────────────────
 
+  storeProject(projectData = {}) {
+    return this.createProject(projectData);
+  }
+
   createProject(projectData = {}) {
     const id = projectData.id || `proj_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
     const now = new Date().toISOString();
     const project = {
       id,
       title: projectData.title || projectData.name || 'Untitled Project',
+      name: projectData.name || projectData.title || 'Untitled Project',
       domain: projectData.domain || 'General Engineering',
       objective: projectData.objective || '',
       status: projectData.status || 'active',
@@ -1085,7 +1091,7 @@ export class MemoryService {
       id: `mem_proj_${id}`,
       category: MEMORY_CATEGORIES.PROJECT_MEMORY,
       memoryType: MEMORY_TYPES.PROJECT_CONTEXT,
-      content: `Project [${project.title}]: ${project.objective}. Status: ${project.status}. Architecture: ${project.technicalArchitecture}`,
+      content: `Project [${project.title}]: ${project.objective}. Status: ${project.status}. Architecture: ${project.technicalArchitecture}${project.knownProblems?.length ? `. Known issues: ${project.knownProblems.join('; ')}` : ''}`,
       source: 'Project Continuity Registry',
       evidence: 'Structured project entity creation',
       confidence: 1.0,
@@ -1613,6 +1619,14 @@ export class MemoryService {
   }
 
   // ── Memory Approval Workflow ────────────────────────────────────────
+
+  getRecord(id) {
+    return this.records.get(id) || null;
+  }
+
+  getMemory(id) {
+    return this.records.get(id) || null;
+  }
 
   getPendingApprovals() {
     return Array.from(this.records.values())

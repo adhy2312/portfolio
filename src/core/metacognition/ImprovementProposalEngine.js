@@ -68,6 +68,30 @@ export class ImprovementProposalEngine {
   /**
    * Formulates and validates a structured Self-Improvement Proposal
    */
+  formulateProposal(proposalData = {}) {
+    const pId = `prop_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    const prop = {
+      id: pId,
+      proposalId: pId,
+      status: 'PENDING_EXPERIMENT',
+      title: proposalData.title || 'Improvement Proposal',
+      area: proposalData.area || 'GENERAL',
+      sections: {
+        objective: proposalData.description || 'Improve retrieval accuracy and prevent regressions',
+        evidenceBase: proposalData.evidence || ['Failure trace analysis'],
+        riskAssessment: ['Low risk isolated parameter change'],
+        implementationSteps: ['Configure category fallback in retrieval pipeline'],
+        rollbackPlan: 'Revert to previous category whitelist on error',
+        metricsTarget: 'Retrieval accuracy improvement > 10%',
+        approvalState: 'PENDING_OWNER_REVIEW'
+      },
+      ...proposalData
+    };
+    this.proposals.set(pId, prop);
+    this.saveProposals();
+    return prop;
+  }
+
   createProposal({
     title = '',
     area = PROPOSAL_AREAS.RETRIEVAL_STRATEGY,

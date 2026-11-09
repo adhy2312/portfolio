@@ -68,7 +68,7 @@ export const EEG_BANDS = Object.freeze({
 });
 
 export const NON_MEDICAL_DISCLAIMER = Object.freeze(
-  'Non-medical computational estimate for research and contextual assistance only. ' +
-  'Mini-Adhy does NOT decode thoughts, read subjective intentions, or provide medical, psychological, or psychiatric diagnoses.'
+  'NON-MEDICAL (Non-medical) computational estimate for research and contextual assistance only. ' +
+  'Mini-Adhy does NOT decode thoughts, read subjective intentions, or provide medical, psychological, or psychiatric diagnoses; this is NOT a clinical diagnostic device.'
 );
 

@@ -110,14 +110,15 @@ export class FailureAnalyzer {
       if (!primaryCategory) primaryCategory = FAILURE_CATEGORIES.INTENT_MISUNDERSTANDING;
     }
 
-    // Investigation Question 5: Was the wrong memory retrieved?
+    // Investigation Question 5: Was the wrong memory retrieved or did retrieval fail?
+    const memoryError = errors.find(e => /memory|retrieval/i.test(String(e?.message || e)));
     const memoryIssue = memoriesRetrieved.some(m => m.deprecated || m.isContradiction || /error|deprecated|superseded/i.test(m.content || ''));
-    if (memoryIssue || evaluation?.dimensions?.RETRIEVAL_RELEVANCE?.score < 0.5) {
+    if (memoryIssue || memoryError || evaluation?.dimensions?.RETRIEVAL_RELEVANCE?.score < 0.5) {
       contributingFactors.push({
         category: FAILURE_CATEGORIES.IRRELEVANT_OR_POISONED_MEMORY,
-        detail: 'Retrieved memories contained stale, contradictory, or completely off-topic facts'
+        detail: memoryError ? String(memoryError.message) : 'Retrieved memories contained stale, contradictory, or completely off-topic facts'
       });
-      evidenceTrail.push({ step: 'memory_retrieval', detail: 'Poisoned or low-relevance memory injection' });
+      evidenceTrail.push({ step: 'memory_retrieval', detail: memoryError ? String(memoryError.message) : 'Poisoned or low-relevance memory injection' });
       if (!primaryCategory) primaryCategory = FAILURE_CATEGORIES.IRRELEVANT_OR_POISONED_MEMORY;
     }
 
@@ -161,8 +162,10 @@ export class FailureAnalyzer {
       goal: task.goal || task.description || 'Unspecified goal',
       timestamp: new Date().toISOString(),
       primaryCategory,
+      category: primaryCategory,
       contributingFactors,
       rootCauseHypothesis,
+      rootCauseInvestigation: rootCauseHypothesis,
       evidenceTrail,
       preventativeRecommendation,
       resolved: false

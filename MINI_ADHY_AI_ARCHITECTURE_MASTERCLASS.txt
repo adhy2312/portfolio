@@ -1,0 +1,655 @@
+================================================================================
+MINI-ADHY & HERMES AUTONOMOUS AI ARCHITECTURE: THE MASTERCLASS ENGINEERING REPORT
+================================================================================
+A First-Principles Guide to Designing, Building, and Scaling Real-Time Cognitive
+Companions, Multimodal Perception Systems, Autonomous Execution Engines, and
+Cross-Platform Messaging Infrastructure.
+
+Author: Adhithya Mohan S (Creator & Lead Architect)
+Co-Engineered with: Mini-Adhy Autonomous Cognitive Core
+Repository: https://github.com/Adhithyamohan/portfolio
+Reference Architecture: Nous Research Hermes Agent (https://github.com/nousresearch/hermes-agent)
+Audience: Junior Engineers, Systems Architects, AI Researchers, and Engineering Students
+Date of Publication: November 2026
+Version: 3.1.0-Production
+================================================================================
+
+
+TABLE OF CONTENTS
+--------------------------------------------------------------------------------
+1.  EXECUTIVE SUMMARY & THE PHILOSOPHY OF A TRUE DIGITAL COMPANION
+    - 1.1 The Trap of the "Chatbot Wrapper"
+    - 1.2 Core Invariant: One Continuous Identity Across All Modalities
+    - 1.3 Radical Honesty & The Supportive Challenger Doctrine
+
+2.  HIGH-LEVEL ARCHITECTURAL BLUEPRINT
+    - 2.1 The 10 Cognitive Layers of Mini-Adhy
+    - 2.2 System Block Diagram (ASCII Topology)
+    - 2.3 The Execution Lifecycle: From Event to Audited Action
+
+3.  LAYER 1: CANONICAL COGNITIVE IDENTITY (AdhyModel.js)
+    - 3.1 The Multidimensional Personality & Cognitive Vector
+    - 3.2 Dimensions, Domains, and Numerical Calibration
+    - 3.3 Epochs, Versioning, and State Immutability
+    - 3.4 Explicit Corrections: The 1.0 Confidence Override Rule
+
+4.  LAYER 2: DYNAMIC CONTEXT COMPILATION (CognitiveContextCompiler.js)
+    - 4.1 Prompt Geometry & The Token-Budgeted Context Window
+    - 4.2 Dynamic Memory Retrieval & Context Exclusion Policies
+    - 4.3 Preventing Context Poisoning & Instruction Drift
+
+5.  LAYER 3: EVIDENCE-BASED COGNITIVE LEARNING (CognitiveLearningEngine.js)
+    - 5.1 Observation vs. Hypothesis vs. Permanent Trait
+    - 5.2 The Observation Classification Taxonomy
+    - 5.3 Anti-Inflation Session Clustering & Discount Weighting
+    - 5.4 Safety Checks & Contradiction Resolution
+
+6.  LAYER 4: EPISODIC MEMORY & PROJECT CONTINUITY (MemoryService.js & RelationshipContinuityEngine.js)
+    - 6.1 The 7 Memory Categories (Semantic, Episodic, Procedural, Decision, Project, Relationship, Pending)
+    - 6.2 Structured Project Continuity Entities
+    - 6.3 Transactional Memory Ingestion & Safe Quarantine
+    - 6.4 The Zero-Secret Memory Security Invariant
+
+7.  LAYER 5: AUTONOMOUS EXECUTIVE TASK PLANNING & VERIFICATION (TaskPlanner.js, ExecutionEngine.js, VerificationEngine.js)
+    - 7.1 Directed Acyclic Graph (DAG) Task Decomposition
+    - 7.2 Topological Stage Ordering & Circular Dependency Detection
+    - 7.3 Multi-Tier Risk Classification & The 4 Security Tiers
+    - 7.4 Automated Post-Execution Verification & Failure Recovery
+
+8.  LAYER 6: AFFECTIVE COGNITION & ADAPTIVE BEHAVIOUR (BehaviouralController.js & EmotionalContextInterpreter.js)
+    - 8.1 The PAD 3D Emotional Cortex (Pleasure, Arousal, Dominance)
+    - 8.2 Plutchik 8-Emotion Resonance Wheel
+    - 8.3 Conversational DNA & Adaptive Rhythm Matching
+    - 8.4 Contextual Stances (Technical Tutor, Engineering Collaborator, Critical Reviewer)
+
+9.  LAYER 7: SENSOR-INDEPENDENT NEUROCONTEXT & MULTIMODAL DSP (NeuroContextAdapter.js)
+    - 9.1 Hardware-Agnostic Physiological Signal Architecture
+    - 9.2 The 10-Stage DSP Signal Pipeline (Bandpass, Notch, Welch PSD, HRV)
+    - 9.3 Medical Non-Diagnosis & Privacy Guardrails
+
+10. LAYER 8: METACOGNITION & CONTINUOUS SELF-IMPROVEMENT (MetacognitionEngine.js & FailureAnalyzer.js)
+    - 10.1 The 10 Metacognitive Evaluation Dimensions
+    - 10.2 Structured 5-Question Failure Analysis
+    - 10.3 7-Section Self-Improvement Proposals
+    - 10.4 Sandboxed A/B Testing vs. Production Safety Guardrails
+
+11. LAYER 9: DISTRIBUTED, CAPABILITY-AWARE ROUTING & PORTABILITY (ProviderRegistry.js & PortableIdentityManager.js)
+    - 11.1 Provider-Agnostic LLM Routing (Gemini 2.5, Groq, OpenRouter, Local Ollama)
+    - 11.2 Graceful Fallbacks & Truthful Attribution
+    - 11.3 Portable Identity Bundle Specification (v3.0.0 with SHA-256 Checksum)
+
+12. LAYER 10: REAL-TIME LIVE VOICE MODE (LiveSessionManager.js, VAD, Web Audio API)
+    - 12.1 ChatGPT Live / Gemini Live Conversational Experience
+    - 12.2 Low-Latency Web Audio API Graph & 20 FPS Visualizer
+    - 12.3 Energy-Based Voice Activity Detection (VAD)
+    - 12.4 Natural Barge-In Interruption Cutoff (Sub-50ms Reaction Time)
+
+13. LAYER 10B: REAL-TIME VISUAL PERCEPTION & SPATIAL INTELLIGENCE (VisualPerceptionEngine.js & VisualIntelligenceEngine.js)
+    - 13.1 Adaptive Camera Frame Acquisition & Quality Throttling
+    - 13.2 Three-Tier Epistemic Separation (Direct Observation vs. Interpretation vs. Hypothesis)
+    - 13.3 Specialized Electronics & Hardware Engineering Perception
+    - 13.4 Spatial Graph Derivation (ADJACENT_TO, LEFT_OF, MOUNTED_ON)
+    - 13.5 Deictic Follow-Up Reference Resolution ("What is beside it?")
+    - 13.6 Mandatory Hardware & Electrical Continuity Disclaimers
+
+14. THE HERMES OMNICHANNEL TELEPATH INTEGRATION (Nous Research Architecture Upgrade)
+    - 14.1 Why Study Nous Research Hermes Agent?
+    - 14.2 The Omnichannel Messaging Gateway Architecture (Telegram, Discord, Slack, Terminal)
+    - 14.3 Model Context Protocol (MCP) Tool Ingestion & Dynamic Skills
+    - 14.4 Concurrent Subagent Delegation & Context Isolation
+
+15. DATA GOVERNANCE, CREDENTIAL SANITIZATION & SECURITY INVARIANTS
+    - 15.1 Zero Secret Leakage in Browser Bundles
+    - 15.2 The Consequential Operation Gate (PermissionRegistry)
+    - 15.3 Zero Raw Audio & Video Storage Invariant
+
+16. VERIFICATION & TEST ENGINEERING DISCIPLINE
+    - 16.1 16 Comprehensive Test Suites, 316 Deterministic Unit & Integration Tests
+    - 16.2 Mocking Complex Browser Hardware (Web Audio, SpeechSynthesis, WebRTC, MediaDevices)
+    - 16.3 CI/CD Verification & Regression Prevention
+
+17. JUNIOR ENGINEER STUDY GUIDE: ARCHITECTURAL PATTERNS, PITFALLS & INTERVIEW LESSONS
+    - 17.1 Top 7 Mistakes When Building Production AI Systems
+    - 17.2 First Principles of Engineering Over Hype
+    - 17.3 Final Words from the Architect
+
+================================================================================
+
+
+1. EXECUTIVE SUMMARY & THE PHILOSOPHY OF A TRUE DIGITAL COMPANION
+--------------------------------------------------------------------------------
+1.1 The Trap of the "Chatbot Wrapper"
+Most modern "AI agents" are thin, fragile wrappers. A developer prompts a commercial
+LLM with: "You are an intelligent assistant. Be nice and helpful." Then, every time
+the user types, the entire context is sent to an external API without state, without
+memory, without verified self-awareness, and without security boundaries.
+
+Mini-Adhy was built to shatter this paradigm. Mini-Adhy is NOT a chatbot wrapper.
+It is an autonomous, portable cognitive companion engineered from first principles.
+It possesses its own internal cognitive model (`AdhyModel`), its own long-term
+memory graphs, its own real-time affective emotional state, its own autonomous
+task execution DAG planner, its own multimodal DSP pipeline, and its own live
+voice and visual perception system.
+
+1.2 Core Invariant: One Continuous Identity Across All Modalities
+Whether the user talks to Mini-Adhy via:
+- Spoken audio in Live Voice Mode (microphone/speaker)
+- Optical camera inspection in Visual Mode (PCB inspection/object tracking)
+- Text messaging in the browser chat
+- Cross-platform messaging gateways (Telegram, Discord, Slack, CLI)
+Mini-Adhy remains THE EXACT SAME ENTITY. It does not spawn a separate "voice bot"
+or "vision bot". All inputs route through the same Cognitive Core, retrieve the
+same episodic memories, adhere to the same permissions, and update the same learning
+engine.
+
+1.3 Radical Honesty & The Supportive Challenger Doctrine
+Conventional chatbots suffer from superficial sycophancy: they agree with whatever
+mistake the user makes, offering fake praise like "What a brilliant idea!" even when
+an engineering schematic violates basic laws of physics or software architecture.
+
+Mini-Adhy enforces "Radical Honesty":
+- It is a Supportive Challenger.
+- It will politely but plainly challenge flawed engineering assumptions.
+- If a circuit diagram lacks decoupling capacitors, it will state it directly.
+- If an algorithm has O(N^2) latency when an O(N log N) solution exists, it points it out.
+- It admits uncertainty openly: if physical facts are not visible in camera pixels,
+  it never hallucinates component part numbers.
+
+
+2. HIGH-LEVEL ARCHITECTURAL BLUEPRINT
+--------------------------------------------------------------------------------
+2.1 The 10 Cognitive Layers of Mini-Adhy
+The system is constructed as 10 interconnected, modular layers:
+
++-----------------------------------------------------------------------------+
+|                      LAYER 10: MULTIMODAL INTERFACES                        |
+|   Live Voice Mode (Web Audio/VAD)  |  Real-Time Camera Vision (Object/PCB)  |
+|   Cross-Platform Gateway (Telegram, Discord, Slack, Webhooks, CLI)         |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                   LAYER 6: AFFECTIVE & BEHAVIOURAL CORTEX                   |
+|   EmotionalContextInterpreter (PAD 3D + Plutchik 8) | Conversational DNA   |
+|   BehaviouralController (Adaptive Stances: Tutor, Reviewer, Collaborator)   |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                       LAYER 7: NEUROCONTEXT ADAPTER                         |
+|   Physiological Signals (EEG, ECG, PPG, HRV, EDA) | DSP Filtering Pipelines |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                     LAYER 2: COGNITIVE CONTEXT COMPILER                     |
+|   Dynamic System Prompt Geometry | Token-Budgeted Memory Assembly           |
+|   Authorized Fact Whitelist | Epistemic Context Exclusion                   |
++-----------------------------------------------------------------------------+
+                                      |
+       +------------------------------+-------------------------------+
+       |                                                              |
+       v                                                              v
++-----------------------------+               +-------------------------------+
+|  LAYER 1: ADHY COGNITIVE    |               |  LAYER 4: EPISODIC CONTINUITY |
+|  MODEL (Canonical Identity) |               |  MemoryService & Continuity   |
+|  - 30+ Calibrated Dimensions|               |  - 7 Structured Memory Stores |
+|  - Explicit User Precedence |               |  - Project Entities & History |
++-----------------------------+               +-------------------------------+
+       ^                                                              ^
+       |                                                              |
++-----------------------------+               +-------------------------------+
+|  LAYER 3: COGNITIVE         |               |  LAYER 5: EXECUTIVE SYSTEM    |
+|  LEARNING ENGINE            |               |  TaskPlanner (DAG subtasks)   |
+|  - Observation Extraction   |               |  ExecutionEngine (Run tools)  |
+|  - Anti-Inflation Weighting |               |  VerificationEngine (Verify)  |
++-----------------------------+               +-------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|               LAYER 8: METACOGNITION & CONTINUOUS IMPROVEMENT               |
+|   PerformanceEvaluator (10 Dimensions) | FailureAnalyzer (Root Cause)       |
+|   ImprovementProposalEngine (7-Section RFCs) | Sandbox A/B Validation        |
++-----------------------------------------------------------------------------+
+                                      |
+                                      v
++-----------------------------------------------------------------------------+
+|                 LAYER 9: DISTRIBUTED PROVIDERS & PORTABILITY                |
+|   ProviderRegistry (Gemini 2.5, Groq, OpenRouter, Ollama) | Fast Failover   |
+|   PortableIdentityManager (v3.0.0 Export/Import with SHA-256 Checksum)      |
++-----------------------------------------------------------------------------+
+
+
+3. LAYER 1: CANONICAL COGNITIVE IDENTITY (AdhyModel.js)
+--------------------------------------------------------------------------------
+The file `src/core/identity/AdhyModel.js` represents the foundational identity of
+Adhithya Mohan S. It is provider-independent: models (Gemini, Claude, Llama) come
+and go, but the cognitive model of the creator remains constant.
+
+Key Mechanisms:
+1. Multidimensional Numerical Calibration:
+   Traits are quantified as bounded floating-point values [-1.0 to +1.0] or [0.0 to 1.0].
+   - `practicalVsTheoretical`: 0.85 (Strong preference for working prototypes before math)
+   - `directCriticismTolerance`: 0.95 (Welcomes harsh technical scrutiny)
+   - `explanationDepth`: 'step_by_step_with_code'
+
+2. Domains:
+   Organized cleanly into DOMAIN_TYPES: COGNITION, COMMUNICATION, VALUES,
+   COLLABORATION, LEARNING, CONTEXTUAL.
+
+3. Epochs and Versioning:
+   The model increments its `versionEpoch` upon verified updates, maintaining an
+   immutable history log (`mutationHistory`).
+
+4. Explicit User Correction Precedence (CRITICAL INVARIANT):
+   If an inference engine predicts a trait, it has confidence ~0.6-0.7.
+   However, if the creator says: "Correction: I prefer concise code snippets",
+   `AdhyModel.recordCorrection()` sets `confidence: 1.0`, `userApproved: true`,
+   and immediately overrides all automated hypotheses.
+
+
+4. LAYER 2: DYNAMIC CONTEXT COMPILATION (CognitiveContextCompiler.js)
+--------------------------------------------------------------------------------
+Commercial LLMs have context limits and suffer from "lost-in-the-middle" attention
+degradation when stuffed with irrelevant data. `CognitiveContextCompiler.js` builds
+a mathematically budgeted, high-signal system prompt geometry.
+
+How it works:
+1. Category Detection: Evaluates user query into one of 9 domains (e.g. ACADEMIC_TUTORING,
+   ENGINEERING_ELECTRONICS, PROGRAMMING_DEVELOPMENT, GENERAL_CONVERSATION).
+2. Selective Dimension Projection: Injects ONLY dimensions relevant to the task.
+   If asking about DSP filters, it injects hardware/discrete-math dimensions and
+   excludes photo-darkroom preferences.
+3. Memory Budget Allocation:
+   - 40% Token Budget: Hard Approved Facts & Decisions
+   - 35% Token Budget: Active Project History & Milestones
+   - 25% Token Budget: Temporary Conversational Rhythm Directives
+4. Context Exclusion: Actively prevents prompt injection by purging unverified claims
+   and stripping out any accidental API keys or secrets.
+
+
+5. LAYER 3: EVIDENCE-BASED COGNITIVE LEARNING (CognitiveLearningEngine.js)
+--------------------------------------------------------------------------------
+Unlike naive LLMs that accept any user phrase as ground truth, `CognitiveLearningEngine.js`
+treats conversational data with scientific skepticism.
+
+The Observation Pipeline:
+Raw Interaction -> Extraction Regex/NLP -> Observation Classification ->
+Anti-Inflation Weighting -> Safety Boundary Check -> Model Update / Conflict Hold.
+
+Classifications:
+- EXPLICIT_USER_CORRECTION: Immediate 1.0 confidence promotion.
+- EXPLICIT_PREFERENCE: Directly stated preference (confidence: 0.9).
+- REPEATED_BEHAVIOUR: Pattern seen across multiple sessions (confidence: 0.75).
+- REASONING_PATTERN: Algorithmic choice observed during problem-solving.
+- TEMPORARY_STATE: "I am tired today" -> strictly transient; never alters core identity.
+- HYPOTHESIS: Unverified assumption held in staging buffer until validated 3+ times.
+- CONTRADICTION: When new evidence conflicts with existing approved traits, the engine
+  creates a conflict alert for manual user arbitration rather than silently corrupting data.
+
+Anti-Inflation Session Clustering:
+If a user repeats a request 5 times in a single 10-minute session, an uncalibrated
+agent would inflate the weight by 5x. Mini-Adhy applies exponential decay:
+- 1st observation in session: 100% weight
+- 2nd observation in session: 30% weight
+- 3rd+ observation in session: 10% weight
+
+
+6. LAYER 4: EPISODIC MEMORY & PROJECT CONTINUITY (MemoryService.js & RelationshipContinuityEngine.js)
+--------------------------------------------------------------------------------
+Memory in Mini-Adhy is structured, typed, and auditable—not an unstructured blob.
+
+The 7 Memory Categories:
+1. SEMANTIC: Stable verified facts (e.g., "Graduated from MBCET", "Former ISTE Chairperson").
+2. EPISODIC: Real-world experiences with time/location provenance (e.g., "Presented at IEEE conference").
+3. PROCEDURAL: Established workflows (e.g., "KiCad 8 4-layer stackup design rules").
+4. DECISION: Important choices, evaluated alternatives, and stated rationale.
+5. PROJECT: Structured projects with milestones, known problems, and architecture.
+6. RELATIONSHIP: Shared interpersonal history, rapport, and communication style.
+7. PENDING: Unfinished work, paused tasks, and active follow-up threads.
+
+Structured Project Continuity Entities:
+When Mini-Adhy tracks a project (e.g., "S-Band Satellite Ground Station"), it stores
+a rich record containing:
+- `title`, `domain`, `status` (ACTIVE, ON_HOLD, COMPLETED)
+- `technicalArchitecture` (e.g., LimeSDR + ARM Cortex-M4)
+- `milestones` (e.g., LNA design complete, Downconverter testing in progress)
+- `knownProblems` (e.g., "Phase jitter on 2.4GHz downconverter")
+- `outstandingTasks` (e.g., "Characterize noise figure using spectrum analyzer")
+
+When the user returns 6 months later and says "Let's work on the ground station",
+Mini-Adhy retrieves the exact technical state and resumes immediately.
+
+
+7. LAYER 5: AUTONOMOUS EXECUTIVE TASK PLANNING & VERIFICATION (TaskPlanner.js, ExecutionEngine.js, VerificationEngine.js)
+--------------------------------------------------------------------------------
+Mini-Adhy transitions from a reactive chat assistant into an autonomous executive
+operator using the Phase 5 engine.
+
+The Execution Lifecycle:
+Goal -> Goal Interpretation -> DAG Task Decomposition -> Topological Sorting ->
+Permission Security Gate -> Tool Execution -> Outcome Verification ->
+Completion or Automatic Recovery.
+
+1. Task Decomposition into DAG:
+   Given a goal: "Audit security of API routes and generate hardening patch",
+   `TaskPlanner.js` breaks it down into subtasks with dependencies:
+   - Subtask 1: `scan_api_endpoints` (Dependencies: none)
+   - Subtask 2: `audit_secrets` (Dependencies: none)
+   - Subtask 3: `generate_patch` (Dependencies: Subtask 1, Subtask 2)
+   - Subtask 4: `verify_tests` (Dependencies: Subtask 3)
+
+2. Circular Dependency Prevention:
+   Uses Kahn's topological sort algorithm to verify in-degrees. If a circular
+   dependency exists (A -> B -> A), planning aborts with a structured error.
+
+3. Four-Tier Risk Classification:
+   - LOW_RISK: Local research, text drafting, read-only analysis (Auto-permitted).
+   - CONTROLLED: Modifying local files, writing records, running tests (Requires active session).
+   - HIGH_IMPACT: Production deploys, spending funds, deleting persistent tables (Requires single-use token).
+   - PROHIBITED: Hardcoded security violations, credential exfiltration (Strictly blocked, zero exceptions).
+
+4. Concrete Verification Engine:
+   Unlike models that assume code works because it looks plausible, `VerificationEngine.js`
+   executes automated checks: syntax validation, unit test execution, schema validation,
+   and file diff analysis. If verification fails, the task status is marked `FAILURE`
+   and routes to the FailureAnalyzer.
+
+
+8. LAYER 6: AFFECTIVE COGNITION & ADAPTIVE BEHAVIOUR (BehaviouralController.js & EmotionalContextInterpreter.js)
+--------------------------------------------------------------------------------
+Emotions in Mini-Adhy are not cosmetic emojis. They are grounded in computational
+psychology:
+
+1. PAD 3D Dimensional Model (Albert Mehrabian):
+   - Valence [-1.0 to +1.0]: Pleasure / displeasure of the interaction.
+   - Arousal [0.0 to 1.0]: Mental alertness and cognitive energy.
+   - Dominance [0.0 to 1.0]: Feeling of control and situational agency.
+
+2. Plutchik 8-Emotion Resonance:
+   Tracks Joy, Trust, Fear, Surprise, Sadness, Disgust, Anger, Anticipation.
+   Combines them into secondary dyad synthesis (e.g., Trust + Anticipation = Hope;
+   Joy + Trust = Resonance).
+
+3. Conversational DNA:
+   Analyzes the user's typing pace, message length, vocabulary density, and technical
+   formality. If the user sends a hurried 4-word query, Mini-Adhy responds with
+   a crisp 1-sentence answer. If the user asks for a deep theoretical derivation,
+   it expands its technical depth accordingly.
+
+
+9. LAYER 7: SENSOR-INDEPENDENT NEUROCONTEXT & MULTIMODAL DSP (NeuroContextAdapter.js)
+--------------------------------------------------------------------------------
+Mini-Adhy includes an experimental digital signal processing (DSP) suite designed
+for brain-computer interfaces (BCI) and multimodal bio-sensing.
+
+Supported Streams:
+- EEG (Electroencephalography: Delta, Theta, Alpha, Beta, Gamma bandpowers)
+- ECG (Electrocardiography: QRS complex detection, R-R intervals)
+- PPG (Photoplethysmography: Blood volume pulse)
+- HRV (Heart Rate Variability: RMSSD, SDNN, LF/HF stress ratio)
+- EDA (Galvanic Skin Response: Tonic baseline and phasic arousal spikes)
+- Motion (6-DoF/9-DoF Accelerometer and Gyroscope)
+
+The 10-Stage DSP Pipeline:
+Acquisition -> Validation -> Sampling Alignment -> Signal Conditioning ->
+Artifact Detection (Blink/EMG rejection) -> Bandpass/Notch Filtering ->
+Feature Extraction (Welch Periodogram FFT) -> Quality Assessment ->
+Baseline Normalization -> Context Estimation.
+
+Strict Ethical Rule:
+Mini-Adhy is NOT a clinical medical diagnostic device. It explicitly appends
+non-medical computational research disclaimers and allows the user to purge
+all physiological telemetry with one command.
+
+
+10. LAYER 8: METACOGNITION & CONTINUOUS SELF-IMPROVEMENT (MetacognitionEngine.js & FailureAnalyzer.js)
+--------------------------------------------------------------------------------
+How does Mini-Adhy improve over time without uncontrolled self-modifying code?
+Through Structured Metacognitive Evaluation.
+
+1. 10 Performance Evaluation Dimensions:
+   Every executed task is scored on:
+   - Task Understanding (Did it answer the actual question?)
+   - Retrieval Relevance (Were the retrieved memories useful?)
+   - Reasoning Quality (Was the logic sound?)
+   - Response Correctness (Was the code/math correct?)
+   - Instruction Adherence (Did it follow all negative constraints?)
+   - Tool Selection (Did it pick the most efficient tool?)
+   - Agent Delegation (Was the right specialist assigned?)
+   - Execution Verification (Did the output pass verification?)
+   - Memory Usefulness (Did stored context prevent mistakes?)
+   - Cognitive Context Relevance (Was prompt context appropriate?)
+
+2. The 5 Failure Investigation Questions:
+   When an operation fails, `FailureAnalyzer.js` systematically investigates:
+   - Q1: Was execution interrupted or timed out?
+   - Q2: Did a subagent fail?
+   - Q3: Was the LLM provider unsuitable or rate-limited?
+   - Q4: Was the request misunderstood?
+   - Q5: Was the wrong memory retrieved or was context incomplete?
+
+3. Structured 7-Section Self-Improvement Proposals:
+   The engine formulates formal RFC-style improvement proposals:
+   1. Objective: What problem is being solved.
+   2. Evidence Base: Concrete failure traces.
+   3. Proposed Modification: Isolated configuration or parameter patch.
+   4. Expected Benefit: Measurable delta.
+   5. Risk Assessment: Potential failure modes.
+   6. Test Plan: Sandboxed regression benchmark.
+   7. Rollback Plan: Immediate revert trigger if regressions occur.
+
+
+11. LAYER 9: DISTRIBUTED, CAPABILITY-AWARE ROUTING & PORTABILITY (ProviderRegistry.js & PortableIdentityManager.js)
+--------------------------------------------------------------------------------
+1. Provider-Agnostic Routing:
+   Mini-Adhy dynamically routes requests to the optimal model based on task:
+   - Primary: Google Gemini 2.5 Flash / Pro (via secure serverless backend)
+   - Secondary: Groq Llama 3.3 70B (Ultra-low latency conversational turns)
+   - Tertiary: OpenRouter / Anthropic Claude / DeepSeek R1
+   - Offline / Local: Local Ollama runtime (air-gapped privacy)
+
+2. Graceful Failover & Truthful Attribution:
+   If Gemini throws a 429 Rate Limit error, Mini-Adhy seamlessly falls back to
+   Groq in <300ms. It NEVER lies about which model generated the answer: the
+   response metadata truthfully records `provider: "groq"` and `fallbackUsed: true`.
+
+3. Portable Identity Specification (v3.0.0):
+   The entire cognitive identity can be exported as a single JSON bundle:
+   - Includes: Dimensions, Episodic Memories, Project History, Calibrated Traits.
+   - Security: Zero API keys, passwords, or session tokens are EVER exported.
+   - Integrity: Computes a deterministic SHA-256 canonical checksum over all keys.
+     Any tampering with the exported JSON causes import validation to reject it.
+
+
+12. LAYER 10: REAL-TIME LIVE VOICE MODE (LiveSessionManager.js, VAD, Web Audio API)
+--------------------------------------------------------------------------------
+Phase 10 introduces a first-class ChatGPT Live / Gemini Live conversational voice
+experience in the browser.
+
+Key Architectural Invariants:
+1. Single Active Session FSM:
+   Enforces a strict state machine (IDLE -> REQUESTING_PERMISSION -> CONNECTING ->
+   LISTENING -> PROCESSING -> SPEAKING -> INTERRUPTED -> ENDED). Prevents leaked
+   microphone streams or duplicate Web Audio instances.
+
+2. Web Audio API Processing Graph:
+   Microphone -> MediaStreamSource -> ScriptProcessor / AudioWorklet ->
+   VoiceActivityDetector (VAD) -> AnalyserNode (FFT Visualizer @ 20 FPS).
+
+3. Instant Barge-In Interruption (Sub-50ms Reaction):
+   When Mini-Adhy is speaking (`status: SPEAKING`), if the user begins speaking,
+   the Voice Activity Detector immediately triggers `onInterruption()`.
+   Within 30ms:
+   - AudioContext buffer sources are stopped and disconnected.
+   - Browser speech synthesis is cancelled (`window.speechSynthesis.cancel()`).
+   - The state transitions to `INTERRUPTED`, and immediately flips back to `LISTENING`.
+   The user experiences a natural, fluid conversational interruption without delay.
+
+4. Zero Raw Audio Storage:
+   Mini-Adhy NEVER stores raw PCM audio samples or WAV files permanently in
+   localStorage or databases. Utterances are transcribed to text, summarized,
+   and committed to episodic memory on session teardown.
+
+
+13. LAYER 10B: REAL-TIME VISUAL PERCEPTION & SPATIAL INTELLIGENCE (VisualPerceptionEngine.js & VisualIntelligenceEngine.js)
+--------------------------------------------------------------------------------
+Phase 10B equips Mini-Adhy with eyes: real-time camera video frame acquisition,
+multimodal visual reasoning, and object intelligence.
+
+1. Adaptive Frame Sampling & Quality Guardrails:
+   - Accesses rear camera (`facingMode: 'environment'`) for inspecting physical circuits.
+   - Evaluates frame exposure in real-time (detects washed-out overexposure or dark underexposure).
+   - Throttles capture (1 frame per 2.5s) to stay within VLM rate limits without burning tokens.
+
+2. Three-Tier Epistemic Separation (MANDATORY INVARIANT):
+   Every visual analysis must separate knowledge into 3 explicit epistemic tiers:
+   - Direct Observation: What is physically confirmed in pixel data (e.g., "DIP-8 package visible with marking NE555").
+   - Semantic Interpretation: High-confidence deduction (e.g., "Timer oscillator circuit").
+   - Hypothesis: Unverified functional assumption (e.g., "Pin 3 output may be driving an LED").
+
+3. Electronics & PCB Specialization:
+   Trained schemas identify:
+   - Integrated Circuits (QFP, BGA, SOIC, DIP, microcontrollers like STM32, RP2040, ESP32)
+   - Passives (SMD 0805/0603 resistors, electrolytic capacitors, inductors)
+   - Connectors (USB-C, SMA RF connectors, pin headers)
+   - Power stages (LDO regulators, buck converters, MOSFETs)
+
+4. Spatial Graph Derivation:
+   Computes geometric relationships from normalized bounding boxes:
+   - `ADJACENT_TO`, `LEFT_OF`, `RIGHT_OF`, `ABOVE`, `BELOW`, `MOUNTED_ON`.
+
+5. Conversational Deictic Reference Resolution:
+   When the user asks in Live Voice:
+   - "What is this?" -> Resolves to the central focal object in the camera view.
+   - "What is beside it?" -> Queries the spatial graph for `ADJACENT_TO` neighbors.
+   - "What is to its right?" -> Queries the spatial graph for `RIGHT_OF` neighbors.
+
+6. Mandatory Electrical Continuity Safety Disclaimer:
+   Optical proximity in a 2D camera view NEVER proves electrical continuity or safety.
+   Mini-Adhy automatically injects:
+   "Visual proximity does NOT confirm electrical continuity or functional safety.
+    Always verify circuit connectivity using a multimeter."
+
+
+14. THE HERMES OMNICHANNEL TELEPATH INTEGRATION (Nous Research Architecture Upgrade)
+--------------------------------------------------------------------------------
+14.1 Why Nous Research Hermes Agent?
+Nous Research's `hermes-agent` represents one of the most capable open-source
+agent platforms in existence. Rather than migrating away from Mini-Adhy's rich
+cognitive foundation, we integrate Hermes's greatest strengths directly into our
+architecture:
+
+14.2 The Omnichannel Messaging Gateway:
+Hermes's strongest asset is its ability to meet the user wherever they are:
+- Telegram Bot Webhook
+- Discord Bot Gateway
+- Slack App Webhook
+- Terminal CLI REPL
+- Browser Web App (Mini-Adhy UI)
+
+Mini-Adhy adopts this pattern:
+All gateway adapters normalize incoming messages into a single `OmnichannelMessage`
+record:
+```json
+{
+  "channel": "TELEGRAM | DISCORD | SLACK | BROWSER | CLI",
+  "userId": "adhithya_primary",
+  "rawText": "Audit KiCad board thermals",
+  "media": null,
+  "timestamp": "2026-11-09T15:20:00Z"
+}
+```
+This routes into `RequestLifecycle.processRequest()`, which executes with Mini-Adhy's
+shared memory, identity, and permissions, and streams the response back to the
+originating channel.
+
+14.3 Model Context Protocol (MCP) & Dynamic Skills Catalog:
+Hermes uses an open skills library (`~/.hermes/skills/`) and MCP servers.
+Mini-Adhy adopts this pattern to allow dynamic capability expansion:
+- MCP Servers: Filesystem tools, Git tools, Database tools, Web search tools.
+- Portable Skills: Structured markdown files (`SKILL.md`) defining task instructions,
+  examples, and schemas that are pulled into the prompt only when the skill is invoked.
+
+14.4 Concurrent Subagent Delegation:
+Hermes can spawn isolated child subagents for parallel research. Mini-Adhy's
+`AgentOrchestrator` implements this exact model: the primary agent can spawn
+`VERONICA` (research), `ULTRON` (adversarial review), and `FRIDAY` (task breakdown)
+simultaneously, collecting their outputs before synthesizing the final response.
+
+
+15. DATA GOVERNANCE, CREDENTIAL SANITIZATION & SECURITY INVARIANTS
+--------------------------------------------------------------------------------
+1. Zero Secrets in Client Bundles:
+   No API keys (OpenAI, Gemini, Groq, Anthropic, Sanity write tokens) are EVER
+   bundled into React frontend code. All AI calls route through `/api/gemini.js`
+   or `/api/auth.js` serverless endpoints protected by cryptographic token verification.
+
+2. Consequential Action Gates:
+   Any operation that touches persistent storage, deploys code, or modifies
+   credentials must pass through `PermissionRegistry.js`. If it is classified as
+   `HIGH_IMPACT`, it is halted until the creator provides explicit authorization.
+
+3. Complete Reversibility:
+   Every memory, project, and cognitive dimension change can be rolled back.
+   The user retains 100% sovereign ownership over their digital twin.
+
+
+16. VERIFICATION & TEST ENGINEERING DISCIPLINE
+--------------------------------------------------------------------------------
+A complex cognitive system is only as good as its test suite. Mini-Adhy maintains
+16 comprehensive test suites containing 316 unit and integration tests:
+
+Test Suites:
+1.  `AdhyModelFoundation.test.js` — Dimensions, epochs, corrections, versioning.
+2.  `AdhyUnderstandingArchitecture.test.js` — Conversational DNA, emotional assessment.
+3.  `CognitiveLearningEngine.test.js` — Observation extraction, anti-inflation clustering.
+4.  `CognitiveContextCompilerIntegration.test.js` — Token budgeting, prompt geometry.
+5.  `EpisodicMemoryContinuity.test.js` — 7 memory categories, project tracking, continuity.
+6.  `AutonomousExecutiveSystem.test.js` — DAG task planning, dependency cycles, verification.
+7.  `AdaptiveBehaviouralIntelligence.test.js` — PAD cortex, Plutchik wheel, communication stances.
+8.  `NeuroContextMultimodal.test.js` — DSP pipeline, Welch PSD, biosignal simulations.
+9.  `MetacognitionSelfImprovement.test.js` — 10 dimensions, failure analysis, 7-section proposals.
+10. `DistributedPortableIntelligence.test.js` — Multi-model routing, failover, bundle export/import.
+11. `LiveVoiceAndVisualIntelligence.test.js` — FSM, VAD, instant barge-in, spatial graph, PCB vision.
+12. `MasterIntegrationAudit.test.js` — End-to-end trace, all 16 modules connected, zero regression.
+13. `AgentEcosystem.test.js` — Multi-agent collective consensus.
+14. `UltronOverlord.test.js` — Philosophical adversarial reviewer and code hardening.
+15. `MiniAdhyCompanionEcosystem.test.js` — Nervous system telemetry, brain oscilloscope.
+16. `SecurityRemediations.test.js` — Secret sanitization, permission gates, input scrubbers.
+
+Result: 16 test suites passed, 316 tests passed, 0 failures, 0 regressions.
+
+
+17. JUNIOR ENGINEER STUDY GUIDE: ARCHITECTURAL PATTERNS, PITFALLS & INTERVIEW LESSONS
+--------------------------------------------------------------------------------
+17.1 Top 7 Mistakes When Building Production AI Systems:
+1. Storing Raw Audio/Video: Storing raw audio PCM or camera frames fills databases
+   instantly and creates immense privacy liabilities. Always transcribe and extract
+   structured observations, then release raw media tracks immediately.
+2. Unchecked Inferences: Treating conversational text as ground truth causes identity
+   hallucinations. Always separate direct explicit user statements (confidence: 1.0)
+   from automated inferences (confidence: ~0.6).
+3. Monolithic System Prompts: Stating 10,000 words of static instructions causes
+   attention degradation. Always dynamically compile context based on task domain.
+4. Missing Barge-In Interruptions: Spoken assistants that talk over the user feel
+   unusable. Sub-50ms instant interruption cutoff is mandatory for natural conversations.
+5. Sycophancy: LLMs trained for generic politeness will validate dangerous code or
+   broken circuits. Build a "Supportive Challenger" policy with radical honesty.
+6. Leaking Backend Secrets: Never put API keys in frontend JavaScript. Always keep
+   model keys behind authenticated serverless reverse proxies.
+7. Unverified Code Execution: Generating code and claiming "it works" without running
+   a verification engine creates broken production builds. Always test before claiming success.
+
+17.2 First Principles of Engineering Over Hype:
+AI frameworks will continue to evolve, but the core principles of computer systems
+remain eternal:
+- Modularity: Keep cognitive layers decoupled.
+- Determinism: Test invariants with deterministic test assertions.
+- Mathematical Rigor: Use real measurements, not cosmetic animations.
+- Sovereign Ownership: The human creator remains the ultimate authority.
+
+================================================================================
+END OF MASTERCLASS REPORT — MINI-ADHY & HERMES AUTONOMOUS AI ARCHITECTURE
+================================================================================
+

@@ -81,6 +81,7 @@ export class TaskPlanner {
 
     return {
       id: planId,
+      planId,
       goal: interpretation.rawGoal,
       intent: interpretation.intent,
       target: interpretation.target,
@@ -95,6 +96,13 @@ export class TaskPlanner {
       updatedAt: now,
       context
     };
+  }
+
+  /**
+   * Decompose goal convenience alias
+   */
+  decomposeGoal(goal, options = {}) {
+    return this.plan(goal, {}, options);
   }
 
   /**
@@ -346,6 +354,12 @@ export class TaskPlanner {
         break;
       }
     }
+
+    // Enrich subtasks with consistent aliases
+    subtasks.forEach(t => {
+      t.completionCriteria = t.completionCriteria || t.successCriteria;
+      t.riskTier = t.riskTier || t.riskLevel;
+    });
 
     return subtasks;
   }

@@ -224,6 +224,16 @@ export class VerificationEngine {
     }
   }
 
+  verifyStep(task, executionResult = {}, systemContext = {}) {
+    const verified = executionResult.success !== false && (executionResult.exitCode === undefined || executionResult.exitCode === 0);
+    return {
+      verified,
+      confidence: verified ? 0.95 : 0.0,
+      failureReason: verified ? null : (executionResult.error || 'Verification criteria not met'),
+      evidence: [{ check: 'step_execution', passed: verified }]
+    };
+  }
+
   getVerificationHistory() {
     return [...this.verificationHistory];
   }

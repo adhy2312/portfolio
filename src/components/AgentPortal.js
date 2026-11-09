@@ -3987,7 +3987,7 @@ Access classified portal: https://adhy.tech/agentp (Authenticated Access Only)`}
               {/* Human Empathy & Intelligence Vector Section */}
               {selectedAgentDossier.intelligence?.empathyVector && (
                 <div className="agentp-modal-section">
-                  <h4 className="agentp-modal-sec-title">HUMAN EMPATHY & RESILIENCE VECTOR</h4>
+                  <h4 className="agentp-modal-sec-title">HUMAN EMPATHY & RESILIENCE VECTOR [DESIGN BASELINE / ESTIMATED]</h4>
                   <div className="agentp-empathy-grid">
                     {Object.entries(selectedAgentDossier.intelligence.empathyVector).map(([k, val]) => (
                       <div key={k} className="agentp-empathy-item">

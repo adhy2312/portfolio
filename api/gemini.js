@@ -50,9 +50,11 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'AI Brain service temporarily offline' });
   }
 
-  // 4. Payload Size Guard (Max 16KB payload)
+  // 4. Payload Size Guard (Max 4MB for vision/multimodal, 32KB for standard text)
   const payloadStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
-  if (payloadStr.length > 16384) {
+  const isMultimodal = /inline_?data|image\/(jpeg|png|webp)|base64/i.test(payloadStr);
+  const maxPayloadSize = isMultimodal ? 4 * 1024 * 1024 : 32768;
+  if (payloadStr.length > maxPayloadSize) {
     return res.status(413).json({ error: 'Payload exceeds security limits.' });
   }
 

@@ -218,6 +218,12 @@ export class RelationshipContinuityEngine {
     return p;
   }
 
+  getProjectContinuity(projectId) {
+    if (!projectId) return null;
+    return (memoryService && typeof memoryService.getProject === 'function' ? memoryService.getProject(projectId) : null) ||
+      this.projects.find(p => p.id === projectId) || null;
+  }
+
   getCompactContinuitySummary({ taskCategory = null, projectId = null, query = '' } = {}) {
     let targetProject = null;
     if (projectId) {

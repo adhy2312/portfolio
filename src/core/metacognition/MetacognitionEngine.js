@@ -46,7 +46,10 @@ export class MetacognitionEngine {
     const evaluation = this.evaluator.evaluateTask(executionRecord);
 
     // 2. Track complete outcome (separated objective facts vs subjective assessments)
-    const finalOutcome = evaluation.isPassing ? OUTCOME_STATUS.SUCCESS : OUTCOME_STATUS.FAILURE;
+    const hasExplicitFailure = executionRecord.verificationResult?.verified === false || 
+      (executionRecord.errors && executionRecord.errors.length > 0) ||
+      executionRecord.status === 'FAILED';
+    const finalOutcome = (evaluation.isPassing && !hasExplicitFailure) ? OUTCOME_STATUS.SUCCESS : OUTCOME_STATUS.FAILURE;
     const trackedOutcome = this.tracker.recordOutcome({
       taskId: executionRecord.task?.id,
       originalObjective: executionRecord.task?.goal || executionRecord.task?.description,
@@ -74,6 +77,7 @@ export class MetacognitionEngine {
     }
 
     return {
+      finalOutcome,
       evaluation,
       trackedOutcome,
       failureReport,

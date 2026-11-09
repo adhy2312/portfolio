@@ -195,6 +195,7 @@ class PermissionRegistry {
         allowed: false,
         granted: false,
         requiresApproval: true,
+        requiresExplicitApproval: true,
         pendingApproval: true,
         approvalId: approvalRequest.id,
         level: CAPABILITY_LEVELS.APPROVAL_REQUIRED,

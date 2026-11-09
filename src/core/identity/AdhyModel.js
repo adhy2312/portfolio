@@ -556,6 +556,13 @@ export class AdhyModel {
   // ── Mutations & Evolution ───────────────────────────────────────────
 
   /**
+   * Alias for recordCorrection
+   */
+  correctDimension(dimensionKey, newValue, reason = '') {
+    return this.recordCorrection(dimensionKey, newValue, reason);
+  }
+
+  /**
    * Explicit user correction (Core Invariant: Strictly overrides inferences with 1.0 confidence)
    */
   recordCorrection(dimensionKey, newValue, reason = '') {

@@ -170,6 +170,38 @@ export class NeuroContextAdapter {
     return this.getStatus();
   }
 
+  connectDevice(deviceInfo = {}, options = {}) {
+    if (!options.userConsent && !this.hasUserConsent) {
+      throw new Error('[NeuroContextAdapter] Explicit user consent is mandatory for physiological signal ingestion.');
+    }
+    this.hasUserConsent = true;
+    this.activeDevice = {
+      id: deviceInfo.deviceId || deviceInfo.id || 'unidentified_device',
+      name: deviceInfo.name || deviceInfo.deviceType || 'External Biosensor',
+      type: deviceInfo.type || BIO_SIGNAL_TYPES.EEG,
+      isSimulated: Boolean(deviceInfo.isSimulated),
+      connectedAt: new Date().toISOString()
+    };
+    this.status = DEVICE_CONNECTION_STATUS.CONNECTED;
+    return { success: true, device: this.activeDevice, status: this.status };
+  }
+
+  ingestSignal(signalType, rawSamples, options = {}) {
+    const rawPacket = Array.isArray(rawSamples) ? { samples: rawSamples, ...options } : rawSamples;
+    const res = this.ingestRawPacket(signalType, rawPacket, options);
+    return {
+      success: res.status !== 'BLOCKED',
+      isSimulated: Boolean(options.isSimulated),
+      extractedFeatures: res.features || res.extractedFeatures || {},
+      ...res
+    };
+  }
+
+  purgeUserData() {
+    this.purgeAllData();
+    return { success: true, purged: true };
+  }
+
   disconnectHardware() {
     this.status = DEVICE_CONNECTION_STATUS.DISCONNECTED;
     this.activeDevice = null;

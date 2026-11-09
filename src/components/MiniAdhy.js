@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu } from 'react-icons/fi';
+import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu, FiRadio } from 'react-icons/fi';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
 import lifeEngine from '../core/LifeEngine';
 import './MiniAdhy.css';
 import MiniAdhyFormattedText from './MiniAdhyMarkdown';
+import LiveModeModal from './LiveModeModal';
 import { miniAdhyBrain } from '../core/MiniAdhyBrain';
 import { executeSkillCommand } from '../core/MiniAdhySkills';
 import { emotionEngine } from '../core/emotion/EmotionEngine';
@@ -699,6 +700,7 @@ const MiniAdhy = () => {
   // Live Multi-Dimensional Emotion Engine State (PAD & Plutchik Core)
   const [emotionState, setEmotionState] = useState(() => emotionEngine.getSnapshot());
   const [showEmotionHUD, setShowEmotionHUD] = useState(false);
+  const [showLiveMode, setShowLiveMode] = useState(false);
 
   useEffect(() => {
     const unsubscribe = emotionEngine.subscribe(setEmotionState);
@@ -1305,6 +1307,18 @@ const MiniAdhy = () => {
 
             {/* Action Buttons Cluster */}
             <div className="ma-header-actions">
+              {/* Mini-Adhy Live Mode (Spoken Voice + Real-Time Camera Vision) */}
+              <button
+                type="button"
+                className="ma-live-mode-toggle"
+                onClick={() => setShowLiveMode(true)}
+                title="Mini-Adhy LIVE MODE: Real-time spoken conversation & visual perception"
+                aria-label="Launch Live Mode"
+              >
+                <FiRadio size={13} className="ma-live-pulse-icon" />
+                <span className="ma-live-mode-label">LIVE</span>
+              </button>
+
               {/* Clear Conversation Memory */}
               <button
                 type="button"
@@ -1572,6 +1586,12 @@ const MiniAdhy = () => {
           </div>
         </div>
       )}
+
+      {/* Mini-Adhy Live Mode Modal */}
+      <LiveModeModal
+        isOpen={showLiveMode}
+        onClose={() => setShowLiveMode(false)}
+      />
     </>
   );
 };

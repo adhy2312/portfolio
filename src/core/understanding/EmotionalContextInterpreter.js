@@ -45,6 +45,10 @@ export class EmotionalContextInterpreter {
   /**
    * Interprets conversational state from text and recent context
    */
+  interpretState(input = '', context = {}) {
+    return this.interpret(input, context);
+  }
+
   interpret(input = '', context = {}) {
     const text = String(input).trim();
     const lower = text.toLowerCase();

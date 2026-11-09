@@ -839,6 +839,43 @@
   box-shadow: 0 0 10px rgba(192, 132, 252, 0.35);
 }
 
+/* ─── Live Mode Launcher Toggle ─── */
+.ma-live-mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  outline: none;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.25);
+}
+
+.ma-live-mode-toggle:hover {
+  background: rgba(56, 189, 248, 0.3);
+  border-color: #38bdf8;
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+}
+
+.ma-live-pulse-icon {
+  animation: maLivePulseGlow 1.6s infinite ease-in-out;
+}
+
+@keyframes maLivePulseGlow {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.45; transform: scale(1.15); }
+}
+
 .ma-voice-bars {
   display: flex;
   align-items: flex-end;
