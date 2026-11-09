@@ -16,6 +16,7 @@ import { memoryService } from '../memory/MemoryService';
 import { hermesAdapter } from '../adapters/hermes/HermesAdapter';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { personalUnderstandingEngine } from '../understanding/PersonalUnderstandingEngine';
+import { metacognitionEngine } from '../metacognition/MetacognitionEngine.js';
 
 export class RuntimeSelfModel {
   constructor() {
@@ -82,6 +83,8 @@ export class RuntimeSelfModel {
         relationshipProjectsCount: personalUnderstandingEngine.continuityEngine.projects.length,
         recentEmotionalStatesCount: personalUnderstandingEngine.emotionalInterpreter.recentStates.length
       },
+
+      metacognition: metacognitionEngine.getMetrics(),
 
       realOperationalMetrics: realEcosystemMetrics
     };
