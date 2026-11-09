@@ -54,7 +54,8 @@ export default async function handler(req, res) {
     return res.status(413).json({ error: 'Payload exceeds security limits.' });
   }
 
-  if (payloadStr.includes('__proto__') || payloadStr.includes('constructor') || payloadStr.includes('prototype')) {
+  // Prototype Pollution Key Injection Guard (safely ignores conversational prose)
+  if (/(["'])(?:__proto__|constructor)\1\s*:\s*\{/i.test(payloadStr)) {
     return res.status(400).json({ error: 'Invalid payload structure' });
   }
 
