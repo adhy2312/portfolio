@@ -156,9 +156,7 @@ export class RequestLifecycle {
     });
 
     const durationMs = Date.now() - startTime;
-    const finalResponse = generationResult.text || (generationResult.error 
-      ? `I ran into a temporary provider issue: ${generationResult.error}. Let's try again.`
-      : "I'm right here with you. What aspect of the project shall we explore next?");
+    const finalResponse = generationResult.text || this._resolveFallbackResponse(input, generationResult.error, specialistId);
 
     // Step 7: Continuous Memory Extraction & Controlled Evaluation Pipeline
     try {
@@ -194,6 +192,44 @@ export class RequestLifecycle {
       fallbackEngaged: generationResult.fallbackEngaged || false,
       durationMs
     };
+  }
+
+  /**
+   * Deterministic local knowledge fallback when cloud providers are unreachable
+   */
+  _resolveFallbackResponse(input = '', errorMsg = '', specialistId = 'MINI_ADHY') {
+    const lower = input.toLowerCase().trim();
+
+    if (lower.includes('who are you') || lower.includes('what are you') || lower.includes('who is mini-adhy')) {
+      return "I'm Mini-Adhy, Adhithya Mohan's cognitive companion and digital twin. I represent his engineering, leadership, and creative workflows, bridging embedded systems, DSP, software architecture, and photography.";
+    }
+
+    if (lower.includes('who is adhy') || lower.includes('about adhy') || lower.includes('tell me about yourself') || lower.includes('bio')) {
+      return "Adhithya Mohan S (Adhy) is an Electronics and Communication Engineering (ECE) student at Mar Baselios College of Engineering and Technology (MBCET, KTU). He currently serves as Media Secretary for the MBCET Senate and Lead Photographer for FRAMES MBCET, and was formerly Chairperson of ISTE Students Chapter MBCET. His technical core spans DSP, SDR, embedded systems (ARM/STM32), and autonomous agent systems.";
+    }
+
+    if (lower.includes('role') || lower.includes('senate') || lower.includes('iste') || lower.includes('frames') || lower.includes('leadership')) {
+      return "Adhy's verified leadership roles include:\n• Current: Media Secretary, MBCET Senate\n• Current: Lead Photographer, FRAMES MBCET\n• Historical: Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members)\n• Historical: Former PR & Media Head, ISTE Students Chapter MBCET";
+    }
+
+    if (lower.includes('project') || lower.includes('hardware') || lower.includes('stm32') || lower.includes('sdr') || lower.includes('dsp') || lower.includes('kicad')) {
+      return "Adhy's active engineering projects span:\n• SDR & Digital Signal Processing (GNU Radio, RTL-SDR)\n• Embedded Systems & Firmware (STM32 ARM Cortex)\n• Multibody Dynamics & Simulation (MATLAB, Simulink, Simscape)\n• Hardware Design (KiCad 8 PCB layout)\n• Autonomous Agent Systems (the multi-agent cognitive architecture powering this portfolio)";
+    }
+
+    if (lower.includes('photo') || lower.includes('camera') || lower.includes('zoomout')) {
+      return "Adhy is the Lead Photographer at FRAMES MBCET and curates street, documentary, and architectural photography under @zoomout_frames, exploring high-contrast visual storytelling and analog-inspired aesthetics.";
+    }
+
+    if (lower.includes('contact') || lower.includes('email') || lower.includes('reach') || lower.includes('message') || lower.includes('hire')) {
+      return "You can get in touch with Adhy at adhithyamohan2312@gmail.com, or connect via LinkedIn and GitHub directly from the links on this portfolio.";
+    }
+
+    // Default polite offline fallback
+    if (errorMsg) {
+      return `I am currently operating in local offline mode as external cloud model providers are establishing connection (${errorMsg}). You can ask me anything about Adhy's engineering projects, leadership roles, photography, or skills!`;
+    }
+
+    return "I'm right here with you. What aspect of Adhy's work or projects shall we explore next?";
   }
 }
 
