@@ -44,11 +44,8 @@ export default async function handler(req, res) {
     });
   }
 
-  // 3. Secret Verification (Environment Guard)
-  const API_KEY = process.env.GEMINI_API_KEY || 
-                  process.env.REACT_APP_GEMINI_API_KEY || 
-                  process.env.REACT_APP_GEMINI_API_KEY_2 || 
-                  process.env.GEMINI_API_KEY_2;
+  // 3. Secret Verification (Environment Guard — server-only vars only)
+  const API_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2;
   if (!API_KEY) {
     return res.status(500).json({ error: 'AI Brain service temporarily offline' });
   }
@@ -152,18 +149,29 @@ export default async function handler(req, res) {
   }
 
   // 7. Gemini Generative Safety Settings & Token Quota Limits
-  const requestedModel = bodyObj.model || 'gemini-3.8-flash';
-  const modelsToTry = [requestedModel, 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
+  const requestedModel = typeof bodyObj.model === 'string' ? bodyObj.model : 'gemini-3.8-flash';
+  const ALLOWED_GEN_MODELS = new Set([
+    'gemini-3.8-flash',
+    'gemini-2.5-flash',
+    'gemini-1.5-flash',
+    'gemini-2.0-flash',
+    'gemini-1.5-pro'
+  ]);
+  const safeGenModel = ALLOWED_GEN_MODELS.has(requestedModel) ? requestedModel : 'gemini-3.8-flash';
+  const modelsToTry = [safeGenModel, 'gemini-3.8-flash', 'gemini-2.5-flash', 'gemini-1.5-flash'];
   const uniqueModels = [...new Set(modelsToTry)];
+
+  const clampedTemperature = Math.min(2.0, Math.max(0.0, Number(bodyObj.temperature ?? 0.7)));
+  const clampedMaxTokens = Math.min(4096, Math.max(1, Math.floor(Number(bodyObj.maxOutputTokens ?? 2048))));
 
   const requestBody = {
     contents: bodyObj.contents || [],
     systemInstruction: systemInstruction || undefined,
     generationConfig: {
-      temperature: bodyObj.temperature || 0.7,
+      temperature: clampedTemperature,
       topK: 40,
       topP: 0.92,
-      maxOutputTokens: bodyObj.maxOutputTokens || 2048,
+      maxOutputTokens: clampedMaxTokens,
     },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },

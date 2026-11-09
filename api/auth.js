@@ -154,6 +154,18 @@ export default async function handler(req, res) {
 
   const action = req.query.action || req.body?.action || (req.method === 'POST' ? 'login' : 'verify');
 
+  // ── CSRF: Reject state-changing requests from unexpected origins ──────
+  if (req.method === 'POST' && action !== 'verify') {
+    const origin = req.headers.origin || '';
+    const referer = req.headers.referer || '';
+    const allowedOrigins = ['adhy.tech', 'localhost', '127.0.0.1', 'vercel.app'];
+    const hasValidOrigin = !origin || allowedOrigins.some(o => origin.includes(o));
+    const hasValidReferer = !referer || allowedOrigins.some(o => referer.includes(o));
+    if (!hasValidOrigin && !hasValidReferer) {
+      return res.status(403).json({ success: false, error: 'Cross-origin request blocked.' });
+    }
+  }
+
   // ── 1. VERIFY SESSION (GET or POST) ───────────────────────────────
   if (action === 'verify') {
     const token = extractToken(req);
@@ -227,8 +239,7 @@ export default async function handler(req, res) {
       return res.status(200).json({
         success: true,
         authenticated: true,
-        role,
-        token
+        role
       });
     }
 
@@ -267,12 +278,21 @@ export default async function handler(req, res) {
     }
 
     const { command = '', payload = {} } = req.body || {};
-    const allowedCommands = ['TRIGGER_SCAN', 'APPROVE_ACTION', 'REJECT_ACTION', 'ULTRON_IMPROVISE', 'REFRESH_TELEMETRY'];
+    const allowedCommands = ['TRIGGER_SCAN', 'APPROVE_ACTION', 'REJECT_ACTION', 'ULTRON_IMPROVISE', 'REFRESH_TELEMETRY', 'APPROVE_MEMORY', 'REJECT_MEMORY'];
+    // Commands that require owner role (not just agent_portal)
+    const OWNER_ONLY_COMMANDS = new Set(['APPROVE_ACTION', 'REJECT_ACTION', 'ULTRON_IMPROVISE', 'APPROVE_MEMORY', 'REJECT_MEMORY']);
 
     if (!allowedCommands.includes(command)) {
       return res.status(400).json({
         success: false,
         error: 'Unrecognized or unauthorized command signature.'
+      });
+    }
+
+    if (OWNER_ONLY_COMMANDS.has(command) && session.role !== 'owner') {
+      return res.status(403).json({
+        success: false,
+        error: 'Owner authorization required for this command.'
       });
     }
 

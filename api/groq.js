@@ -42,8 +42,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const API_KEY = process.env.GROQ_API_KEY || 
-                  process.env.REACT_APP_GROQ_API_KEY;
+  const API_KEY = process.env.GROQ_API_KEY;
 
   if (!API_KEY) {
     return res.status(500).json({ error: 'Groq LPU Engine offline' });

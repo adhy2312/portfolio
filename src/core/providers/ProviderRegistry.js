@@ -140,15 +140,39 @@ export class ProviderRegistry {
   }
 
   /**
-   * Computes cache key for response caching and request deduplication
+   * Computes cache key for response caching and request deduplication.
+   * Key includes the full conversation history, system prompt, agent, model,
+   * temperature, and prompt to prevent cross-context cache collisions.
    */
   computeCacheKey(request = {}, options = {}) {
+    // Extract conversation history (Gemini-style contents[] or OpenAI-style messages[])
+    const history = request.contents || request.messages || [];
+    const historyStr = JSON.stringify(
+      history.map(m => ({
+        role: m.role,
+        // Truncate individual turns to keep key size bounded but preserve identity
+        text: (m.parts?.[0]?.text || m.content || '').slice(0, 300)
+      }))
+    );
     const promptStr = typeof request === 'string'
       ? request
-      : (request.prompt || JSON.stringify(request.contents || request.messages || ''));
-    const systemPrompt = options.systemPrompt || '';
+      : (request.prompt || '');
+    const systemStr = (options.systemPrompt || '').slice(0, 200);
     const agentId = options.agentId || 'MINI_ADHY';
-    return `${agentId}:${systemPrompt.slice(0, 80)}:${promptStr.trim()}`;
+    const temp = options.temperature !== undefined ? String(options.temperature) : '0.7';
+    const model = options.model || 'default';
+    const sessionId = options.sessionId || '';
+
+    // Deterministic serialization — combine all context-defining fields
+    const raw = `${agentId}|${model}|${temp}|${sessionId}|${systemStr}|${promptStr.trim()}|${historyStr}`;
+
+    // Simple djb2-style hash for compact key (not cryptographic, just identity)
+    let hash = 5381;
+    for (let i = 0; i < raw.length; i++) {
+      hash = ((hash << 5) + hash) ^ raw.charCodeAt(i);
+      hash = hash >>> 0; // Keep unsigned 32-bit
+    }
+    return `cache_${agentId}_${hash.toString(36)}`;
   }
 
   /**
@@ -160,7 +184,9 @@ export class ProviderRegistry {
 
     // 1. Cache Check (Exact match cache for non-volatile queries)
     const cacheKey = this.computeCacheKey(request, options);
-    const allowCache = options.cache !== false && (options.temperature === undefined || options.temperature < 0.7);
+    // Disable caching for vision/multimodal requests and volatile queries
+    const isMultimodal = options.requiresVision || options.requiresAudio;
+    const allowCache = !isMultimodal && options.cache !== false && (options.temperature === undefined || options.temperature < 0.7);
 
     if (allowCache && this.responseCache.has(cacheKey)) {
       const cached = this.responseCache.get(cacheKey);
@@ -171,6 +197,7 @@ export class ProviderRegistry {
         return {
           ...cached.data,
           cacheHit: true,
+          responseType: 'cache_hit',
           durationMs: 2
         };
       } else {

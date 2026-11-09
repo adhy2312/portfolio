@@ -42,7 +42,8 @@ export default async function handler(req, res) {
     });
   }
 
-  const API_KEY = process.env.OPENROUTER_API_KEY || process.env.REACT_APP_OPENROUTER_API_KEY;
+  // Remove REACT_APP_ fallback — server-only key
+  const API_KEY = process.env.OPENROUTER_API_KEY;
 
   if (!API_KEY) {
     return res.status(503).json({
@@ -55,6 +56,12 @@ export default async function handler(req, res) {
     bodyObj = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   } catch {
     return res.status(400).json({ error: 'Malformed JSON' });
+  }
+
+  // Prototype pollution guard
+  const payloadStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
+  if (/(["'])(?:__proto__|constructor)\1\s*:\s*\{/i.test(payloadStr)) {
+    return res.status(400).json({ error: 'Invalid payload structure' });
   }
 
   if (bodyObj.ping) {
@@ -85,15 +92,28 @@ export default async function handler(req, res) {
     messages.unshift({ role: 'system', content: systemInstruction });
   }
 
-  const requestedModel = bodyObj.model || 'openrouter/auto';
+  const requestedModel = typeof bodyObj.model === 'string' ? bodyObj.model : 'openrouter/auto';
+  const ALLOWED_MODELS = new Set([
+    'openrouter/auto',
+    'meta-llama/llama-3.3-70b-instruct:free',
+    'google/gemini-2.0-flash-001',
+    'deepseek/deepseek-chat',
+    'qwen/qwen-2.5-coder-32b-instruct'
+  ]);
+  const safeModel = ALLOWED_MODELS.has(requestedModel) ? requestedModel : 'openrouter/auto';
+
   const modelsToTry = [
-    requestedModel,
+    safeModel,
     'openrouter/auto',
     'meta-llama/llama-3.3-70b-instruct:free',
     'google/gemini-2.0-flash-001',
     'deepseek/deepseek-chat'
   ];
   const uniqueModels = [...new Set(modelsToTry)];
+
+  // Clamp parameters to prevent resource exhaustion or erratic sampling
+  const clampedTemperature = Math.min(2.0, Math.max(0.0, Number(bodyObj.temperature ?? 0.7)));
+  const clampedMaxTokens = Math.min(4096, Math.max(1, Math.floor(Number(bodyObj.max_tokens ?? 1200))));
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
@@ -112,8 +132,8 @@ export default async function handler(req, res) {
         body: JSON.stringify({
           model: modelName,
           messages,
-          temperature: bodyObj.temperature ?? 0.7,
-          max_tokens: bodyObj.max_tokens ?? 1200
+          temperature: clampedTemperature,
+          max_tokens: clampedMaxTokens
         }),
         signal: controller.signal
       });

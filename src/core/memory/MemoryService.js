@@ -397,6 +397,7 @@ export class MemoryService {
    */
   _logAudit(candidate = {}, action = 'QUEUED_FOR_APPROVAL', reason = '') {
     const entry = {
+      id: candidate.id || null,
       timestamp: new Date().toISOString(),
       action,
       reason,
@@ -600,20 +601,109 @@ export class MemoryService {
     return Array.from(this.records.values());
   }
 
-  importMemories(recordsArray = []) {
-    if (!Array.isArray(recordsArray)) return 0;
-    let imported = 0;
-    recordsArray.forEach(rec => {
-      if (rec && rec.id && rec.content) {
-        this.records.set(rec.id, {
-          ...rec,
-          schemaVersion: '3.0.0'
-        });
-        imported++;
+  importMemories(recordsArray = [], options = {}) {
+    if (!Array.isArray(recordsArray)) {
+      return { imported: 0, rejected: 0, quarantined: 0, errors: ['Input must be an array'] };
+    }
+    // Guard against oversized batches
+    if (recordsArray.length > 500) {
+      return { imported: 0, rejected: 0, quarantined: 0, errors: ['Batch too large (max 500 records)'] };
+    }
+
+    const results = { imported: 0, rejected: 0, quarantined: 0, errors: [] };
+    const batch = [];
+
+    for (const rec of recordsArray) {
+      // Basic schema validation
+      if (!rec || typeof rec !== 'object' || !rec.id || !rec.content || !rec.category) {
+        results.rejected++;
+        continue;
       }
-    });
+      if (!Object.values(MEMORY_CATEGORIES).includes(rec.category)) {
+        results.rejected++;
+        continue;
+      }
+      if (typeof rec.content !== 'string' || rec.content.length > 2000) {
+        results.rejected++;
+        continue;
+      }
+      // Secret detection — never persist credentials
+      if (this._containsSecret(rec.content)) {
+        results.rejected++;
+        this._logAudit(rec, 'REJECTED_SECRET_ON_IMPORT', 'Secret detected in imported record — rejected');
+        continue;
+      }
+      // Strip any trust claims from imported data — imported records are ALWAYS untrusted
+      batch.push({
+        ...rec,
+        userApproved: false,     // ← FORCE: ignore any userApproved: true from import
+        importedAt: new Date().toISOString(),
+        schemaVersion: '3.0.0',
+        // Preserve valid provenance fields but sanitize trust
+        confidence: typeof rec.confidence === 'number' ? Math.min(1, Math.max(0, rec.confidence)) : 0.5
+      });
+    }
+
+    // Transactional: validate entire batch before committing
+    for (const rec of batch) {
+      if (this.records.has(rec.id)) {
+        results.quarantined++;
+        this._logAudit(rec, 'QUARANTINED_DUPLICATE', 'Imported record ID already exists — not overwritten');
+      } else {
+        this.records.set(rec.id, rec);
+        results.imported++;
+        this._logAudit(rec, 'IMPORTED_PENDING_APPROVAL', 'Imported; forced userApproved=false — requires owner approval');
+      }
+    }
+
+    if (results.imported > 0) {
+      this.saveState();
+    }
+    return results;
+  }
+
+  // ── Memory Approval Workflow ────────────────────────────────────────
+
+  getPendingApprovals() {
+    return Array.from(this.records.values())
+      .filter(r => !r.userApproved && r.category !== MEMORY_CATEGORIES.SUPERSEDED_INFO)
+      .sort((a, b) => new Date(b.importedAt || b.timestamp || 0) - new Date(a.importedAt || a.timestamp || 0));
+  }
+
+  approveMemory(id) {
+    const rec = this.records.get(id);
+    if (!rec) return false;
+    const updated = { ...rec, userApproved: true, approvedAt: new Date().toISOString() };
+    this.records.set(id, updated);
     this.saveState();
-    return imported;
+    this._logAudit(updated, 'APPROVED', 'Owner approved memory');
+    return true;
+  }
+
+  rejectMemory(id) {
+    const rec = this.records.get(id);
+    if (!rec) return false;
+    this.records.delete(id);
+    this.saveState();
+    this._logAudit(rec, 'REJECTED', 'Owner rejected memory');
+    return true;
+  }
+
+  editPendingMemory(id, changes = {}) {
+    const rec = this.records.get(id);
+    if (!rec) return false;
+    const allowedFields = ['content', 'category', 'confidence', 'sensitivity'];
+    const sanitized = {};
+    for (const f of allowedFields) {
+      if (changes[f] !== undefined) sanitized[f] = changes[f];
+    }
+    if (sanitized.content && this._containsSecret(String(sanitized.content))) return false;
+    if (sanitized.category && !Object.values(MEMORY_CATEGORIES).includes(sanitized.category)) return false;
+    const updated = { ...rec, ...sanitized, updatedAt: new Date().toISOString() };
+    this.records.set(id, updated);
+    this.saveState();
+    this._logAudit(updated, 'EDITED_PENDING', 'Owner edited pending memory');
+    return true;
   }
 
   setCollectionEnabled(enabled) {

@@ -28,6 +28,7 @@ import {
 } from 'react-icons/fi';
 import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { permissionRegistry } from '../core/agents/PermissionRegistry';
+import { memoryService } from '../core/memory/MemoryService';
 import { HUMAN_KNOWLEDGE_DATASET, getDatasetMetrics } from '../core/learning/HumanKnowledgeDataset';
 import {
   COGNITIVE_TAXONOMY_106,
@@ -49,28 +50,13 @@ import {
 import { AgentOrb } from './AgentOrb';
 import './AgentPortal.css';
 
-// Cryptographic Hash Digest for Offline / Static Fallback (Zero Plaintext Secrets in Bundle)
-const VERIFIED_GATEWAY_HASH = '3f462008f2539259e8600f0272f17e31e22438472d9fbde4776b06235548fe04';
 const TARGET_EMAIL = 'adhithyamohan2312@gmail.com';
 
-async function computeSHA256(str) {
-  try {
-    const enc = new TextEncoder().encode(str);
-    const buf = await window.crypto.subtle.digest('SHA-256', enc);
-    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-  } catch {
-    return '';
-  }
-}
-
 const AgentPortal = ({ onExit }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    try {
-      return Boolean(sessionStorage.getItem('adhy_agentp_session'));
-    } catch {
-      return false;
-    }
-  });
+  // Authentication state — always starts false; verified by server on mount
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authRole, setAuthRole] = useState(null);
+  const [isVerifying, setIsVerifying] = useState(true); // true until server responds
 
   const [passwordInput, setPasswordInput] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
@@ -84,6 +70,7 @@ const AgentPortal = ({ onExit }) => {
   const [filterCategory, setFilterCategory] = useState('ALL');
   const [findings, setFindings] = useState([]);
   const [approvals, setApprovals] = useState([]);
+  const [pendingMemories, setPendingMemories] = useState([]);
   const [isScanning, setIsScanning] = useState(false);
   const [weeklyReport, setWeeklyReport] = useState(null);
   const [dispatchStatus, setDispatchStatus] = useState(null);
@@ -291,10 +278,29 @@ const AgentPortal = ({ onExit }) => {
     setDetailedReports(agentOrchestrator.getAllDetailedAgentReports());
     setFindings(agentOrchestrator.getFindings());
     setApprovals(permissionRegistry.getPendingApprovals());
+    setPendingMemories(memoryService?.getPendingApprovals ? memoryService.getPendingApprovals() : []);
     setEvolutionSummary(agentOrchestrator.getCognitiveEvolutionSummary());
     setDefenseState(agentOrchestrator.getDefenseState());
     setIndustryAudit(agentOrchestrator.getIndustryTrendsAudit());
   };
+
+  // Server-side session verification on mount — prevents sessionStorage spoofing
+  useEffect(() => {
+    setIsVerifying(true);
+    fetch('/api/auth?action=verify', { credentials: 'include' })
+      .then(r => r.ok ? r.json() : { authenticated: false, role: null })
+      .then(data => {
+        setIsAuthenticated(data.authenticated === true);
+        setAuthRole(data.authenticated ? (data.role || null) : null);
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+        setAuthRole(null);
+      })
+      .finally(() => setIsVerifying(false));
+  // Run once on mount only
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -338,65 +344,47 @@ const AgentPortal = ({ onExit }) => {
     setErrorMsg('');
 
     const inputTrimmed = passwordInput.trim();
-    let authSuccess = false;
-    let sessionToken = null;
 
-    // 1. Primary: Serverless Authentication Boundary (/api/auth)
+    // Server-authoritative authentication — no client-side fallback
     try {
       const res = await fetch('/api/auth?action=login', {
         method: 'POST',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ passcode: inputTrimmed, scope: 'agentp' })
       });
-      if (res && res.ok) {
-        const contentType = res.headers.get('content-type') || '';
-        if (contentType.includes('application/json')) {
-          const data = await res.json();
-          if (data.authenticated) {
-            authSuccess = true;
-            sessionToken = data.token || 'verified_server_session';
-          }
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          setAuthRole(data.role || null);
+          refreshTelemetry();
+          setIsAuthenticating(false);
+          return;
         }
       }
-    } catch {
-      // Offline or static server: Fall through to client cryptographic hash validation
+    } catch (err) {
+      console.warn('[AgentPortal] Auth server unreachable:', err);
     }
 
-    // 2. Resilient Static / Offline Cryptographic Verification
-    if (!authSuccess) {
-      const hash = await computeSHA256(inputTrimmed);
-      if (hash && hash === VERIFIED_GATEWAY_HASH) {
-        authSuccess = true;
-        sessionToken = 'offline_crypto_verified_' + Date.now();
-      }
-    }
-
-    if (authSuccess) {
-      try {
-        sessionStorage.setItem('adhy_agentp_session', sessionToken);
-      } catch {}
-      setIsAuthenticated(true);
-      refreshTelemetry();
-    } else {
-      // Trigger synchronized full-squad defensive interception!
-      synchronizedAntiBreachDefense.interceptBreachAttempt({
-        threatType: 'Unauthorized Gateway Intrusion Attempt',
-        vector: '/agentp authentication gate',
-        payload: `Passcode trial: "${inputTrimmed.slice(0, 3)}***"`,
-        origin: 'Client Gateway'
-      });
-      setErrorMsg('ACCESS BREACH DETECTED: All 10 Specialist Agents + Mini-Adhy united to neutralize intrusion. Hostile vector quarantined.');
-    }
-
+    // All auth paths failed — do NOT fall back to client-side verification
+    synchronizedAntiBreachDefense.interceptBreachAttempt({
+      threatType: 'Unauthorized Gateway Intrusion Attempt',
+      vector: '/agentp authentication gate',
+      payload: `Passcode trial: "${inputTrimmed.slice(0, 3)}***"`,
+      origin: 'Client Gateway'
+    });
+    setErrorMsg('Authentication failed. If the service is unavailable, try again later.');
     setIsAuthenticating(false);
   };
 
   const handleLogout = async () => {
     try {
-      await fetch('/api/auth?action=logout', { method: 'POST' }).catch(() => {});
-      sessionStorage.removeItem('adhy_agentp_session');
+      await fetch('/api/auth?action=logout', { method: 'POST', credentials: 'include' }).catch(() => {});
     } catch {}
     setIsAuthenticated(false);
+    setAuthRole(null);
     setPasswordInput('');
   };
 
@@ -413,36 +401,148 @@ const AgentPortal = ({ onExit }) => {
     }
   };
 
-  const handleApprove = (id) => {
+  const handleApprove = async (id) => {
+    try {
+      const res = await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'APPROVE_ACTION', payload: { id } })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Authorization failed. Owner clearance required.');
+        return;
+      }
+    } catch {
+      alert('Authorization service unreachable. Action blocked.');
+      return;
+    }
     agentOrchestrator.approveAction(id);
     refreshTelemetry();
   };
 
-  const handleReject = (id) => {
+  const handleReject = async (id) => {
+    try {
+      await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'REJECT_ACTION', payload: { id } })
+      });
+    } catch {}
     agentOrchestrator.rejectAction(id);
     refreshTelemetry();
   };
 
-  // Ultron Autonomous Code Improvisation Trigger (No strings attached)
-  const handleUltronImprovise = () => {
+  const handleApproveMemory = async (id) => {
+    try {
+      const res = await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'APPROVE_MEMORY', payload: { id } })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Authorization failed. Owner clearance required.');
+        return;
+      }
+    } catch {
+      alert('Authorization service unreachable. Memory approval blocked.');
+      return;
+    }
+    memoryService.approveMemory(id);
+    refreshTelemetry();
+  };
+
+  const handleRejectMemory = async (id) => {
+    try {
+      await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'REJECT_MEMORY', payload: { id } })
+      });
+    } catch {}
+    memoryService.rejectMemory(id);
+    refreshTelemetry();
+  };
+
+  // Ultron Autonomous Code Improvisation — requires owner authorization
+  const handleUltronImprovise = async () => {
+    try {
+      const res = await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'ULTRON_IMPROVISE' })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setUltronActionNotice('⛔ Authorization denied: Owner credentials required for Ultron autonomy.');
+        setTimeout(() => setUltronActionNotice(null), 6000);
+        return;
+      }
+    } catch {
+      setUltronActionNotice('⛔ Authorization service unavailable. Action blocked.');
+      setTimeout(() => setUltronActionNotice(null), 6000);
+      return;
+    }
     const improv = agentOrchestrator.agents.ULTRON.improvisePortfolioCode();
-    setUltronActionNotice(`⚡ Ultron autonomously applied code patch: "${improv.title}" without requiring approval.`);
+    setUltronActionNotice(`⚡ Ultron applied code patch: "${improv.title}" (owner-authorized).`);
     refreshTelemetry();
     setTimeout(() => setUltronActionNotice(null), 6000);
   };
 
-  // Ultron Surface + Darkweb Knowledge Harvester
-  const handleUltronHarvest = () => {
+  // Ultron Surface + Darkweb Knowledge Harvester — requires owner authorization
+  const handleUltronHarvest = async () => {
+    try {
+      const res = await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'ULTRON_IMPROVISE' })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setUltronActionNotice('⛔ Authorization denied: Owner credentials required for intelligence harvest.');
+        setTimeout(() => setUltronActionNotice(null), 6000);
+        return;
+      }
+    } catch {
+      setUltronActionNotice('⛔ Authorization service unavailable. Action blocked.');
+      setTimeout(() => setUltronActionNotice(null), 6000);
+      return;
+    }
     const intel = agentOrchestrator.agents.ULTRON.harvestIntelligence();
     setUltronActionNotice(`🌐 Ultron ingested intelligence from ${intel.origin}: "${intel.domain}". Cognitive Index elevated.`);
     refreshTelemetry();
     setTimeout(() => setUltronActionNotice(null), 6000);
   };
 
-  // Ultron Retrain Squad Trigger
-  const handleUltronRetrainSquad = () => {
+  // Ultron Retrain Squad — requires owner authorization
+  const handleUltronRetrainSquad = async () => {
+    try {
+      const res = await fetch('/api/auth?action=execute_privileged', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ command: 'ULTRON_IMPROVISE' })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setUltronActionNotice('⛔ Authorization denied: Owner credentials required for squad retraining.');
+        setTimeout(() => setUltronActionNotice(null), 6000);
+        return;
+      }
+    } catch {
+      setUltronActionNotice('⛔ Authorization service unavailable. Action blocked.');
+      setTimeout(() => setUltronActionNotice(null), 6000);
+      return;
+    }
     const logs = agentOrchestrator.agents.ULTRON.trainAgentSquad(agentOrchestrator.agents);
-    setUltronActionNotice(`⚡ Ultron transmitted primordial doctrines across all ${logs.length} specialist agents autonomously.`);
+    setUltronActionNotice(`⚡ Ultron transmitted doctrines across all ${logs.length} specialist agents (owner-authorized).`);
     refreshTelemetry();
     setTimeout(() => setUltronActionNotice(null), 6000);
   };
@@ -636,6 +736,20 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
     );
     window.open(`mailto:${TARGET_EMAIL}?subject=${subject}&body=${body}`, '_blank');
   };
+
+  // ────────────────────────────────────────────────────────────
+  // RENDER: Verifying session — do not show login OR portal until confirmed
+  // ────────────────────────────────────────────────────────────
+  if (isVerifying) {
+    return (
+      <div className="agentp-gate-container">
+        <div className="agentp-gate-box" style={{ textAlign: 'center', padding: '48px 32px' }}>
+          <FiShield size={40} style={{ color: '#00f5d4', marginBottom: 16 }} />
+          <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Verifying classified session…</p>
+        </div>
+      </div>
+    );
+  }
 
   // ────────────────────────────────────────────────────────────
   // RENDER: PASSWORD ACCESS GATE (IF NOT AUTHENTICATED)
@@ -858,6 +972,9 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
         </div>
         <div className="agentp-hierarchy-chips">
           <span className="agentp-hierarchy-chip agentp-hierarchy-chip--sovereign">
+            CLEARANCE: {authRole === 'owner' ? 'OWNER // LEVEL 5' : 'PORTAL // OPERATOR'}
+          </span>
+          <span className="agentp-hierarchy-chip agentp-hierarchy-chip--sovereign">
             #1 OVERSEER: MINI-ADHY
           </span>
           <span className="agentp-hierarchy-chip agentp-hierarchy-chip--jarvis">
@@ -967,7 +1084,7 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
           className={`agentp-tab ${activeTab === 'approvals' ? 'agentp-tab--active' : ''}`}
           onClick={() => setActiveTab('approvals')}
         >
-          <FiCheckCircle size={14} /> Governance ({approvals.length})
+          <FiCheckCircle size={14} /> Governance ({approvals.length + pendingMemories.length})
         </button>
         <button
           className={`agentp-tab ${activeTab === 'reports' ? 'agentp-tab--active' : ''}`}
@@ -2910,19 +3027,21 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
       {/* TAB 7: GOVERNANCE & APPROVALS */}
       {activeTab === 'approvals' && (
         <div className="agentp-approvals-panel">
-          {/* Note highlighting Ultron bypass */}
           <div className="agentp-approval-notice">
-            <FiZap color="#c4b5fd" size={16} />
+            <FiShield color="#00f5d4" size={16} />
             <span>
-              <strong>GOVERNANCE POLICY:</strong> Ultron operates with unrestricted autonomy (zero approval
-              required). Other specialist agents require verified owner authorization for high-risk mutations.
+              <strong>GOVERNANCE POLICY:</strong> All consequential state mutations, code improvisations, and imported memory candidates require verified owner authorization. No unverified records or unapproved commands execute silently.
             </span>
           </div>
 
+          {/* Section 1: Operational Action Approvals */}
+          <h3 style={{ color: '#f1f5f9', fontSize: '1rem', marginTop: '20px', marginBottom: '10px' }}>
+            Action Execution Requests ({approvals.length})
+          </h3>
           {approvals.length === 0 ? (
             <div className="agentp-empty-state">
-              <FiCheckCircle size={32} color="#10b981" />
-              <p>No actions pending owner approval. All automated actions are verified within bounds.</p>
+              <FiCheckCircle size={28} color="#10b981" />
+              <p>No operational actions pending owner approval.</p>
             </div>
           ) : (
             <div className="agentp-approvals-list">
@@ -2940,6 +3059,55 @@ Classified Command Center: https://adhy.tech/agentp (Authenticated Access Only)
                       <FiCheck size={14} /> APPROVE
                     </button>
                     <button className="agentp-btn-reject" onClick={() => handleReject(appr.id)}>
+                      <FiX size={14} /> REJECT
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Section 2: Memory Candidate Approvals */}
+          <h3 style={{ color: '#f1f5f9', fontSize: '1rem', marginTop: '30px', marginBottom: '10px' }}>
+            Memory Records Pending Approval ({pendingMemories.length})
+          </h3>
+          {pendingMemories.length === 0 ? (
+            <div className="agentp-empty-state">
+              <FiCheckCircle size={28} color="#10b981" />
+              <p>No memory records pending owner approval. All canonical memory entries are verified.</p>
+            </div>
+          ) : (
+            <div className="agentp-approvals-list">
+              {pendingMemories.map((mem) => (
+                <div key={mem.id} className="agentp-approval-item" style={{ borderLeft: '3px solid #8b5cf6' }}>
+                  <div className="agentp-approval-left">
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '4px' }}>
+                      <span className="agentp-approval-agent" style={{ background: 'rgba(139, 92, 246, 0.15)', color: '#c4b5fd' }}>
+                        {mem.category || 'MEMORY_CANDIDATE'}
+                      </span>
+                      {mem.confidence !== undefined && (
+                        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+                          Confidence: {Math.round(mem.confidence * 100)}%
+                        </span>
+                      )}
+                      {mem.sensitivity && (
+                        <span style={{ fontSize: '0.75rem', color: '#f59e0b' }}>
+                          [{mem.sensitivity}]
+                        </span>
+                      )}
+                    </div>
+                    <p className="agentp-approval-action" style={{ fontSize: '0.88rem', color: '#e2e8f0', margin: '4px 0' }}>
+                      {mem.content}
+                    </p>
+                    <span className="agentp-approval-time">
+                      Source: {mem.source || 'Interaction'} • {new Date(mem.importedAt || mem.timestamp || Date.now()).toLocaleTimeString()}
+                    </span>
+                  </div>
+                  <div className="agentp-approval-actions">
+                    <button className="agentp-btn-approve" onClick={() => handleApproveMemory(mem.id)}>
+                      <FiCheck size={14} /> APPROVE
+                    </button>
+                    <button className="agentp-btn-reject" onClick={() => handleRejectMemory(mem.id)}>
                       <FiX size={14} /> REJECT
                     </button>
                   </div>

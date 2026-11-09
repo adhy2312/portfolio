@@ -45,10 +45,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Canonical Identity & Supreme Coordinator',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.90, aestheticJoy: 0.98, mortalityCompassion: 0.95 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Unified 10 specialist agents under single canonical Mini-Adhy identity',
           'Integrated Adhithya Mohan’s real ECE and hardware architecture knowledge',
@@ -60,10 +60,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Executive Intelligence & Orchestration',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.90, mortalityCompassion: 0.92 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Selective delegation coordinator based on task complexity levels',
           'Real token budget tracking and bounded execution',
@@ -75,10 +75,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Engineering & Challenger Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.95, aestheticJoy: 0.95, mortalityCompassion: 0.95 },
-        vigilanceScore: 100.0,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Critical architectural review and technical assumption challenger',
           'Strictly bounded by permission registry without privilege escalation',
@@ -90,10 +90,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Human, Security & Emotional Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.95, superstitionDecoding: 0.88, aestheticJoy: 0.90, mortalityCompassion: 0.95 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Conversational sensitivity and tone regulation',
           'Automated client-side defense and sanitized DOM inputs',
@@ -105,10 +105,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Experimental & Data Integrity Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.85, mortalityCompassion: 0.88 },
-        vigilanceScore: 99.0,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Rapid hardware prototyping and test procedures',
           'Headless Sanity CMS schema integrity verification'
@@ -119,10 +119,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Creative & Privacy Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.88, superstitionDecoding: 0.85, aestheticJoy: 0.95, mortalityCompassion: 0.90 },
-        vigilanceScore: 99.0,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Visual concept generation and unexpected connections',
           'Zero-knowledge client privacy sentry'
@@ -133,10 +133,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Research & Infrastructure Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.85, mortalityCompassion: 0.90 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Verified research summaries and documentation retrieval',
           'Edge serverless latency and CDN availability auditing'
@@ -147,10 +147,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Quality & Web Vitals Architect',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.92, mortalityCompassion: 0.88 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Frame rate stability (60-120FPS) and Web Vitals governance',
           'Requirements verification and complexity assessment'
@@ -161,10 +161,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Testing & QA Simulator',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.85, superstitionDecoding: 0.80, aestheticJoy: 0.85, mortalityCompassion: 0.88 },
-        vigilanceScore: 99.0,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Regression testing and touch-target validation',
           'Failure analysis and edge-case discovery'
@@ -175,10 +175,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Portfolio & Communication Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.88, superstitionDecoding: 0.82, aestheticJoy: 0.92, mortalityCompassion: 0.90 },
-        vigilanceScore: 99.0,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Technical SEO, JSON-LD Schema.org graphs, and OpenGraph cards',
           'Portfolio presentation quality and communication clarity'
@@ -189,10 +189,10 @@ class ContinuousCognitiveEvolutionEngine {
         role: 'Growth & Horizon Intelligence',
         operationalStatus: 'nominal',
         tasksCompleted: 0,
-        successRate: 1.0,
+        successRate: null,  // Computed from actual task outcomes; null until measured
         medianLatencyMs: 0,
         empathyVector: { fearAwareness: 0.90, superstitionDecoding: 0.85, aestheticJoy: 0.90, mortalityCompassion: 0.92 },
-        vigilanceScore: 99.5,
+        vigilanceScore: null, // Computed from actual security events; null until measured
         evolutionMilestones: [
           'Opportunity discovery and skill-development alignment',
           'WebGPU and next-gen browser tech exploration'
@@ -295,7 +295,7 @@ class ContinuousCognitiveEvolutionEngine {
       profile.tokensIngested = (profile.tokensIngested || 0) + record.tokenCount;
       const agentTasks = this.taskExecutions.filter(t => t.agentId === key);
       const successes = agentTasks.filter(t => t.success).length;
-      profile.successRate = agentTasks.length > 0 ? Math.round((successes / agentTasks.length) * 100) / 100 : 1.0;
+      profile.successRate = agentTasks.length > 0 ? Math.round((successes / agentTasks.length) * 100) / 100 : null;
       
       const latencies = agentTasks.map(t => t.durationMs).sort((a, b) => a - b);
       profile.medianLatencyMs = latencies.length > 0 ? latencies[Math.floor(latencies.length / 2)] : record.durationMs;
@@ -355,8 +355,8 @@ class ContinuousCognitiveEvolutionEngine {
 
     return {
       sampleCount: total,
-      taskCompletionRate: total > 0 ? Math.round((successes / total) * 100) / 100 : 1.0,
-      toolSuccessRate: tools.length > 0 ? Math.round((toolSuccesses / tools.length) * 100) / 100 : 1.0,
+      taskCompletionRate: total > 0 ? Math.round((successes / total) * 100) / 100 : null,
+      toolSuccessRate: tools.length > 0 ? Math.round((toolSuccesses / tools.length) * 100) / 100 : null,
       medianLatencyMs: medianLatency,
       p95LatencyMs: p95Latency,
       userCorrectionsCount: this.userCorrections.length,
@@ -414,7 +414,7 @@ class ContinuousCognitiveEvolutionEngine {
 
     return {
       operationalMetrics: realMetrics,
-      averageScore: Math.round(realMetrics.taskCompletionRate * 100),
+      averageScore: realMetrics.taskCompletionRate !== null ? Math.round(realMetrics.taskCompletionRate * 100) : null,
       totalTokensIngested: this.totalEcosystemTokensIngested,
       globalEpochsCompleted: this.globalEpochsCompleted,
       lastEvolutionTimestamp: this.lastEvolutionTimestamp,
@@ -424,6 +424,10 @@ class ContinuousCognitiveEvolutionEngine {
       profiles: this.agentIntelligenceProfiles,
       recentLogs: this.evolutionLog
     };
+  }
+
+  getEvolutionSummary() {
+    return this.getEcosystemSummary();
   }
 
   getAgentIntelligence(agentId) {

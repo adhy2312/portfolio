@@ -50,9 +50,7 @@ export default async function handler(req, res) {
     });
   }
 
-  const API_KEY = process.env.HUGGINGFACE_API_KEY || 
-                  process.env.HF_TOKEN || 
-                  process.env.REACT_APP_HF_TOKEN;
+  const API_KEY = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
 
   const payloadStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
   if (payloadStr.length > 32768) {
@@ -144,16 +142,46 @@ export default async function handler(req, res) {
       });
     }
 
+    // Secondary fallback: Try legacy api-inference endpoint if router rejected permissions
+    if (!hfResponse.ok && (hfResponse.status === 403 || hfResponse.status === 404)) {
+      try {
+        const legacyEndpoint = `https://api-inference.huggingface.co/models/${resolvedModelId}`;
+        const legacyRes = await fetch(legacyEndpoint, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${activeKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            inputs: formattedInput,
+            parameters: {
+              max_new_tokens: Math.min(maxTokens, 1500),
+              temperature: Math.max(0.1, Math.min(temperature, 1.2)),
+              return_full_text: false
+            }
+          })
+        });
+        if (legacyRes.ok) {
+          hfResponse = legacyRes;
+        }
+      } catch {}
+    }
+
     const latencyMs = Date.now() - startTime;
 
     if (!hfResponse.ok) {
       const errText = await hfResponse.text();
+      const isPermissionErr = hfResponse.status === 403 || errText.includes('permissions') || errText.includes('Inference Providers');
+      const guidance = isPermissionErr
+        ? "Your Hugging Face token lacks 'Make calls to Inference Providers' scope. In huggingface.co -> Settings -> Access Tokens, create a fine-grained token with Inference enabled, or use Gemini Flash / Groq in the engine selector."
+        : `Hugging Face serverless returned (${hfResponse.status}): ${errText.slice(0, 100)}`;
+
       return res.status(200).json({
         success: true,
         model: resolvedModelId,
         agentId,
         fallbackMode: true,
-        text: `[Agent ${agentId} // Hugging Face Mesh Authenticated as @adhy2312]\nNotice: Hugging Face serverless router returned (${hfResponse.status}): ${errText.slice(0, 120)}.\nAutonomous neural heuristic fallback engaged for prompt: "${prompt.slice(0, 80)}..."\nTip: You can also switch to GroqCloud LPU (750 T/S) or Gemini Flash in the engine selector for instant live generation.`,
+        text: `[Hugging Face Provider Notice]\n${guidance}\n\nFalling back to local heuristic response for: "${prompt.slice(0, 80)}..."`,
         metrics: {
           latencyMs,
           tokensGenerated: 54,

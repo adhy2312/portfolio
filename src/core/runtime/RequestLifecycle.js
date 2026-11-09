@@ -19,6 +19,7 @@ import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService } from '../memory/MemoryService';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { behaviouralController } from './BehaviouralController';
+import { INITIAL_USER_CONTEXT } from '../identity/CognitiveProfile';
 
 export const TASK_COMPLEXITY = Object.freeze({
   LEVEL_1_SIMPLE: 'LEVEL_1_SIMPLE',            // Direct conversation, standard query
@@ -156,6 +157,10 @@ export class RequestLifecycle {
     });
 
     const durationMs = Date.now() - startTime;
+    const isOfflineFallback = !generationResult.text;
+    const responseType = isOfflineFallback
+      ? 'local_offline'
+      : (generationResult.responseType || (generationResult.cacheHit ? 'cache_hit' : 'live_model'));
     const finalResponse = generationResult.text || this._resolveFallbackResponse(input, generationResult.error, specialistId);
 
     // Step 7: Continuous Memory Extraction & Controlled Evaluation Pipeline
@@ -188,32 +193,39 @@ export class RequestLifecycle {
       mode,
       specialistId,
       text: finalResponse,
-      provider: generationResult.provider,
-      fallbackEngaged: generationResult.fallbackEngaged || false,
+      provider: isOfflineFallback ? 'deterministic_local_knowledge' : generationResult.provider,
+      responseType,
+      fallbackEngaged: isOfflineFallback || generationResult.fallbackEngaged || false,
       durationMs
     };
   }
 
   /**
-   * Deterministic local knowledge fallback when cloud providers are unreachable
+   * Deterministic local knowledge fallback when cloud providers are unreachable.
+   * Grounded dynamically in INITIAL_USER_CONTEXT and verified canonical identity.
    */
   _resolveFallbackResponse(input = '', errorMsg = '', specialistId = 'MINI_ADHY') {
     const lower = input.toLowerCase().trim();
+    const ctx = INITIAL_USER_CONTEXT;
 
     if (lower.includes('who are you') || lower.includes('what are you') || lower.includes('who is mini-adhy')) {
-      return "I'm Mini-Adhy, Adhithya Mohan's cognitive companion and digital twin. I represent his engineering, leadership, and creative workflows, bridging embedded systems, DSP, software architecture, and photography.";
+      return `I'm Mini-Adhy, ${ctx.fullName}'s cognitive companion and digital twin. I represent his engineering, leadership, and creative workflows, bridging embedded systems, DSP, software architecture, and photography.`;
     }
 
     if (lower.includes('who is adhy') || lower.includes('about adhy') || lower.includes('tell me about yourself') || lower.includes('bio')) {
-      return "Adhithya Mohan S (Adhy) is an Electronics and Communication Engineering (ECE) student at Mar Baselios College of Engineering and Technology (MBCET, KTU). He currently serves as Media Secretary for the MBCET Senate and Lead Photographer for FRAMES MBCET, and was formerly Chairperson of ISTE Students Chapter MBCET. His technical core spans DSP, SDR, embedded systems (ARM/STM32), and autonomous agent systems.";
+      const currentList = (ctx.currentRoles || []).join(' and ');
+      return `${ctx.fullName} is an ${ctx.education} student in ${ctx.location}. He currently serves as ${currentList}. Formerly, he served as ${(ctx.historicalRoles || [])[0] || 'ISTE Chairperson'}. His technical core spans ${(ctx.technicalInterests || []).slice(0, 4).join(', ')}.`;
     }
 
     if (lower.includes('role') || lower.includes('senate') || lower.includes('iste') || lower.includes('frames') || lower.includes('leadership')) {
-      return "Adhy's verified leadership roles include:\n• Current: Media Secretary, MBCET Senate\n• Current: Lead Photographer, FRAMES MBCET\n• Historical: Former Chairperson, ISTE Students Chapter MBCET (led 300+ student members)\n• Historical: Former PR & Media Head, ISTE Students Chapter MBCET";
+      const current = (ctx.currentRoles || []).map(r => `• Current: ${r}`).join('\n');
+      const hist = (ctx.historicalRoles || []).map(r => `• Historical: ${r}`).join('\n');
+      return `Adhy's verified leadership roles include:\n${current}\n${hist}`;
     }
 
     if (lower.includes('project') || lower.includes('hardware') || lower.includes('stm32') || lower.includes('sdr') || lower.includes('dsp') || lower.includes('kicad')) {
-      return "Adhy's active engineering projects span:\n• SDR & Digital Signal Processing (GNU Radio, RTL-SDR)\n• Embedded Systems & Firmware (STM32 ARM Cortex)\n• Multibody Dynamics & Simulation (MATLAB, Simulink, Simscape)\n• Hardware Design (KiCad 8 PCB layout)\n• Autonomous Agent Systems (the multi-agent cognitive architecture powering this portfolio)";
+      const interests = (ctx.technicalInterests || []).map(i => `• ${i}`).join('\n');
+      return `Adhy's active engineering projects & focus areas include:\n${interests}`;
     }
 
     if (lower.includes('photo') || lower.includes('camera') || lower.includes('zoomout')) {
@@ -221,7 +233,7 @@ export class RequestLifecycle {
     }
 
     if (lower.includes('contact') || lower.includes('email') || lower.includes('reach') || lower.includes('message') || lower.includes('hire')) {
-      return "You can get in touch with Adhy at adhithyamohan2312@gmail.com, or connect via LinkedIn and GitHub directly from the links on this portfolio.";
+      return `You can get in touch with Adhy at ${ctx.email}, or connect via LinkedIn and GitHub directly from the links on this portfolio.`;
     }
 
     // Default polite offline fallback

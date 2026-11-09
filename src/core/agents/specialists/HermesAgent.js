@@ -42,7 +42,7 @@ export class HermesAgent extends BaseAgent {
 
     this.dispatchLedger = [];
     this.activeChannels = new Set(['portfolio_hud', 'cross_tab_sync', 'rf_nexus', 'contact_bus']);
-    this.totalDispatches = 128;
+    this.totalDispatches = 0; // Starts at 0, increments on real events
     this.channelLatencyMs = 1.8;
 
     // Cross-tab broadcast channel setup
@@ -79,7 +79,6 @@ export class HermesAgent extends BaseAgent {
 
   async runRoutine(agentRegistry = {}) {
     const reports = [];
-    this.totalDispatches += 4;
 
     const channelCount = this.activeChannels.size;
     const isChannelHealthy = Boolean(this.broadcastChannel || typeof window !== 'undefined');
@@ -172,6 +171,8 @@ export class HermesAgent extends BaseAgent {
    */
   streamRfPacketTelemetry(freqMhz = 433.92, protocol = 'FSK_PACKET') {
     const packet = {
+      type: 'RF_TELEMETRY_SIMULATED',
+      isSimulated: true,
       frequencyMhz: Number(freqMhz) || 433.92,
       protocol: String(protocol).toUpperCase(),
       snrDb: Math.floor(18 + Math.random() * 14),
