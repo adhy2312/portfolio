@@ -212,7 +212,7 @@ export class ProviderRegistry {
             new Promise((_, reject) => setTimeout(() => reject(new Error(`Timeout after ${timeoutMs}ms`)), timeoutMs))
           ]);
 
-          if (result && result.success && result.text) {
+          if (result && (result.success !== false) && result.text) {
             this.metrics.successfulRequests += 1;
             if (i > 0) this.metrics.fallbackEvents += 1;
 

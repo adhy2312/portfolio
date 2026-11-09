@@ -45,7 +45,9 @@ export default async function handler(req, res) {
   const API_KEY = process.env.OPENROUTER_API_KEY || process.env.REACT_APP_OPENROUTER_API_KEY;
 
   if (!API_KEY) {
-    return res.status(500).json({ error: 'OpenRouter failover engine unconfigured' });
+    return res.status(503).json({
+      error: 'OpenRouter failover engine unconfigured: OPENROUTER_API_KEY is missing from environment variables in Vercel project settings.'
+    });
   }
 
   let bodyObj = {};

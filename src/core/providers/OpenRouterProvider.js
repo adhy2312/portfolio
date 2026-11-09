@@ -84,7 +84,8 @@ export class OpenRouterProvider extends BaseProvider {
       });
 
       if (!res.ok) {
-        throw new Error(`OpenRouter gateway HTTP ${res.status}`);
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `OpenRouter gateway HTTP ${res.status}`);
       }
 
       const data = await res.json();
@@ -95,10 +96,12 @@ export class OpenRouterProvider extends BaseProvider {
 
       const durationMs = Date.now() - startTime;
       return {
+        success: Boolean(text),
         text,
         model: data.model || this.defaultModel,
         provider: 'openrouter',
         durationMs,
+        tokenEstimate: Math.ceil(text.length / 3.8),
         usage: data.usage || null
       };
     } finally {
