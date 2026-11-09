@@ -93,6 +93,13 @@ export default function LiveModeModal({ isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleKey);
   }, [isOpen, onClose]);
 
+  // Auto-dismiss transient notices after 5 seconds
+  useEffect(() => {
+    if (!errorMsg) return;
+    const timer = setTimeout(() => setErrorMsg(null), 5000);
+    return () => clearTimeout(timer);
+  }, [errorMsg]);
+
   // Cleanup subscription on unmount
   useEffect(() => {
     return () => {

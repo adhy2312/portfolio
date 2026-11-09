@@ -101,7 +101,22 @@ export class AudioInputManager {
         classifiedErr = new Error('Microphone is occupied by another application or Windows audio service.');
         classifiedErr.name = 'NotReadableError';
       } else if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-        classifiedErr = new Error('Microphone permission blocked in browser settings.');
+        // Check if browser site permission is actually granted (indicating Windows OS-level restriction)
+        let isSystemLevelLock = false;
+        try {
+          if (typeof navigator !== 'undefined' && navigator.permissions && navigator.permissions.query) {
+            const status = await navigator.permissions.query({ name: 'microphone' }).catch(() => null);
+            if (status && status.state === 'granted') {
+              isSystemLevelLock = true;
+            }
+          }
+        } catch {}
+
+        if (isSystemLevelLock) {
+          classifiedErr = new Error('Microphone is enabled in browser, but Windows Privacy or another app is restricting hardware access.');
+        } else {
+          classifiedErr = new Error('Microphone permission blocked in browser settings.');
+        }
         classifiedErr.name = 'NotAllowedError';
       }
       this.onError(classifiedErr);

@@ -388,25 +388,26 @@
   position: relative;
 }
 
-/* Master Orb Assembly */
+/* Master Orb Assembly — Stark Arc Reactor Neural Core */
 .ma-stark-orb-assembly {
   position: relative;
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  filter: drop-shadow(0 0 24px rgba(14, 165, 233, 0.35));
 }
 
-/* Outer High-Tech Gyroscopic Reticle Ring */
+/* Outer High-Tech Gyroscopic Reticle Ring with Precision Tick Marks */
 .ma-stark-reticle-outer {
   position: absolute;
-  inset: -14px;
+  inset: -16px;
   border-radius: 50%;
-  border: 2px dashed rgba(14, 165, 233, 0.55);
-  box-shadow: 0 0 20px rgba(14, 165, 233, 0.25), inset 0 0 15px rgba(14, 165, 233, 0.15);
-  animation: maStarkReticleSpinClockwise 16s linear infinite;
+  border: 2px dashed rgba(56, 189, 248, 0.65);
+  box-shadow: 0 0 24px rgba(14, 165, 233, 0.3), inset 0 0 16px rgba(56, 189, 248, 0.2);
+  animation: maStarkReticleSpinClockwise 18s linear infinite;
 }
 
 /* Inner Counter-Rotating Precision Ring */
@@ -414,64 +415,66 @@
   position: absolute;
   inset: -6px;
   border-radius: 50%;
-  border: 1px dotted rgba(56, 189, 248, 0.75);
+  border: 1.5px dotted rgba(56, 189, 248, 0.85);
   border-top-color: transparent;
   border-bottom-color: transparent;
-  animation: maStarkReticleSpinCounter 10s linear infinite;
+  animation: maStarkReticleSpinCounter 11s linear infinite;
 }
 
 /* Arc Reactor Plasma Corona Glow */
 .ma-stark-energy-corona {
   position: absolute;
-  inset: 0;
+  inset: -4px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.45) 0%, rgba(14, 165, 233, 0.25) 55%, transparent 75%);
-  filter: blur(12px);
-  animation: maStarkCoronaPulse 3s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(56, 189, 248, 0.55) 0%, rgba(14, 165, 233, 0.3) 50%, transparent 75%);
+  filter: blur(10px);
+  animation: maStarkCoronaPulse 2.8s ease-in-out infinite;
 }
 
 /* Central Hyper-Luminous Arc Reactor Core */
 .ma-stark-reactor-core {
   position: relative;
-  width: 104px;
-  height: 104px;
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #bae6fd 25%, #0284c7 65%, #0369a1 100%);
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #e0f2fe 18%, #38bdf8 45%, #0284c7 75%, #0369a1 100%);
   box-shadow:
-    0 0 35px rgba(14, 165, 233, 0.75),
-    0 0 70px rgba(56, 189, 248, 0.4),
-    inset 0 4px 12px rgba(255, 255, 255, 0.95),
-    inset 0 -4px 12px rgba(2, 132, 199, 0.8);
+    0 0 40px rgba(14, 165, 233, 0.8),
+    0 0 80px rgba(56, 189, 248, 0.45),
+    inset 0 4px 14px rgba(255, 255, 255, 0.95),
+    inset 0 -4px 14px rgba(2, 132, 199, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
 }
 
 .ma-stark-core-plasma {
   position: absolute;
-  width: 60px;
-  height: 60px;
+  width: 68px;
+  height: 68px;
   border-radius: 50%;
-  background: radial-gradient(circle, #ffffff 0%, rgba(224, 242, 254, 0.9) 40%, rgba(14, 165, 233, 0.5) 80%, transparent 100%);
+  background: radial-gradient(circle, #ffffff 0%, rgba(224, 242, 254, 0.95) 35%, rgba(56, 189, 248, 0.6) 75%, transparent 100%);
   animation: maStarkPlasmaShimmer 2.2s ease-in-out infinite alternate;
 }
 
 .ma-stark-core-flare {
   position: absolute;
-  width: 120%;
+  width: 130%;
   height: 2px;
   background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.95) 50%, transparent 100%);
   filter: blur(1px);
   transform: rotate(35deg);
-  animation: maStarkFlareRotate 6s linear infinite;
+  animation: maStarkFlareRotate 5s linear infinite;
 }
 
 .ma-stark-core-rings {
   position: absolute;
-  inset: 10px;
+  inset: 12px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.6);
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 8px rgba(56, 189, 248, 0.4);
   pointer-events: none;
 }
 
@@ -643,13 +646,33 @@
   width: 100%;
   max-width: 720px;
   max-height: 200px;
-  background: rgba(255, 255, 255, 0.68);
-  border: 1px solid rgba(226, 232, 240, 0.85);
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(226, 232, 240, 0.9);
   border-radius: 18px;
   padding: 16px 20px;
   overflow-y: auto;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02), inset 0 1px 0 #ffffff;
-  backdrop-filter: blur(16px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03), inset 0 1px 0 #ffffff;
+  backdrop-filter: blur(20px);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(56, 189, 248, 0.3) transparent;
+}
+
+/* Explicit scoped scrollbar to prevent inheriting global theme accent-primary yellow */
+.ma-live-transcript-container::-webkit-scrollbar {
+  width: 5px;
+}
+
+.ma-live-transcript-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.ma-live-transcript-container::-webkit-scrollbar-thumb {
+  background: rgba(56, 189, 248, 0.35) !important;
+  border-radius: 9999px;
+}
+
+.ma-live-transcript-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.65) !important;
 }
 
 .ma-live-transcript-scroll {
@@ -748,24 +771,26 @@
   color: #1e293b;
 }
 
-/* ── Advisory Banner (Glassmorphic) ─────────────────────────────────── */
+/* ── Advisory Banner (Stark Glassmorphic HUD) ────────────────────── */
 
 .ma-live-error-banner {
   position: relative;
-  z-index: 10;
+  z-index: 15;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin: 0 32px 10px;
-  padding: 10px 18px;
-  background: rgba(254, 249, 195, 0.85);
-  border: 1px solid rgba(250, 204, 21, 0.65);
-  border-radius: 12px;
-  font-size: 0.8rem;
-  color: #854d0e;
-  backdrop-filter: blur(16px);
+  padding: 8px 18px;
+  background: rgba(15, 23, 42, 0.88);
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e0f2fe;
+  backdrop-filter: blur(20px);
   gap: 12px;
-  box-shadow: 0 4px 14px rgba(234, 179, 8, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 0 16px rgba(14, 165, 233, 0.2);
+  transition: all 0.2s ease;
 }
 
 .ma-live-banner-content {
@@ -775,17 +800,18 @@
 }
 
 .ma-live-banner-icon {
-  color: #ca8a04;
+  color: #38bdf8;
   flex-shrink: 0;
+  animation: maStatusPulse 1.5s infinite;
 }
 
 .ma-live-error-banner button {
-  background: rgba(234, 179, 8, 0.2);
-  color: #854d0e;
-  border: 1px solid rgba(234, 179, 8, 0.45);
-  padding: 4px 12px;
-  border-radius: 6px;
-  font-size: 0.72rem;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 3px 12px;
+  border-radius: 9999px;
+  font-size: 0.7rem;
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
@@ -793,7 +819,9 @@
 }
 
 .ma-live-error-banner button:hover {
-  background: rgba(234, 179, 8, 0.35);
+  background: rgba(56, 189, 248, 0.3);
+  color: #ffffff;
+  border-color: #38bdf8;
 }
 
 /* ── Bottom Controls Footer Deck ────────────────────────────────────── */

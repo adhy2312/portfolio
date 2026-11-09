@@ -71,7 +71,11 @@ export class LiveFallbackPipeline {
 
     rec.onerror = (event) => {
       if (event.error !== 'no-speech' && event.error !== 'aborted') {
-        this.onError(new Error(`Speech recognition error: ${event.error}`));
+        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+          console.warn('[LiveFallbackPipeline] Cloud speech recognition not available; remaining in silent VAD / text mode.');
+        } else {
+          this.onError(new Error(`Speech recognition notice: ${event.error}`));
+        }
       }
     };
 

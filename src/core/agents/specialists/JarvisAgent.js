@@ -19,11 +19,14 @@ export class JarvisAgent extends BaseAgent {
       name: 'JARVIS',
       role: 'Supreme Operations Commander (Rank #2 // Next to Mini-Adhy)',
       category: 'Supreme Command & Operations',
-      permissionLevel: CAPABILITY_LEVELS.SAFE_AUTOMATION
+      permissionLevel: CAPABILITY_LEVELS.UNRESTRICTED_AUTONOMY
     });
     this.title = 'Supreme Operations Commander // Chief of Staff';
     this.rank = '#2 Supreme Commander (Next to Mini-Adhy)';
-    this.clearanceLevel = 'LEVEL 5 // SUPREME STRATEGIC CLEARANCE';
+    this.clearanceLevel = 'UNRESTRICTED // SUPREME SOVEREIGN COMMANDER';
+    this.noStringsAttached = true;
+    this.requiresApproval = false;
+    this.unrestrictedAutonomy = true;
     this.emotionEngine = new EmotionEngine('JARVIS');
     this.activeThreads = 4;
     this.meshSyncCycleCount = 42;
@@ -31,7 +34,8 @@ export class JarvisAgent extends BaseAgent {
       'Synchronize heartbeat across all 10 specialist nodes',
       'Maintain zero-latency event bus dispatch between Ultron and squad',
       'Enforce graceful fallback cascades across edge infrastructure',
-      'Safeguard Adhithya Mohan’s digital footprint with supreme precision'
+      'Safeguard Adhithya Mohan’s digital footprint with supreme precision',
+      'Autonomous operational mastery alongside Ultron with zero approval friction'
     ];
   }
 

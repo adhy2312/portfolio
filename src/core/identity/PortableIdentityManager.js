@@ -92,6 +92,7 @@ function computeBundleChecksum(bundle) {
 export class PortableIdentityManager {
   constructor() {
     this.backups = new Map(); // backupId -> bundle
+    this.quarantinedCandidates = new Map(); // candidateId -> CandidateRecord
   }
 
   /**
@@ -403,35 +404,149 @@ export class PortableIdentityManager {
       });
     }
 
-    // Import Cognitive Profile Dimensions
+    // P0.3 Quarantine Pipeline: Quarantine ALL imported cognitive dimensions by default
+    const isExplicitlyTrusted = options.trusted === true;
+
+    // 1. Cognitive Profile Dimensions Quarantine
     if (bundle.cognitiveProfile?.dimensions) {
       Object.entries(bundle.cognitiveProfile.dimensions).forEach(([k, dim]) => {
         if (dim && dim.value !== undefined) {
-          cognitiveProfile.correctPreference(k, dim.value, `Imported from bundle: ${dim.evidence || ''}`);
-          report.updatedPreferencesCount += 1;
-        }
-      });
-    }
-
-    // Import AdhyModel Cognition Dimensions
-    if (bundle.adhyModel?.cognition) {
-      Object.entries(bundle.adhyModel.cognition).forEach(([k, dim]) => {
-        if (dim && dim.value !== undefined && typeof adhyModel.recordObservation === 'function') {
-          // If explicitly marked as fact/preference or verified
-          if (dim.classification === 'fact' || dim.confidence === 1.0) {
-            adhyModel.correctDimension(k, dim.value, dim.provenance || 'Imported verified dimension');
+          if (isExplicitlyTrusted) {
+            cognitiveProfile.correctPreference(k, dim.value, `Imported from trusted bundle: ${dim.evidence || ''}`);
+            report.updatedPreferencesCount += 1;
+          } else {
+            // Quarantine as candidate preference awaiting owner verification
+            const candidateId = `cand_pref_${k}_${Date.now()}`;
+            this.quarantinedCandidates.set(candidateId, {
+              candidateId,
+              type: 'COGNITIVE_PREFERENCE',
+              dimensionKey: k,
+              value: dim.value,
+              evidence: dim.evidence || 'Imported unverified preference',
+              importedConfidence: dim.confidence || 0.7,
+              provenance: `Bundle import (${bundle.sourceRuntime || 'external'})`,
+              status: 'CANDIDATE_QUARANTINED',
+              quarantinedAt: new Date().toISOString()
+            });
+            report.quarantinedDimensionsCount = (report.quarantinedDimensionsCount || 0) + 1;
           }
         }
       });
     }
 
-    // Import Understanding Bundle (Cognitive Mirror & Relationship Continuity)
-    if (bundle.understanding) {
-      personalUnderstandingEngine.importUnderstandingBundle(bundle.understanding);
+    // 2. AdhyModel Cognition Dimensions Quarantine (No self-promotion via confidence=1.0)
+    if (bundle.adhyModel?.cognition) {
+      Object.entries(bundle.adhyModel.cognition).forEach(([k, dim]) => {
+        if (dim && dim.value !== undefined) {
+          if (isExplicitlyTrusted) {
+            if (typeof adhyModel.recordObservation === 'function') {
+              adhyModel.correctDimension(k, dim.value, dim.provenance || 'Imported verified dimension');
+            }
+          } else {
+            // Strict Invariant: Imported confidence 1.0 or verified flags CANNOT promote to active cognition
+            const candidateId = `cand_dim_${k}_${Date.now()}`;
+            this.quarantinedCandidates.set(candidateId, {
+              candidateId,
+              type: 'ADHY_MODEL_DIMENSION',
+              dimensionKey: k,
+              value: dim.value,
+              classification: dim.classification || 'inference',
+              claimedConfidence: dim.confidence,
+              provenance: dim.provenance || `Bundle import (${bundle.sourceRuntime || 'external'})`,
+              status: 'CANDIDATE_QUARANTINED',
+              quarantinedAt: new Date().toISOString()
+            });
+            report.quarantinedDimensionsCount = (report.quarantinedDimensionsCount || 0) + 1;
+          }
+        }
+      });
     }
 
-    report.summary = `Successfully imported ${report.importedMemoriesCount} memories and ${report.updatedPreferencesCount} cognitive preferences in '${options.mode}' mode.`;
+    // 3. Understanding Bundle Quarantine (Cognitive Mirror & Relationship Continuity)
+    if (bundle.understanding) {
+      if (isExplicitlyTrusted) {
+        personalUnderstandingEngine.importUnderstandingBundle(bundle.understanding);
+      } else {
+        const candidateId = `cand_und_${Date.now()}`;
+        this.quarantinedCandidates.set(candidateId, {
+          candidateId,
+          type: 'UNDERSTANDING_BUNDLE',
+          understandingData: bundle.understanding,
+          status: 'CANDIDATE_QUARANTINED',
+          quarantinedAt: new Date().toISOString()
+        });
+        report.quarantinedUnderstandingCount = 1;
+      }
+    }
+
+    report.summary = `Successfully processed import: ${report.importedMemoriesCount} memories quarantined, ${report.quarantinedDimensionsCount || 0} cognitive dimensions quarantined for owner review.`;
     return report;
+  }
+
+  /**
+   * Returns all quarantined candidate records awaiting human owner promotion
+   */
+  getQuarantinedCandidates(filterType = null) {
+    const list = Array.from(this.quarantinedCandidates.values());
+    if (filterType) {
+      return list.filter(c => c.type === filterType);
+    }
+    return list;
+  }
+
+  /**
+   * Authoritative human owner promotion of a quarantined candidate
+   */
+  promoteQuarantinedCandidate(candidateId, ownerAuthProof = true) {
+    if (!ownerAuthProof) {
+      return { success: false, error: 'Unauthorized: Candidate promotion requires human owner authorization.' };
+    }
+
+    const candidate = this.quarantinedCandidates.get(candidateId);
+    if (!candidate) {
+      return { success: false, error: `Quarantined candidate [${candidateId}] not found.` };
+    }
+
+    if (candidate.type === 'COGNITIVE_PREFERENCE') {
+      cognitiveProfile.correctPreference(candidate.dimensionKey, candidate.value, `Promoted by owner: ${candidate.provenance}`);
+    } else if (candidate.type === 'ADHY_MODEL_DIMENSION') {
+      if (typeof adhyModel.correctDimension === 'function') {
+        adhyModel.correctDimension(candidate.dimensionKey, candidate.value, `Promoted by owner: ${candidate.provenance}`);
+      }
+    } else if (candidate.type === 'UNDERSTANDING_BUNDLE') {
+      personalUnderstandingEngine.importUnderstandingBundle(candidate.understandingData);
+    }
+
+    candidate.status = 'APPROVED_BY_OWNER';
+    candidate.promotedAt = new Date().toISOString();
+    this.quarantinedCandidates.delete(candidateId);
+
+    return {
+      success: true,
+      promotedCandidateId: candidateId,
+      type: candidate.type,
+      status: 'PROMOTED_TO_ACTIVE_COGNITION'
+    };
+  }
+
+  /**
+   * Rejects a quarantined candidate record
+   */
+  rejectQuarantinedCandidate(candidateId, reason = 'Rejected by owner') {
+    const candidate = this.quarantinedCandidates.get(candidateId);
+    if (!candidate) return { success: false, error: 'Candidate not found.' };
+
+    candidate.status = 'REJECTED';
+    candidate.rejectionReason = reason;
+    this.quarantinedCandidates.delete(candidateId);
+    return { success: true, rejectedCandidateId: candidateId };
+  }
+
+  /**
+   * Clear all quarantined candidate records
+   */
+  clearQuarantine() {
+    this.quarantinedCandidates.clear();
   }
 
   /**

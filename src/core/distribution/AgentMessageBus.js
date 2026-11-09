@@ -23,6 +23,7 @@ export const DELIVERY_STATUS = Object.freeze({
   PENDING: 'PENDING',
   DELIVERED: 'DELIVERED',
   ACKNOWLEDGED: 'ACKNOWLEDGED',
+  OUTCOME_UNKNOWN: 'OUTCOME_UNKNOWN',
   FAILED: 'FAILED',
   CANCELLED: 'CANCELLED'
 });
@@ -201,11 +202,13 @@ export class AgentMessageBus {
       }
     }
 
-    message.deliveryStatus = DELIVERY_STATUS.FAILED;
+    const isTimeout = /timeout/i.test(lastError?.message);
+    message.deliveryStatus = isTimeout ? DELIVERY_STATUS.OUTCOME_UNKNOWN : DELIVERY_STATUS.FAILED;
     message.error = lastError?.message || 'Delivery failed after retries.';
     return {
       success: false,
-      deliveryStatus: DELIVERY_STATUS.FAILED,
+      deliveryStatus: message.deliveryStatus,
+      outcomeUnknown: isTimeout,
       error: message.error
     };
   }

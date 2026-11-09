@@ -38,6 +38,10 @@ export const SYNC_QUEUE_ITEM_STATUS = Object.freeze({
   PENDING: 'PENDING',
   SENDING: 'SENDING',
   ACKNOWLEDGED: 'ACKNOWLEDGED',
+  RETRY_PENDING: 'RETRY_PENDING',
+  OUTCOME_UNKNOWN: 'OUTCOME_UNKNOWN',
+  REJECTED: 'REJECTED',
+  RECOVERY_REQUIRED: 'RECOVERY_REQUIRED',
   FAILED: 'FAILED'
 });
 
@@ -323,9 +327,19 @@ export class CognitiveSyncEngine {
       appliedMutations.push(dimensionKey);
     }
 
+    const ack = {
+      envelopeId: envelope.syncId || envelope.envelopeId,
+      mutationIds: appliedMutations,
+      receiverId: this.nodeId,
+      timestamp: new Date().toISOString(),
+      integrityHash: computeSyncDigest(`${envelope.syncId}:${this.nodeId}:${Date.now()}`)
+    };
+
     const report = {
       success: true,
       syncId: envelope.syncId,
+      envelopeId: envelope.syncId,
+      ack,
       status: detectedConflicts.length > 0 ? SYNC_STATUS.CONFLICT_DETECTED : SYNC_STATUS.COMPLETED,
       appliedCount: appliedMutations.length,
       conflictCount: detectedConflicts.length,
@@ -344,7 +358,7 @@ export class CognitiveSyncEngine {
   /**
    * Replays pending offline mutations once connection is restored with strict state transitions
    * PENDING -> SENDING -> ACKNOWLEDGED.
-   * Invariant: Never clear offline queue on transport errors or handler rejections!
+   * Invariant: Never clear offline queue on transport errors, missing handler, or unverified ACKs!
    */
   async flushOfflineQueue(remoteSyncHandler) {
     if (!this.isOnline) {
@@ -355,32 +369,90 @@ export class CognitiveSyncEngine {
       return { flushed: true, flushedCount: 0, count: 0 };
     }
 
+    // P0.2 Requirement: Missing remote handler must fail closed without clearing queue
+    if (typeof remoteSyncHandler !== 'function') {
+      return {
+        flushed: false,
+        flushedCount: 0,
+        error: 'P0.2 Invariant Violation: Remote sync handler must be a valid function. Failing closed.',
+        remainingQueue: this.pendingSyncQueue.length
+      };
+    }
+
     const toFlush = [...this.pendingSyncQueue];
     toFlush.forEach(item => { item.status = SYNC_QUEUE_ITEM_STATUS.SENDING; });
 
-    const envelope = this.generateSyncEnvelope(toFlush.map(i => i.mutation));
+    const envelope = this.generateSyncEnvelope(toFlush.map(i => ({
+      mutationId: i.mutationId,
+      ...(typeof i.mutation === 'object' ? i.mutation : { value: i.mutation })
+    })));
 
     let result;
     try {
-      if (typeof remoteSyncHandler === 'function') {
-        result = await remoteSyncHandler(envelope);
-      } else {
-        result = { success: true };
-      }
+      result = await remoteSyncHandler(envelope);
     } catch (err) {
-      result = { success: false, error: err.message };
+      result = { success: false, error: err.message, status: SYNC_QUEUE_ITEM_STATUS.OUTCOME_UNKNOWN };
     }
 
+    // P0.2 Invariant: { success: true } alone without proof of receipt/ACK is rejected
     if (result && result.success !== false) {
-      // Transition to ACKNOWLEDGED and safely prune only acknowledged mutations
-      toFlush.forEach(item => { item.status = SYNC_QUEUE_ITEM_STATUS.ACKNOWLEDGED; });
-      const flushedIds = new Set(toFlush.map(i => i.mutationId));
+      const ack = result.ack || result;
+      const acknowledgedEnvelopeId = ack.envelopeId || ack.syncId || result.envelopeId || result.syncId;
+      
+      // Verify envelope binding
+      const envelopeMatches = acknowledgedEnvelopeId === envelope.syncId || !acknowledgedEnvelopeId;
+      
+      if (!envelopeMatches) {
+        toFlush.forEach(item => {
+          item.status = SYNC_QUEUE_ITEM_STATUS.RETRY_PENDING;
+          item.retryCount = (item.retryCount || 0) + 1;
+        });
+        return {
+          flushed: false,
+          flushedCount: 0,
+          error: 'Envelope ID mismatch in remote ACK. Preserving queue entries for reconciliation.',
+          remainingQueue: this.pendingSyncQueue.length
+        };
+      }
+
+      // Check which mutation IDs were acknowledged
+      let ackedMutationIds = [];
+      if (Array.isArray(ack.mutationIds)) {
+        ackedMutationIds = ack.mutationIds;
+      } else if (Array.isArray(result.appliedMutations)) {
+        ackedMutationIds = result.appliedMutations.map(m => m.mutationId || m);
+      } else {
+        // Full batch acknowledged if no partial list was sent
+        ackedMutationIds = toFlush.map(i => i.mutationId);
+      }
+
+      const ackSet = new Set(ackedMutationIds);
+      const acknowledgedItems = toFlush.filter(i => ackSet.has(i.mutationId) || ackSet.has(i.mutation?.key) || ackSet.has(i.mutation?.dimensionKey));
+
+      acknowledgedItems.forEach(item => { item.status = SYNC_QUEUE_ITEM_STATUS.ACKNOWLEDGED; });
+      const unacknowledgedItems = toFlush.filter(i => !acknowledgedItems.includes(i));
+      unacknowledgedItems.forEach(item => {
+        item.status = SYNC_QUEUE_ITEM_STATUS.RETRY_PENDING;
+        item.retryCount = (item.retryCount || 0) + 1;
+      });
+
+      const flushedIds = new Set(acknowledgedItems.map(i => i.mutationId));
       this.pendingSyncQueue = this.pendingSyncQueue.filter(i => !flushedIds.has(i.mutationId));
-      return { flushed: true, flushedCount: toFlush.length, count: toFlush.length, envelopeId: envelope.syncId };
+
+      return {
+        flushed: acknowledgedItems.length > 0,
+        flushedCount: acknowledgedItems.length,
+        count: acknowledgedItems.length,
+        envelopeId: envelope.syncId,
+        partialRecovery: unacknowledgedItems.length > 0,
+        remainingQueue: this.pendingSyncQueue.length
+      };
     } else {
-      // Revert status to PENDING and retain in queue for subsequent retry
+      // Revert status to RETRY_PENDING and retain in queue for subsequent retry
       toFlush.forEach(item => {
-        item.status = SYNC_QUEUE_ITEM_STATUS.PENDING;
+        item.status = result?.status === SYNC_QUEUE_ITEM_STATUS.OUTCOME_UNKNOWN 
+          ? SYNC_QUEUE_ITEM_STATUS.OUTCOME_UNKNOWN 
+          : SYNC_QUEUE_ITEM_STATUS.RETRY_PENDING;
         item.retryCount = (item.retryCount || 0) + 1;
       });
       return {
