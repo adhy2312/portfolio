@@ -60,7 +60,7 @@ export class GeminiProvider extends BaseProvider {
     try {
       const contents = Array.isArray(request.contents) 
         ? request.contents 
-        : [{ role: 'user', parts: [{ text: request.prompt || '' }] }];
+        : [{ role: 'user', parts: [{ text: typeof request === 'string' ? request : (request.prompt || '') }] }];
 
       const payload = {
         agent: options.agentId || 'MINI_ADHY',

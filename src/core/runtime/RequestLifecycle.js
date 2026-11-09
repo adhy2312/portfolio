@@ -31,6 +31,23 @@ export const TASK_COMPLEXITY = Object.freeze({
 export class RequestLifecycle {
   constructor() {
     this.activeRequests = new Map();
+    this.recentTraces = [];
+    this.maxTraces = 50;
+  }
+
+  _recordLifecycleTrace(trace) {
+    this.recentTraces.unshift(trace);
+    if (this.recentTraces.length > this.maxTraces) {
+      this.recentTraces.pop();
+    }
+  }
+
+  getRecentTraces() {
+    return [...this.recentTraces];
+  }
+
+  getTrace(requestId) {
+    return this.recentTraces.find(t => t.requestId === requestId) || null;
   }
 
   /**
@@ -194,6 +211,23 @@ export class RequestLifecycle {
       });
     }
 
+    const lifecycleTrace = {
+      requestId,
+      taskCategory: instructionPackage.cognitiveContext?.taskCategory || 'GENERAL_CONVERSATION',
+      retrievedDimensions: instructionPackage.cognitiveContext?.retrievedDimensions || [],
+      selectedMemories: (instructionPackage.cognitiveContext?.authorizedMemories || []).map(m => m.id || m.content?.slice(0, 40)),
+      excludedContext: instructionPackage.cognitiveContext?.excludedContext || {},
+      modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
+      provider: isOfflineFallback ? 'deterministic_local_knowledge' : generationResult.provider,
+      cacheHit: Boolean(generationResult.cacheHit),
+      fallbackUsed: isOfflineFallback || Boolean(generationResult.fallbackEngaged),
+      responseType,
+      durationMs,
+      timestamp: new Date().toISOString()
+    };
+
+    this._recordLifecycleTrace(lifecycleTrace);
+
     return {
       requestId,
       complexity,
@@ -204,7 +238,8 @@ export class RequestLifecycle {
       responseType,
       modelSnapshotVersion: instructionPackage.modelSnapshotVersion,
       fallbackEngaged: isOfflineFallback || generationResult.fallbackEngaged || false,
-      durationMs
+      durationMs,
+      lifecycleTrace
     };
   }
 

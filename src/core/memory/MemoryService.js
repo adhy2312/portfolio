@@ -315,7 +315,7 @@ export class MemoryService {
       lastConfirmedAt: userApproved ? now : null,
       supersedes: supersedes || null,
       relatedMemoryIds: Array.isArray(relatedMemoryIds) ? relatedMemoryIds : [],
-      sensitivity: sensitivity === 'private' ? 'private' : 'public',
+      sensitivity: (sensitivity === 'private' || sensitivity === 'restricted' || String(sensitivity).toLowerCase() === 'high') ? 'private' : 'public',
       schemaVersion: '3.0.0'
     };
 

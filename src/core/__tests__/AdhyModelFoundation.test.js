@@ -33,9 +33,36 @@ jest.mock('../../sanity', () => ({
 }));
 
 describe('MINI-ADHY — ADHY COGNITIVE MODEL FOUNDATION (PHASE 1 & 2)', () => {
+  const originalFetch = global.fetch;
+
+  afterAll(() => {
+    global.fetch = originalFetch;
+    if (typeof window !== 'undefined') {
+      window.fetch = originalFetch;
+    }
+  });
 
   beforeEach(() => {
     adhyModel.initCanonicalBaseline();
+
+    const mockFetch = jest.fn().mockImplementation(() => {
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        headers: {
+          get: (h) => (h && h.toLowerCase() === 'content-type' ? 'application/json' : null)
+        },
+        json: async () => ({
+          text: 'Adhy is actively developing STM32 DSP systems and SDR architectures.',
+          candidates: [{ content: { parts: [{ text: 'Mock model response' }] } }]
+        })
+      });
+    });
+
+    global.fetch = mockFetch;
+    if (typeof window !== 'undefined') {
+      window.fetch = mockFetch;
+    }
   });
 
   // ────────────────────────────────────────────────────────────

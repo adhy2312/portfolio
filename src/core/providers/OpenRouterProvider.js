@@ -63,10 +63,19 @@ export class OpenRouterProvider extends BaseProvider {
     const startTime = Date.now();
     try {
       const prompt = typeof request === 'string' ? request : (request.prompt || '');
-      const messages = request.messages || [
-        { role: 'system', content: options.systemPrompt || 'You are Mini-Adhy.' },
-        { role: 'user', content: prompt }
-      ];
+      let messages = request.messages;
+      if (!messages && Array.isArray(request.contents)) {
+        messages = request.contents.map(c => ({
+          role: c.role === 'model' ? 'assistant' : (c.role || 'user'),
+          content: c.parts?.[0]?.text || c.content || ''
+        }));
+      }
+      if (!messages || messages.length === 0) {
+        messages = [{ role: 'user', content: prompt }];
+      }
+      if (!messages.some(m => m.role === 'system')) {
+        messages.unshift({ role: 'system', content: options.systemPrompt || 'You are Mini-Adhy.' });
+      }
 
       const res = await fetch(this.endpoint, {
         method: 'POST',

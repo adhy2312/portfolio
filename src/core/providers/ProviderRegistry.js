@@ -141,39 +141,56 @@ export class ProviderRegistry {
 
   /**
    * Computes cache key for response caching and request deduplication.
-   * Key includes the full conversation history, system prompt, agent, model,
-   * temperature, and prompt to prevent cross-context cache collisions.
+   * Key deterministically hashes the full conversation history, full system prompt,
+   * cognitive context digest, model snapshot version, agent, model, temperature,
+   * maxTokens, and session isolation boundary without lossy truncation.
    */
   computeCacheKey(request = {}, options = {}) {
-    // Extract conversation history (Gemini-style contents[] or OpenAI-style messages[])
     const history = request.contents || request.messages || [];
-    const historyStr = JSON.stringify(
-      history.map(m => ({
-        role: m.role,
-        // Truncate individual turns to keep key size bounded but preserve identity
-        text: (m.parts?.[0]?.text || m.content || '').slice(0, 300)
-      }))
-    );
+    const historyNormalized = history.map(m => ({
+      role: m.role,
+      text: m.parts?.[0]?.text || m.content || ''
+    }));
+
     const promptStr = typeof request === 'string'
       ? request
       : (request.prompt || '');
-    const systemStr = (options.systemPrompt || '').slice(0, 200);
+    const systemPrompt = options.systemPrompt || '';
     const agentId = options.agentId || 'MINI_ADHY';
     const temp = options.temperature !== undefined ? String(options.temperature) : '0.7';
+    const maxTokens = options.maxTokens !== undefined ? String(options.maxTokens) : '1500';
     const model = options.model || 'default';
     const sessionId = options.sessionId || '';
     const modelSnapshotVersion = options.modelSnapshotVersion || '';
+    const cognitiveDigest = options.cognitiveDigest || options.cognitiveContext?.digest || '';
 
-    // Deterministic serialization — combine all context-defining fields
-    const raw = `${agentId}|${model}|${temp}|${sessionId}|${modelSnapshotVersion}|${systemStr}|${promptStr.trim()}|${historyStr}`;
+    // Deterministic serialization of the complete relevant generation context
+    const contextPayload = {
+      agentId,
+      model,
+      temp,
+      maxTokens,
+      sessionId,
+      modelSnapshotVersion,
+      cognitiveDigest,
+      systemPrompt,
+      prompt: promptStr.trim(),
+      history: historyNormalized
+    };
 
-    // Simple djb2-style hash for compact key (not cryptographic, just identity)
-    let hash = 5381;
+    const raw = JSON.stringify(contextPayload);
+
+    // Collision-resistant dual-hash (djb2 + sdbm combined into a 64-bit hex key)
+    let h1 = 5381;
+    let h2 = 0;
     for (let i = 0; i < raw.length; i++) {
-      hash = ((hash << 5) + hash) ^ raw.charCodeAt(i);
-      hash = hash >>> 0; // Keep unsigned 32-bit
+      const char = raw.charCodeAt(i);
+      h1 = ((h1 << 5) + h1) ^ char;
+      h1 = h1 >>> 0;
+      h2 = char + (h2 << 6) + (h2 << 16) - h2;
+      h2 = h2 >>> 0;
     }
-    return `cache_${agentId}_${hash.toString(36)}`;
+    return `cache_${agentId}_${h1.toString(16)}_${h2.toString(16)}`;
   }
 
   /**
