@@ -21,6 +21,7 @@ import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
 import { cognitiveLearningEngine } from '../learning/CognitiveLearningEngine';
 import { behaviouralController } from './BehaviouralController';
 import { INITIAL_USER_CONTEXT } from '../identity/CognitiveProfile';
+import { executionEngine } from '../executive/ExecutionEngine';
 
 export const TASK_COMPLEXITY = Object.freeze({
   LEVEL_1_SIMPLE: 'LEVEL_1_SIMPLE',            // Direct conversation, standard query
@@ -98,6 +99,33 @@ export class RequestLifecycle {
     const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
     const startTime = Date.now();
     const input = String(rawInput).trim();
+
+    // Autonomous Executive System Dispatch (Phase 5)
+    const isExecutiveGoal = Boolean(
+      options.isExecutiveGoal ||
+      input.toLowerCase().startsWith('goal:') ||
+      input.toLowerCase().startsWith('execute_goal:') ||
+      input.toLowerCase().startsWith('execute_plan:') ||
+      options.executeAsGoal
+    );
+
+    if (isExecutiveGoal) {
+      const cleanGoal = input.replace(/^(?:goal|execute_goal|execute_plan):\s*/i, '').trim();
+      const execResult = await executionEngine.executeGoal(cleanGoal, options.context || {}, options);
+      const durationMs = Date.now() - startTime;
+
+      return {
+        requestId,
+        complexity: TASK_COMPLEXITY.LEVEL_3_COMPLEX,
+        mode: 'EXECUTIVE',
+        isExecutiveGoal: true,
+        text: `[Autonomous Executive System]: Goal "${cleanGoal}" executed with status: ${execResult.status}. Subtasks completed: ${execResult.completedTasks?.length || 0}.`,
+        planId: execResult.planId,
+        status: execResult.status,
+        execResult,
+        durationMs
+      };
+    }
 
     // Step 1: Complexity Classification
     const complexity = this.classifyComplexity(input, options);

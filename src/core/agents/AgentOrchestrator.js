@@ -35,6 +35,7 @@ import { industryTrendAuditor } from './IndustryTrendAuditor';
 import { COMPLETE_AGENT_ROSTER } from './AgentRegistry';
 import { claudeAgenticEngine } from './ClaudeAgenticEngine';
 import { collectiveConsensusEngine } from '../ai/CollectiveConsensusEngine';
+import { SPECIALIST_CAPABILITIES } from '../executive/ExecutiveTypes';
 
 class MiniAdhyAgentOrchestrator {
   constructor() {
@@ -465,6 +466,56 @@ class MiniAdhyAgentOrchestrator {
 
   getCollectiveAIStatus() {
     return collectiveConsensusEngine.getCollectiveStatus();
+  }
+
+  // ── Phase 5 Executive Coordination ──────────────────────────────────
+
+  getCapabilities(agentId = null) {
+    if (agentId) {
+      return SPECIALIST_CAPABILITIES[agentId] || null;
+    }
+    return SPECIALIST_CAPABILITIES;
+  }
+
+  /**
+   * Delegates a task to a specialist based on verified capability
+   */
+  async delegateTask(agentId, taskPayload = {}) {
+    const caps = this.getCapabilities(agentId);
+    if (!caps) {
+      throw new Error(`Agent [${agentId}] is not recognized in executive capabilities.`);
+    }
+
+    const op = taskPayload.operation || 'general_inspection';
+    const hasCapability = caps.capabilities.includes(op) || caps.capabilities.some(c => op.includes(c));
+
+    if (!hasCapability) {
+      return {
+        success: false,
+        verified: false,
+        error: `Agent [${agentId}] lacks capability for operation: "${op}". Allowed: ${caps.capabilities.join(', ')}`
+      };
+    }
+
+    const agentInstance = this.agents[agentId];
+    if (!agentInstance) {
+      return { success: false, verified: false, error: `Agent instance [${agentId}] not initialized.` };
+    }
+
+    let output = null;
+    if (typeof agentInstance.run === 'function') {
+      output = await agentInstance.run(taskPayload);
+    } else if (typeof agentInstance.runRoutine === 'function') {
+      output = await agentInstance.runRoutine(this.agents);
+    }
+
+    return {
+      success: true,
+      verified: true,
+      agentId,
+      operation: op,
+      output
+    };
   }
 }
 
