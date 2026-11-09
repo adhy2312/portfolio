@@ -18,6 +18,7 @@ import { providerRegistry } from '../providers/ProviderRegistry';
 import { permissionRegistry } from '../agents/PermissionRegistry';
 import { memoryService } from '../memory/MemoryService';
 import { cognitiveEvolutionEngine } from '../learning/CognitiveEvolutionEngine';
+import { cognitiveLearningEngine } from '../learning/CognitiveLearningEngine';
 import { behaviouralController } from './BehaviouralController';
 import { INITIAL_USER_CONTEXT } from '../identity/CognitiveProfile';
 
@@ -187,7 +188,7 @@ export class RequestLifecycle {
       : (generationResult.responseType || (generationResult.cacheHit ? 'cache_hit' : 'live_model'));
     const finalResponse = generationResult.text || this._resolveFallbackResponse(input, generationResult.error, specialistId);
 
-    // Step 7: Continuous Memory Extraction & Controlled Evaluation Pipeline
+    // Step 7: Continuous Memory Extraction & Evidence-Based Cognitive Learning Pipeline
     try {
       const candidateMemories = memoryService.extractCandidateObservations(input);
       candidateMemories.forEach(cand => {
@@ -196,6 +197,18 @@ export class RequestLifecycle {
         } else {
           memoryService.storeRecord(cand);
         }
+      });
+    } catch {}
+
+    let learningResults = [];
+    try {
+      learningResults = cognitiveLearningEngine.processInteraction({
+        userInput: input,
+        assistantResponse: finalResponse,
+        sessionId: options.sessionId,
+        taskCategory: instructionPackage.cognitiveContext?.taskCategory,
+        emotionalState: stance?.emotionalAssessment?.state,
+        metadata: { requestId, specialistId }
       });
     } catch {}
 
@@ -222,6 +235,7 @@ export class RequestLifecycle {
       cacheHit: Boolean(generationResult.cacheHit),
       fallbackUsed: isOfflineFallback || Boolean(generationResult.fallbackEngaged),
       responseType,
+      learningObservationsCount: learningResults.length,
       durationMs,
       timestamp: new Date().toISOString()
     };

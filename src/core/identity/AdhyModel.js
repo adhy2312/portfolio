@@ -504,6 +504,11 @@ export class AdhyModel {
         timestamp: new Date().toISOString(),
         resolved: false
       });
+      // Also retain in pendingCandidates for reviewable approval
+      this.domains.evolution.pendingCandidates.unshift(candidate);
+      if (this.domains.evolution.pendingCandidates.length > 100) {
+        this.domains.evolution.pendingCandidates.pop();
+      }
       this.saveState();
       return { status: 'QUEUED_IN_CONFLICTS', candidate };
     }
@@ -541,6 +546,14 @@ export class AdhyModel {
       approvedAt: now,
       lastUpdated: now
     };
+
+    // Auto-resolve any corresponding conflict in reviewableConflicts
+    const conflict = this.domains.evolution.reviewableConflicts.find(c => c.dimensionKey === cand.dimensionKey && !c.resolved);
+    if (conflict) {
+      conflict.resolved = true;
+      conflict.resolvedAt = now;
+      conflict.resolutionStrategy = 'CANDIDATE_APPROVED';
+    }
 
     this.domains.evolution.auditTrail.unshift({
       id: `audit_${Date.now()}`,

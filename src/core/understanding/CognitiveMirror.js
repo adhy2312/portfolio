@@ -16,6 +16,7 @@
  */
 
 import { adhyModel } from '../identity/AdhyModel';
+import { cognitiveLearningEngine } from '../learning/CognitiveLearningEngine';
 
 export class CognitiveMirror {
   constructor(storageAdapter = null) {
@@ -169,6 +170,16 @@ export class CognitiveMirror {
       evidence
     });
     if (this.observationsLog.length > 50) this.observationsLog.pop();
+
+    try {
+      cognitiveLearningEngine.recordObservation({
+        candidateDimension: dimensionKey,
+        observedValue,
+        evidence: evidence || dim.evidence,
+        confidence: dim.confidence,
+        source: 'CognitiveMirror'
+      });
+    } catch {}
 
     this.saveState();
     return dim;
