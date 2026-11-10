@@ -200,3 +200,4 @@ CREATE POLICY "Service role approval consumptions access" ON public.approval_con
 -- H. Provider Usage: Service role only
 CREATE POLICY "Service role provider usage access" ON public.provider_usage
   FOR ALL TO service_role USING (true) WITH CHECK (true);
+

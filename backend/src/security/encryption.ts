@@ -46,3 +46,4 @@ export class TokenCipher {
 }
 
 export const tokenCipher = new TokenCipher();
+
