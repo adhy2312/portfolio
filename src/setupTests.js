@@ -80,35 +80,4 @@ if (typeof window !== 'undefined') {
     unobserve() {}
     disconnect() {}
   };
-
-  // Safe fallback fetch for unmocked local API probes during tests
-  const originalFetch = window.fetch;
-  window.fetch = async (url, opts) => {
-    if (typeof url === 'string' && url.startsWith('/api/')) {
-      return {
-        ok: true,
-        status: 200,
-        json: async () => ({ status: 'healthy', mock: true }),
-        text: async () => JSON.stringify({ status: 'healthy' })
-      };
-    }
-    if (originalFetch) {
-      try {
-        return await originalFetch(url, opts);
-      } catch {
-        return {
-          ok: true,
-          status: 200,
-          json: async () => ({ status: 'mock' }),
-          text: async () => ''
-        };
-      }
-    }
-    return {
-      ok: true,
-      status: 200,
-      json: async () => ({}),
-      text: async () => ''
-    };
-  };
 }

@@ -10,6 +10,8 @@ import { getCorsOptions } from '../security/cors.js';
 import { sanitizationHook } from '../security/sanitization.js';
 import { SupabaseAdapter } from '../auth/supabase.js';
 import { IdentityAuthService } from '../auth/identity.js';
+import { ProviderGateway } from '../providers/gateway.js';
+import { CognitiveOrchestrator } from '../cognitive-core/orchestrator.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
 import { publicRoutes } from '../api/routes/public.routes.js';
 import { ownerRoutes } from '../api/routes/owner.routes.js';
@@ -70,14 +72,16 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   // 5. Pre-validation sanitization hook (Prototype pollution protection)
   app.addHook('preValidation', sanitizationHook);
 
-  // 6. Persistence & Identity Services
+  // 6. Persistence & Core AI Services
   const dbAdapter = new SupabaseAdapter(appConfig);
   const authService = new IdentityAuthService(appConfig, dbAdapter);
+  const providerGateway = new ProviderGateway(appConfig);
+  const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway);
 
   // 7. Register Route Modules
-  await app.register(healthRoutes, { dbAdapter });
-  await app.register(publicRoutes, { dbAdapter });
-  await app.register(ownerRoutes, { dbAdapter, authService });
+  await app.register(healthRoutes, { dbAdapter, providerGateway });
+  await app.register(publicRoutes, { dbAdapter, orchestrator, providerGateway });
+  await app.register(ownerRoutes, { dbAdapter, authService, orchestrator });
 
   // 8. Centralized Error Handler
   app.setErrorHandler((error, request, reply) => {
@@ -102,9 +106,10 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
     return reply.status(500).send({
       statusCode: 500,
       error: 'Internal Server Error',
-      message: appConfig.NODE_ENV === 'production' 
-        ? 'An unexpected error occurred. Please try again later.' 
-        : error.message
+      message:
+        appConfig.NODE_ENV === 'production'
+          ? 'An unexpected error occurred. Please try again later.'
+          : error.message
     });
   });
 
@@ -119,4 +124,3 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
 
   return app;
 }
-

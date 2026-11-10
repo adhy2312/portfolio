@@ -1,40 +1,52 @@
 import { FastifyInstance, FastifyPluginAsync } from 'fastify';
 import { z } from 'zod';
 import { SupabaseAdapter } from '../../auth/supabase.js';
-
-const PublicChatSchema = z.object({
-  message: z.string().trim().min(1, 'Message cannot be empty').max(2000, 'Message exceeds 2000 characters limit'),
-  sessionId: z.string().min(5).max(100).optional(),
-  language: z.string().max(10).optional()
-});
+import { CognitiveOrchestrator } from '../../cognitive-core/orchestrator.js';
+import { ProviderGateway } from '../../providers/gateway.js';
 
 const CreateConversationSchema = z.object({
-  title: z.string().trim().max(100).optional()
+  title: z.string().max(100).optional()
 });
 
 const SendMessageSchema = z.object({
-  content: z.string().trim().min(1).max(2000)
+  content: z.string().trim().min(1, 'Message cannot be empty').max(2000)
 });
 
-// In-memory store for visitor conversations (for local dev / testing parity)
-const visitorConversations = new Map<string, {
-  id: string;
-  visitorSessionId: string;
-  title: string;
-  createdAt: string;
-  messages: Array<{ id: string; role: string; content: string; createdAt: string }>;
-}>();
+const PublicChatSchema = z.object({
+  message: z.string().trim().min(1, 'Message cannot be empty').max(2000),
+  sessionId: z.string().optional()
+});
 
-export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = async (
-  fastify: FastifyInstance,
-  _opts
-) => {
-  // 1. Read approved public portfolio knowledge
+// In-memory conversation store for public visitors
+const visitorConversations = new Map<
+  string,
+  {
+    id: string;
+    visitorSessionId: string;
+    title: string;
+    messages: Array<{
+      id: string;
+      role: 'user' | 'assistant';
+      content: string;
+      createdAt: string;
+      provider?: string;
+      model?: string;
+    }>;
+    createdAt: string;
+  }
+>();
+
+export const publicRoutes: FastifyPluginAsync<{
+  dbAdapter: SupabaseAdapter;
+  orchestrator?: CognitiveOrchestrator;
+  providerGateway?: ProviderGateway;
+}> = async (fastify: FastifyInstance, opts) => {
+  // 1. Read approved public portfolio knowledge (Domain A)
   fastify.get(
     '/api/v1/public/knowledge',
     {
       schema: {
-        description: 'Read approved public portfolio knowledge (Domain A)',
+        description: 'Read approved public portfolio knowledge items (Domain A)',
         tags: ['Public'],
         response: {
           200: {
@@ -70,7 +82,7 @@ export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
           id: 'k2',
           topic: 'Architecture',
           title: 'Mini-Adhy Architecture',
-          content: 'Dual-domain personal intelligence system featuring single shared cognitive core and 10 specialist agents (JARVIS, FRIDAY, ULTRON).'
+          content: 'Dual-domain personal intelligence system featuring single shared cognitive core and specialist agents (JARVIS, FRIDAY, ULTRON).'
         },
         {
           id: 'k3',
@@ -107,31 +119,22 @@ export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
       const title = parseResult.success && parseResult.data.title ? parseResult.data.title : 'Public Portfolio Inquiry';
 
       const convId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-      const visitorSessionId = (request.headers['x-visitor-session-id'] as string) || 
-                               `vses_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      const visitorSessionId =
+        (request.headers['x-visitor-session-id'] as string) ||
+        `session_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
-      const newConv = {
+      visitorConversations.set(convId, {
         id: convId,
         visitorSessionId,
         title,
-        createdAt: new Date().toISOString(),
-        messages: [
-          {
-            id: `msg_${Date.now()}_init`,
-            role: 'assistant',
-            content: 'Hello! I am Mini-Adhy. How can I assist you with Adhithya portfolio, skills, or projects today?',
-            createdAt: new Date().toISOString()
-          }
-        ]
-      };
-
-      visitorConversations.set(convId, newConv);
+        messages: [],
+        createdAt: new Date().toISOString()
+      });
 
       return reply.status(201).send({
         success: true,
         conversationId: convId,
         visitorSessionId,
-        domain: 'PUBLIC',
         title
       });
     }
@@ -237,15 +240,38 @@ export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
 
       const userMsg = {
         id: `msg_${Date.now()}_u`,
-        role: 'user',
+        role: 'user' as const,
         content: parseResult.data.content,
         createdAt: new Date().toISOString()
       };
 
+      let assistantReply = `I received your inquiry: "${parseResult.data.content}". Adhithya specializes in full-stack architecture, cognitive agent systems, and reactive UI design.`;
+      let providerName = 'public-knowledge-baseline';
+      let modelName = 'mini-adhy-v1';
+
+      if (opts.orchestrator) {
+        try {
+          const res = await opts.orchestrator.handleRequest({
+            message: parseResult.data.content,
+            isOwnerAuthenticated: false,
+            visitorSessionId: sessionHeader,
+            conversationId: conv.id,
+            history: conv.messages.map((m) => ({ role: m.role, content: m.content }))
+          });
+          assistantReply = res.reply;
+          providerName = res.provider;
+          modelName = res.model;
+        } catch {
+          // Graceful fallback preserves truthfulness without crash
+        }
+      }
+
       const assistantMsg = {
         id: `msg_${Date.now()}_a`,
-        role: 'assistant',
-        content: `I received your inquiry: "${parseResult.data.content}". Adhithya specializes in full-stack architecture, cognitive agent systems, and reactive UI design.`,
+        role: 'assistant' as const,
+        content: assistantReply,
+        provider: providerName,
+        model: modelName,
         createdAt: new Date().toISOString()
       };
 
@@ -254,7 +280,9 @@ export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
       return reply.status(200).send({
         success: true,
         reply: assistantMsg.content,
-        conversationId: conv.id
+        conversationId: conv.id,
+        provider: providerName,
+        model: modelName
       });
     }
   );
@@ -295,13 +323,81 @@ export const publicRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
       const { message, sessionId } = parseResult.data;
       const activeSessionId = sessionId || `pub_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
+      let replyContent = `Hello! I am Mini-Adhy, Adhithya's AI companion. You asked: "${message}". I am operating securely in public visitor mode with access to Adhithya's projects, experience, and technical portfolio.`;
+      let providerName = 'public-knowledge-baseline';
+      let modelName = 'mini-adhy-v1';
+
+      if (opts.orchestrator) {
+        try {
+          const res = await opts.orchestrator.handleRequest({
+            message,
+            isOwnerAuthenticated: false,
+            visitorSessionId: activeSessionId
+          });
+          replyContent = res.reply;
+          providerName = res.provider;
+          modelName = res.model;
+        } catch {
+          // Graceful fallback
+        }
+      }
+
       return reply.status(200).send({
         success: true,
-        reply: `Hello! I am Mini-Adhy, Adhithya's AI companion. You asked: "${message}". I am operating securely in public visitor mode with access to Adhithya's projects, experience, and technical portfolio.`,
+        reply: replyContent,
         sessionId: activeSessionId,
+        provider: providerName,
+        model: modelName,
         domain: 'PUBLIC_VISITOR_SANDBOX',
         timestamp: new Date().toISOString()
       });
+    }
+  );
+
+  // 6. Server-Sent Events (SSE) Streaming endpoint
+  fastify.get(
+    '/api/v1/public/chat/stream',
+    {
+      schema: {
+        description: 'SSE Streaming chat response for real-time frontend rendering',
+        tags: ['Public'],
+        querystring: {
+          type: 'object',
+          required: ['message'],
+          properties: {
+            message: { type: 'string', minLength: 1, maxLength: 1000 }
+          }
+        }
+      }
+    },
+    async (request, reply) => {
+      const { message } = request.query as { message: string };
+
+      reply.raw.setHeader('Content-Type', 'text/event-stream');
+      reply.raw.setHeader('Cache-Control', 'no-cache, no-transform');
+      reply.raw.setHeader('Connection', 'keep-alive');
+      reply.raw.setHeader('X-Accel-Buffering', 'no');
+
+      if (!opts.providerGateway) {
+        reply.raw.write(`data: ${JSON.stringify({ text: `Echo: ${message}`, done: true })}\n\n`);
+        return reply.raw.end();
+      }
+
+      try {
+        await opts.providerGateway.stream(
+          {
+            messages: [{ role: 'user', content: message }],
+            privacyClass: 'PUBLIC'
+          },
+          (chunk) => {
+            reply.raw.write(`data: ${JSON.stringify({ delta: chunk.delta, done: chunk.done })}\n\n`);
+          }
+        );
+      } catch (err: any) {
+        reply.raw.write(`data: ${JSON.stringify({ error: err.message, done: true })}\n\n`);
+      } finally {
+        reply.raw.end();
+      }
     }
   );
 };

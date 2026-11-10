@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/app/server.js",
     "dev": "tsx watch src/app/server.ts",
-    "test": "tsx --test tests/config.test.ts tests/cors.test.ts tests/health.test.ts tests/security.test.ts tests/validation.test.ts tests/access_separation.test.ts"
+    "test": "tsx --test tests/config.test.ts tests/cors.test.ts tests/health.test.ts tests/security.test.ts tests/validation.test.ts tests/access_separation.test.ts tests/cognitive_and_providers.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",
@@ -17,6 +17,7 @@
     "@fastify/sensible": "^5.5.0",
     "@fastify/swagger": "^8.14.0",
     "@fastify/swagger-ui": "^3.0.0",
+    "@supabase/server": "^1.9.2",
     "@supabase/supabase-js": "^2.45.4",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
@@ -28,4 +29,3 @@
     "typescript": "^5.5.4"
   }
 }
-

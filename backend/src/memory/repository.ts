@@ -1,5 +1,5 @@
 import { SupabaseClient } from '@supabase/supabase-js';
-import { IMemoryRepository, MemoryRecord } from './types.js';
+import { IMemoryRepository, MemoryRecord, MemoryPrivacyClass, MemoryLifecycleStatus } from './types.js';
 
 export class InMemoryMemoryRepository implements IMemoryRepository {
   private records = new Map<string, MemoryRecord>();
@@ -10,15 +10,30 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     return { ...r };
   }
 
-  async searchRecords(query: string, options?: { category?: string; limit?: number }): Promise<MemoryRecord[]> {
-    const q = query.toLowerCase();
+  async searchRecords(
+    query: string,
+    options?: {
+      category?: string;
+      limit?: number;
+      privacyClass?: MemoryPrivacyClass;
+      lifecycleStatus?: MemoryLifecycleStatus;
+    }
+  ): Promise<MemoryRecord[]> {
+    const q = (query || '').toLowerCase().trim();
+    const terms = q.split(/\s+/).filter((w) => w.length > 3);
     const limit = options?.limit || 10;
     const results: MemoryRecord[] = [];
 
     for (const record of this.records.values()) {
       if (record.isTombstoned) continue;
       if (options?.category && record.category !== options.category) continue;
-      if (record.content.toLowerCase().includes(q)) {
+      if (options?.privacyClass && record.privacyClass !== options.privacyClass) continue;
+      if (options?.lifecycleStatus && record.lifecycleStatus !== options.lifecycleStatus) continue;
+
+      const lowerContent = record.content.toLowerCase();
+      const matches = !q || lowerContent.includes(q) || terms.some((term) => lowerContent.includes(term));
+
+      if (matches) {
         results.push({ ...record });
       }
       if (results.length >= limit) break;
@@ -30,11 +45,47 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     const now = Date.now();
     const full: MemoryRecord = {
       ...record,
+      privacyClass: record.privacyClass || 'OWNER_ONLY',
+      lifecycleStatus: record.lifecycleStatus || 'APPROVED',
+      sourceType: record.sourceType || 'USER_INPUT',
+      userApproved: record.userApproved ?? true,
+      verified: record.verified ?? true,
       createdAt: now,
       updatedAt: now
     };
     this.records.set(record.id, full);
-    return full;
+    return { ...full };
+  }
+
+  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>): Promise<MemoryRecord | null> {
+    const existing = this.records.get(id);
+    if (!existing || existing.isTombstoned) return null;
+
+    const updated: MemoryRecord = {
+      ...existing,
+      ...updates,
+      updatedAt: Date.now()
+    };
+    this.records.set(id, updated);
+    return { ...updated };
+  }
+
+  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
+    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`);
+    const stored = await this.storeRecord({
+      ...newRecord,
+      supersedesMemoryId: oldId
+    });
+    return stored;
+  }
+
+  async archiveRecord(id: string, reason?: string): Promise<boolean> {
+    const existing = this.records.get(id);
+    if (!existing) return false;
+    existing.lifecycleStatus = 'ARCHIVED';
+    existing.metadata = { ...existing.metadata, archiveReason: reason, archivedAt: Date.now() };
+    existing.updatedAt = Date.now();
+    return true;
   }
 
   async tombstoneRecord(id: string, reason?: string): Promise<boolean> {
@@ -70,21 +121,34 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
     return this.mapFromRow(data);
   }
 
-  async searchRecords(query: string, options?: { category?: string; limit?: number }): Promise<MemoryRecord[]> {
+  async searchRecords(
+    query: string,
+    options?: {
+      category?: string;
+      limit?: number;
+      privacyClass?: MemoryPrivacyClass;
+      lifecycleStatus?: MemoryLifecycleStatus;
+    }
+  ): Promise<MemoryRecord[]> {
     let builder = this.client
       .from('memories')
       .select('*')
       .eq('is_tombstoned', false)
-      .ilike('content', `%${query}%`)
       .limit(options?.limit || 10);
 
+    if (query) {
+      builder = builder.ilike('content', `%${query}%`);
+    }
     if (options?.category) {
       builder = builder.eq('category', options.category);
+    }
+    if (options?.lifecycleStatus) {
+      builder = builder.eq('lifecycle_status', options.lifecycleStatus);
     }
 
     const { data, error } = await builder;
     if (error || !data) return [];
-    return data.map(this.mapFromRow);
+    return data.map((r) => this.mapFromRow(r));
   }
 
   async storeRecord(record: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
@@ -97,6 +161,13 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
         content: record.content,
         confidence: record.confidence,
         provenance: record.provenance,
+        source: record.source,
+        source_type: record.sourceType || 'USER_INPUT',
+        user_approved: record.userApproved ?? true,
+        verified: record.verified ?? true,
+        privacy_class: record.privacyClass || 'OWNER_ONLY',
+        lifecycle_status: record.lifecycleStatus || 'APPROVED',
+        supersedes_memory_id: record.supersedesMemoryId || null,
         metadata: record.metadata || {},
         is_tombstoned: Boolean(record.isTombstoned),
         updated_at: now
@@ -108,6 +179,49 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       throw new Error(`Supabase memory persistence error: ${error?.message}`);
     }
     return this.mapFromRow(data);
+  }
+
+  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>): Promise<MemoryRecord | null> {
+    const now = new Date().toISOString();
+    const payload: any = { updated_at: now };
+    if (updates.category !== undefined) payload.category = updates.category;
+    if (updates.content !== undefined) payload.content = updates.content;
+    if (updates.confidence !== undefined) payload.confidence = updates.confidence;
+    if (updates.provenance !== undefined) payload.provenance = updates.provenance;
+    if (updates.lifecycleStatus !== undefined) payload.lifecycle_status = updates.lifecycleStatus;
+    if (updates.userApproved !== undefined) payload.user_approved = updates.userApproved;
+    if (updates.verified !== undefined) payload.verified = updates.verified;
+    if (updates.metadata !== undefined) payload.metadata = updates.metadata;
+
+    const { data, error } = await this.client
+      .from('memories')
+      .update(payload)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error || !data) return null;
+    return this.mapFromRow(data);
+  }
+
+  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
+    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`);
+    return this.storeRecord({
+      ...newRecord,
+      supersedesMemoryId: oldId
+    });
+  }
+
+  async archiveRecord(id: string, reason?: string): Promise<boolean> {
+    const { error } = await this.client
+      .from('memories')
+      .update({
+        lifecycle_status: 'ARCHIVED',
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id);
+
+    return !error;
   }
 
   async tombstoneRecord(id: string, reason?: string): Promise<boolean> {
@@ -137,15 +251,22 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
   private mapFromRow(row: any): MemoryRecord {
     return {
       id: row.id,
+      ownerId: row.owner_id,
       category: row.category,
       content: row.content,
       confidence: Number(row.confidence),
-      provenance: row.provenance,
-      metadata: row.metadata,
-      createdAt: new Date(row.created_at).getTime(),
-      updatedAt: new Date(row.updated_at).getTime(),
+      provenance: row.provenance || '',
+      source: row.source || 'system',
+      sourceType: row.source_type || 'USER_INPUT',
+      userApproved: Boolean(row.user_approved ?? true),
+      verified: Boolean(row.verified ?? true),
+      privacyClass: row.privacy_class || 'OWNER_ONLY',
+      lifecycleStatus: row.lifecycle_status || 'APPROVED',
+      supersedesMemoryId: row.supersedes_memory_id,
+      metadata: row.metadata || {},
+      createdAt: new Date(row.created_at || Date.now()).getTime(),
+      updatedAt: new Date(row.updated_at || Date.now()).getTime(),
       isTombstoned: Boolean(row.is_tombstoned)
     };
   }
 }
-

@@ -38,7 +38,10 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build && cd studio && npm install && npx sanity build ../build/studio --yes",
+    "build": "npm run build:all",
+    "build:web": "cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build",
+    "build:studio": "cd studio && npm ci && npx sanity build ../build/studio --yes",
+    "build:all": "npm run build:web && npm run build:studio",
     "test": "react-scripts test",
     "backend:dev": "cd backend && npm run dev",
     "backend:build": "cd backend && npm run build",

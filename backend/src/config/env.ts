@@ -17,7 +17,10 @@ export const EnvSchema = z.object({
   // Supabase (Server-side Only)
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_ANON_KEY: z.string().min(10).optional(),
+  SUPABASE_PUBLISHABLE_KEY: z.string().min(10).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(10).optional(),
+  SUPABASE_SECRET_KEY: z.string().min(10).optional(),
+  SUPABASE_JWKS_URL: z.string().url().optional(),
   SUPABASE_JWT_SECRET: z.string().min(16).optional(),
   DATABASE_URL: z.string().optional(),
 
@@ -60,8 +63,13 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
 
+  const anonKey = parsed.data.SUPABASE_ANON_KEY || parsed.data.SUPABASE_PUBLISHABLE_KEY;
+  const serviceRoleKey = parsed.data.SUPABASE_SERVICE_ROLE_KEY || parsed.data.SUPABASE_SECRET_KEY;
+
   return {
     ...parsed.data,
+    SUPABASE_ANON_KEY: anonKey,
+    SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey,
     allowedOriginsList,
     ownerEmailsList
   };
