@@ -36,6 +36,14 @@ export const EnvSchema = z.object({
   ALLOW_TEST_AUTH: z.boolean().default(false),
   ALLOW_OWNER_DATA_ON_CLOUD: z.coerce.boolean().default(false),
 
+  // Rate Limiting & Distributed Redis Cache
+  REDIS_URL: z.string().optional(),
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+  RATE_LIMIT_FAIL_CLOSED: z.coerce.boolean().default(false),
+  TRUSTED_PROXIES: z.string().default('127.0.0.1,::1,::ffff:127.0.0.1'),
+  TRUST_PROXY: z.string().optional(),
+
   // AI Free Quota Keys (Optional - server will start gracefully without them)
   GEMINI_API_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
@@ -47,6 +55,7 @@ export const EnvSchema = z.object({
 export type AppConfig = z.infer<typeof EnvSchema> & {
   allowedOriginsList: string[];
   ownerEmailsList: string[];
+  trustedProxiesList: string[];
 };
 
 export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
@@ -66,6 +75,11 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
     .filter(Boolean);
 
   const ownerEmailsList = (parsed.data.OWNER_EMAILS || '')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  const trustedProxiesList = (parsed.data.TRUSTED_PROXIES || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);
@@ -90,7 +104,8 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
     SUPABASE_ANON_KEY: anonKey,
     SUPABASE_SERVICE_ROLE_KEY: serviceRoleKey,
     allowedOriginsList,
-    ownerEmailsList
+    ownerEmailsList,
+    trustedProxiesList
   };
 }
 

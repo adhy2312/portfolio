@@ -170,26 +170,22 @@ export class IdentityAuthService {
 
   /**
    * Server-controlled owner authorization check (never trusts client bodies)
-   * When canonical owner ID is configured, user ID MUST match it. Never trusts email claims alone.
+   * Canonical owner ID is strictly mandatory. Email-based owner fallback is completely removed.
    */
   public isUserOwner(userId: string, email: string): boolean {
     const canonicalOwnerId = this.config.OWNER_USER_ID;
     const allowedEmails = this.config.ownerEmailsList || [];
 
-    if (canonicalOwnerId) {
-      if (canonicalOwnerId !== userId) {
-        return false; // Subject mismatch: cannot claim owner with different sub when canonical owner ID is set
-      }
-      if (email && allowedEmails.length > 0) {
-        return allowedEmails.includes(email.toLowerCase());
-      }
-      return true;
+    // Invariant: Canonical owner ID is mandatory across all environments.
+    // Email-based owner identity fallback is completely removed.
+    if (!canonicalOwnerId || canonicalOwnerId !== userId) {
+      return false;
     }
 
     if (email && allowedEmails.length > 0) {
       return allowedEmails.includes(email.toLowerCase());
     }
-    return false;
+    return true;
   }
 
   /**

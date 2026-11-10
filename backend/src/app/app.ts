@@ -38,10 +38,25 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   // 2. CORS configuration
   await app.register(cors, getCorsOptions(appConfig.allowedOriginsList));
 
-  // 3. Global Rate Limiter (Default: 100 requests per minute per IP)
+  // 3. Global Rate Limiter with Trusted Proxy Client IP Verification
   await app.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute',
+    keyGenerator: (req) => {
+      const socketIp = req.socket?.remoteAddress || '127.0.0.1';
+      const trustedList = appConfig.trustedProxiesList || ['127.0.0.1', '::1', '::ffff:127.0.0.1'];
+      const isTrustedProxy =
+        Boolean(process.env.VERCEL === '1') ||
+        trustedList.includes(socketIp.toLowerCase());
+
+      if (isTrustedProxy) {
+        const forwarded = req.headers['x-forwarded-for'];
+        if (typeof forwarded === 'string' && forwarded.trim()) {
+          return forwarded.split(',')[0].trim();
+        }
+      }
+      return socketIp;
+    },
     errorResponseBuilder: (_req, context) => ({
       statusCode: 429,
       error: 'Too Many Requests',

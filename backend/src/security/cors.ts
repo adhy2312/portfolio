@@ -1,6 +1,7 @@
 import { FastifyCorsOptions } from '@fastify/cors';
 
-export function getCorsOptions(allowedOrigins: string[]): FastifyCorsOptions {
+export function getCorsOptions(allowedOrigins: string[] = []): FastifyCorsOptions {
+  const origins = Array.isArray(allowedOrigins) ? allowedOrigins : [];
   return {
     origin: (origin, cb) => {
       // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
@@ -9,7 +10,7 @@ export function getCorsOptions(allowedOrigins: string[]): FastifyCorsOptions {
         return;
       }
 
-      const isAllowed = allowedOrigins.some((allowed) => {
+      const isAllowed = origins.some((allowed) => {
         if (allowed === '*') return true;
         if (allowed === origin) return true;
         // Support subdomain matching if needed

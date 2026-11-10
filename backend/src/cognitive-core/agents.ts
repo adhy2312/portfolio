@@ -449,12 +449,18 @@ export interface ToolExecutionEvidence {
 
 export type VerificationState =
   | 'PLANNED'
-  | 'DISPATCHED'
-  | 'EXECUTED'
-  | 'ACKNOWLEDGED'
-  | 'VERIFIED'
+  | 'PREPARED'
+  | 'AWAITING_APPROVAL'
+  | 'APPROVED'
+  | 'EXECUTING'
+  | 'COMPLETED'
   | 'FAILED'
   | 'UNAVAILABLE'
+  | 'SIMULATED'
+  | 'VERIFIED'
+  | 'PARTIAL'
+  | 'DISPATCHED'
+  | 'ACKNOWLEDGED'
   | 'NOT_TESTED'
   | 'INCONCLUSIVE'
   | 'SUCCESS_VERIFIED'
@@ -516,8 +522,8 @@ export class AdversarialAuditAdapter implements IToolExecutionAdapter<{ target: 
   constructor(options?: { projectRoot?: string; dbAdapter?: SupabaseAdapter; hardwareGateway?: IHardwareGateway }) {
     this.engine = new AdversarialAuditEngine({
       projectRoot: options?.projectRoot,
-      liveDatabaseAvailable: Boolean(options?.dbAdapter?.getClient()),
-      liveHardwareAvailable: Boolean(options?.hardwareGateway?.isConnected())
+      dbAdapter: options?.dbAdapter,
+      hardwareGateway: options?.hardwareGateway
     });
   }
 
@@ -553,6 +559,8 @@ export class AdversarialAuditAdapter implements IToolExecutionAdapter<{ target: 
       success = false;
     } else if (report.notTestedCount > 0 && report.passedCount === 0) {
       verificationState = 'NOT_TESTED';
+    } else if (report.notTestedCount > 0) {
+      verificationState = 'PARTIAL';
     } else if (report.inconclusiveCount > 0) {
       verificationState = 'INCONCLUSIVE';
     } else {
@@ -710,26 +718,45 @@ export class CheckServiceHealthAdapter implements IToolExecutionAdapter<{ servic
     // 2. Database service health probe
     if (service === 'database' || service === 'supabase' || service === 'postgres') {
       const client = this.dbAdapter?.getClient();
-      const isConnected = Boolean(client);
+      let isHealthy = false;
+      let probeDetails = 'Database client unconfigured or offline';
+
+      if (client) {
+        try {
+          // Real live probe query: constructed client object is not proof of a healthy database!
+          const { error } = await client.from('revoked_visitor_sessions').select('token_hash').limit(1);
+          if (error) {
+            isHealthy = false;
+            probeDetails = `Database query probe failed: ${error.message}`;
+          } else {
+            isHealthy = true;
+            probeDetails = 'Live PostgreSQL query probe succeeded';
+          }
+        } catch (err: any) {
+          isHealthy = false;
+          probeDetails = `Database query probe error: ${err.message}`;
+        }
+      }
+
       const durationMs = Date.now() - start;
-      const evidenceRaw = `${service}:${isConnected}:${start}`;
+      const evidenceRaw = `${service}:${isHealthy}:${start}`;
       const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
 
       return {
-        success: isConnected,
+        success: isHealthy,
         data: {
           service: input.serviceName,
-          status: isConnected ? 'HEALTHY' : 'UNAVAILABLE',
-          connected: isConnected,
-          details: isConnected ? 'Supabase client connected' : 'Database client unconfigured or offline'
+          status: isHealthy ? 'HEALTHY' : 'UNAVAILABLE',
+          connected: isHealthy,
+          details: probeDetails
         },
-        verificationState: isConnected ? 'VERIFIED' : 'UNAVAILABLE',
+        verificationState: isHealthy ? 'VERIFIED' : 'UNAVAILABLE',
         evidence: {
           executionTimestamp: start,
           durationMs,
           runtimeEnvironment: process.env.NODE_ENV || 'development',
           evidenceDigest,
-          details: { service: input.serviceName, connected: isConnected }
+          details: { service: input.serviceName, isHealthy, details: probeDetails }
         },
         auditMetadata: {
           agentId: ctx.agentId,
@@ -897,15 +924,21 @@ export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; du
     let verificationState: VerificationState = 'UNAVAILABLE';
     let success = false;
 
-    if (gatewayResult.state === 'PHYSICALLY_VERIFIED') {
+    if (gatewayResult.state === 'PHYSICALLY_VERIFIED' || gatewayResult.state === 'READBACK_VERIFIED') {
       verificationState = 'VERIFIED';
       success = true;
-    } else if (gatewayResult.state === 'ACKNOWLEDGED') {
+    } else if (gatewayResult.state === 'SIMULATED') {
+      verificationState = 'SIMULATED';
+      success = true;
+    } else if (gatewayResult.state === 'ACKNOWLEDGED' || gatewayResult.state === 'DEVICE_ACKNOWLEDGED') {
       verificationState = 'ACKNOWLEDGED';
       success = true;
-    } else if (gatewayResult.state === 'DISPATCHED') {
+    } else if (gatewayResult.state === 'DISPATCHED' || gatewayResult.state === 'COMMAND_SENT') {
       verificationState = 'DISPATCHED';
       success = true;
+    } else if (gatewayResult.state === 'TIMED_OUT') {
+      verificationState = 'FAILED';
+      success = false;
     } else if (gatewayResult.state === 'FAILED') {
       verificationState = 'FAILED';
       success = false;

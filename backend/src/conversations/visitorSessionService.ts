@@ -23,7 +23,10 @@ export class VisitorSessionService {
   private primarySigningSecret: string;
   private previousSigningSecret?: string;
   private defaultTtlMs = 24 * 60 * 60 * 1000; // 24-hour default expiration
-  private revokedHashes = new Set<string>();
+  // Bounded revocation cache (max 5000 entries) with TTL to avoid unbounded memory growth
+  private revocationCache = new Map<string, { revoked: boolean; cachedAt: number }>();
+  private readonly MAX_CACHE_ENTRIES = 5000;
+  private readonly CACHE_TTL_MS = 60000; // 1 minute
   // Local store strictly for development and unit testing
   private localConversations = new Map<string, PublicConversationRecord>();
   private initialized = false;
@@ -51,27 +54,47 @@ export class VisitorSessionService {
     }
   }
 
+  private setCachedRevocation(tokenHash: string, revoked: boolean): void {
+    if (this.revocationCache.size >= this.MAX_CACHE_ENTRIES) {
+      const oldestKey = this.revocationCache.keys().next().value;
+      if (oldestKey) this.revocationCache.delete(oldestKey);
+    }
+    this.revocationCache.set(tokenHash, { revoked, cachedAt: Date.now() });
+  }
+
+  private isCachedRevoked(tokenHash: string): boolean | null {
+    const entry = this.revocationCache.get(tokenHash);
+    if (!entry) return null;
+    if (Date.now() - entry.cachedAt > this.CACHE_TTL_MS) {
+      this.revocationCache.delete(tokenHash);
+      return null;
+    }
+    return entry.revoked;
+  }
+
+  // Backward compatibility alias for test harnesses simulating durable preload
+  public get revokedHashes(): { add: (tokenHash: string) => void; has: (tokenHash: string) => boolean; size: number } {
+    return {
+      add: (tokenHash: string) => this.setCachedRevocation(tokenHash, true),
+      has: (tokenHash: string) => this.isCachedRevoked(tokenHash) === true,
+      size: this.revocationCache.size
+    };
+  }
+
   /**
-   * Initializes durable state such as loading revoked sessions from PostgreSQL across restarts
+   * Initializes durable state: verifies PostgreSQL connectivity without unbounded table loads
    */
   public async initialize(): Promise<void> {
     if (this.initialized) return;
     const supabase = this.dbAdapter.getClient();
     if (supabase) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from('revoked_visitor_sessions')
-          .select('token_hash');
-        if (error) {
-          if (this.config.NODE_ENV === 'production') {
-            throw new Error('[Database Invariant Violation] Failed to synchronize durable revoked visitor sessions from Supabase: ' + error.message);
-          }
-        } else if (Array.isArray(data)) {
-          for (const row of data) {
-            if (row.token_hash) {
-              this.revokedHashes.add(row.token_hash);
-            }
-          }
+          .select('token_hash')
+          .limit(1);
+        if (error && this.config.NODE_ENV === 'production') {
+          throw new Error('[Database Invariant Violation] Failed to reach revoked_visitor_sessions table in Supabase: ' + error.message);
         }
       } catch (err: any) {
         if (this.config.NODE_ENV === 'production') {
@@ -114,15 +137,18 @@ export class VisitorSessionService {
   }
 
   /**
-   * Synchronous cryptographic signature, expiration, and local cache verification
+   * RESTRICTED: Synchronous cryptographic signature and expiration verification ONLY.
+   * INSECURE FOR AUTHORIZATION — does not probe distributed database revocation.
+   * CANNOT be used to authorize protected routes.
    */
   public verifySessionTokenSync(token: string): boolean {
     if (!token || typeof token !== 'string') return false;
 
-    // Check revocation cache
+    // Check bounded local cache
     const tokenHash = this.hashToken(token);
-    if (this.revokedHashes.has(tokenHash)) {
-      return false;
+    const cachedState = this.isCachedRevoked(tokenHash);
+    if (cachedState === true) {
+      return false; // Confirmed revoked in cache
     }
 
     const parts = token.split('.');
@@ -191,20 +217,32 @@ export class VisitorSessionService {
    * 1. Awaits initialization
    * 2. Cryptographically verifies format, expiration, and signature
    * 3. Probes PostgreSQL table 'revoked_visitor_sessions' for multi-instance revocation visibility
-   * 4. Fails closed on database errors in production
+   * 4. Fails closed with safe denial (false) on database errors, preventing middleware bypass or crashes
    */
   public async verifySessionToken(token: string): Promise<boolean> {
     if (!token || typeof token !== 'string') return false;
 
-    // Fast cryptographic & local cache validation
+    // Fast cryptographic & expiration validation
     if (!this.verifySessionTokenSync(token)) {
       return false;
     }
 
-    await this.ensureInitialized();
+    try {
+      await this.ensureInitialized();
+    } catch {
+      // Fail closed with safe denial if initialization fails
+      return false;
+    }
+
     const tokenHash = this.hashToken(token);
 
-    // Multi-instance database verification
+    // Bounded cache check
+    const cachedState = this.isCachedRevoked(tokenHash);
+    if (cachedState === true) {
+      return false; // Revoked
+    }
+
+    // Authoritative multi-instance database verification
     const supabase = this.dbAdapter.getClient();
     if (supabase) {
       try {
@@ -215,24 +253,24 @@ export class VisitorSessionService {
           .maybeSingle();
 
         if (error) {
-          if (this.config.NODE_ENV === 'production') {
-            throw new Error(`[Security Invariant Violation] Database outage during visitor session verification: ${error.message}`);
-          }
+          // Safe denial response: database read failure denies access, does not throw unhandled exception
+          console.error('[VisitorSession] Database read error during revocation check:', error.message);
           return false;
         }
 
         if (data && data.token_hash) {
-          this.revokedHashes.add(tokenHash);
+          this.setCachedRevocation(tokenHash, true);
           return false; // Revoked across instances
         }
+
+        // Cache confirmed valid state
+        this.setCachedRevocation(tokenHash, false);
       } catch (err: any) {
-        if (this.config.NODE_ENV === 'production') {
-          throw err;
-        }
+        console.error('[VisitorSession] Exception during database verification:', err.message);
         return false;
       }
     } else if (this.config.NODE_ENV === 'production') {
-      throw new Error('[Security Invariant Violation] Database client is required for visitor session verification in production');
+      return false;
     }
 
     return true;
@@ -243,16 +281,14 @@ export class VisitorSessionService {
    */
   public async revokeSessionToken(token: string): Promise<boolean> {
     if (!token) return false;
-    await this.ensureInitialized();
+    try {
+      await this.ensureInitialized();
+    } catch {
+      return false;
+    }
 
     const tokenHash = this.hashToken(token);
-    this.revokedHashes.add(tokenHash);
-
-    // Also extract raw entropy if available
-    const rawEntropy = token.split('.')[0];
-    if (rawEntropy) {
-      this.revokedHashes.add(this.hashToken(rawEntropy));
-    }
+    this.setCachedRevocation(tokenHash, true);
 
     const supabase = this.dbAdapter.getClient();
     if (supabase) {
@@ -264,19 +300,39 @@ export class VisitorSessionService {
           revoked_at: new Date().toISOString(),
           expires_at: expiresAt
         });
-        if (error && this.config.NODE_ENV === 'production') {
-          throw new Error('[Database Invariant Violation] Failed to durably record revoked session: ' + error.message);
+        if (error) {
+          console.error('[VisitorSession] Database write error during revocation:', error.message);
+          return false;
         }
       } catch (err: any) {
-        if (this.config.NODE_ENV === 'production') {
-          throw err;
-        }
+        console.error('[VisitorSession] Exception during revocation insert:', err.message);
+        return false;
       }
     } else if (this.config.NODE_ENV === 'production') {
-      throw new Error('[Security Invariant Violation] Database client is required for session revocation in production');
+      return false;
     }
 
     return true;
+  }
+
+  /**
+   * Maintenance: prunes expired revoked session records older than 24h
+   */
+  public async cleanupExpiredRevocations(): Promise<number> {
+    const supabase = this.dbAdapter.getClient();
+    if (!supabase) return 0;
+    try {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('revoked_visitor_sessions')
+        .delete()
+        .lt('expires_at', nowIso)
+        .select('token_hash');
+      if (error) return 0;
+      return data ? data.length : 0;
+    } catch {
+      return 0;
+    }
   }
 
   /**

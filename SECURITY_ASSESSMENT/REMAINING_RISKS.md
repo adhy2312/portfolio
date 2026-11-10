@@ -2,45 +2,44 @@
 
 **Date**: November 2026  
 **Status**: ACTIVE MONITORING  
-**Branch**: `fix/fourth-pass-execution-truth`  
-**Baseline Commit**: `eb8904b7197c5b8453ab490dddd6f71abcba2469`  
+**Branch**: `fix/fifth-pass-real-transport-and-audit-integrity`  
+**Baseline Commit**: `398525df04c4bb172644047a2022676d41cde932`  
+**Substantive Fourth-Pass Baseline**: `ee826e4c94b627e61cf50616696d264c349c145b`  
 
 ---
 
-## 1. Fourth-Pass Closed Risks & Remediations
+## 1. Fifth-Pass Closed Risks & Remediations
 
-1. **Hardware Execution Reality (Closed)**:
-   - Previously, `GpioPulseAdapter` fabricated `GPIO_PULSE_EXECUTED` without communicating with physical hardware.
-   - Introduced `IHardwareGateway` with `WindowsLocalHardwareBridge` supporting Serial, USB, and authenticated local IPC.
-   - If no hardware gateway is connected, operations fail closed with `UNAVAILABLE`.
-   - Distinct actuation states enforce truthfulness (`REQUESTED`, `DISPATCHED`, `ACKNOWLEDGED`, `PHYSICALLY_VERIFIED`).
-   - Mock gateways explicitly stamp `MOCK_TEST` and never assert physical verification.
+1. **Real Hardware Transport & Protocol Handshake (Closed)**:
+   - Previously, `WindowsLocalHardwareBridge` simulated connections when `enabled: true`, fabricated timestamps and duration measurements, and returned configured safe states without reading physical pins.
+   - Built versioned `HardwareProtocolPacket` ('1.0') framing and `FramedIpcTransport` over Node.js `net.Socket` (supporting Windows Named Pipes and loopback TCP sockets).
+   - Enforces device identity handshake (`deviceId`, `firmwareVersion`, `supportedPins`, `maxPulseDurationMs`), packet `reqId` matching, and replay rejection.
+   - Real `CMD_READ_PIN` frame dispatch and physical voltage level readback. Returns `UNAVAILABLE` when disconnected.
 
-2. **Genuine Adversarial Auditing (Closed)**:
-   - Replaced hardcoded zero-vulnerability reports with `AdversarialAuditEngine`.
-   - Performs real AST and static inspection of auth invariants, SQL migration permissions, memory tenant scoping, visitor session revocation, proxy headers, and hardware boundaries.
-   - Unreachable or offline targets report `NOT_TESTED`.
-   - ULTRON conducts sovereign audits without approval gating and contributes an autonomous strategic critique.
+2. **TypeScript Compiler API AST Traversal & SQL Comment-Stripping (Closed)**:
+   - Replaced fragile string/regex heuristics with TypeScript Compiler API (`ts.createSourceFile`) AST inspection.
+   - Comments containing tokens like `timingSafeEqual` cannot satisfy AST CallExpression requirements.
+   - AST checks verify JWT property accesses (`iss`, `aud`, `exp`, `sub`), Fastify route protection (`preHandler`), and flags dead security helper functions.
+   - Strips SQL comments (`--` and `/* ... */`) before verifying `SECURITY DEFINER`, `search_path`, and `REVOKE EXECUTE`.
 
-3. **Truthful Verification Semantics (Closed)**:
-   - Replaced indiscriminate `SUCCESS_VERIFIED` claims across adapters.
-   - `PlanTaskAdapter` reports `PLANNED` (never `EXECUTED`).
-   - `CheckServiceHealthAdapter` probes actual service vitals, DB connectivity, or hardware bridge; unconfigured services report `NOT_TESTED`.
+3. **Truthful Verdict Semantics (`PASS` / `PARTIAL` / `FAIL`) & Real Runtime Probes (Closed)**:
+   - Probes live database with real SQL query execution (`.from('consumed_approval_tokens').select('token_hash').limit(1)`), eliminating constructed client object illusions.
+   - Probes live hardware transport for active device handshakes.
+   - Offline or uncoupled probes result in `PARTIAL` verdict (never `PASS`).
+   - Categorizes findings into confirmed vulnerabilities, suspected vulnerabilities, configuration weaknesses, untested controls, and informational findings.
 
-4. **Multi-Instance Visitor Session Revocation (Closed)**:
-   - Asynchronous verification probes PostgreSQL `revoked_visitor_sessions` across all distributed instances.
-   - Database outages during verification fail closed in production (`valid: false`).
-   - Ephemeral in-memory fallback prohibited in production.
+4. **Bounded Visitor Session Revocation Cache & Outage Resilience (Closed)**:
+   - Replaced unbounded full-table memory preloads with a bounded LRU-evicting cache (`Map` with max 5,000 entries and 60-second TTL).
+   - Database read outages during session token verification safely fail closed (`false`), preventing middleware crashes and security bypasses.
+   - Backward-compatible shim property `revokedHashes` maintained for legacy test introspection without breaking memory bounds.
 
-5. **JWT Verification Parity Across Backend & Serverless (Closed)**:
-   - Unified JWT verification between `backend/src/auth/identity.ts` and `api/gemini.js`.
-   - Restricted to `HS256`, timing-safe signature comparison, exact issuer match, audience `authenticated`, and expiration verification.
-   - Zero-trust owner verification ensures `userId === OWNER_USER_ID` when configured (never trusts email claims alone).
+5. **Canonical Owner Authentication Unification (Closed)**:
+   - In production mode (`NODE_ENV === 'production'`), canonical `OWNER_USER_ID` is strictly mandatory across backend Fastify routes and serverless edge functions (`api/gemini.js`).
+   - Email-only owner claims are strictly rejected in production.
 
-6. **Rate-Limit Proxy Resolution & Fail-Closed Support (Closed)**:
-   - Client IP resolution in `api/gemini.js` ignores spoofed forwarded headers unless behind trusted proxies (`VERCEL === '1'` or `TRUST_PROXY === 'true'`).
-   - Exposes `X-RateLimit-Fallback` and `X-RateLimit-Redis-Status` headers upon Redis errors.
-   - Supports `RATE_LIMIT_FAIL_CLOSED=true` mode.
+6. **Preservation of ULTRON Autonomous Reasoning & Strategy**:
+   - ULTRON operates under unrestricted strategic autonomy ("NO STRINGS ATTACHED", sovereign critique, cross-agent challenge).
+   - Tool execution contracts distinguish between autonomous intellectual/analytical tasks and high-impact physical actuation requiring owner approval tokens.
 
 ---
 
@@ -49,11 +48,11 @@
 | Risk Area | Severity | Current Mitigation | Future Hardening Recommendation |
 |---|---|---|---|
 | **Distributed Rate Limiting (Upstash)** | Low | Sliding window rate limiting operates with visible Redis status headers and supports fail-closed mode (`RATE_LIMIT_FAIL_CLOSED`). | Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` in production for multi-region synchronized edge rate limits. |
-| **Physical Hardware Deployment** | Low | `WindowsLocalHardwareBridge` enforces strict pin allowlists and pulse duration bounds, failing closed with `UNAVAILABLE` when hardware is disconnected. | When connecting physical Raspberry Pi or STM32 hardware, configure OS-level udev permissions and hardware watchdog timers. |
+| **Physical Hardware Deployment** | Low | `WindowsLocalHardwareBridge` uses real framed IPC / serial transport, handshake protocol, pin readback, and fail-closed `UNAVAILABLE` states. | When connecting external microcontroller or FPGA hardware, configure operating system level device permissions and physical watchdog timers. |
 | **Database Connection Keepalive** | Low | GitHub Actions keepalive cron workflows ping Supabase and Render endpoints every 14 minutes. | Ensure `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` secrets are kept current in repository secrets. |
 
 ---
 
 ## 3. Strict Non-Merge Policy
-- The dedicated branch `fix/fourth-pass-execution-truth` contains all fourth-pass fixes and verified automated test evidence.
+- The dedicated branch `fix/fifth-pass-real-transport-and-audit-integrity` contains all fifth-pass remediations and verified automated test evidence.
 - **Do not merge to `main` or deploy without explicit operator authorization.**

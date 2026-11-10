@@ -26,6 +26,7 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
       PORT: 3010,
       LOG_LEVEL: 'silent',
       SUPABASE_JWT_SECRET: testSecret,
+      OWNER_USER_ID: 'usr_adhithya_mohan_verified',
       OWNER_EMAILS: ownerEmail
     });
     app = await buildApp(testConfig);
