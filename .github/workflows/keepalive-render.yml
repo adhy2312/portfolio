@@ -22,3 +22,4 @@ jobs:
           else
             echo "Notice: Status was $HTTP_STATUS (Render service may be spinning up)."
           fi
+
