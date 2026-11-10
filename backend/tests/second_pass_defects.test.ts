@@ -512,3 +512,4 @@ describe('SECOND-PASS P1 — 8. Agent Capability Contracts & Tool Executor Bound
     assert.match((result.result as any).invariantSummary, /sovereign red-team assessment verified/i);
   });
 });
+
