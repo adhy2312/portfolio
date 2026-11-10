@@ -90,3 +90,4 @@ CREATE POLICY "Service role append audit" ON public.audit_events
 
 CREATE POLICY "Service role read audit" ON public.audit_events
   FOR SELECT TO service_role USING (true);
+

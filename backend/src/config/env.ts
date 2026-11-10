@@ -18,7 +18,13 @@ export const EnvSchema = z.object({
   SUPABASE_URL: z.string().url().optional(),
   SUPABASE_ANON_KEY: z.string().min(10).optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(10).optional(),
+  SUPABASE_JWT_SECRET: z.string().min(16).optional(),
   DATABASE_URL: z.string().optional(),
+
+  // Owner Authorization & Security (Server-controlled allowlist)
+  OWNER_USER_ID: z.string().optional(),
+  OWNER_EMAILS: z.string().default('adhithyamohan2312@gmail.com'),
+  ENCRYPTION_SECRET: z.string().min(16).optional(),
 
   // AI Free Quota Keys (Optional - server will start gracefully without them)
   GEMINI_API_KEY: z.string().optional(),
@@ -30,6 +36,7 @@ export const EnvSchema = z.object({
 
 export type AppConfig = z.infer<typeof EnvSchema> & {
   allowedOriginsList: string[];
+  ownerEmailsList: string[];
 };
 
 export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
@@ -48,11 +55,18 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
     .map((s) => s.trim())
     .filter(Boolean);
 
+  const ownerEmailsList = parsed.data.OWNER_EMAILS
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
   return {
     ...parsed.data,
-    allowedOriginsList
+    allowedOriginsList,
+    ownerEmailsList
   };
 }
 
 // Default export cached singleton
 export const config = parseEnv();
+

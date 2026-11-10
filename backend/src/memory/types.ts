@@ -23,3 +23,4 @@ export interface IDatabaseAdapter {
   isAvailable(): Promise<boolean>;
   getMemoryRepository(): IMemoryRepository;
 }
+

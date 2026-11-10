@@ -80,3 +80,4 @@ describe('Backend Foundation — Health, Readiness & OpenAPI Spec', () => {
     assert.strictEqual(body.error, 'Not Found');
   });
 });
+

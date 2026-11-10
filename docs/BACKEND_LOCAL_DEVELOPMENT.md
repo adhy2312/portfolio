@@ -132,3 +132,4 @@ Produces optimized JavaScript in `backend/dist/`.
 | `GET` | `/docs` | Public | Interactive OpenAPI (Swagger UI) documentation |
 | `GET` | `/api/v1/public/capabilities` | Public (Domain A) | Directory of public agents & capabilities |
 | `POST` | `/api/v1/public/chat` | Public (Domain A) | Rate-limited visitor chat Q&A |
+

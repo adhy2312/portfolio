@@ -44,3 +44,4 @@ export class SupabaseAdapter implements IDatabaseAdapter {
     return this.memoryRepo;
   }
 }
+

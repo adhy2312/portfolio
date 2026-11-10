@@ -57,3 +57,4 @@ describe('Backend Foundation — Security & Secret Redaction', () => {
     assert.ok(res.headers['x-request-id'] !== undefined || res.raw);
   });
 });
+

@@ -179,3 +179,4 @@ export class BackendClient {
 
 // Singleton instance for frontend application
 export const backendClient = new BackendClient();
+

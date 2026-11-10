@@ -51,3 +51,4 @@ describe('Backend Foundation — CORS Policy Enforcement', () => {
     assert.strictEqual(res.headers['access-control-allow-origin'], undefined);
   });
 });
+

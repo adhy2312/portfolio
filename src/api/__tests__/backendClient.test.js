@@ -80,3 +80,4 @@ describe('Frontend Compatibility — BackendClient Abstraction', () => {
     expect(res.error).toContain('Mini-Adhy Backend is currently unreachable');
   });
 });
+

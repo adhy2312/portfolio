@@ -109,3 +109,4 @@ export const healthRoutes: FastifyPluginAsync<{ dbAdapter: SupabaseAdapter }> = 
     }
   );
 };
+

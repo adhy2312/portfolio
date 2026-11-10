@@ -37,3 +37,4 @@ async function startServer() {
 if (process.argv[1]?.endsWith('server.ts') || process.argv[1]?.endsWith('server.js')) {
   startServer();
 }
+

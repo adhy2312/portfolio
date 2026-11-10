@@ -9,8 +9,10 @@ import { getFastifyLoggerConfig, generateRequestId } from '../observability/logg
 import { getCorsOptions } from '../security/cors.js';
 import { sanitizationHook } from '../security/sanitization.js';
 import { SupabaseAdapter } from '../auth/supabase.js';
+import { IdentityAuthService } from '../auth/identity.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
 import { publicRoutes } from '../api/routes/public.routes.js';
+import { ownerRoutes } from '../api/routes/owner.routes.js';
 
 export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   const app = fastify({
@@ -68,12 +70,14 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   // 5. Pre-validation sanitization hook (Prototype pollution protection)
   app.addHook('preValidation', sanitizationHook);
 
-  // 6. Persistence Adapter
+  // 6. Persistence & Identity Services
   const dbAdapter = new SupabaseAdapter(appConfig);
+  const authService = new IdentityAuthService(appConfig, dbAdapter);
 
   // 7. Register Route Modules
   await app.register(healthRoutes, { dbAdapter });
   await app.register(publicRoutes, { dbAdapter });
+  await app.register(ownerRoutes, { dbAdapter, authService });
 
   // 8. Centralized Error Handler
   app.setErrorHandler((error, request, reply) => {
@@ -115,3 +119,4 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
 
   return app;
 }
+

@@ -33,3 +33,4 @@ export function getCorsOptions(allowedOrigins: string[]): FastifyCorsOptions {
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Session-ID', 'X-Request-ID']
   };
 }
+
