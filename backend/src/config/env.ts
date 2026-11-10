@@ -28,6 +28,7 @@ export const EnvSchema = z.object({
   OWNER_USER_ID: z.string().optional(),
   OWNER_EMAILS: z.string().optional(),
   ENCRYPTION_SECRET: z.string().min(16).optional(),
+  APPROVAL_SIGNING_SECRET: z.string().min(32, 'APPROVAL_SIGNING_SECRET must be at least 32 characters').optional(),
   ALLOW_TEST_AUTH: z.boolean().default(false),
   ALLOW_OWNER_DATA_ON_CLOUD: z.coerce.boolean().default(false),
 
@@ -67,6 +68,12 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
 
   const anonKey = parsed.data.SUPABASE_ANON_KEY || parsed.data.SUPABASE_PUBLISHABLE_KEY;
   const serviceRoleKey = parsed.data.SUPABASE_SERVICE_ROLE_KEY || parsed.data.SUPABASE_SECRET_KEY;
+
+  if (parsed.data.NODE_ENV === 'production' && !parsed.data.APPROVAL_SIGNING_SECRET) {
+    throw new Error(
+      '[Security Invariant Violation] In production mode, APPROVAL_SIGNING_SECRET is mandatory and must be at least 32 characters long. Silently generating random keys or reusing other secrets is strictly prohibited.'
+    );
+  }
 
   return {
     ...parsed.data,

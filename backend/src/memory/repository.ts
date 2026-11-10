@@ -7,7 +7,8 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
   async getRecord(id: string, ownerId?: string): Promise<MemoryRecord | null> {
     const r = this.records.get(id);
     if (!r || r.isTombstoned) return null;
-    if (ownerId && r.ownerId && r.ownerId !== ownerId) return null;
+    // Strict Owner Scoping: unowned legacy records or records belonging to another owner are never returned
+    if (ownerId !== undefined && r.ownerId !== ownerId) return null;
     return { ...r };
   }
 
@@ -28,7 +29,9 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
 
     for (const record of this.records.values()) {
       if (record.isTombstoned) continue;
-      if (options?.ownerId && record.ownerId && record.ownerId !== options.ownerId) continue;
+      // Strict Owner Scoping: If ownerId is specified, the record MUST have matching ownerId.
+      // Unowned legacy records or records belonging to another owner are never returned in an owner-scoped query.
+      if (options?.ownerId !== undefined && record.ownerId !== options.ownerId) continue;
       if (options?.category && record.category !== options.category) continue;
       if (options?.privacyClass && record.privacyClass !== options.privacyClass) continue;
       if (options?.lifecycleStatus && record.lifecycleStatus !== options.lifecycleStatus) continue;
@@ -46,14 +49,34 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
 
   async storeRecord(record: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
     const now = Date.now();
+
+    // Trust & Verification Invariant:
+    // Only records with provenance proving authenticated owner creation can default to approved/verified.
+    // Unknown, imported, or legacy records MUST default to QUARANTINED and unverified.
+    const isOwnerProvenance = (record.source === 'owner' || record.source === 'owner_authenticated') &&
+      record.sourceType === 'USER_INPUT' &&
+      Boolean(record.ownerId);
+
+    const userApproved = record.userApproved !== undefined
+      ? record.userApproved
+      : (isOwnerProvenance ? true : false);
+
+    const verified = record.verified !== undefined
+      ? record.verified
+      : (isOwnerProvenance ? true : false);
+
+    const lifecycleStatus = record.lifecycleStatus !== undefined
+      ? record.lifecycleStatus
+      : (userApproved && verified ? 'APPROVED' : 'QUARANTINED');
+
     const full: MemoryRecord = {
       ...record,
       ownerId: record.ownerId,
       privacyClass: record.privacyClass || 'OWNER_ONLY',
-      lifecycleStatus: record.lifecycleStatus || 'APPROVED',
+      lifecycleStatus,
       sourceType: record.sourceType || 'USER_INPUT',
-      userApproved: record.userApproved ?? true,
-      verified: record.verified ?? true,
+      userApproved,
+      verified,
       createdAt: now,
       updatedAt: now
     };
@@ -64,7 +87,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
   async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>, ownerId?: string): Promise<MemoryRecord | null> {
     const existing = this.records.get(id);
     if (!existing || existing.isTombstoned) return null;
-    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return null;
+    if (ownerId !== undefined && existing.ownerId !== ownerId) return null;
 
     const updated: MemoryRecord = {
       ...existing,
@@ -76,9 +99,17 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
   }
 
   async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>, ownerId?: string): Promise<MemoryRecord> {
+    const existing = this.records.get(oldId);
+    if (!existing || existing.isTombstoned) {
+      throw new Error(`Record ${oldId} not found`);
+    }
+    if (ownerId !== undefined && existing.ownerId !== ownerId) {
+      throw new Error(`Access Denied: Record ${oldId} does not belong to owner ${ownerId}`);
+    }
     await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`, ownerId);
     const stored = await this.storeRecord({
       ...newRecord,
+      ownerId: ownerId || newRecord.ownerId,
       supersedesMemoryId: oldId
     });
     return stored;
@@ -87,7 +118,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
   async archiveRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
     const existing = this.records.get(id);
     if (!existing) return false;
-    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return false;
+    if (ownerId !== undefined && existing.ownerId !== ownerId) return false;
     existing.lifecycleStatus = 'ARCHIVED';
     existing.metadata = { ...existing.metadata, archiveReason: reason, archivedAt: Date.now() };
     existing.updatedAt = Date.now();
@@ -97,7 +128,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
   async tombstoneRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
     const existing = this.records.get(id);
     if (!existing) return false;
-    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return false;
+    if (ownerId !== undefined && existing.ownerId !== ownerId) return false;
     existing.isTombstoned = true;
     existing.metadata = { ...existing.metadata, tombstoneReason: reason };
     existing.updatedAt = Date.now();
@@ -172,6 +203,26 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
 
   async storeRecord(record: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
     const now = new Date().toISOString();
+
+    // Trust & Verification Invariant:
+    // Only records with provenance proving authenticated owner creation can default to approved/verified.
+    // Unknown, imported, or legacy records MUST default to QUARANTINED and unverified.
+    const isOwnerProvenance = (record.source === 'owner' || record.source === 'owner_authenticated') &&
+      record.sourceType === 'USER_INPUT' &&
+      Boolean(record.ownerId);
+
+    const userApproved = record.userApproved !== undefined
+      ? record.userApproved
+      : (isOwnerProvenance ? true : false);
+
+    const verified = record.verified !== undefined
+      ? record.verified
+      : (isOwnerProvenance ? true : false);
+
+    const lifecycleStatus = record.lifecycleStatus !== undefined
+      ? record.lifecycleStatus
+      : (userApproved && verified ? 'APPROVED' : 'QUARANTINED');
+
     const { data, error } = await this.client
       .from('memories')
       .upsert({
@@ -183,10 +234,10 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
         provenance: record.provenance,
         source: record.source,
         source_type: record.sourceType || 'USER_INPUT',
-        user_approved: record.userApproved ?? true,
-        verified: record.verified ?? true,
+        user_approved: userApproved,
+        verified: verified,
         privacy_class: record.privacyClass || 'OWNER_ONLY',
-        lifecycle_status: record.lifecycleStatus || 'APPROVED',
+        lifecycle_status: lifecycleStatus,
         supersedes_memory_id: record.supersedesMemoryId || null,
         metadata: record.metadata || {},
         is_tombstoned: Boolean(record.isTombstoned),

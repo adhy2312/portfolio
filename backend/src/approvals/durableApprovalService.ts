@@ -81,10 +81,14 @@ export class DurableApprovalService {
     private config: AppConfig,
     private dbAdapter: SupabaseAdapter
   ) {
+    if (config.NODE_ENV === 'production' && !config.APPROVAL_SIGNING_SECRET) {
+      throw new Error(
+        '[Security Invariant] In production mode, APPROVAL_SIGNING_SECRET is mandatory and must be at least 32 characters long. Generating random secrets or reusing other secrets is prohibited.'
+      );
+    }
     this.signingSecret =
-      config.ENCRYPTION_SECRET ||
-      config.SUPABASE_JWT_SECRET ||
-      crypto.randomBytes(32).toString('hex');
+      config.APPROVAL_SIGNING_SECRET ||
+      'dev_test_approval_signing_secret_min_32_chars_long_12345';
   }
 
   /**
@@ -391,59 +395,28 @@ export class DurableApprovalService {
       return { success: false, reason: 'INVALID_TOKEN_SIGNATURE', error: 'Cryptographic token signature verification failed.' };
     }
 
-    // Anti-replay check against consumptions table
+    // Anti-replay and atomic state transition
+    // 1. If Supabase is available, execute atomic PostgreSQL RPC transaction with FOR UPDATE row lock
     if (supabase) {
       try {
-        const { data: existingConsumption } = await supabase
-          .from('approval_consumptions')
-          .select('id')
-          .eq('token_hash', tokenHash)
-          .single();
-
-        if (existingConsumption) {
-          return { success: false, reason: 'TOKEN_ALREADY_USED', error: 'Token replay detected: token has already been consumed.' };
-        }
-
-        const nowIso = new Date().toISOString();
-        // Atomic update and consumption insert
-        const { error: updateError } = await supabase
-          .from('approval_requests')
-          .update({
-            status: 'CONSUMED',
-            consumed_at: nowIso,
-            metadata: {
-              ...(record.metadata || {}),
-              consumedBy: params.consumerIdentity || 'owner_api',
-              consumedAt: nowIso
-            }
-          })
-          .eq('approval_id', approvalId)
-          .eq('status', record.status);
-
-        if (updateError) {
-          return { success: false, reason: 'CONCURRENT_CONSUMPTION_CONFLICT', error: 'Failed to atomically consume approval.' };
-        }
-
-        await supabase.from('approval_consumptions').insert({
-          approval_id: approvalId,
-          consumed_by: params.consumerIdentity || 'owner_api',
-          token_hash: tokenHash,
-          consumed_at: nowIso
+        const { data: rpcResult, error: rpcError } = await supabase.rpc('consume_approval_atomic', {
+          p_approval_id: approvalId,
+          p_token_hash: tokenHash,
+          p_owner_id: ownerId,
+          p_action_type: params.actionType || record.actionType,
+          p_target_service: params.targetService || record.targetService,
+          p_payload_hash: record.payloadHash,
+          p_consumer_identity: params.consumerIdentity || 'owner_api',
+          p_current_epoch_ms: Date.now()
         });
 
-        // Insert immutable audit event
-        await supabase.from('audit_events').insert({
-          event_type: 'APPROVAL_TOKEN_CONSUMED',
-          actor_id: ownerId,
-          target_resource: `approval:${approvalId}`,
-          payload_hash: record.payloadHash,
-          risk_tier: 'CONTROLLED',
-          status: 'SUCCESS',
-          details: {
-            actionType: record.actionType,
-            consumerIdentity: params.consumerIdentity || 'owner_api'
-          }
-        });
+        if (rpcError) {
+          return { success: false, reason: 'DATABASE_ERROR', error: rpcError.message };
+        }
+
+        if (rpcResult && typeof rpcResult === 'object') {
+          return rpcResult as ConsumeResult;
+        }
       } catch (err: any) {
         if (this.config.NODE_ENV === 'production') {
           return { success: false, reason: 'DATABASE_ERROR', error: err.message };
@@ -451,7 +424,7 @@ export class DurableApprovalService {
       }
     }
 
-    // Local state consumption
+    // 2. Offline / Local in-memory atomic critical section
     if (this.localConsumptions.has(tokenHash)) {
       return { success: false, reason: 'TOKEN_ALREADY_USED', error: 'Token replay detected (Local anti-replay invariant).' };
     }

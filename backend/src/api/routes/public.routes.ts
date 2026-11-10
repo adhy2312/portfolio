@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { SupabaseAdapter } from '../../auth/supabase.js';
 import { CognitiveOrchestrator } from '../../cognitive-core/orchestrator.js';
 import { ProviderGateway } from '../../providers/gateway.js';
+import { VisitorSessionService } from '../../conversations/visitorSessionService.js';
+import { AppConfig } from '../../config/env.js';
 
 const CreateConversationSchema = z.object({
   title: z.string().max(100).optional()
@@ -17,30 +19,16 @@ const PublicChatSchema = z.object({
   sessionId: z.string().optional()
 });
 
-// In-memory conversation store for public visitors
-const visitorConversations = new Map<
-  string,
-  {
-    id: string;
-    visitorSessionId: string;
-    title: string;
-    messages: Array<{
-      id: string;
-      role: 'user' | 'assistant';
-      content: string;
-      createdAt: string;
-      provider?: string;
-      model?: string;
-    }>;
-    createdAt: string;
-  }
->();
-
 export const publicRoutes: FastifyPluginAsync<{
   dbAdapter: SupabaseAdapter;
   orchestrator?: CognitiveOrchestrator;
   providerGateway?: ProviderGateway;
+  visitorSessionService?: VisitorSessionService;
+  config?: AppConfig;
 }> = async (fastify: FastifyInstance, opts) => {
+  const visitorService =
+    opts.visitorSessionService ||
+    new VisitorSessionService(opts.config || ({} as any), opts.dbAdapter);
   // 1. Read approved public portfolio knowledge (Domain A)
   fastify.get(
     '/api/v1/public/knowledge',
@@ -99,12 +87,12 @@ export const publicRoutes: FastifyPluginAsync<{
     }
   );
 
-  // 2. Start a public assistant conversation session
+  // 2. Start a public assistant conversation session with cryptographically secure visitor session token
   fastify.post(
     '/api/v1/public/conversations',
     {
       schema: {
-        description: 'Start public assistant conversation session with opaque visitor session scoping',
+        description: 'Start public assistant conversation session with cryptographically bound visitor session scoping',
         tags: ['Public'],
         body: {
           type: 'object',
@@ -118,34 +106,32 @@ export const publicRoutes: FastifyPluginAsync<{
       const parseResult = CreateConversationSchema.safeParse(request.body || {});
       const title = parseResult.success && parseResult.data.title ? parseResult.data.title : 'Public Portfolio Inquiry';
 
-      const convId = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
-      const visitorSessionId =
-        (request.headers['x-visitor-session-id'] as string) ||
-        `session_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+      const sessionHeader = request.headers['x-visitor-session-id'] as string;
+      let visitorSessionId = sessionHeader;
 
-      visitorConversations.set(convId, {
-        id: convId,
-        visitorSessionId,
-        title,
-        messages: [],
-        createdAt: new Date().toISOString()
-      });
+      // Cryptographic session verification: Do not trust arbitrary unverified tokens
+      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+        visitorSessionId = visitorService.generateSessionToken();
+      }
+
+      const conv = await visitorService.createConversation(visitorSessionId, title);
 
       return reply.status(201).send({
         success: true,
-        conversationId: convId,
+        conversationId: conv.id,
         visitorSessionId,
-        title
+        visitorSessionToken: visitorSessionId,
+        title: conv.title
       });
     }
   );
 
-  // 3. Read visitor conversation history (strictly scoped to visitor session token)
+  // 3. Read visitor conversation history (strictly scoped to verified visitor session token)
   fastify.get(
     '/api/v1/public/conversations/:id',
     {
       schema: {
-        description: 'Read visitor conversation history (scanned strictly against caller session ID)',
+        description: 'Read visitor conversation history (strictly authenticated against caller session token)',
         tags: ['Public'],
         params: {
           type: 'object',
@@ -160,8 +146,17 @@ export const publicRoutes: FastifyPluginAsync<{
       const { id } = request.params as { id: string };
       const sessionHeader = request.headers['x-visitor-session-id'] as string;
 
-      const conv = visitorConversations.get(id);
-      if (!conv) {
+      // Unverified or missing session token is rejected
+      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Invalid, missing, or revoked visitor session token.'
+        });
+      }
+
+      const access = await visitorService.getConversation(id, sessionHeader);
+      if (access.status === 'NOT_FOUND') {
         return reply.status(404).send({
           statusCode: 404,
           error: 'Not Found',
@@ -169,8 +164,7 @@ export const publicRoutes: FastifyPluginAsync<{
         });
       }
 
-      // Cross-visitor isolation: Visitor A cannot read Visitor B's conversation
-      if (!sessionHeader || sessionHeader !== conv.visitorSessionId) {
+      if (access.status === 'FORBIDDEN') {
         return reply.status(403).send({
           statusCode: 403,
           error: 'Forbidden',
@@ -180,12 +174,12 @@ export const publicRoutes: FastifyPluginAsync<{
 
       return reply.status(200).send({
         success: true,
-        conversation: conv
+        conversation: access.conversation
       });
     }
   );
 
-  // 4. Send message to public assistant conversation
+  // 4. Send message to public assistant conversation (Durable storage)
   fastify.post(
     '/api/v1/public/conversations/:id/messages',
     {
@@ -212,8 +206,16 @@ export const publicRoutes: FastifyPluginAsync<{
       const { id } = request.params as { id: string };
       const sessionHeader = request.headers['x-visitor-session-id'] as string;
 
-      const conv = visitorConversations.get(id);
-      if (!conv) {
+      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+        return reply.status(401).send({
+          statusCode: 401,
+          error: 'Unauthorized',
+          message: 'Invalid, missing, or revoked visitor session token.'
+        });
+      }
+
+      const access = await visitorService.getConversation(id, sessionHeader);
+      if (access.status === 'NOT_FOUND') {
         return reply.status(404).send({
           statusCode: 404,
           error: 'Not Found',
@@ -221,7 +223,7 @@ export const publicRoutes: FastifyPluginAsync<{
         });
       }
 
-      if (!sessionHeader || sessionHeader !== conv.visitorSessionId) {
+      if (access.status === 'FORBIDDEN') {
         return reply.status(403).send({
           statusCode: 403,
           error: 'Forbidden',
@@ -238,12 +240,8 @@ export const publicRoutes: FastifyPluginAsync<{
         });
       }
 
-      const userMsg = {
-        id: `msg_${Date.now()}_u`,
-        role: 'user' as const,
-        content: parseResult.data.content,
-        createdAt: new Date().toISOString()
-      };
+      // Append user message
+      await visitorService.appendMessage(id, sessionHeader, 'user', parseResult.data.content);
 
       let assistantReply = `I received your inquiry: "${parseResult.data.content}". Adhithya specializes in full-stack architecture, cognitive agent systems, and reactive UI design.`;
       let providerName = 'public-knowledge-baseline';
@@ -255,8 +253,8 @@ export const publicRoutes: FastifyPluginAsync<{
             message: parseResult.data.content,
             isOwnerAuthenticated: false,
             visitorSessionId: sessionHeader,
-            conversationId: conv.id,
-            history: conv.messages.map((m) => ({ role: m.role, content: m.content }))
+            conversationId: id,
+            history: (access.conversation?.messages || []).map((m) => ({ role: m.role as any, content: m.content }))
           });
           assistantReply = res.reply;
           providerName = res.provider;
@@ -266,23 +264,45 @@ export const publicRoutes: FastifyPluginAsync<{
         }
       }
 
-      const assistantMsg = {
-        id: `msg_${Date.now()}_a`,
-        role: 'assistant' as const,
-        content: assistantReply,
+      // Append assistant message
+      await visitorService.appendMessage(id, sessionHeader, 'assistant', assistantReply, {
         provider: providerName,
-        model: modelName,
-        createdAt: new Date().toISOString()
-      };
-
-      conv.messages.push(userMsg, assistantMsg);
+        model: modelName
+      });
 
       return reply.status(200).send({
         success: true,
-        reply: assistantMsg.content,
-        conversationId: conv.id,
+        reply: assistantReply,
+        conversationId: id,
         provider: providerName,
         model: modelName
+      });
+    }
+  );
+
+  // 4b. Explicit Visitor Session Revocation
+  fastify.post(
+    '/api/v1/public/sessions/revoke',
+    {
+      schema: {
+        description: 'Revoke an active visitor session token',
+        tags: ['Public']
+      }
+    },
+    async (request, reply) => {
+      const sessionHeader = request.headers['x-visitor-session-id'] as string;
+      if (!sessionHeader) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Missing x-visitor-session-id header.'
+        });
+      }
+
+      visitorService.revokeSessionToken(sessionHeader);
+      return reply.status(200).send({
+        success: true,
+        message: 'Visitor session revoked successfully.'
       });
     }
   );

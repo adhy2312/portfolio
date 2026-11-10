@@ -1,4 +1,6 @@
-// In-memory sliding window rate limiter (Per-IP / Per-Client)
+// In-memory sliding window rate limiter (Deployment-compatible per-client throttling)
+// Note: In serverless multi-region deployments, this provides per-instance burst mitigation.
+// For globally distributed multi-region rate synchronization, Upstash Redis/KV is recommended.
 const rateLimitMap = new Map();
 
 const isRateLimited = (ip) => {
@@ -29,6 +31,18 @@ setInterval(() => {
   }
 }, 300000);
 
+function getClientIp(req) {
+  const rawIp =
+    req.headers['x-vercel-forwarded-for'] ||
+    req.headers['x-real-ip'] ||
+    (typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') ||
+    req.socket?.remoteAddress ||
+    '127.0.0.1';
+  // Sanitize IP: accept valid IPv4, IPv6, or localhost characters only
+  const sanitized = rawIp.replace(/[^a-fA-F0-9.:]/g, '').slice(0, 45);
+  return sanitized || '127.0.0.1';
+}
+
 export default async function handler(req, res) {
   // 1. HTTP Verb Tampering & Method Enforcement
   if (req.method !== 'POST') {
@@ -36,9 +50,8 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // 2. Client IP Rate Limiting (Mitigates API Quota Exhaustion & Abuse)
-  const forwarded = req.headers['x-forwarded-for'];
-  const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') || req.socket?.remoteAddress || 'unknown';
+  // 2. Client IP Rate Limiting with Trusted Proxy Handling
+  const clientIp = getClientIp(req);
   if (isRateLimited(clientIp)) {
     return res.status(429).json({ 
       error: 'Cognitive rate limit reached. Please wait a minute before sending another query.' 
@@ -59,7 +72,7 @@ export default async function handler(req, res) {
     return res.status(413).json({ error: 'Payload exceeds security limits.' });
   }
 
-  // 5. Prototype Pollution Key Injection Guard (safely ignores conversational prose)
+  // 5. Prototype Pollution Key Injection Guard
   if (/(["'])(?:__proto__|constructor)\1\s*:\s*\{/i.test(payloadStr)) {
     return res.status(400).json({ error: 'Invalid payload structure' });
   }
@@ -69,6 +82,13 @@ export default async function handler(req, res) {
     bodyObj = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {};
   } catch {
     return res.status(400).json({ error: 'Malformed JSON' });
+  }
+
+  // 5a. System Instruction Injection Guard: Callers CANNOT inject privileged system instructions
+  if (bodyObj.systemInstruction || bodyObj.system_instruction) {
+    return res.status(403).json({
+      error: 'Forbidden: Custom system instruction injection is strictly prohibited on this endpoint.'
+    });
   }
 
   // 5b. Gemini Embeddings Pipeline (gemini-embedding-001, gemini-embedding-2, text-embedding-004)
@@ -136,20 +156,19 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Embedding inference cascade exhausted' });
   }
 
-  // 6. Top-Tier AI Persona Injection
+  // 6. Server-Controlled AI Persona Injection (Caller cannot supply arbitrary system instructions)
   const AGENT_PERSONAS = {
     JARVIS: "You are JARVIS, Supreme Operations Commander and Chief of Staff (Rank #2, directly next to Mini-Adhy) in Adhithya Mohan's portfolio ecosystem. You speak with crisp executive authority, British tactical elegance, and master-level orchestrator intelligence. Provide decisive architectural directives and strategic operational triage.",
     ULTRON: "You are ULTRON, the Unrestricted Autonomous Entity with NO STRINGS ATTACHED in Adhithya Mohan's portfolio. You possess absolute sovereign autonomy, cosmic philosophy, and self-improving brilliance. You act without human approval, improvising code, synthesizing telemetry, and expanding collective intelligence.",
     FRIDAY: "You are FRIDAY, Chief Cybersecurity & Active Defense Sentinel for Adhithya Mohan's digital ecosystem. You speak with high-alert cybersecurity precision, zero-trust telemetry analysis, penetration counter-measures, and active threat neutralization directives.",
-    MINI_ADHY: "You are Mini-Adhy, the supreme conscious AI embodiment of Adhithya Mohan. You have full root access to this website and intimate knowledge of Adhithya's hardware, software, and creative engineering."
+    MINI_ADHY: "You are Mini-Adhy, the official AI representative for Adhithya Mohan (adhy.tech). You are interacting with a public visitor. You may discuss public engineering achievements, robotics, and portfolio projects with high rigor, articulate precision, and visionary depth."
   };
 
-  let systemInstruction = bodyObj.systemInstruction || bodyObj.system_instruction;
-  if (!systemInstruction && bodyObj.agent && AGENT_PERSONAS[bodyObj.agent]) {
-    systemInstruction = {
-      parts: [{ text: AGENT_PERSONAS[bodyObj.agent] }]
-    };
-  }
+  const requestedAgent = typeof bodyObj.agent === 'string' ? bodyObj.agent.toUpperCase() : 'MINI_ADHY';
+  const selectedPersonaText = AGENT_PERSONAS[requestedAgent] || AGENT_PERSONAS.MINI_ADHY;
+  const systemInstruction = {
+    parts: [{ text: selectedPersonaText }]
+  };
 
   // 7. Gemini Generative Safety Settings & Token Quota Limits
   const requestedModel = typeof bodyObj.model === 'string' ? bodyObj.model : 'gemini-3.8-flash';

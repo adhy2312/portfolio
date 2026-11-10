@@ -71,23 +71,28 @@ ALTER TABLE public.memories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.approval_requests ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_events ENABLE ROW LEVEL SECURITY;
 
--- 7. RLS Policies:
+-- 7. RLS Policies (Idempotent):
 -- Profiles: Users can read their own profile
+DROP POLICY IF EXISTS "Users can read own profile" ON public.profiles;
 CREATE POLICY "Users can read own profile" ON public.profiles
   FOR SELECT USING (auth.uid() = id);
 
 -- Memories: Service role (backend) has full access; visitors have ZERO direct access
+DROP POLICY IF EXISTS "Service role full memory access" ON public.memories;
 CREATE POLICY "Service role full memory access" ON public.memories
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- Approval Requests: Service role full access
+DROP POLICY IF EXISTS "Service role approval access" ON public.approval_requests;
 CREATE POLICY "Service role approval access" ON public.approval_requests
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- Audit Events: Service role can insert and read; nobody can update or delete (Immutable)
+DROP POLICY IF EXISTS "Service role append audit" ON public.audit_events;
 CREATE POLICY "Service role append audit" ON public.audit_events
   FOR INSERT TO service_role WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Service role read audit" ON public.audit_events;
 CREATE POLICY "Service role read audit" ON public.audit_events
   FOR SELECT TO service_role USING (true);
 

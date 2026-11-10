@@ -124,32 +124,39 @@ ALTER TABLE public.approval_consumptions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.provider_usage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.integration_connections ENABLE ROW LEVEL SECURITY;
 
--- 10. RLS Policies:
+-- 10. RLS Policies (Idempotent):
 
 -- A. Public Knowledge: Anyone can read published knowledge; only service_role can modify
+DROP POLICY IF EXISTS "Public read published knowledge" ON public.public_knowledge;
 CREATE POLICY "Public read published knowledge" ON public.public_knowledge
   FOR SELECT USING (is_published = TRUE);
 
+DROP POLICY IF EXISTS "Service role full public knowledge access" ON public.public_knowledge;
 CREATE POLICY "Service role full public knowledge access" ON public.public_knowledge
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- B. Conversations:
 -- Owner can see own conversations
+DROP POLICY IF EXISTS "Owner read own conversations" ON public.conversations;
 CREATE POLICY "Owner read own conversations" ON public.conversations
   FOR SELECT TO authenticated USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Owner insert own conversations" ON public.conversations;
 CREATE POLICY "Owner insert own conversations" ON public.conversations
   FOR INSERT TO authenticated WITH CHECK (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Owner update own conversations" ON public.conversations;
 CREATE POLICY "Owner update own conversations" ON public.conversations
   FOR UPDATE TO authenticated USING (auth.uid() = owner_id) WITH CHECK (auth.uid() = owner_id);
 
 -- Backend service role has full access (for public visitor sessions managed server-side)
+DROP POLICY IF EXISTS "Service role full conversations access" ON public.conversations;
 CREATE POLICY "Service role full conversations access" ON public.conversations
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- C. Messages:
 -- Authenticated users can read messages from their own conversations
+DROP POLICY IF EXISTS "Owner read conversation messages" ON public.messages;
 CREATE POLICY "Owner read conversation messages" ON public.messages
   FOR SELECT TO authenticated USING (
     EXISTS (
@@ -158,23 +165,29 @@ CREATE POLICY "Owner read conversation messages" ON public.messages
     )
   );
 
+DROP POLICY IF EXISTS "Service role full messages access" ON public.messages;
 CREATE POLICY "Service role full messages access" ON public.messages
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- D. Cognitive Profile: Strictly owner only
+DROP POLICY IF EXISTS "Owner read own cognitive profile" ON public.cognitive_profile;
 CREATE POLICY "Owner read own cognitive profile" ON public.cognitive_profile
   FOR SELECT TO authenticated USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Service role full cognitive profile access" ON public.cognitive_profile;
 CREATE POLICY "Service role full cognitive profile access" ON public.cognitive_profile
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- E. Tasks & Task Events: Strictly owner only
+DROP POLICY IF EXISTS "Owner read own tasks" ON public.tasks;
 CREATE POLICY "Owner read own tasks" ON public.tasks
   FOR SELECT TO authenticated USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Service role full tasks access" ON public.tasks;
 CREATE POLICY "Service role full tasks access" ON public.tasks
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
+DROP POLICY IF EXISTS "Owner read own task events" ON public.task_events;
 CREATE POLICY "Owner read own task events" ON public.task_events
   FOR SELECT TO authenticated USING (
     EXISTS (
@@ -183,21 +196,26 @@ CREATE POLICY "Owner read own task events" ON public.task_events
     )
   );
 
+DROP POLICY IF EXISTS "Service role full task events access" ON public.task_events;
 CREATE POLICY "Service role full task events access" ON public.task_events
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- F. Integrations: Strictly owner only
+DROP POLICY IF EXISTS "Owner read own integration metadata" ON public.integration_connections;
 CREATE POLICY "Owner read own integration metadata" ON public.integration_connections
   FOR SELECT TO authenticated USING (auth.uid() = owner_id);
 
+DROP POLICY IF EXISTS "Service role full integration access" ON public.integration_connections;
 CREATE POLICY "Service role full integration access" ON public.integration_connections
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- G. Approval Consumptions: Service role only
+DROP POLICY IF EXISTS "Service role approval consumptions access" ON public.approval_consumptions;
 CREATE POLICY "Service role approval consumptions access" ON public.approval_consumptions
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 
 -- H. Provider Usage: Service role only
+DROP POLICY IF EXISTS "Service role provider usage access" ON public.provider_usage;
 CREATE POLICY "Service role provider usage access" ON public.provider_usage
   FOR ALL TO service_role USING (true) WITH CHECK (true);
 

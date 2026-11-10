@@ -52,20 +52,19 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
   });
 
   test('Public visitor can create conversation session and read own history', async () => {
-    const sessionToken = 'vses_alice_9988';
-    
     // Create
     const createRes = await app.inject({
       method: 'POST',
       url: '/api/v1/public/conversations',
-      headers: { 'x-visitor-session-id': sessionToken },
       payload: { title: 'Visitor Inquiry' }
     });
 
     assert.strictEqual(createRes.statusCode, 201);
     const createBody = JSON.parse(createRes.payload);
     const convId = createBody.conversationId;
+    const sessionToken = createBody.visitorSessionToken;
     assert.ok(convId);
+    assert.ok(sessionToken);
 
     // Read with matching session header
     const readRes = await app.inject({
@@ -81,19 +80,28 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
 
   test('Public visitor B is DENIED (403) when trying to access Visitor A conversation', async () => {
     // Visitor A creates conversation
-    const createRes = await app.inject({
+    const createResA = await app.inject({
       method: 'POST',
       url: '/api/v1/public/conversations',
-      headers: { 'x-visitor-session-id': 'vses_victim_user_11' },
       payload: { title: 'Victim Private Session' }
     });
-    const convId = JSON.parse(createRes.payload).conversationId;
+    const bodyA = JSON.parse(createResA.payload);
+    const convIdA = bodyA.conversationId;
 
-    // Attacker Visitor B attempts access
+    // Visitor B creates separate conversation
+    const createResB = await app.inject({
+      method: 'POST',
+      url: '/api/v1/public/conversations',
+      payload: { title: 'Attacker Private Session' }
+    });
+    const bodyB = JSON.parse(createResB.payload);
+    const sessionTokenB = bodyB.visitorSessionToken;
+
+    // Attacker Visitor B attempts access to Visitor A's conversation
     const crossRes = await app.inject({
       method: 'GET',
-      url: `/api/v1/public/conversations/${convId}`,
-      headers: { 'x-visitor-session-id': 'vses_attacker_user_22' }
+      url: `/api/v1/public/conversations/${convIdA}`,
+      headers: { 'x-visitor-session-id': sessionTokenB }
     });
 
     assert.strictEqual(crossRes.statusCode, 403);
@@ -364,7 +372,8 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
       PORT: 3010,
       LOG_LEVEL: 'silent',
       SUPABASE_URL: 'https://test-prod.supabase.co',
-      SUPABASE_SERVICE_ROLE_KEY: 'test_service_role_key_long_enough_32'
+      SUPABASE_SERVICE_ROLE_KEY: 'test_service_role_key_long_enough_32',
+      APPROVAL_SIGNING_SECRET: 'test_approval_signing_secret_32_bytes_long'
       // No SUPABASE_JWT_SECRET
     });
     const { IdentityAuthService } = require('../src/auth/identity.js');

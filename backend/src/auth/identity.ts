@@ -28,40 +28,46 @@ export class IdentityAuthService {
 
   /**
    * Cryptographically decodes and verifies a JWT token
-   * 1. Primary Authority: Supabase Auth auth.getUser(token)
-   * 2. Secondary Cryptographic Verifier: strictly requires explicit SUPABASE_JWT_SECRET (HS256)
-   * 3. NEVER uses SUPABASE_ANON_KEY as signing secret
-   * 4. NEVER falls back to hardcoded default secrets
-   * 5. Fails closed (returns null)
+   * Strategy:
+   * 1. Authoritative Supabase Auth verification: When Supabase is configured, auth.getUser(token)
+   *    is the sole authoritative source of truth. If Supabase rejects, expires, or revokes the token,
+   *    it is REJECTED immediately. Never fall through to offline fallback for rejected/revoked tokens.
+   * 2. Offline Cryptographic Verifier: Used STRICTLY when Supabase is not configured (offline test/dev).
+   *    Enforces strict HS256, timing-safe signature, issuer, audience, and expiration.
    */
   public async verifyToken(token: string): Promise<AuthenticatedUser | null> {
     if (!token || typeof token !== 'string') return null;
 
-    // 1. If Supabase client is configured, verify via authoritative Supabase Auth
+    // 1. Authoritative Supabase Auth verification
     const supabaseClient = this.dbAdapter.getClient();
     if (supabaseClient) {
       try {
         const { data, error } = await supabaseClient.auth.getUser(token);
-        if (!error && data?.user) {
-          const user = data.user;
-          const email = (user.email || '').toLowerCase();
-          const isOwner = this.isUserOwner(user.id, email);
-
-          return {
-            id: user.id,
-            email,
-            role: user.role || 'authenticated',
-            isOwner,
-            aud: user.aud || 'authenticated',
-            exp: Math.floor(Date.now() / 1000) + 3600
-          };
+        if (error || !data?.user) {
+          // Token is rejected by authoritative Supabase Auth (revoked, signed out, or invalid)
+          // Do NOT fall back to local verifier: revoked sessions must stay revoked!
+          return null;
         }
+
+        const user = data.user;
+        const email = (user.email || '').toLowerCase();
+        const isOwner = this.isUserOwner(user.id, email);
+
+        return {
+          id: user.id,
+          email,
+          role: user.role || 'authenticated',
+          isOwner,
+          aud: user.aud || 'authenticated',
+          exp: Math.floor(Date.now() / 1000) + 3600
+        };
       } catch {
-        // Fall through to strict cryptographic verification if explicit secret is configured
+        // Network/connectivity failure to Supabase Auth: fail closed
+        return null;
       }
     }
 
-    // 2. Strict cryptographic signature and claims verification (HS256)
+    // 2. Offline cryptographic verification (strictly for environments without Supabase client)
     return this.verifyJwtCryptographically(token);
   }
 

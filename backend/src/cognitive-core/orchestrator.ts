@@ -80,10 +80,15 @@ export class CognitiveOrchestrator {
       ].join('\n');
     } else {
       // DOMAIN B: Authenticated owner
-      // Retrieve authorized owner memory (only APPROVED lifecycle status)
+      if (!req.ownerId) {
+        throw new Error('[Security Invariant Violation] Authenticated owner requests must supply a verified ownerId');
+      }
+
+      // Retrieve authorized owner memory explicitly scoped to ownerId (only APPROVED lifecycle status)
       const relevantMemories = await this.memoryRepo.searchRecords(req.message, {
         limit: 5,
-        lifecycleStatus: 'APPROVED'
+        lifecycleStatus: 'APPROVED',
+        ownerId: req.ownerId
       });
       memoriesConsulted = relevantMemories.length;
 

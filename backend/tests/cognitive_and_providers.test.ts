@@ -231,6 +231,7 @@ describe('Prompt 4: Cognitive Core & Metacognitive Invariants', () => {
   test('Owner authenticated mode retrieves verified memories with provenance', async () => {
     await memoryRepo.storeRecord({
       id: 'mem_owner_02',
+      ownerId: 'owner_adhithya',
       category: 'engineering',
       content: 'Primary microcontroller for robotics is STM32H753',
       confidence: 1.0,
