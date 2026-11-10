@@ -19,13 +19,13 @@
     "@fastify/swagger-ui": "^3.0.0",
     "@supabase/server": "^1.9.2",
     "@supabase/supabase-js": "^2.45.4",
+    "@types/node": "^20.14.9",
     "dotenv": "^16.4.5",
     "fastify": "^4.28.1",
+    "typescript": "^5.5.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@types/node": "^20.14.9",
-    "tsx": "^4.19.0",
-    "typescript": "^5.5.4"
+    "tsx": "^4.19.0"
   }
 }
