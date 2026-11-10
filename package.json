@@ -45,6 +45,7 @@
     "test": "react-scripts test",
     "backend:dev": "cd backend && npm run dev",
     "backend:build": "cd backend && npm run build",
+    "backend:start": "cd backend && npm start",
     "backend:test": "cd backend && npm test",
     "eject": "react-scripts eject"
   },
