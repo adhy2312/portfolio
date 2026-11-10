@@ -1,6 +1,32 @@
 // jest-dom adds custom jest matchers for asserting on DOM nodes.
 import '@testing-library/jest-dom';
 
+// Ensure crypto and getRandomValues are available in JSDOM / Node test environment
+const nodeCrypto = require('crypto');
+if (typeof window !== 'undefined') {
+  if (!window.crypto) {
+    window.crypto = {};
+  }
+  if (!window.crypto.getRandomValues) {
+    window.crypto.getRandomValues = function (buffer) {
+      return nodeCrypto.randomFillSync(buffer);
+    };
+  }
+  if (!window.crypto.subtle && nodeCrypto.webcrypto) {
+    window.crypto.subtle = nodeCrypto.webcrypto.subtle;
+  }
+}
+if (typeof global !== 'undefined') {
+  if (!global.crypto) {
+    global.crypto = nodeCrypto.webcrypto || {};
+  }
+  if (!global.crypto.getRandomValues) {
+    global.crypto.getRandomValues = function (buffer) {
+      return nodeCrypto.randomFillSync(buffer);
+    };
+  }
+}
+
 // 1. Mock HTMLCanvasElement.prototype.getContext for headless JSDOM environments
 if (typeof HTMLCanvasElement !== 'undefined') {
   HTMLCanvasElement.prototype.getContext = function () {
