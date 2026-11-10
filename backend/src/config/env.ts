@@ -26,8 +26,10 @@ export const EnvSchema = z.object({
 
   // Owner Authorization & Security (Server-controlled allowlist)
   OWNER_USER_ID: z.string().optional(),
-  OWNER_EMAILS: z.string().default('adhithyamohan2312@gmail.com'),
+  OWNER_EMAILS: z.string().optional(),
   ENCRYPTION_SECRET: z.string().min(16).optional(),
+  ALLOW_TEST_AUTH: z.boolean().default(false),
+  ALLOW_OWNER_DATA_ON_CLOUD: z.coerce.boolean().default(false),
 
   // AI Free Quota Keys (Optional - server will start gracefully without them)
   GEMINI_API_KEY: z.string().optional(),
@@ -58,7 +60,7 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
     .map((s) => s.trim())
     .filter(Boolean);
 
-  const ownerEmailsList = parsed.data.OWNER_EMAILS
+  const ownerEmailsList = (parsed.data.OWNER_EMAILS || '')
     .split(',')
     .map((s) => s.trim().toLowerCase())
     .filter(Boolean);

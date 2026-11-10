@@ -104,6 +104,69 @@ describe('Prompt 4 & 5: Provider Gateway, Routing & Privacy Guards', () => {
     );
   });
 
+  test('Privacy Invariant: SENSITIVE and OWNER_ONLY reject cloud when ALLOW_OWNER_DATA_ON_CLOUD is false', async () => {
+    const strictConfig = parseEnv({
+      NODE_ENV: 'test',
+      ALLOW_OWNER_DATA_ON_CLOUD: false
+    });
+    const gateway = new ProviderGateway(strictConfig);
+    gateway.register(new MockTestAdapter('gemini', 'Cloud Gemini', false));
+    gateway.register(new MockTestAdapter('groq', 'Cloud Groq', false));
+
+    // Offline Ollama
+    class OfflineOllama extends MockTestAdapter {
+      isAvailable() {
+        return false;
+      }
+    }
+    gateway.register(new OfflineOllama('ollama', 'Local Ollama', true));
+
+    // OWNER_ONLY should fail closed without local Ollama
+    await assert.rejects(
+      async () => {
+        await gateway.generate({
+          messages: [{ role: 'user', content: 'Owner private architecture notes' }],
+          privacyClass: 'OWNER_ONLY'
+        });
+      },
+      (err: Error) => {
+        assert.match(err.message, /OWNER_ONLY content cannot be processed on cloud/);
+        return true;
+      }
+    );
+
+    // SENSITIVE should also fail closed without local Ollama
+    await assert.rejects(
+      async () => {
+        await gateway.generate({
+          messages: [{ role: 'user', content: 'Master vault passphrase' }],
+          privacyClass: 'SENSITIVE'
+        });
+      },
+      (err: Error) => {
+        assert.match(err.message, /SENSITIVE content cannot be processed/);
+        return true;
+      }
+    );
+  });
+
+  test('Privacy Invariant: OWNER_ONLY is permitted on cloud when ALLOW_OWNER_DATA_ON_CLOUD is true', async () => {
+    const cloudAllowedConfig = parseEnv({
+      NODE_ENV: 'test',
+      ALLOW_OWNER_DATA_ON_CLOUD: true
+    });
+    const gateway = new ProviderGateway(cloudAllowedConfig);
+    gateway.register(new MockTestAdapter('gemini', 'Cloud Gemini', false));
+
+    const res = await gateway.generate({
+      messages: [{ role: 'user', content: 'Authorized owner query' }],
+      privacyClass: 'OWNER_ONLY'
+    });
+
+    assert.equal(res.providerId, 'gemini');
+    assert.match(res.text, /Cloud Gemini/);
+  });
+
   test('Truthful error reporting when all cascade providers are exhausted', async () => {
     const gateway = new ProviderGateway(testConfig);
     gateway.register(new MockTestAdapter('gemini', 'Gemini', false, true, 'RATE_LIMIT'));
@@ -130,10 +193,12 @@ describe('Prompt 4: Cognitive Core & Metacognitive Invariants', () => {
   const memoryRepo = new InMemoryMemoryRepository();
   const testConfig = parseEnv({
     NODE_ENV: 'test',
-    ENCRYPTION_SECRET: 'test_encryption_secret_1234567890'
+    ENCRYPTION_SECRET: 'test_encryption_secret_1234567890',
+    ALLOW_OWNER_DATA_ON_CLOUD: true
   });
   const gateway = new ProviderGateway(testConfig);
   gateway.register(new MockTestAdapter('groq', 'Mock Reflex Engine', false));
+  gateway.register(new MockTestAdapter('ollama', 'Mock Local Ollama', true));
   const orchestrator = new CognitiveOrchestrator(memoryRepo, gateway);
 
   test('Public visitor mode never consults or returns owner memory', async () => {
@@ -200,6 +265,28 @@ describe('Prompt 4: Cognitive Core & Metacognitive Invariants', () => {
     const evaluation = registry.evaluateToolExecution('HERMES', 'gpio_pulse', true);
     assert.equal(evaluation.permitted, true);
     assert.equal(evaluation.requiresApproval, true);
+  });
+
+  test('Worker Capability Contract: Complete 12-agent ecosystem registered with sovereign ULTRON contract', () => {
+    const registry = new AgentWorkerRegistry();
+    const workers = registry.listWorkers();
+    assert.equal(workers.length, 12, 'Must have exactly 12 specialized agents registered in the ecosystem');
+
+    const ultron = registry.getWorker('ULTRON');
+    assert.ok(ultron, 'ULTRON must be registered');
+    assert.equal(ultron.id, 'ULTRON');
+    assert.equal(ultron.requiresOwnerApproval, false, 'ULTRON operates with sovereign strategic autonomy');
+    assert.match(ultron.description, /sovereign/i, 'ULTRON description preserves sovereign independence');
+    assert.ok(ultron.allowedTools.includes('adversarial_audit'));
+    assert.ok(ultron.allowedTools.includes('simulate_exploit'));
+
+    const friday = registry.getWorker('FRIDAY');
+    assert.ok(friday, 'FRIDAY must be registered');
+    assert.ok(friday.allowedTools.includes('verify_signature'));
+
+    const jarvis = registry.getWorker('JARVIS');
+    assert.ok(jarvis, 'JARVIS must be registered');
+    assert.ok(jarvis.allowedTools.includes('plan_task'));
   });
 
   test('Metacognition: Detects memory contradictions', () => {

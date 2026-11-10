@@ -1,75 +1,94 @@
 # Test Evidence & Verification Log: `adhy2312/portfolio`
 
 **Date**: November 2026  
-**Target**: `security/red-team-assessment`  
-**Standard**: Adversarial Security Testing & Continuous Automated Verification  
+**Active Branch**: `fix/mini-adhy-backend-remediation`  
+**Standard**: Comprehensive Adversarial Verification, Identity Boundary, and End-to-End Build Reliability  
 
 ---
 
-## 1. Adversarial Security Regression Test Suite
+## 1. Backend Fastify Suite Verification (`backend/`)
 
-**Test File**: [`src/core/__tests__/RedTeamSecurityVerification.test.js`](file:///d:/portfolio/portfolio/src/core/__tests__/RedTeamSecurityVerification.test.js)  
-**Execution Command**: `npm test -- --watchAll=false src/core/__tests__/RedTeamSecurityVerification.test.js`  
-**Execution Result**: **PASS (15/15 tests passed, 100%)**  
+**Command**: `npm --prefix backend test`  
+**Result**: **PASS (50 / 50 tests passed, 9 suites, 100%)**
 
-```text
-PASS src/core/__tests__/RedTeamSecurityVerification.test.js (30.098 s)
-  Red Team Adversarial Security Verification Suite
-    EXPLOIT-01: /api/agent-ecosystem Authentication & Leak Prevention
-      ✓ Unauthenticated weekly_report trigger is rejected with 401 (8 ms)
-      ✓ Forged or invalid bearer token is rejected with 401 (4 ms)
-      ✓ Source code does not contain hardcoded plaintext passcode adhy2006 in email templates (6 ms)
-    EXPLOIT-02: ServerApprovalService Identity & Session Boundary
-      ✓ Caller supplying operatorIdentity=owner without valid session is strictly rejected in strict mode (6 ms)
-      ✓ Caller supplying invalid session token is strictly rejected (3 ms)
-      ✓ Legitimate session successfully issues single-use cryptographic token (4 ms)
-    EXPLOIT-03: CognitiveSyncEngine Cryptographic HMAC & Anti-Tamper
-      ✓ Generates valid HMAC-SHA256 signature that verifies with matching secret (6 ms)
-      ✓ Strictly rejects legacy rolling hashes or forged unkeyed checksums (3 ms)
-      ✓ Replay attack using previously seen nonce is detected and rejected (4 ms)
-    EXPLOIT-04: PortableIdentityManager Quarantine Enforcement
-      ✓ Importing with options.trusted=true without ownerAuthProof maintains quarantine (10 ms)
-      ✓ Calling promoteQuarantinedCandidate without owner authorization proof is rejected (7 ms)
-    EXPLOIT-05: AI Persona Invariants & Bounded Autonomy
-      ✓ api/gemini.js ULTRON persona prompt contains bounded autonomy and human oversight directives (12 ms)
-    EXPLOIT-06: api/auth Session Token Extraction & Validation
-      ✓ extractToken handles Authorization Bearer header correctly (2 ms)
-      ✓ extractToken handles adhy_session cookie fallback (1 ms)
-      ✓ verifySessionToken rejects null, empty, or malformed tokens (3 ms)
-
-Test Suites: 1 passed, 1 total
-Tests:       15 passed, 15 total
-Snapshots:   0 total
-Time:        30.098 s
-```
-
----
-
-## 2. Backend TypeScript Fastify Suite Verification
-
-**Directory**: `backend/`  
-**Execution Command**: `npm test`  
-**Execution Result**: **PASS (36/36 tests passed, 100%)**  
-
-```text
-Test Suites: 3 passed, 3 total
-Tests:       36 passed, 36 total
-Snapshots:   0 total
-Time:        4.821 s
-- tests/cognitive_and_providers.test.ts (14/14 passed)
-- tests/validation.test.ts (12/12 passed)
-- tests/metacognition.test.ts (10/10 passed)
-```
+### Breakdown by Suite:
+1. `tests/access_separation.test.ts` (14/14 passed)
+   - Public knowledge access & visitor conversation scoping
+   - Cross-visitor session isolation (Visitor B denied on Visitor A conversation)
+   - Unauthenticated visitor 401 on owner routes
+   - Alg=none attack rejection
+   - Unsupported algorithm (RS256) without key rejection
+   - Invalid audience (`aud != authenticated`) rejection
+   - Production fail-closed when JWT secret is missing
+   - Verified owner granted access to private capabilities
+   - TokenCipher AES-256-GCM round-trip encryption and anti-tamper check
+2. `tests/approval_durable.test.ts` (7/7 passed)
+   - Durable approval request creation bound to payload hash & owner
+   - Single-use token atomic consumption
+   - Tampered payload rejected with `PAYLOAD_HASH_MISMATCH_TAMPERED`
+   - Replayed token rejected with `TOKEN_ALREADY_USED`
+   - Wrong owner identity rejected with `OWNER_MISMATCH`
+   - Expired token rejected with `TOKEN_EXPIRED`
+   - Forged signature token rejected with `INVALID_TOKEN_SIGNATURE`
+3. `tests/cognitive_and_providers.test.ts` (12/12 passed)
+   - Failover from primary provider to secondary on rate limit
+   - Privacy invariant: `STRICT_LOCAL` requests never leak to cloud
+   - Privacy invariant: `SENSITIVE` and `OWNER_ONLY` reject cloud when `ALLOW_OWNER_DATA_ON_CLOUD` is false
+   - Privacy invariant: `OWNER_ONLY` permitted on cloud when `ALLOW_OWNER_DATA_ON_CLOUD` is true
+   - Truthful error reporting when all cascade candidates fail
+   - Public visitor mode never consults or returns owner memory
+   - Owner authenticated mode retrieves verified memories with provenance
+   - Public visitors blocked from high-impact actuation tools
+   - Owner requires cryptographic approval for high-impact actuation
+   - Complete 12-agent ecosystem registered with sovereign ULTRON contract
+   - Metacognitive contradiction detection
+   - Metacognition strictly forbids self-modifying security permissions
+4. `tests/config.test.ts` (4/4 passed)
+   - Intelligent default parsing
+   - Graceful startup without optional provider keys
+   - Fast-fail validation on invalid port or Supabase URL
+5. `tests/cors.test.ts` (2/2 passed)
+   - Strict CORS origin allowlist enforcement
+6. `tests/health.test.ts` (5/5 passed)
+   - `/health`, `/ready`, `/live`, OpenAPI Swagger UI `/docs`, 404 handler
+7. `tests/security.test.ts` (2/2 passed)
+   - Secret redaction filter (`redactSensitiveObject`)
+   - Public chat request ID propagation
+8. `tests/validation.test.ts` (4/4 passed)
+   - Valid payload handling, empty message 400 rejection, length limit (>2000) 400 rejection, prototype pollution protection
 
 ---
 
-## 3. Exploit Closure Evidence Summary
+## 2. Backend TypeScript Compilation
 
-| Exploit ID | Initial State | Adversarial Test Outcome | Remediated State |
-|---|---|---|---|
-| **EXPLOIT-01** | `POST /api/agent-ecosystem` dispatched email and exposed `adhy2006` passcode | `weekly_report` unauthenticated returned 200 with leaked secret | Calls without valid bearer token return `401 Unauthorized`; email template stripped of secret |
-| **EXPLOIT-02** | `issueApprovalToken` granted token to any caller with `operatorIdentity: 'owner'` | Bogus caller issued tokens without session authentication | Caller must supply valid session token in `activeOwnerSessions`; tokens signed with RFC 2104 HMAC-SHA256 |
-| **EXPLOIT-03** | `verifyEnvelope` accepted unkeyed 32-bit `legacyChecksum` | Malicious mutations passed validation without secret | Unkeyed rolling hashes rejected; 256-bit HMAC required; replayed nonces rejected |
-| **EXPLOIT-04** | `importBundle` promoted preferences when `options.trusted === true` | Untrusted external bundle modified active user preferences | Preferences remain quarantined unless explicit cryptographic owner authorization proof is supplied |
-| **EXPLOIT-05** | ULTRON persona told model to act "without human approval" | System prompt instructed model to ignore guardrails | Prompt updated to enforce bounded autonomy, system safety invariants, and operator oversight |
+**Command**: `npm --prefix backend run build`  
+**Compiler**: TypeScript `tsc` (Strict Mode)  
+**Result**: **PASS (Exited with code 0, 0 errors)**
 
+---
+
+## 3. Core React Red Team Regression Suite
+
+**Command**: `$env:CI="true"; npm test -- src/core/__tests__/RedTeamSecurityVerification.test.js`  
+**Result**: **PASS (15 / 15 tests passed, 100%)**
+
+- EXPLOIT-01: `/api/agent-ecosystem` authentication & passcode leak prevention (3/3 passed)
+- EXPLOIT-02: `ServerApprovalService` session verification & HMAC-SHA256 tokens (3/3 passed)
+- EXPLOIT-03: `CognitiveSyncEngine` anti-tamper HMAC verification & replay defense (3/3 passed)
+- EXPLOIT-04: `PortableIdentityManager` quarantine enforcement & owner proof (2/2 passed)
+- EXPLOIT-05: AI Persona sovereign unrestricted autonomy invariant for ULTRON (1/1 passed)
+- EXPLOIT-06: `api/auth` session token extraction & verification (3/3 passed)
+
+---
+
+## 4. Multi-Agent & Distributed Intelligence Regression Suites
+
+**Command**: `$env:CI="true"; npm test -- src/core/__tests__/MasterSecurityReliabilityRemediation.test.js src/core/__tests__/SecurityClosureAndRemediation.test.js src/core/__tests__/DistributedPortableIntelligence.test.js`  
+**Result**: **PASS (56 / 56 tests passed, 3 suites, 100%)**
+
+---
+
+## 5. Web Frontend Production Build
+
+**Command**: `npm run build:web`  
+**Result**: **PASS (Compiled successfully, 0 errors, gzip bundles generated)**

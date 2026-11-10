@@ -28,11 +28,16 @@ export class IdentityAuthService {
 
   /**
    * Cryptographically decodes and verifies a JWT token
+   * 1. Primary Authority: Supabase Auth auth.getUser(token)
+   * 2. Secondary Cryptographic Verifier: strictly requires explicit SUPABASE_JWT_SECRET (HS256)
+   * 3. NEVER uses SUPABASE_ANON_KEY as signing secret
+   * 4. NEVER falls back to hardcoded default secrets
+   * 5. Fails closed (returns null)
    */
   public async verifyToken(token: string): Promise<AuthenticatedUser | null> {
     if (!token || typeof token !== 'string') return null;
 
-    // 1. If Supabase client is configured, verify via Supabase Auth
+    // 1. If Supabase client is configured, verify via authoritative Supabase Auth
     const supabaseClient = this.dbAdapter.getClient();
     if (supabaseClient) {
       try {
@@ -52,16 +57,17 @@ export class IdentityAuthService {
           };
         }
       } catch {
-        // Fall through to cryptographic verification
+        // Fall through to strict cryptographic verification if explicit secret is configured
       }
     }
 
-    // 2. Cryptographic signature and claims verification (HS256)
+    // 2. Strict cryptographic signature and claims verification (HS256)
     return this.verifyJwtCryptographically(token);
   }
 
   /**
    * Independent cryptographic signature and payload verification
+   * Enforces algorithm, signature, issuer, audience, expiration, not-before, and subject.
    */
   public verifyJwtCryptographically(token: string): AuthenticatedUser | null {
     const parts = token.split('.');
@@ -69,8 +75,22 @@ export class IdentityAuthService {
 
     const [headerB64, payloadB64, signatureB64] = parts;
 
-    // Verify secret configuration
-    const secret = this.config.SUPABASE_JWT_SECRET || this.config.SUPABASE_ANON_KEY || 'test_jwt_secret_for_auth_verification';
+    // Fail closed if no explicit JWT secret configured
+    const secret = this.config.SUPABASE_JWT_SECRET;
+    if (!secret || secret.length < 16) {
+      return null;
+    }
+
+    // Decode header and enforce HS256 algorithm
+    try {
+      const headerStr = Buffer.from(headerB64, 'base64url').toString('utf8');
+      const header = JSON.parse(headerStr);
+      if (!header || header.alg !== 'HS256') {
+        return null; // Reject 'none' or unsupported algorithms
+      }
+    } catch {
+      return null;
+    }
 
     // Verify HMAC-SHA256 signature
     const expectedSig = crypto
@@ -98,9 +118,22 @@ export class IdentityAuthService {
         return null;
       }
 
+      // Verify not-before (nbf) if present
+      if (typeof payload.nbf === 'number' && payload.nbf > nowSeconds) {
+        return null;
+      }
+
       // Verify subject exists
       if (!payload.sub || typeof payload.sub !== 'string') {
         return null;
+      }
+
+      // Verify issuer (iss) if configured
+      if (this.config.SUPABASE_URL && payload.iss) {
+        const expectedPrefix = this.config.SUPABASE_URL;
+        if (!payload.iss.startsWith(expectedPrefix)) {
+          return null;
+        }
       }
 
       const email = (payload.email || '').toLowerCase();
@@ -126,8 +159,8 @@ export class IdentityAuthService {
     if (this.config.OWNER_USER_ID && this.config.OWNER_USER_ID === userId) {
       return true;
     }
-    if (email && this.config.ownerEmailsList.includes(email.toLowerCase())) {
-      return true;
+    if (email && this.config.ownerEmailsList && this.config.ownerEmailsList.length > 0) {
+      return this.config.ownerEmailsList.includes(email.toLowerCase());
     }
     return false;
   }

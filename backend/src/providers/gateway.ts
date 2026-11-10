@@ -32,7 +32,7 @@ export class ProviderGateway {
     failuresByProvider: {}
   };
 
-  constructor(config: AppConfig) {
+  constructor(private config: AppConfig) {
     this.register(new GeminiAdapter(config.GEMINI_API_KEY));
     this.register(new GroqAdapter(config.GROQ_API_KEY));
     this.register(new HuggingFaceAdapter(config.HF_TOKEN));
@@ -56,17 +56,29 @@ export class ProviderGateway {
    * Determine preferred provider cascade based on privacy, task, and health
    */
   public selectProviderCascade(req: GenerateRequest): IProviderAdapter[] {
-    // 1. STRICT_LOCAL privacy constraint: Never send to cloud
-    if (req.privacyClass === 'STRICT_LOCAL') {
+    // 1. STRICT_LOCAL or SENSITIVE privacy constraint: Never send to cloud
+    if (req.privacyClass === 'STRICT_LOCAL' || req.privacyClass === 'SENSITIVE') {
       const ollama = this.adapters.get('ollama');
       if (ollama && ollama.isAvailable() && this.isCircuitOpen(ollama.id) === false) {
         return [ollama];
       }
-      throw new Error('[Privacy Guard] STRICT_LOCAL content cannot be processed: No local provider (Ollama) is available.');
+      throw new Error(`[Privacy Guard] ${req.privacyClass} content cannot be processed: No local provider (Ollama) is available.`);
     }
 
-    // 2. Multimodal Vision constraint
+    // 2. OWNER_ONLY privacy constraint: Route locally unless explicitly authorized for cloud
+    if (req.privacyClass === 'OWNER_ONLY' && !this.config.ALLOW_OWNER_DATA_ON_CLOUD) {
+      const ollama = this.adapters.get('ollama');
+      if (ollama && ollama.isAvailable() && this.isCircuitOpen(ollama.id) === false) {
+        return [ollama];
+      }
+      throw new Error('[Privacy Guard] OWNER_ONLY content cannot be processed on cloud when ALLOW_OWNER_DATA_ON_CLOUD is false: Local provider (Ollama) is unavailable.');
+    }
+
+    // 3. Multimodal Vision constraint
     if (req.taskType === 'vision') {
+      if (req.privacyClass === 'OWNER_ONLY' && !this.config.ALLOW_OWNER_DATA_ON_CLOUD) {
+        throw new Error('[Privacy Guard] Private/sensitive vision analysis cannot be delegated to cloud AI providers.');
+      }
       const gemini = this.adapters.get('gemini');
       if (gemini && gemini.isAvailable() && !this.isCircuitOpen(gemini.id)) {
         return [gemini];
@@ -74,7 +86,7 @@ export class ProviderGateway {
       throw new Error('[Capability Guard] Vision task requested, but no vision-capable provider is currently active.');
     }
 
-    // 3. Preferred candidate cascade
+    // 4. Preferred candidate cascade
     let preferredOrder: ProviderId[] = ['gemini', 'groq', 'huggingface', 'openrouter', 'ollama'];
     if (req.taskType === 'fast_reflex') {
       preferredOrder = ['groq', 'gemini', 'huggingface', 'openrouter', 'ollama'];
@@ -106,6 +118,11 @@ export class ProviderGateway {
     for (let i = 0; i < cascade.length; i++) {
       const adapter = cascade[i];
       const isFallback = i > 0;
+
+      // Anti-leak invariant: Never fall back from local to cloud for private/sensitive data
+      if (isFallback && !adapter.isLocal && (req.privacyClass === 'STRICT_LOCAL' || req.privacyClass === 'SENSITIVE' || (req.privacyClass === 'OWNER_ONLY' && !this.config.ALLOW_OWNER_DATA_ON_CLOUD))) {
+        throw new Error(`[Privacy Guard] Prohibited fallback: Cannot fall back to cloud provider '${adapter.id}' for ${req.privacyClass} data.`);
+      }
 
       if (isFallback) {
         this.metrics.fallbacksTriggered++;
@@ -147,6 +164,11 @@ export class ProviderGateway {
     for (let i = 0; i < cascade.length; i++) {
       const adapter = cascade[i];
       const isFallback = i > 0;
+
+      // Anti-leak invariant: Never fall back from local to cloud for private/sensitive data
+      if (isFallback && !adapter.isLocal && (req.privacyClass === 'STRICT_LOCAL' || req.privacyClass === 'SENSITIVE' || (req.privacyClass === 'OWNER_ONLY' && !this.config.ALLOW_OWNER_DATA_ON_CLOUD))) {
+        throw new Error(`[Privacy Guard] Prohibited fallback: Cannot fall back to cloud provider '${adapter.id}' for ${req.privacyClass} data.`);
+      }
 
       try {
         const response = await adapter.stream(req, onChunk);

@@ -249,6 +249,12 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
     assert.ok(queryBody.count >= 1);
 
     // 3. Approvals inbox & atomic consumption
+    const appReq = await (app as any).approvalService.createApprovalRequest({
+      actionType: 'DEPLOY_PRODUCTION_PATCH',
+      ownerId: 'usr_adhithya_mohan_verified',
+      payload: { patch: 'v2' }
+    });
+
     const approvalsRes = await app.inject({
       method: 'GET',
       url: '/api/v1/owner/approvals',
@@ -258,9 +264,9 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
 
     const consumeRes = await app.inject({
       method: 'POST',
-      url: '/api/v1/owner/approvals/appr_sample_01/consume',
+      url: `/api/v1/owner/approvals/${appReq.approvalId}/consume`,
       headers: { authorization: `Bearer ${validOwnerToken}` },
-      payload: { token: 'tok_cryptographic_owner_approval_valid' }
+      payload: { token: appReq.token }
     });
     assert.strictEqual(consumeRes.statusCode, 200);
     assert.strictEqual(JSON.parse(consumeRes.payload).status, 'CONSUMED');
@@ -295,6 +301,86 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
     assert.throws(() => {
       tokenCipher.decrypt(tampered);
     });
+  });
+
+  // ── Strict JWT Claims & Algorithm Verification ───────────────────────
+
+  test('Attacker with alg=none JWT is strictly DENIED (401)', async () => {
+    const header = Buffer.from(JSON.stringify({ alg: 'none', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({
+      sub: 'usr_hacker',
+      email: ownerEmail,
+      aud: 'authenticated',
+      exp: Math.floor(Date.now() / 1000) + 3600
+    })).toString('base64url');
+    const unsignedJwt = `${header}.${body}.`;
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/owner/profile',
+      headers: { authorization: `Bearer ${unsignedJwt}` }
+    });
+    assert.strictEqual(res.statusCode, 401);
+  });
+
+  test('Attacker with unsupported algorithm (RS256) without matching key is DENIED (401)', async () => {
+    const header = Buffer.from(JSON.stringify({ alg: 'RS256', typ: 'JWT' })).toString('base64url');
+    const body = Buffer.from(JSON.stringify({
+      sub: 'usr_hacker',
+      email: ownerEmail,
+      aud: 'authenticated',
+      exp: Math.floor(Date.now() / 1000) + 3600
+    })).toString('base64url');
+    const fakeSig = Buffer.from('fake_rsa_signature').toString('base64url');
+    const badAlgJwt = `${header}.${body}.${fakeSig}`;
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/owner/profile',
+      headers: { authorization: `Bearer ${badAlgJwt}` }
+    });
+    assert.strictEqual(res.statusCode, 401);
+  });
+
+  test('JWT with invalid audience (aud=public) is strictly DENIED (401)', async () => {
+    const badAudJwt = createSignedJwt({
+      sub: 'usr_adhithya',
+      email: ownerEmail,
+      aud: 'public', // Must be 'authenticated'
+      exp: Math.floor(Date.now() / 1000) + 3600
+    });
+
+    const res = await app.inject({
+      method: 'GET',
+      url: '/api/v1/owner/profile',
+      headers: { authorization: `Bearer ${badAudJwt}` }
+    });
+    assert.strictEqual(res.statusCode, 401);
+  });
+
+  test('Production configuration without SUPABASE_JWT_SECRET fails closed', () => {
+    const prodConfig = parseEnv({
+      NODE_ENV: 'production',
+      PORT: 3010,
+      LOG_LEVEL: 'silent',
+      SUPABASE_URL: 'https://test-prod.supabase.co',
+      SUPABASE_SERVICE_ROLE_KEY: 'test_service_role_key_long_enough_32'
+      // No SUPABASE_JWT_SECRET
+    });
+    const { IdentityAuthService } = require('../src/auth/identity.js');
+    const { SupabaseAdapter } = require('../src/auth/supabase.js');
+    const dbAdapter = new SupabaseAdapter(prodConfig);
+    const authService = new IdentityAuthService(prodConfig, dbAdapter);
+
+    // Any cryptographic JWT verification must fail closed
+    const validOwnerToken = createSignedJwt({
+      sub: 'usr_adhithya_mohan_verified',
+      email: ownerEmail,
+      aud: 'authenticated',
+      exp: Math.floor(Date.now() / 1000) + 3600
+    });
+    const verified = authService.verifyJwtCryptographically(validOwnerToken);
+    assert.strictEqual(verified, null);
   });
 });
 

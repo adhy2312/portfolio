@@ -8,7 +8,7 @@
     "build": "tsc",
     "start": "node dist/app/server.js",
     "dev": "tsx watch src/app/server.ts",
-    "test": "tsx --test tests/config.test.ts tests/cors.test.ts tests/health.test.ts tests/security.test.ts tests/validation.test.ts tests/access_separation.test.ts tests/cognitive_and_providers.test.ts"
+    "test": "tsx --test tests/config.test.ts tests/cors.test.ts tests/health.test.ts tests/security.test.ts tests/validation.test.ts tests/access_separation.test.ts tests/approval_durable.test.ts tests/cognitive_and_providers.test.ts"
   },
   "dependencies": {
     "@fastify/cors": "^9.0.1",

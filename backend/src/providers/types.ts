@@ -6,7 +6,7 @@ export interface ChatMessage {
 }
 
 export type TaskType = 'general' | 'fast_reflex' | 'deep_reasoning' | 'code' | 'vision';
-export type PrivacyClass = 'PUBLIC' | 'OWNER_ONLY' | 'STRICT_LOCAL';
+export type PrivacyClass = 'PUBLIC' | 'OWNER_ONLY' | 'SENSITIVE' | 'STRICT_LOCAL';
 
 export interface GenerateRequest {
   messages: ChatMessage[];

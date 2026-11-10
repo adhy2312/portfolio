@@ -12,6 +12,7 @@ import { SupabaseAdapter } from '../auth/supabase.js';
 import { IdentityAuthService } from '../auth/identity.js';
 import { SupabaseKeepAliveService } from '../observability/keepAlive.js';
 import { ProviderGateway } from '../providers/gateway.js';
+import { DurableApprovalService } from '../approvals/durableApprovalService.js';
 import { CognitiveOrchestrator } from '../cognitive-core/orchestrator.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
 import { publicRoutes } from '../api/routes/public.routes.js';
@@ -77,7 +78,12 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   const dbAdapter = new SupabaseAdapter(appConfig);
   const authService = new IdentityAuthService(appConfig, dbAdapter);
   const providerGateway = new ProviderGateway(appConfig);
+  const approvalService = new DurableApprovalService(appConfig, dbAdapter);
   const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway);
+
+  // Attach services to app instance for testing and route injection
+  (app as any).approvalService = approvalService;
+  (app as any).dbAdapter = dbAdapter;
 
   // 14-Minute Keep-Alive Cron to keep Supabase PostgreSQL connection pool alive
   const keepAlive = new SupabaseKeepAliveService(dbAdapter, 14);
@@ -90,7 +96,7 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   // 7. Register Route Modules
   await app.register(healthRoutes, { dbAdapter, providerGateway });
   await app.register(publicRoutes, { dbAdapter, orchestrator, providerGateway });
-  await app.register(ownerRoutes, { dbAdapter, authService, orchestrator });
+  await app.register(ownerRoutes, { dbAdapter, authService, orchestrator, approvalService });
 
   // 8. Centralized Error Handler
   app.setErrorHandler((error, request, reply) => {

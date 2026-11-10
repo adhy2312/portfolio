@@ -4,9 +4,10 @@ import { IMemoryRepository, MemoryRecord, MemoryPrivacyClass, MemoryLifecycleSta
 export class InMemoryMemoryRepository implements IMemoryRepository {
   private records = new Map<string, MemoryRecord>();
 
-  async getRecord(id: string): Promise<MemoryRecord | null> {
+  async getRecord(id: string, ownerId?: string): Promise<MemoryRecord | null> {
     const r = this.records.get(id);
     if (!r || r.isTombstoned) return null;
+    if (ownerId && r.ownerId && r.ownerId !== ownerId) return null;
     return { ...r };
   }
 
@@ -17,6 +18,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
       limit?: number;
       privacyClass?: MemoryPrivacyClass;
       lifecycleStatus?: MemoryLifecycleStatus;
+      ownerId?: string;
     }
   ): Promise<MemoryRecord[]> {
     const q = (query || '').toLowerCase().trim();
@@ -26,6 +28,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
 
     for (const record of this.records.values()) {
       if (record.isTombstoned) continue;
+      if (options?.ownerId && record.ownerId && record.ownerId !== options.ownerId) continue;
       if (options?.category && record.category !== options.category) continue;
       if (options?.privacyClass && record.privacyClass !== options.privacyClass) continue;
       if (options?.lifecycleStatus && record.lifecycleStatus !== options.lifecycleStatus) continue;
@@ -45,6 +48,7 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     const now = Date.now();
     const full: MemoryRecord = {
       ...record,
+      ownerId: record.ownerId,
       privacyClass: record.privacyClass || 'OWNER_ONLY',
       lifecycleStatus: record.lifecycleStatus || 'APPROVED',
       sourceType: record.sourceType || 'USER_INPUT',
@@ -57,9 +61,10 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     return { ...full };
   }
 
-  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>): Promise<MemoryRecord | null> {
+  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>, ownerId?: string): Promise<MemoryRecord | null> {
     const existing = this.records.get(id);
     if (!existing || existing.isTombstoned) return null;
+    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return null;
 
     const updated: MemoryRecord = {
       ...existing,
@@ -70,8 +75,8 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     return { ...updated };
   }
 
-  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
-    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`);
+  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>, ownerId?: string): Promise<MemoryRecord> {
+    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`, ownerId);
     const stored = await this.storeRecord({
       ...newRecord,
       supersedesMemoryId: oldId
@@ -79,18 +84,20 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
     return stored;
   }
 
-  async archiveRecord(id: string, reason?: string): Promise<boolean> {
+  async archiveRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
     const existing = this.records.get(id);
     if (!existing) return false;
+    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return false;
     existing.lifecycleStatus = 'ARCHIVED';
     existing.metadata = { ...existing.metadata, archiveReason: reason, archivedAt: Date.now() };
     existing.updatedAt = Date.now();
     return true;
   }
 
-  async tombstoneRecord(id: string, reason?: string): Promise<boolean> {
+  async tombstoneRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
     const existing = this.records.get(id);
     if (!existing) return false;
+    if (ownerId && existing.ownerId && existing.ownerId !== ownerId) return false;
     existing.isTombstoned = true;
     existing.metadata = { ...existing.metadata, tombstoneReason: reason };
     existing.updatedAt = Date.now();
@@ -109,13 +116,18 @@ export class InMemoryMemoryRepository implements IMemoryRepository {
 export class SupabaseMemoryRepository implements IMemoryRepository {
   constructor(private client: SupabaseClient) {}
 
-  async getRecord(id: string): Promise<MemoryRecord | null> {
-    const { data, error } = await this.client
+  async getRecord(id: string, ownerId?: string): Promise<MemoryRecord | null> {
+    let builder = this.client
       .from('memories')
       .select('*')
       .eq('id', id)
-      .eq('is_tombstoned', false)
-      .single();
+      .eq('is_tombstoned', false);
+
+    if (ownerId) {
+      builder = builder.eq('owner_id', ownerId);
+    }
+
+    const { data, error } = await builder.single();
 
     if (error || !data) return null;
     return this.mapFromRow(data);
@@ -128,6 +140,7 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       limit?: number;
       privacyClass?: MemoryPrivacyClass;
       lifecycleStatus?: MemoryLifecycleStatus;
+      ownerId?: string;
     }
   ): Promise<MemoryRecord[]> {
     let builder = this.client
@@ -136,11 +149,17 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       .eq('is_tombstoned', false)
       .limit(options?.limit || 10);
 
+    if (options?.ownerId) {
+      builder = builder.eq('owner_id', options.ownerId);
+    }
     if (query) {
       builder = builder.ilike('content', `%${query}%`);
     }
     if (options?.category) {
       builder = builder.eq('category', options.category);
+    }
+    if (options?.privacyClass) {
+      builder = builder.eq('privacy_class', options.privacyClass);
     }
     if (options?.lifecycleStatus) {
       builder = builder.eq('lifecycle_status', options.lifecycleStatus);
@@ -157,6 +176,7 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       .from('memories')
       .upsert({
         id: record.id,
+        owner_id: record.ownerId || null,
         category: record.category,
         content: record.content,
         confidence: record.confidence,
@@ -181,7 +201,7 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
     return this.mapFromRow(data);
   }
 
-  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>): Promise<MemoryRecord | null> {
+  async updateRecord(id: string, updates: Partial<Omit<MemoryRecord, 'id' | 'createdAt'>>, ownerId?: string): Promise<MemoryRecord | null> {
     const now = new Date().toISOString();
     const payload: any = { updated_at: now };
     if (updates.category !== undefined) payload.category = updates.category;
@@ -191,29 +211,33 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
     if (updates.lifecycleStatus !== undefined) payload.lifecycle_status = updates.lifecycleStatus;
     if (updates.userApproved !== undefined) payload.user_approved = updates.userApproved;
     if (updates.verified !== undefined) payload.verified = updates.verified;
+    if (updates.privacyClass !== undefined) payload.privacy_class = updates.privacyClass;
     if (updates.metadata !== undefined) payload.metadata = updates.metadata;
 
-    const { data, error } = await this.client
+    let builder = this.client
       .from('memories')
       .update(payload)
-      .eq('id', id)
-      .select()
-      .single();
+      .eq('id', id);
 
+    if (ownerId) {
+      builder = builder.eq('owner_id', ownerId);
+    }
+
+    const { data, error } = await builder.select().single();
     if (error || !data) return null;
     return this.mapFromRow(data);
   }
 
-  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>): Promise<MemoryRecord> {
-    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`);
+  async supersedeRecord(oldId: string, newRecord: Omit<MemoryRecord, 'createdAt' | 'updatedAt'>, ownerId?: string): Promise<MemoryRecord> {
+    await this.archiveRecord(oldId, `Superseded by memory ${newRecord.id || 'new'}`, ownerId);
     return this.storeRecord({
       ...newRecord,
       supersedesMemoryId: oldId
     });
   }
 
-  async archiveRecord(id: string, reason?: string): Promise<boolean> {
-    const { error } = await this.client
+  async archiveRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
+    let builder = this.client
       .from('memories')
       .update({
         lifecycle_status: 'ARCHIVED',
@@ -221,11 +245,16 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       })
       .eq('id', id);
 
+    if (ownerId) {
+      builder = builder.eq('owner_id', ownerId);
+    }
+
+    const { error } = await builder;
     return !error;
   }
 
-  async tombstoneRecord(id: string, reason?: string): Promise<boolean> {
-    const { error } = await this.client
+  async tombstoneRecord(id: string, reason?: string, ownerId?: string): Promise<boolean> {
+    let builder = this.client
       .from('memories')
       .update({
         is_tombstoned: true,
@@ -233,6 +262,11 @@ export class SupabaseMemoryRepository implements IMemoryRepository {
       })
       .eq('id', id);
 
+    if (ownerId) {
+      builder = builder.eq('owner_id', ownerId);
+    }
+
+    const { error } = await builder;
     return !error;
   }
 

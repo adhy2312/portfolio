@@ -64,7 +64,7 @@ export class CognitiveOrchestrator {
     // 1. Determine privacy class and load permitted memory
     let systemPrompt = '';
     let memoriesConsulted = 0;
-    const privacyClass: PrivacyClass = req.isOwnerAuthenticated ? 'OWNER_ONLY' : 'PUBLIC';
+    let privacyClass: PrivacyClass = req.isOwnerAuthenticated ? 'OWNER_ONLY' : 'PUBLIC';
 
     if (domain === 'PUBLIC_VISITOR') {
       // DOMAIN A: Strict public visitor isolation
@@ -86,6 +86,18 @@ export class CognitiveOrchestrator {
         lifecycleStatus: 'APPROVED'
       });
       memoriesConsulted = relevantMemories.length;
+
+      // Escalate privacy class if any memory requires SENSITIVE or STRICT_LOCAL protection
+      for (const m of relevantMemories) {
+        const memPrivacy = m.privacyClass || (m as any).privacy_class;
+        if (memPrivacy === 'STRICT_LOCAL') {
+          privacyClass = 'STRICT_LOCAL';
+          break;
+        }
+        if (memPrivacy === 'SENSITIVE') {
+          privacyClass = 'SENSITIVE';
+        }
+      }
 
       const memoryContext = relevantMemories
         .map((m) => `[Category: ${m.category}] ${m.content} (Confidence: ${m.confidence})`)

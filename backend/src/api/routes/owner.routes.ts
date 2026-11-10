@@ -4,6 +4,7 @@ import { SupabaseAdapter } from '../../auth/supabase.js';
 import { IdentityAuthService } from '../../auth/identity.js';
 import { tokenCipher } from '../../security/encryption.js';
 import { CognitiveOrchestrator } from '../../cognitive-core/orchestrator.js';
+import { DurableApprovalService } from '../../approvals/durableApprovalService.js';
 
 const StoreMemorySchema = z.object({
   id: z.string().optional(),
@@ -15,7 +16,9 @@ const StoreMemorySchema = z.object({
 });
 
 const ConsumeApprovalSchema = z.object({
-  token: z.string().min(10)
+  token: z.string().min(10),
+  actionType: z.string().optional(),
+  payload: z.record(z.unknown()).optional()
 });
 
 const OwnerChatSchema = z.object({
@@ -32,50 +35,22 @@ const CreateProposalSchema = z.object({
   testEvidence: z.string().min(5)
 });
 
-// In-memory owner task & approval store for local parity
-const ownerTasks = [
-  {
-    id: 'task_001',
-    agentId: 'JARVIS',
-    title: 'Monitor live system security & cloud invariants',
-    status: 'RUNNING',
-    riskTier: 'LOW_RISK',
-    createdAt: new Date().toISOString()
-  },
-  {
-    id: 'task_002',
-    agentId: 'ULTRON',
-    title: 'Adversarial threat modeling & anti-replay verification',
-    status: 'COMPLETED',
-    riskTier: 'CONTROLLED',
-    createdAt: new Date().toISOString()
-  }
-];
-
-const pendingApprovals = new Map<string, {
-  approvalId: string;
-  actionType: string;
-  payloadHash: string;
-  status: string;
-  expiresAt: string;
-}>();
-
-// Initialize sample pending approval
-pendingApprovals.set('appr_sample_01', {
-  approvalId: 'appr_sample_01',
-  actionType: 'DEPLOY_PRODUCTION_PATCH',
-  payloadHash: 'hash_839a_f02c',
-  status: 'PENDING_OWNER_APPROVAL',
-  expiresAt: new Date(Date.now() + 300000).toISOString()
-});
-
 export const ownerRoutes: FastifyPluginAsync<{
   dbAdapter: SupabaseAdapter;
   authService: IdentityAuthService;
   orchestrator?: CognitiveOrchestrator;
+  approvalService?: DurableApprovalService;
 }> = async (fastify: FastifyInstance, opts) => {
   // DENY-BY-DEFAULT: Register owner authentication hook on all routes in this plugin
   fastify.addHook('preHandler', opts.authService.requireOwnerHook);
+
+  // Lazy or passed approval service
+  const approvalService =
+    opts.approvalService ||
+    new DurableApprovalService(
+      (opts.dbAdapter as any).config || { NODE_ENV: 'test', ALLOW_TEST_AUTH: true },
+      opts.dbAdapter
+    );
 
   // 1. Owner Cognitive Profile
   fastify.get(
@@ -125,8 +100,9 @@ export const ownerRoutes: FastifyPluginAsync<{
     },
     async (request, reply) => {
       const { q = '', category } = request.query as { q?: string; category?: string };
+      const user = (request as any).user;
       const memoryRepo = opts.dbAdapter.getMemoryRepository();
-      const records = await memoryRepo.searchRecords(q, { category });
+      const records = await memoryRepo.searchRecords(q, { category, ownerId: user.id });
 
       return reply.status(200).send({
         success: true,
@@ -158,6 +134,7 @@ export const ownerRoutes: FastifyPluginAsync<{
       }
     },
     async (request, reply) => {
+      const user = (request as any).user;
       const parseResult = StoreMemorySchema.safeParse(request.body);
       if (!parseResult.success) {
         return reply.status(400).send({
@@ -170,6 +147,7 @@ export const ownerRoutes: FastifyPluginAsync<{
       const memoryRepo = opts.dbAdapter.getMemoryRepository();
       const stored = await memoryRepo.storeRecord({
         id: parseResult.data.id || `mem_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+        ownerId: user.id,
         category: parseResult.data.category,
         content: parseResult.data.content,
         confidence: parseResult.data.confidence,
@@ -190,7 +168,7 @@ export const ownerRoutes: FastifyPluginAsync<{
     }
   );
 
-  // 4. Autonomous Agent Tasks
+  // 4. Autonomous Agent Tasks (Durable from PostgreSQL/Supabase)
   fastify.get(
     '/api/v1/owner/tasks',
     {
@@ -199,15 +177,33 @@ export const ownerRoutes: FastifyPluginAsync<{
         tags: ['Owner']
       }
     },
-    async (_request, reply) => {
+    async (request, reply) => {
+      const user = (request as any).user;
+      const supabase = opts.dbAdapter.getClient();
+      let tasks: any[] = [];
+
+      if (supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('tasks')
+            .select('*')
+            .eq('owner_id', user.id)
+            .order('created_at', { ascending: false });
+
+          if (!error && data) {
+            tasks = data;
+          }
+        } catch {}
+      }
+
       return reply.status(200).send({
         success: true,
-        tasks: ownerTasks
+        tasks
       });
     }
   );
 
-  // 5. Human-in-the-Loop Approval Requests (Approval Inbox)
+  // 5. Human-in-the-Loop Approval Requests (Durable Inbox)
   fastify.get(
     '/api/v1/owner/approvals',
     {
@@ -216,15 +212,18 @@ export const ownerRoutes: FastifyPluginAsync<{
         tags: ['Owner']
       }
     },
-    async (_request, reply) => {
+    async (request, reply) => {
+      const user = (request as any).user;
+      const pendingApprovals = await approvalService.getPendingApprovals(user.id);
+
       return reply.status(200).send({
         success: true,
-        pendingApprovals: Array.from(pendingApprovals.values())
+        pendingApprovals
       });
     }
   );
 
-  // 6. Cryptographic Approval Token Consumption
+  // 6. Cryptographic Approval Token Consumption (Durable & Atomically Single-Use)
   fastify.post(
     '/api/v1/owner/approvals/:id/consume',
     {
@@ -242,13 +241,16 @@ export const ownerRoutes: FastifyPluginAsync<{
           type: 'object',
           required: ['token'],
           properties: {
-            token: { type: 'string' }
+            token: { type: 'string' },
+            actionType: { type: 'string' },
+            payload: { type: 'object' }
           }
         }
       }
     },
     async (request, reply) => {
       const { id } = request.params as { id: string };
+      const user = (request as any).user;
       const parseResult = ConsumeApprovalSchema.safeParse(request.body);
       if (!parseResult.success) {
         return reply.status(400).send({
@@ -258,29 +260,34 @@ export const ownerRoutes: FastifyPluginAsync<{
         });
       }
 
-      const approval = pendingApprovals.get(id);
-      if (!approval) {
-        return reply.status(404).send({
-          statusCode: 404,
-          error: 'Not Found',
-          message: 'Approval request not found.'
+      const consumeRes = await approvalService.consumeApprovalToken({
+        approvalId: id,
+        token: parseResult.data.token,
+        payload: parseResult.data.payload,
+        actionType: parseResult.data.actionType,
+        consumerIdentity: 'owner_web_client',
+        ownerId: user.id
+      });
+
+      if (!consumeRes.success) {
+        const statusCode = consumeRes.reason === 'APPROVAL_NOT_FOUND' ? 404 : 400;
+        return reply.status(statusCode).send({
+          statusCode,
+          error: consumeRes.reason || 'ApprovalFailed',
+          message: consumeRes.error || 'Failed to consume approval token.'
         });
       }
-
-      // Mark consumed atomically (Anti-replay invariant)
-      approval.status = 'CONSUMED';
-      pendingApprovals.delete(id);
 
       return reply.status(200).send({
         success: true,
         approvalId: id,
         status: 'CONSUMED',
-        authorizedAt: new Date().toISOString()
+        authorizedAt: consumeRes.authorizedAt
       });
     }
   );
 
-  // 7. Integration Management (GitHub, Gmail, Calendar)
+  // 7. Integration Management (Real Verification — Zero Fake Tokens)
   fastify.get(
     '/api/v1/owner/integrations',
     {
@@ -289,33 +296,39 @@ export const ownerRoutes: FastifyPluginAsync<{
         tags: ['Owner']
       }
     },
-    async (_request, reply) => {
-      // Sample encrypted state verification
-      const sampleEncrypted = tokenCipher.encrypt('sample_oauth_token_secret');
+    async (request, reply) => {
+      const user = (request as any).user;
+      const supabase = opts.dbAdapter.getClient();
+      const connectedServices = new Map<string, any>();
+
+      if (supabase) {
+        try {
+          const { data } = await supabase
+            .from('integration_connections')
+            .select('service_name, scopes, updated_at')
+            .eq('owner_id', user.id);
+
+          if (data) {
+            data.forEach((row: any) => connectedServices.set(row.service_name, row));
+          }
+        } catch {}
+      }
+
+      const services = ['github', 'gmail', 'calendar'];
+      const integrations = services.map((service) => {
+        const conn = connectedServices.get(service);
+        return {
+          service,
+          connected: Boolean(conn),
+          status: conn ? 'CONNECTED' : 'NOT_CONFIGURED',
+          scopes: conn?.scopes || [],
+          lastSyncedAt: conn?.updated_at || null
+        };
+      });
 
       return reply.status(200).send({
         success: true,
-        integrations: [
-          {
-            service: 'github',
-            connected: true,
-            status: 'HEALTHY',
-            scopes: ['repo', 'read:user'],
-            hasEncryptedToken: Boolean(sampleEncrypted)
-          },
-          {
-            service: 'gmail',
-            connected: false,
-            status: 'DISCONNECTED',
-            scopes: []
-          },
-          {
-            service: 'calendar',
-            connected: false,
-            status: 'DISCONNECTED',
-            scopes: []
-          }
-        ]
+        integrations
       });
     }
   );

@@ -19,8 +19,13 @@ export class SupabaseAdapter implements IDatabaseAdapter {
         }
       });
       this.memoryRepo = new SupabaseMemoryRepository(this.client);
+    } else if (config.NODE_ENV === 'production') {
+      // Strict Invariant: Production must NEVER silently fall back to ephemeral in-memory storage
+      throw new Error(
+        '[Production Persistence Guard] In production mode, SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (or SUPABASE_SECRET_KEY) are mandatory. Volatile in-memory storage is prohibited in production.'
+      );
     } else {
-      // Fallback to in-memory repository for offline/local development without paid or cloud services
+      // Explicit fallback to in-memory repository strictly for offline/local test/dev
       this.client = null;
       this.memoryRepo = new InMemoryMemoryRepository();
     }

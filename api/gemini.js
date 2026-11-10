@@ -37,7 +37,8 @@ export default async function handler(req, res) {
   }
 
   // 2. Client IP Rate Limiting (Mitigates API Quota Exhaustion & Abuse)
-  const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || 'unknown';
+  const forwarded = req.headers['x-forwarded-for'];
+  const clientIp = (typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : '') || req.socket?.remoteAddress || 'unknown';
   if (isRateLimited(clientIp)) {
     return res.status(429).json({ 
       error: 'Cognitive rate limit reached. Please wait a minute before sending another query.' 
