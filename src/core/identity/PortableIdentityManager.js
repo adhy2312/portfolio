@@ -405,7 +405,8 @@ export class PortableIdentityManager {
     }
 
     // P0.3 Quarantine Pipeline: Quarantine ALL imported cognitive dimensions by default
-    const isExplicitlyTrusted = options.trusted === true;
+    // Explicit owner authorization proof required to bypass quarantine (EXPLOIT-04 Remediation)
+    const isExplicitlyTrusted = Boolean(options.trusted === true && options.ownerAuthProof);
 
     // 1. Cognitive Profile Dimensions Quarantine
     if (bundle.cognitiveProfile?.dimensions) {
@@ -496,8 +497,9 @@ export class PortableIdentityManager {
 
   /**
    * Authoritative human owner promotion of a quarantined candidate
+   * Requires explicit, non-default owner authorization proof (EXPLOIT-04 Remediation)
    */
-  promoteQuarantinedCandidate(candidateId, ownerAuthProof = true) {
+  promoteQuarantinedCandidate(candidateId, ownerAuthProof = false) {
     if (!ownerAuthProof) {
       return { success: false, error: 'Unauthorized: Candidate promotion requires human owner authorization.' };
     }

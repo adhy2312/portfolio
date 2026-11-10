@@ -9,11 +9,13 @@
  * • Authenticated owner approval execution
  */
 
+import { verifySessionToken, extractToken } from './auth.js';
+
 export default async function handler(req, res) {
   // Enforce no-cache for live telemetry
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
 
-  const action = req.query.action || req.body?.action || 'status';
+  const action = req.query?.action || req.body?.action || 'status';
 
   // 1. GET or POST: Return System Status
   if (action === 'status') {
@@ -38,8 +40,17 @@ export default async function handler(req, res) {
     });
   }
 
-  // 2. Weekly Report Dispatch
+  // 2. Weekly Report Dispatch (Protected: Requires Authenticated Owner)
   if (action === 'weekly_report') {
+    const token = extractToken(req);
+    const session = verifySessionToken(token);
+    if (!session || session.role !== 'owner') {
+      return res.status(401).json({
+        success: false,
+        error: 'Unauthorized: Privileged owner session token required to generate or dispatch intelligence reports.'
+      });
+    }
+
     const reportTimestamp = new Date().toISOString();
     const periodEnd = new Date().toLocaleDateString('en-US', { timeZone: 'Asia/Kolkata', dateStyle: 'full' });
 
@@ -127,7 +138,7 @@ export default async function handler(req, res) {
 
           <div style="margin-top: 28px; padding-top: 18px; border-top: 1px solid #1f2937; text-align: center; color: #6b7280; font-size: 11px;">
             Automated intelligence report dispatched to <strong>${OWNER_EMAIL}</strong>.<br/>
-            Access your classified command center at <a href="https://adhy.tech/agentp" style="color: #a78bfa; text-decoration: none;">https://adhy.tech/agentp</a> (Passcode: <code>adhy2006</code>).
+            Access your classified command center at <a href="https://adhy.tech/agentp" style="color: #a78bfa; text-decoration: none;">https://adhy.tech/agentp</a>.
           </div>
         </div>
       </div>

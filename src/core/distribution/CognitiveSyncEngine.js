@@ -17,6 +17,7 @@
  */
 
 import { adhyModel } from '../identity/AdhyModel.js';
+import { computePureJsHmacSha256 } from '../security/ServerApprovalService.js';
 
 export const SYNC_STATUS = Object.freeze({
   IDLE: 'IDLE',
@@ -46,38 +47,28 @@ export const SYNC_QUEUE_ITEM_STATUS = Object.freeze({
 });
 
 /**
- * Deterministic cryptographic digest (HMAC-SHA256 with fallback)
+ * Deterministic cryptographic digest using RFC 2104 HMAC-SHA256
  */
-function computeSyncDigest(rawString, secretKey = 'adhy_cognitive_sync_v1_secret') {
+const DEFAULT_FALLBACK_SYNC_KEY = 'adhy_cognitive_sync_secure_v2';
+
+function computeSyncDigest(rawString, secretKey = DEFAULT_FALLBACK_SYNC_KEY) {
   try {
     const cryptoMod = typeof require !== 'undefined' ? require('crypto') : null;
     if (cryptoMod && cryptoMod.createHmac) {
-      return cryptoMod.createHmac('sha256', secretKey).update(rawString).digest('hex');
+      return cryptoMod.createHmac('sha256', String(secretKey)).update(rawString).digest('hex');
     }
   } catch {}
 
-  // 256-bit collision-resistant digest fallback
-  let h1 = 0xdeadbeef, h2 = 0x41c6ce57, h3 = 0x6a09e667, h4 = 0xbb67ae85;
-  for (let i = 0; i < rawString.length; i++) {
-    const ch = rawString.charCodeAt(i);
-    h1 = Math.imul(h1 ^ ch, 2654435761);
-    h2 = Math.imul(h2 ^ ch, 1597334677);
-    h3 = Math.imul(h3 ^ ch, 2246822507);
-    h4 = Math.imul(h4 ^ ch, 3266489909);
-  }
-  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
-  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h3 ^ (h3 >>> 13), 3266489909);
-  h3 = Math.imul(h3 ^ (h3 >>> 16), 2246822507) ^ Math.imul(h4 ^ (h4 >>> 13), 3266489909);
-  h4 = Math.imul(h4 ^ (h4 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
-  return (h1 >>> 0).toString(16).padStart(8, '0') +
-         (h2 >>> 0).toString(16).padStart(8, '0') +
-         (h3 >>> 0).toString(16).padStart(8, '0') +
-         (h4 >>> 0).toString(16).padStart(8, '0');
+  // Cryptographically sound RFC 2104 HMAC-SHA256 fallback (never uses weak 32-bit linear hashes)
+  return computePureJsHmacSha256(String(secretKey), rawString);
 }
 
 export class CognitiveSyncEngine {
   constructor(options = {}) {
     this.nodeId = options.nodeId || `node_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
+    this.secretKey = options.secretKey || 
+      (typeof process !== 'undefined' && process.env && (process.env.COGNITIVE_SYNC_SECRET || process.env.SESSION_SECRET)) || 
+      DEFAULT_FALLBACK_SYNC_KEY;
     this.isOnline = options.isOnline !== undefined ? options.isOnline : true;
     this.pendingSyncQueue = []; // Offline mutation queue
     this.syncHistory = [];
@@ -112,9 +103,9 @@ export class CognitiveSyncEngine {
       mutations: Array.isArray(mutations) ? mutations : [mutations]
     };
 
-    // Deterministic payload checksum
+    // Deterministic payload checksum using HMAC-SHA256
     const raw = JSON.stringify(payload);
-    const checksum = computeSyncDigest(raw);
+    const checksum = computeSyncDigest(raw, this.secretKey);
 
     return {
       syncId: `sync_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
@@ -129,9 +120,10 @@ export class CognitiveSyncEngine {
   }
 
   /**
-   * Verifies the cryptographic checksum and anti-replay invariants of a sync envelope
+   * Verifies the cryptographic checksum and anti-replay invariants of a sync envelope.
+   * STRICT: Never accepts weak non-cryptographic or legacy checksums.
    */
-  verifyEnvelope(envelope) {
+  verifyEnvelope(envelope, customSecret = null) {
     if (!envelope || (!envelope.checksum && !envelope.signature)) return false;
     const { checksum, signature, syncId, ...contentToHash } = envelope;
 
@@ -140,21 +132,18 @@ export class CognitiveSyncEngine {
       return false; // Replay detected!
     }
 
-    const raw = JSON.stringify(contentToHash);
-    const computedDigest = computeSyncDigest(raw);
-
-    // Support both cryptographic digest and backwards-compatible rolling hash
-    let rollingHash = 0;
-    for (let i = 0; i < raw.length; i++) {
-      rollingHash = ((rollingHash << 5) - rollingHash) + raw.charCodeAt(i);
-      rollingHash |= 0;
+    // Check envelope expiration
+    if (envelope.expiresAt && Date.now() > new Date(envelope.expiresAt).getTime()) {
+      return false; // Expired envelope
     }
-    const legacyChecksum = Math.abs(rollingHash).toString(16);
+
+    const raw = JSON.stringify(contentToHash);
+    const effectiveSecret = customSecret || this.secretKey;
+    const computedDigest = computeSyncDigest(raw, effectiveSecret);
 
     const isValid = (
       checksum === computedDigest ||
-      signature === computedDigest ||
-      checksum === legacyChecksum
+      signature === computedDigest
     );
 
     if (isValid && envelope.nonce) {

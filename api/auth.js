@@ -97,7 +97,7 @@ function createSessionToken(role = 'owner') {
   return `${payloadB64}.${signature}`;
 }
 
-function verifySessionToken(token) {
+export function verifySessionToken(token) {
   if (!SIGNING_SECRET || !token || typeof token !== 'string') return null;
   const parts = token.split('.');
   if (parts.length !== 2) return null;
@@ -121,7 +121,7 @@ function verifySessionToken(token) {
 }
 
 // ── Extract Token from Request (NEVER accept tokens via URL query parameters) ──
-function extractToken(req) {
+export function extractToken(req) {
   // 1. From Authorization Header
   const authHeader = req.headers.authorization || '';
   if (authHeader.startsWith('Bearer ')) {
