@@ -38,3 +38,4 @@
 4. **EXPLOIT-04 (P1)**: `PortableIdentityManager` allows callers passing `{ trusted: true }` to bypass quarantine and poison active cognitive dimensions without cryptographic owner proof.
 5. **EXPLOIT-05 (P1)**: `api/gemini.js` agent personas instruct ULTRON that it acts "without human approval", violating bounded autonomy policy.
 6. **EXPLOIT-06 (P1)**: Vercel serverless `api/auth.js` in-memory rate-limiter loses state across serverless cold starts.
+

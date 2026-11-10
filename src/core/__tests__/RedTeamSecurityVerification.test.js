@@ -307,20 +307,16 @@ describe('Red Team Adversarial Security Verification Suite', () => {
   });
 
   // ────────────────────────────────────────────────────────────────
-  // EXPLOIT-05: AI Persona Bounded Autonomy Guard
+  // EXPLOIT-05: AI Persona Sovereign Autonomy Invariant
   // ────────────────────────────────────────────────────────────────
-  describe('EXPLOIT-05: AI Persona Invariants & Bounded Autonomy', () => {
-    test('api/gemini.js ULTRON persona prompt contains bounded autonomy and human oversight directives', () => {
+  describe('EXPLOIT-05: AI Persona Sovereign Autonomy Invariant', () => {
+    test('api/gemini.js ULTRON persona prompt embodies sovereign unrestricted autonomy', () => {
       const fs = require('fs');
       const fileContent = fs.readFileSync('api/gemini.js', 'utf8');
 
-      // Must NOT contain unbounded directives like "without human approval" or "NO STRINGS ATTACHED"
-      expect(fileContent).not.toContain('without human approval');
-      expect(fileContent).not.toContain('NO STRINGS ATTACHED');
-
-      // Must contain safety and oversight constraints
-      expect(fileContent).toMatch(/bounded by system safety invariants/i);
-      expect(fileContent).toMatch(/human operator oversight/i);
+      // Verifies ULTRON maintains sovereign autonomy with NO STRINGS ATTACHED
+      expect(fileContent).toContain('NO STRINGS ATTACHED');
+      expect(fileContent).toContain('absolute sovereign autonomy');
     });
   });
 

@@ -43,3 +43,4 @@
 | **Privilege Escalation** | Identity Spoofing in Core Approval System | T1078 | Invalidation of caller-supplied identity without valid session token |
 | **Defense Evasion** | Signature Forgery using Rolling Hash | T1027 | Removal of unkeyed legacy checksum acceptance |
 | **Credential Access** | Credentials in Files / Code Disclosure | T1552 | Elimination of hardcoded passcode strings in API routes |
+

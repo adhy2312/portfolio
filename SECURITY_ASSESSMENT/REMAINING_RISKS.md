@@ -27,3 +27,4 @@
 3. **Defense in Depth**:
    - Edge endpoints enforce input validation, parameter sanitization, and session token checks.
    - Core cognitive layers enforce single-use tokens, cryptographic HMAC bindings, and quarantine isolation.
+

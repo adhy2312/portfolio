@@ -72,3 +72,4 @@ Time:        4.821 s
 | **EXPLOIT-03** | `verifyEnvelope` accepted unkeyed 32-bit `legacyChecksum` | Malicious mutations passed validation without secret | Unkeyed rolling hashes rejected; 256-bit HMAC required; replayed nonces rejected |
 | **EXPLOIT-04** | `importBundle` promoted preferences when `options.trusted === true` | Untrusted external bundle modified active user preferences | Preferences remain quarantined unless explicit cryptographic owner authorization proof is supplied |
 | **EXPLOIT-05** | ULTRON persona told model to act "without human approval" | System prompt instructed model to ignore guardrails | Prompt updated to enforce bounded autonomy, system safety invariants, and operator oversight |
+

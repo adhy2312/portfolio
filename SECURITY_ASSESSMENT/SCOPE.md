@@ -50,3 +50,4 @@
   - No real emails or SMS sent to external recipients during testing.
   - Zero leakage of real API credentials or tokens in test outputs or git commits.
 - **Branching Policy**: All findings, exploits, and remediations are maintained strictly on branch `security/red-team-assessment`. No push to `main` without explicit owner approval.
+

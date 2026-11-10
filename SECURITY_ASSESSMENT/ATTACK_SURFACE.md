@@ -48,3 +48,4 @@
 | **PortableIdentityManager**| `src/core/identity/PortableIdentityManager.js` | `options.trusted === true` bypasses quarantine and directly modifies active cognition without owner JWT proof. |
 | **Agent Autonomy** | Specialist Agents & Personas | Prompts claiming ULTRON acts "without human approval"; agents claiming `requiresApproval = false`. |
 | **Visual/Live Mode** | `src/core/live/`, `src/core/vision/` | Malicious camera frame / visual injection; audio buffer overflow. |
+

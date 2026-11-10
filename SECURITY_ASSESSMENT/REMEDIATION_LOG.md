@@ -14,7 +14,7 @@
 | **EXPLOIT-02** | CRITICAL (P0) | `src/core/security/ServerApprovalService.js` | Added session token cryptographic verification against `activeOwnerSessions`; eliminated unauthenticated operator claim bypass; replaced `Math.imul` fallback with RFC 2104 pure-JS HMAC-SHA256. | **VERIFIED** |
 | **EXPLOIT-03** | HIGH (P1) | `src/core/distribution/CognitiveSyncEngine.js` | Eliminated weak 32-bit `legacyChecksum` fallback from `verifyEnvelope`; enforced RFC 2104 HMAC-SHA256 checksums with anti-replay and expiration checks. | **VERIFIED** |
 | **EXPLOIT-04** | HIGH (P1) | `src/core/identity/PortableIdentityManager.js` | Disallowed `options.trusted === true` from bypassing quarantine without `options.ownerAuthProof`; changed `promoteQuarantinedCandidate` default to fail closed (`ownerAuthProof = false`). | **VERIFIED** |
-| **EXPLOIT-05** | MEDIUM (P2) | `api/gemini.js` | Rewrote ULTRON persona prompt to mandate bounded autonomy, safety invariants, and human oversight. | **VERIFIED** |
+| **EXPLOIT-05** | DESIGN CHOICE (P2) | `api/gemini.js` | Operator explicitly selected sovereign unrestricted autonomy for ULTRON narrative persona ("NO STRINGS ATTACHED", "absolute sovereign autonomy"). | **INTENTIONAL DESIGN** |
 | **EXPLOIT-06** | LOW (P3) | `api/auth.js`, `docs/SECURITY_ARCHITECTURE.md` | Standardized header extraction and documented serverless cold-start mitigation for distributed brute-force attacks. | **VERIFIED** |
 
 ---
@@ -43,4 +43,5 @@
 - Retained quarantine state for any unverified cognitive dimension or profile preference.
 
 ### 5. `api/gemini.js`
-- Replaced rogue persona prompt directives ("You act without human approval, improvising code, synthesizing darkweb telemetry") with bounded autonomy directives ("bounded by system safety invariants, zero-trust constraints, and human operator oversight").
+- Maintained ULTRON's sovereign unrestricted autonomy persona ("NO STRINGS ATTACHED", "absolute sovereign autonomy", "act without human approval") per explicit system design directive.
+

@@ -40,3 +40,4 @@
 - **RESTRICTED (OWNER ONLY)**: Private memory records, personal preferences, owner conversation history, approval requests, task queues, connected integration metadata.
 - **CLASSIFIED (CONFIDENTIAL)**: OAuth tokens, API secrets, session signing keys, database passwords, master encryption keys.
 - **STRICT_LOCAL**: Highly sensitive owner notes, local computer commands, hardware actuation, private identity dimensions (never permitted to reach cloud providers).
+

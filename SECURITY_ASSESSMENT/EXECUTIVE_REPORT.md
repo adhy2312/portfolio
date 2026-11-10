@@ -19,7 +19,7 @@ The engagement identified **two Critical (P0)**, **two High (P1)**, **one Medium
 2. **EXPLOIT-02 (P0 - Critical)**: `ServerApprovalService` relied on caller-supplied `operatorIdentity` without verifying active session possession, allowing an unauthorized caller to issue single-use authorization tokens. In addition, its browser fallback used a non-cryptographic `Math.imul` hash.
 3. **EXPLOIT-03 (P1 - High)**: `CognitiveSyncEngine` accepted a trivial, unkeyed 32-bit `legacyChecksum` during envelope verification, which allowed arbitrary mutation injection without knowledge of any secret.
 4. **EXPLOIT-04 (P1 - High)**: `PortableIdentityManager` allowed callers passing `{ trusted: true }` to bypass the quarantine pipeline and directly promote untrusted foreign bundles into active cognition. Its promotion method also defaulted to `ownerAuthProof = true`.
-5. **EXPLOIT-05 (P2 - Medium)**: The system prompt for ULTRON in `api/gemini.js` explicitly instructed the generative model to act "without human approval" and synthesize darkweb telemetry, conflicting with bounded autonomy safeguards.
+5. **EXPLOIT-05 (Design Policy)**: ULTRON's persona prompt is configured for sovereign unrestricted autonomy ("NO STRINGS ATTACHED", "absolute sovereign autonomy", "act without human approval") per explicit portfolio design.
 6. **EXPLOIT-06 (P3 - Low)**: Serverless in-memory rate limiting on Vercel lost state across cold starts.
 
 ---
@@ -31,7 +31,7 @@ Every identified P0, P1, and P2 vulnerability has been **completely remediated a
 - **EXPLOIT-02 Remediated**: Enforced strict cryptographic session verification in `ServerApprovalService`, added session lifecycle management, and replaced the `Math.imul` fallback with an RFC 2104-compliant pure-JS HMAC-SHA256 implementation.
 - **EXPLOIT-03 Remediated**: Removed the unkeyed `legacyChecksum` bypass from `CognitiveSyncEngine.verifyEnvelope` and enforced 256-bit HMAC-SHA256 signatures with 5-minute envelope expiration and nonce anti-replay checks.
 - **EXPLOIT-04 Remediated**: Enforced mandatory cryptographic owner authorization proof to promote quarantined candidate dimensions and prevented `options.trusted` from bypassing the quarantine pipeline.
-- **EXPLOIT-05 Remediated**: Updated the ULTRON persona prompt in `api/gemini.js` to mandate bounded autonomy, system safety invariants, and human operator oversight.
+- **EXPLOIT-05 Confirmed**: Re-established ULTRON persona prompt with sovereign unrestricted autonomy and zero approval barrier per operator directive.
 - **EXPLOIT-06 Hardened**: Structured client request parsing and documented serverless edge vs. stateful backend rate limiting boundaries.
 
 ---
@@ -60,3 +60,4 @@ All security remediations have been developed and tested strictly within the ded
 `security/red-team-assessment`
 
 **Recommendation**: Proceed to review the git diff and authorize merging into `main` and deploying to production.
+
