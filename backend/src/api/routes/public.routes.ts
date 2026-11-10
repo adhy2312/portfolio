@@ -299,7 +299,7 @@ export const publicRoutes: FastifyPluginAsync<{
         });
       }
 
-      visitorService.revokeSessionToken(sessionHeader);
+      await visitorService.revokeSessionToken(sessionHeader);
       return reply.status(200).send({
         success: true,
         message: 'Visitor session revoked successfully.'

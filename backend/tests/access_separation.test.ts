@@ -373,7 +373,8 @@ describe('PROMPT 2 — Access Separation & Owner Identity Boundary', () => {
       LOG_LEVEL: 'silent',
       SUPABASE_URL: 'https://test-prod.supabase.co',
       SUPABASE_SERVICE_ROLE_KEY: 'test_service_role_key_long_enough_32',
-      APPROVAL_SIGNING_SECRET: 'test_approval_signing_secret_32_bytes_long'
+      APPROVAL_SIGNING_SECRET: 'test_approval_signing_secret_32_bytes_long',
+      VISITOR_SESSION_SIGNING_SECRET: 'test_visitor_secret_min_32_chars_12345'
       // No SUPABASE_JWT_SECRET
     });
     const { IdentityAuthService } = require('../src/auth/identity.js');

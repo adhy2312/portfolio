@@ -113,6 +113,13 @@ CREATE TABLE IF NOT EXISTS public.integration_connections (
   UNIQUE(owner_id, service_name)
 );
 
+-- 8b. Revoked Visitor Sessions (P1-3 Durable Visitor Session Revocation)
+CREATE TABLE IF NOT EXISTS public.revoked_visitor_sessions (
+  token_hash TEXT PRIMARY KEY,
+  revoked_at TIMESTAMPTZ DEFAULT NOW(),
+  expires_at TIMESTAMPTZ
+);
+
 -- 9. Enable Row-Level Security (RLS) on all new tables
 ALTER TABLE public.public_knowledge ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.conversations ENABLE ROW LEVEL SECURITY;
@@ -121,6 +128,7 @@ ALTER TABLE public.cognitive_profile ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.task_events ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.approval_consumptions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.revoked_visitor_sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.provider_usage ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.integration_connections ENABLE ROW LEVEL SECURITY;
 

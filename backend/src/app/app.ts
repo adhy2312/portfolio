@@ -15,6 +15,7 @@ import { ProviderGateway } from '../providers/gateway.js';
 import { DurableApprovalService } from '../approvals/durableApprovalService.js';
 import { VisitorSessionService } from '../conversations/visitorSessionService.js';
 import { CognitiveOrchestrator } from '../cognitive-core/orchestrator.js';
+import { AgentWorkerRegistry, AgentToolExecutor } from '../cognitive-core/agents.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
 import { publicRoutes } from '../api/routes/public.routes.js';
 import { ownerRoutes } from '../api/routes/owner.routes.js';
@@ -81,12 +82,15 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   const providerGateway = new ProviderGateway(appConfig);
   const approvalService = new DurableApprovalService(appConfig, dbAdapter);
   const visitorSessionService = new VisitorSessionService(appConfig, dbAdapter);
-  const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway);
+  const agentWorkerRegistry = new AgentWorkerRegistry();
+  const toolExecutor = new AgentToolExecutor(agentWorkerRegistry, approvalService, dbAdapter);
+  const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway, toolExecutor);
 
   // Attach services to app instance for testing and route injection
   (app as any).approvalService = approvalService;
   (app as any).dbAdapter = dbAdapter;
   (app as any).visitorSessionService = visitorSessionService;
+  (app as any).toolExecutor = toolExecutor;
 
   // 14-Minute Keep-Alive Cron to keep Supabase PostgreSQL connection pool alive
   const keepAlive = new SupabaseKeepAliveService(dbAdapter, 14);
@@ -99,7 +103,7 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   // 7. Register Route Modules
   await app.register(healthRoutes, { dbAdapter, providerGateway });
   await app.register(publicRoutes, { dbAdapter, orchestrator, providerGateway, visitorSessionService, config: appConfig });
-  await app.register(ownerRoutes, { dbAdapter, authService, orchestrator, approvalService });
+  await app.register(ownerRoutes, { dbAdapter, authService, orchestrator, approvalService, toolExecutor });
 
   // 8. Centralized Error Handler
   app.setErrorHandler((error, request, reply) => {

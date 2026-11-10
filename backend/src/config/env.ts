@@ -22,6 +22,8 @@ export const EnvSchema = z.object({
   SUPABASE_SECRET_KEY: z.string().min(10).optional(),
   SUPABASE_JWKS_URL: z.string().url().optional(),
   SUPABASE_JWT_SECRET: z.string().min(16).optional(),
+  SUPABASE_JWT_ISSUER: z.string().optional(),
+  ALLOW_OFFLINE_JWT_VERIFICATION: z.coerce.boolean().default(false),
   DATABASE_URL: z.string().optional(),
 
   // Owner Authorization & Security (Server-controlled allowlist)
@@ -29,6 +31,8 @@ export const EnvSchema = z.object({
   OWNER_EMAILS: z.string().optional(),
   ENCRYPTION_SECRET: z.string().min(16).optional(),
   APPROVAL_SIGNING_SECRET: z.string().min(32, 'APPROVAL_SIGNING_SECRET must be at least 32 characters').optional(),
+  VISITOR_SESSION_SIGNING_SECRET: z.string().min(32, 'VISITOR_SESSION_SIGNING_SECRET must be at least 32 characters').optional(),
+  VISITOR_SESSION_SIGNING_SECRET_PREVIOUS: z.string().min(32).optional(),
   ALLOW_TEST_AUTH: z.boolean().default(false),
   ALLOW_OWNER_DATA_ON_CLOUD: z.coerce.boolean().default(false),
 
@@ -72,6 +76,12 @@ export function parseEnv(customEnv?: Record<string, unknown>): AppConfig {
   if (parsed.data.NODE_ENV === 'production' && !parsed.data.APPROVAL_SIGNING_SECRET) {
     throw new Error(
       '[Security Invariant Violation] In production mode, APPROVAL_SIGNING_SECRET is mandatory and must be at least 32 characters long. Silently generating random keys or reusing other secrets is strictly prohibited.'
+    );
+  }
+
+  if (parsed.data.NODE_ENV === 'production' && !parsed.data.VISITOR_SESSION_SIGNING_SECRET) {
+    throw new Error(
+      '[Security Invariant Violation] In production mode, VISITOR_SESSION_SIGNING_SECRET is mandatory and must be at least 32 characters long. Hardcoding or generating fallback keys is strictly prohibited.'
     );
   }
 

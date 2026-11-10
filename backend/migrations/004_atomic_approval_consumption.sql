@@ -32,11 +32,34 @@ CREATE OR REPLACE FUNCTION public.consume_approval_atomic(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_approval public.approval_requests%ROWTYPE;
   v_now_timestamptz TIMESTAMPTZ := NOW();
+  v_jwt_role TEXT;
+  v_jwt_sub TEXT;
 BEGIN
+  -- 0. Untrusted Role Check: Block execution by anon or authenticated roles
+  v_jwt_role := NULLIF(current_setting('request.jwt.claim.role', true), '');
+  IF current_user IN ('anon', 'authenticated') OR v_jwt_role IN ('anon', 'authenticated') THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'reason', 'UNAUTHORIZED_ROLE',
+      'error', 'Permission denied: direct execution by untrusted database roles is prohibited.'
+    );
+  END IF;
+
+  -- 0b. Caller Owner Check: If caller has a JWT sub claim, do not trust caller-supplied p_owner_id blindly
+  v_jwt_sub := NULLIF(current_setting('request.jwt.claim.sub', true), '');
+  IF v_jwt_sub IS NOT NULL AND v_jwt_sub <> p_owner_id THEN
+    RETURN jsonb_build_object(
+      'success', false,
+      'reason', 'OWNER_MISMATCH',
+      'error', 'Caller authenticated subject does not match requested owner identity.'
+    );
+  END IF;
+
   -- 1. Anti-Replay check: Fast fail if token was already consumed
   IF EXISTS (SELECT 1 FROM public.approval_consumptions WHERE token_hash = p_token_hash) THEN
     RETURN jsonb_build_object(
@@ -86,7 +109,7 @@ BEGIN
     );
   END IF;
 
-  -- 5. Owner identity verification
+  -- 5. Owner identity verification (verifies against row owner_id)
   IF v_approval.owner_id <> p_owner_id THEN
     RETURN jsonb_build_object(
       'success', false,
@@ -95,7 +118,18 @@ BEGIN
     );
   END IF;
 
-  -- 6. Action type verification
+  -- 6. Verify token hash against the stored approval token
+  IF v_approval.token IS NOT NULL THEN
+    IF encode(sha256(convert_to(v_approval.token, 'UTF8')), 'hex') <> p_token_hash THEN
+      RETURN jsonb_build_object(
+        'success', false,
+        'reason', 'INVALID_TOKEN_SIGNATURE',
+        'error', 'Supplied token hash does not match stored approval token hash.'
+      );
+    END IF;
+  END IF;
+
+  -- 7. Action type verification
   IF p_action_type IS NOT NULL AND v_approval.action_type <> p_action_type THEN
     RETURN jsonb_build_object(
       'success', false,
@@ -104,7 +138,7 @@ BEGIN
     );
   END IF;
 
-  -- 7. Target service verification
+  -- 8. Target service verification
   IF p_target_service IS NOT NULL AND v_approval.target_service <> p_target_service THEN
     RETURN jsonb_build_object(
       'success', false,
@@ -113,7 +147,7 @@ BEGIN
     );
   END IF;
 
-  -- 8. Payload digest verification (Tamper detection)
+  -- 9. Payload digest verification (Tamper detection)
   IF p_payload_hash IS NOT NULL AND v_approval.payload_hash <> p_payload_hash THEN
     RETURN jsonb_build_object(
       'success', false,
@@ -122,7 +156,7 @@ BEGIN
     );
   END IF;
 
-  -- 9. Atomically update approval status to CONSUMED
+  -- 10. Atomically update approval status to CONSUMED
   UPDATE public.approval_requests
   SET
     status = 'CONSUMED',
@@ -133,7 +167,7 @@ BEGIN
     )
   WHERE approval_id = p_approval_id;
 
-  -- 10. Record consumption in approval_consumptions table
+  -- 11. Record consumption in approval_consumptions table
   INSERT INTO public.approval_consumptions (
     approval_id,
     consumed_by,
@@ -146,7 +180,7 @@ BEGIN
     v_now_timestamptz
   );
 
-  -- 11. Record immutable audit event
+  -- 12. Record immutable audit event
   INSERT INTO public.audit_events (
     event_type,
     actor_id,
@@ -169,7 +203,7 @@ BEGIN
     )
   );
 
-  -- 12. Transaction commits atomically and returns success
+  -- 13. Transaction commits atomically and returns success
   RETURN jsonb_build_object(
     'success', true,
     'approvalId', p_approval_id,
@@ -192,3 +226,7 @@ EXCEPTION
 END;
 $$;
 
+-- 3. Explicitly revoke and grant execution privileges
+REVOKE EXECUTE ON FUNCTION public.consume_approval_atomic(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BIGINT) FROM PUBLIC;
+REVOKE EXECUTE ON FUNCTION public.consume_approval_atomic(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BIGINT) FROM anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.consume_approval_atomic(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, TEXT, BIGINT) TO service_role;

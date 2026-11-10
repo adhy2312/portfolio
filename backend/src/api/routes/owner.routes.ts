@@ -5,6 +5,7 @@ import { IdentityAuthService } from '../../auth/identity.js';
 import { tokenCipher } from '../../security/encryption.js';
 import { CognitiveOrchestrator } from '../../cognitive-core/orchestrator.js';
 import { DurableApprovalService } from '../../approvals/durableApprovalService.js';
+import { AgentToolExecutor } from '../../cognitive-core/agents.js';
 
 const StoreMemorySchema = z.object({
   id: z.string().optional(),
@@ -35,11 +36,20 @@ const CreateProposalSchema = z.object({
   testEvidence: z.string().min(5)
 });
 
+const ExecuteToolSchema = z.object({
+  agentId: z.string().min(1),
+  toolName: z.string().min(1),
+  input: z.record(z.unknown()).default({}),
+  approvalToken: z.string().optional(),
+  approvalId: z.string().optional()
+});
+
 export const ownerRoutes: FastifyPluginAsync<{
   dbAdapter: SupabaseAdapter;
   authService: IdentityAuthService;
   orchestrator?: CognitiveOrchestrator;
   approvalService?: DurableApprovalService;
+  toolExecutor?: AgentToolExecutor;
 }> = async (fastify: FastifyInstance, opts) => {
   // DENY-BY-DEFAULT: Register owner authentication hook on all routes in this plugin
   fastify.addHook('preHandler', opts.authService.requireOwnerHook);
@@ -484,6 +494,54 @@ export const ownerRoutes: FastifyPluginAsync<{
           message: err.message
         });
       }
+    }
+  );
+
+  // 12. Direct Agent Tool Execution via AgentToolExecutor (End-to-End Wiring)
+  fastify.post(
+    '/api/v1/owner/agents/execute-tool',
+    {
+      schema: {
+        description: 'Execute an agent capability tool with typed adapter validation, approval enforcement, and audit persistence',
+        tags: ['Owner']
+      }
+    },
+    async (request, reply) => {
+      const parseResult = ExecuteToolSchema.safeParse(request.body);
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: parseResult.error.issues.map((i) => i.message).join(', ')
+        });
+      }
+
+      const user = (request as any).user;
+      const toolExecutor = opts.toolExecutor || (opts.orchestrator ? opts.orchestrator.getToolExecutor() : undefined);
+
+      if (!toolExecutor) {
+        return reply.status(503).send({
+          statusCode: 503,
+          error: 'Service Unavailable',
+          message: 'AgentToolExecutor is not configured.'
+        });
+      }
+
+      const execution = await toolExecutor.executeTool({
+        agentId: parseResult.data.agentId,
+        toolName: parseResult.data.toolName,
+        input: parseResult.data.input,
+        principal: {
+          id: user.id,
+          isOwner: true,
+          role: user.role
+        },
+        approvalToken: parseResult.data.approvalToken,
+        approvalId: parseResult.data.approvalId
+      });
+
+      const statusCode = execution.success ? 200 : execution.requiresApproval ? 402 : execution.reason === 'UNAVAILABLE' ? 501 : 403;
+      return reply.status(statusCode).send(execution);
     }
   );
 };

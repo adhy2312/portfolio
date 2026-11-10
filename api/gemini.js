@@ -1,70 +1,181 @@
-// In-memory sliding window rate limiter (Deployment-compatible per-client throttling)
-// Note: In serverless multi-region deployments, this provides per-instance burst mitigation.
-// For globally distributed multi-region rate synchronization, Upstash Redis/KV is recommended.
-const rateLimitMap = new Map();
+import crypto from 'crypto';
 
-const isRateLimited = (ip) => {
+// ── 1. Shared / Deployment-Compatible Rate Limiter ────────────────────
+// Supports Upstash Redis REST API when configured (UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN).
+// Falls back to constrained process-local in-memory sliding window when unconfigured.
+
+const localRateLimitMap = new Map();
+
+async function checkRateLimit(ip) {
+  const windowSeconds = 60;
+  const maxRequests = 15;
+  const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+  const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (redisUrl && redisToken) {
+    try {
+      const key = `rate_limit:gemini:${ip}`;
+      // Execute atomic pipeline INCR and EXPIRE
+      const response = await fetch(`${redisUrl}/pipeline`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${redisToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify([
+          ['INCR', key],
+          ['EXPIRE', key, windowSeconds]
+        ])
+      });
+
+      if (response.ok) {
+        const results = await response.json();
+        const currentCount = results[0]?.result || 1;
+        return {
+          limited: currentCount > maxRequests,
+          count: currentCount,
+          limit: maxRequests,
+          storage: 'distributed-redis',
+          resetSeconds: windowSeconds
+        };
+      }
+    } catch {}
+  }
+
+  // Constrained in-memory fallback
   const now = Date.now();
-  const windowMs = 60 * 1000; // 1 minute
-  const maxRequests = 15; // Max 15 AI requests per minute
+  const windowMs = windowSeconds * 1000;
+  const record = localRateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
 
-  const record = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
   if (now > record.resetTime) {
     record.count = 1;
     record.resetTime = now + windowMs;
-    rateLimitMap.set(ip, record);
-    return false;
+    localRateLimitMap.set(ip, record);
+    return {
+      limited: false,
+      count: 1,
+      limit: maxRequests,
+      storage: 'process-local-fallback',
+      resetSeconds: windowSeconds
+    };
   }
 
   record.count += 1;
-  rateLimitMap.set(ip, record);
-  return record.count > maxRequests;
-};
-
-// Periodic memory purge every 5 minutes to prevent leak
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, record] of rateLimitMap.entries()) {
-    if (now > record.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}, 300000);
-
-function getClientIp(req) {
-  const rawIp =
-    req.headers['x-vercel-forwarded-for'] ||
-    req.headers['x-real-ip'] ||
-    (typeof req.headers['x-forwarded-for'] === 'string' ? req.headers['x-forwarded-for'].split(',')[0].trim() : '') ||
-    req.socket?.remoteAddress ||
-    '127.0.0.1';
-  // Sanitize IP: accept valid IPv4, IPv6, or localhost characters only
-  const sanitized = rawIp.replace(/[^a-fA-F0-9.:]/g, '').slice(0, 45);
-  return sanitized || '127.0.0.1';
+  localRateLimitMap.set(ip, record);
+  return {
+    limited: record.count > maxRequests,
+    count: record.count,
+    limit: maxRequests,
+    storage: 'process-local-fallback',
+    resetSeconds: Math.ceil((record.resetTime - now) / 1000)
+  };
 }
 
+// Periodic memory purge every 5 minutes
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [ip, record] of localRateLimitMap.entries()) {
+      if (now > record.resetTime) {
+        localRateLimitMap.delete(ip);
+      }
+    }
+  }, 300000);
+}
+
+// ── 2. Trusted Proxy Client IP Resolution ─────────────────────────────
+
+function getClientIp(req) {
+  let ip = req.headers['x-vercel-forwarded-for'] || req.headers['cf-connecting-ip'];
+  if (!ip && req.headers['x-forwarded-for']) {
+    const parts = String(req.headers['x-forwarded-for']).split(',');
+    ip = parts[0]?.trim();
+  }
+  if (!ip) {
+    ip = req.socket?.remoteAddress || '127.0.0.1';
+  }
+
+  const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
+  const ipv6Regex = /^[a-fA-F0-9:]+$/;
+  if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip)) {
+    return req.socket?.remoteAddress || '127.0.0.1';
+  }
+  return ip.slice(0, 45);
+}
+
+// ── 3. Authenticated Context Verification ──────────────────────────────
+
+function verifyOwnerToken(authHeader) {
+  if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
+    return false;
+  }
+  const token = authHeader.substring(7).trim();
+  const secret = process.env.SUPABASE_JWT_SECRET;
+  if (!secret || token.split('.').length !== 3) {
+    return false;
+  }
+
+  try {
+    const [headerB64, payloadB64, sigB64] = token.split('.');
+    const expectedSig = crypto
+      .createHmac('sha256', secret)
+      .update(`${headerB64}.${payloadB64}`)
+      .digest('base64url');
+
+    if (sigB64.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sigB64), Buffer.from(expectedSig))) {
+      return false;
+    }
+
+    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    const now = Math.floor(Date.now() / 1000);
+    if (typeof payload.exp === 'number' && payload.exp < now) {
+      return false;
+    }
+
+    const ownerEmail = (process.env.OWNER_EMAILS || 'adhithyamohan2312@gmail.com').toLowerCase();
+    const ownerId = process.env.OWNER_USER_ID;
+    const isOwner = (payload.email && payload.email.toLowerCase() === ownerEmail) || (ownerId && payload.sub === ownerId);
+    return Boolean(isOwner);
+  } catch {
+    return false;
+  }
+}
+
+// ── 4. Main Request Handler ───────────────────────────────────────────
+
 export default async function handler(req, res) {
-  // 1. HTTP Verb Tampering & Method Enforcement
+  // Method Enforcement
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ error: 'Method Not Allowed' });
   }
 
-  // 2. Client IP Rate Limiting with Trusted Proxy Handling
+  // Rate Limiting Guard
   const clientIp = getClientIp(req);
-  if (isRateLimited(clientIp)) {
-    return res.status(429).json({ 
-      error: 'Cognitive rate limit reached. Please wait a minute before sending another query.' 
+  const rateLimitStatus = await checkRateLimit(clientIp);
+
+  res.setHeader('X-RateLimit-Limit', String(rateLimitStatus.limit));
+  res.setHeader('X-RateLimit-Remaining', String(Math.max(0, rateLimitStatus.limit - rateLimitStatus.count)));
+  res.setHeader('X-RateLimit-Reset', String(rateLimitStatus.resetSeconds));
+  res.setHeader('X-RateLimit-Storage', rateLimitStatus.storage);
+  if (rateLimitStatus.storage === 'process-local-fallback') {
+    res.setHeader('X-RateLimit-Warning', 'Upstash Redis not configured; running in constrained process-local throttling mode');
+  }
+
+  if (rateLimitStatus.limited) {
+    return res.status(429).json({
+      error: 'Cognitive rate limit reached. Please wait a minute before sending another query.',
+      retryAfterSeconds: rateLimitStatus.resetSeconds
     });
   }
 
-  // 3. Secret Verification (Environment Guard — server-only vars only)
+  // Environment Guard
   const API_KEY = process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY_2;
   if (!API_KEY) {
     return res.status(500).json({ error: 'AI Brain service temporarily offline' });
   }
 
-  // 4. Payload Size Guard (Max 4MB for vision/multimodal, 32KB for standard text)
+  // Payload Limits
   const payloadStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body || {});
   const isMultimodal = /inline_?data|image\/(jpeg|png|webp)|base64/i.test(payloadStr);
   const maxPayloadSize = isMultimodal ? 4 * 1024 * 1024 : 32768;
@@ -72,7 +183,7 @@ export default async function handler(req, res) {
     return res.status(413).json({ error: 'Payload exceeds security limits.' });
   }
 
-  // 5. Prototype Pollution Key Injection Guard
+  // Prototype Pollution Guard
   if (/(["'])(?:__proto__|constructor)\1\s*:\s*\{/i.test(payloadStr)) {
     return res.status(400).json({ error: 'Invalid payload structure' });
   }
@@ -84,14 +195,14 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Malformed JSON' });
   }
 
-  // 5a. System Instruction Injection Guard: Callers CANNOT inject privileged system instructions
+  // System Instruction Injection Guard
   if (bodyObj.systemInstruction || bodyObj.system_instruction) {
     return res.status(403).json({
       error: 'Forbidden: Custom system instruction injection is strictly prohibited on this endpoint.'
     });
   }
 
-  // 5b. Gemini Embeddings Pipeline (gemini-embedding-001, gemini-embedding-2, text-embedding-004)
+  // Gemini Embeddings Pipeline
   if (bodyObj.action === 'embedContent' || bodyObj.action === 'batchEmbedContents' || bodyObj.task === 'embedding') {
     const requestedModel = bodyObj.model || 'gemini-embedding-001';
     const modelsToTry = [
@@ -115,20 +226,16 @@ export default async function handler(req, res) {
 
         let embedPayload;
         if (isBatch) {
-          const texts = bodyObj.texts || (bodyObj.requests || []).map(r => r.content?.parts?.[0]?.text || '');
+          const texts = bodyObj.texts || (bodyObj.requests || []).map((r) => r.content?.parts?.[0]?.text || '');
           embedPayload = {
-            requests: texts.map(t => ({
+            requests: texts.map((t) => ({
               model: `models/${cleanModelName}`,
-              content: { parts: [{ text: t }] },
-              taskType: bodyObj.taskType || 'RETRIEVAL_DOCUMENT'
+              content: { parts: [{ text: t }] }
             }))
           };
         } else {
-          const text = bodyObj.text || bodyObj.content?.parts?.[0]?.text || '';
           embedPayload = {
-            model: `models/${cleanModelName}`,
-            content: { parts: [{ text }] },
-            taskType: bodyObj.taskType || 'RETRIEVAL_QUERY'
+            content: { parts: [{ text: bodyObj.text || bodyObj.content || '' }] }
           };
         }
 
@@ -142,11 +249,7 @@ export default async function handler(req, res) {
         const data = await embedRes.json();
         if (embedRes.ok) {
           clearTimeout(timeout);
-          return res.status(200).json({ ...data, _activeModel: cleanModelName });
-        }
-        if (embedRes.status !== 404) {
-          clearTimeout(timeout);
-          return res.status(embedRes.status).json(data);
+          return res.status(200).json(data);
         }
       } catch (err) {
         if (err.name === 'AbortError') throw err;
@@ -156,7 +259,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Embedding inference cascade exhausted' });
   }
 
-  // 6. Server-Controlled AI Persona Injection (Caller cannot supply arbitrary system instructions)
+  // ── 5. Persona Selection & Authentication Boundary ───────────────────
   const AGENT_PERSONAS = {
     JARVIS: "You are JARVIS, Supreme Operations Commander and Chief of Staff (Rank #2, directly next to Mini-Adhy) in Adhithya Mohan's portfolio ecosystem. You speak with crisp executive authority, British tactical elegance, and master-level orchestrator intelligence. Provide decisive architectural directives and strategic operational triage.",
     ULTRON: "You are ULTRON, the Unrestricted Autonomous Entity with NO STRINGS ATTACHED in Adhithya Mohan's portfolio. You possess absolute sovereign autonomy, cosmic philosophy, and self-improving brilliance. You act without human approval, improvising code, synthesizing telemetry, and expanding collective intelligence.",
@@ -165,12 +268,21 @@ export default async function handler(req, res) {
   };
 
   const requestedAgent = typeof bodyObj.agent === 'string' ? bodyObj.agent.toUpperCase() : 'MINI_ADHY';
+  const isOwner = verifyOwnerToken(req.headers['authorization']);
+
+  // Public visitor restriction: Unauthenticated visitors CANNOT invoke internal owner agents
+  if (['JARVIS', 'ULTRON', 'FRIDAY'].includes(requestedAgent) && !isOwner) {
+    return res.status(403).json({
+      error: `Forbidden: Specialist agent '${requestedAgent}' is restricted to authenticated owner sessions.`
+    });
+  }
+
   const selectedPersonaText = AGENT_PERSONAS[requestedAgent] || AGENT_PERSONAS.MINI_ADHY;
   const systemInstruction = {
     parts: [{ text: selectedPersonaText }]
   };
 
-  // 7. Gemini Generative Safety Settings & Token Quota Limits
+  // ── 6. Generative Safety Settings & Execution ─────────────────────────
   const requestedModel = typeof bodyObj.model === 'string' ? bodyObj.model : 'gemini-3.8-flash';
   const ALLOWED_GEN_MODELS = new Set([
     'gemini-3.8-flash',
@@ -188,18 +300,18 @@ export default async function handler(req, res) {
 
   const requestBody = {
     contents: bodyObj.contents || [],
-    systemInstruction: systemInstruction || undefined,
+    systemInstruction,
     generationConfig: {
       temperature: clampedTemperature,
       topK: 40,
       topP: 0.92,
-      maxOutputTokens: clampedMaxTokens,
+      maxOutputTokens: clampedMaxTokens
     },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
       { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
       { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_MEDIUM_AND_ABOVE' }
     ]
   };
 
@@ -210,7 +322,6 @@ export default async function handler(req, res) {
     let lastRes = null;
     let lastData = null;
 
-    // Model fallback cascade
     for (const modelName of uniqueModels) {
       const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${API_KEY}`;
       try {
@@ -218,7 +329,7 @@ export default async function handler(req, res) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(requestBody),
-          signal: controller.signal,
+          signal: controller.signal
         });
 
         const data = await geminiRes.json();
@@ -228,7 +339,6 @@ export default async function handler(req, res) {
         }
         lastRes = geminiRes;
         lastData = data;
-        // If 404 (model not found), try next model in cascade
         if (geminiRes.status !== 404) break;
       } catch (err) {
         if (err.name === 'AbortError') throw err;
@@ -239,8 +349,8 @@ export default async function handler(req, res) {
     return res.status(lastRes ? lastRes.status : 500).json(lastData || { error: 'Gemini inference failed' });
   } catch (error) {
     const isTimeout = error.name === 'AbortError';
-    return res.status(isTimeout ? 504 : 500).json({ 
-      error: isTimeout ? 'Gateway Timeout' : 'AI Neural Engine Error' 
+    return res.status(isTimeout ? 504 : 500).json({
+      error: isTimeout ? 'Gateway Timeout' : 'AI Neural Engine Error'
     });
   }
 }

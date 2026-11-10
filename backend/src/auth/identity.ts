@@ -76,6 +76,11 @@ export class IdentityAuthService {
    * Enforces algorithm, signature, issuer, audience, expiration, not-before, and subject.
    */
   public verifyJwtCryptographically(token: string): AuthenticatedUser | null {
+    // In production, offline JWT verification is strictly prohibited unless explicitly configured
+    if (this.config.NODE_ENV === 'production' && !this.config.ALLOW_OFFLINE_JWT_VERIFICATION) {
+      return null;
+    }
+
     const parts = token.split('.');
     if (parts.length !== 3) return null;
 
@@ -134,10 +139,13 @@ export class IdentityAuthService {
         return null;
       }
 
-      // Verify issuer (iss) if configured
-      if (this.config.SUPABASE_URL && payload.iss) {
-        const expectedPrefix = this.config.SUPABASE_URL;
-        if (!payload.iss.startsWith(expectedPrefix)) {
+      // Exact issuer (iss) verification
+      const expectedIssuer =
+        this.config.SUPABASE_JWT_ISSUER ||
+        (this.config.SUPABASE_URL ? `${this.config.SUPABASE_URL.replace(/\/+$/, '')}/auth/v1` : undefined);
+
+      if (expectedIssuer) {
+        if (!payload.iss || typeof payload.iss !== 'string' || payload.iss !== expectedIssuer) {
           return null;
         }
       }

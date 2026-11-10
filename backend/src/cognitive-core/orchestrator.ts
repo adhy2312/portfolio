@@ -1,6 +1,6 @@
 import { IMemoryRepository, MemoryRecord } from '../memory/types.js';
 import { ProviderGateway } from '../providers/gateway.js';
-import { AgentWorkerRegistry } from './agents.js';
+import { AgentWorkerRegistry, AgentToolExecutor, ToolExecutionContext, ToolExecutionResponse } from './agents.js';
 import { MetacognitionEngine } from './metacognition.js';
 import { GenerateRequest, GenerateResponse, ChatMessage, TaskType, PrivacyClass } from '../providers/types.js';
 
@@ -12,6 +12,13 @@ export interface CognitiveRequest {
   conversationId?: string;
   taskType?: TaskType;
   history?: ChatMessage[];
+  requestedTool?: {
+    agentId: string;
+    toolName: string;
+    input: Record<string, unknown>;
+    approvalToken?: string;
+    approvalId?: string;
+  };
 }
 
 export interface CognitiveExecutionResult {
@@ -24,9 +31,10 @@ export interface CognitiveExecutionResult {
   delegatedWorker?: string;
   toolAction?: {
     tool: string;
-    status: 'EXECUTED' | 'APPROVAL_REQUIRED' | 'DENIED';
+    status: 'EXECUTED' | 'APPROVAL_REQUIRED' | 'DENIED' | 'UNAVAILABLE';
     approvalId?: string;
   };
+  toolExecution?: ToolExecutionResponse;
   provenance: {
     source: string;
     timestamp: number;
@@ -40,7 +48,8 @@ export class CognitiveOrchestrator {
 
   constructor(
     private memoryRepo: IMemoryRepository,
-    private providerGateway: ProviderGateway
+    private providerGateway: ProviderGateway,
+    private toolExecutor?: AgentToolExecutor
   ) {
     this.agentRegistry = new AgentWorkerRegistry();
     this.metacognition = new MetacognitionEngine();
@@ -52,6 +61,23 @@ export class CognitiveOrchestrator {
 
   public getMetacognition(): MetacognitionEngine {
     return this.metacognition;
+  }
+
+  public getToolExecutor(): AgentToolExecutor | undefined {
+    return this.toolExecutor;
+  }
+
+  public async executeAgentTool(ctx: ToolExecutionContext): Promise<ToolExecutionResponse> {
+    if (!this.toolExecutor) {
+      return {
+        success: false,
+        toolName: ctx.toolName,
+        agentId: ctx.agentId,
+        reason: 'UNAVAILABLE',
+        error: 'AgentToolExecutor is not configured on CognitiveOrchestrator.'
+      };
+    }
+    return this.toolExecutor.executeTool(ctx);
   }
 
   /**
@@ -136,6 +162,51 @@ export class CognitiveOrchestrator {
       delegatedWorker = 'JARVIS';
     }
 
+    // 3b. Execute tool if requested or triggered by specialist worker
+    let toolAction: CognitiveExecutionResult['toolAction'] | undefined = undefined;
+    let toolExecution: ToolExecutionResponse | undefined = undefined;
+
+    if (this.toolExecutor) {
+      if (req.requestedTool) {
+        toolExecution = await this.toolExecutor.executeTool({
+          agentId: req.requestedTool.agentId,
+          toolName: req.requestedTool.toolName,
+          input: req.requestedTool.input,
+          principal: { id: req.ownerId || req.visitorSessionId || 'anonymous', isOwner: req.isOwnerAuthenticated },
+          approvalToken: req.requestedTool.approvalToken,
+          approvalId: req.requestedTool.approvalId
+        });
+      } else if (delegatedWorker === 'ULTRON' && (lowerMsg.includes('adversarial') || lowerMsg.includes('audit'))) {
+        toolExecution = await this.toolExecutor.executeTool({
+          agentId: 'ULTRON',
+          toolName: 'adversarial_audit',
+          input: { target: req.message, scope: 'COGNITIVE_CORE' },
+          principal: { id: req.ownerId || 'sovereign_ultron', isOwner: true }
+        });
+      } else if (delegatedWorker === 'JARVIS' && req.isOwnerAuthenticated && lowerMsg.includes('plan')) {
+        toolExecution = await this.toolExecutor.executeTool({
+          agentId: 'JARVIS',
+          toolName: 'plan_task',
+          input: { taskName: req.message.slice(0, 50), steps: ['Analyze scope', 'Allocate specialists', 'Execute milestones'] },
+          principal: { id: req.ownerId!, isOwner: true }
+        });
+      }
+
+      if (toolExecution) {
+        toolAction = {
+          tool: toolExecution.toolName,
+          status: toolExecution.success
+            ? 'EXECUTED'
+            : toolExecution.requiresApproval
+            ? 'APPROVAL_REQUIRED'
+            : toolExecution.reason === 'UNAVAILABLE'
+            ? 'UNAVAILABLE'
+            : 'DENIED',
+          approvalId: toolExecution.approvalId
+        };
+      }
+    }
+
     // 4. Construct AI request
     const genRequest: GenerateRequest = {
       messages,
@@ -157,6 +228,8 @@ export class CognitiveOrchestrator {
       latencyMs: Date.now() - startTime,
       isFallback: response.isFallback,
       delegatedWorker,
+      toolAction,
+      toolExecution,
       provenance: {
         source: response.provenance.source,
         timestamp: response.provenance.timestamp,
