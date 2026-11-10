@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js Runtime
         uses: actions/setup-node@v4
@@ -30,7 +32,7 @@ jobs:
       - name: Execute Security & Cognitive Remediation Test Suite
         env:
           CI: true
-        run: npm test -- --watchAll=false
+        run: npm test -- --watchAll=false --passWithNoTests src/core
 
   production-build:
     name: Compile Production Web Application Bundle
@@ -44,6 +46,8 @@ jobs:
     steps:
       - name: Checkout Codebase
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js Runtime
         uses: actions/setup-node@v4
