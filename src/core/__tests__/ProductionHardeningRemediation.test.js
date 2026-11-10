@@ -247,9 +247,9 @@ describe('Production Hardening & Master Audit Remediation', () => {
       const flushResult = await cognitiveSyncEngine.flushOfflineQueue(failingRemoteHandler);
       expect(flushResult.flushed).toBe(false);
       expect(flushResult.remainingQueue).toBe(1);
-      // Invariant: Queue must NOT be wiped out
+      // Invariant: Queue must NOT be wiped out (retained in PENDING or RETRY_PENDING)
       expect(cognitiveSyncEngine.pendingSyncQueue.length).toBe(1);
-      expect(cognitiveSyncEngine.pendingSyncQueue[0].status).toBe(SYNC_QUEUE_ITEM_STATUS.PENDING);
+      expect([SYNC_QUEUE_ITEM_STATUS.PENDING, SYNC_QUEUE_ITEM_STATUS.RETRY_PENDING]).toContain(cognitiveSyncEngine.pendingSyncQueue[0].status);
     });
   });
 

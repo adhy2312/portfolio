@@ -313,9 +313,10 @@ describe('Phase 9 — Distributed and Portable Intelligence', () => {
       expect(queueResult.queued).toBe(true);
       expect(syncEngine.pendingSyncQueue.length).toBe(1);
 
-      // Reconnect and flush
+      // Reconnect and flush with authenticated ACK handler
       syncEngine.setOnlineStatus(true);
-      const flushResult = await syncEngine.flushPendingQueue();
+      const mockHandler = async (env) => ({ success: true, ack: { envelopeId: env.syncId } });
+      const flushResult = await syncEngine.flushPendingQueue(mockHandler);
       expect(flushResult.flushedCount).toBe(1);
       expect(syncEngine.pendingSyncQueue.length).toBe(0);
     });
