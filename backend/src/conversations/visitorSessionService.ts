@@ -62,20 +62,32 @@ export class VisitorSessionService {
         const { data, error } = await supabase
           .from('revoked_visitor_sessions')
           .select('token_hash');
-        if (!error && Array.isArray(data)) {
+        if (error) {
+          if (this.config.NODE_ENV === 'production') {
+            throw new Error('[Database Invariant Violation] Failed to synchronize durable revoked visitor sessions from Supabase: ' + error.message);
+          }
+        } else if (Array.isArray(data)) {
           for (const row of data) {
             if (row.token_hash) {
               this.revokedHashes.add(row.token_hash);
             }
           }
         }
-      } catch {
+      } catch (err: any) {
         if (this.config.NODE_ENV === 'production') {
-          throw new Error('Failed to synchronize durable revoked visitor sessions from Supabase');
+          throw err;
         }
       }
+    } else if (this.config.NODE_ENV === 'production') {
+      throw new Error('[Security Invariant Violation] Database client is required for visitor session service in production');
     }
     this.initialized = true;
+  }
+
+  public async ensureInitialized(): Promise<void> {
+    if (!this.initialized) {
+      await this.initialize();
+    }
   }
 
   /**
@@ -102,9 +114,9 @@ export class VisitorSessionService {
   }
 
   /**
-   * Cryptographically verifies session token authenticity, expiration, and checks durable revocation
+   * Synchronous cryptographic signature, expiration, and local cache verification
    */
-  public verifySessionToken(token: string): boolean {
+  public verifySessionTokenSync(token: string): boolean {
     if (!token || typeof token !== 'string') return false;
 
     // Check revocation cache
@@ -175,10 +187,64 @@ export class VisitorSessionService {
   }
 
   /**
-   * Durably revokes a visitor session token
+   * Authoritative multi-instance session verification:
+   * 1. Awaits initialization
+   * 2. Cryptographically verifies format, expiration, and signature
+   * 3. Probes PostgreSQL table 'revoked_visitor_sessions' for multi-instance revocation visibility
+   * 4. Fails closed on database errors in production
+   */
+  public async verifySessionToken(token: string): Promise<boolean> {
+    if (!token || typeof token !== 'string') return false;
+
+    // Fast cryptographic & local cache validation
+    if (!this.verifySessionTokenSync(token)) {
+      return false;
+    }
+
+    await this.ensureInitialized();
+    const tokenHash = this.hashToken(token);
+
+    // Multi-instance database verification
+    const supabase = this.dbAdapter.getClient();
+    if (supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('revoked_visitor_sessions')
+          .select('token_hash')
+          .eq('token_hash', tokenHash)
+          .maybeSingle();
+
+        if (error) {
+          if (this.config.NODE_ENV === 'production') {
+            throw new Error(`[Security Invariant Violation] Database outage during visitor session verification: ${error.message}`);
+          }
+          return false;
+        }
+
+        if (data && data.token_hash) {
+          this.revokedHashes.add(tokenHash);
+          return false; // Revoked across instances
+        }
+      } catch (err: any) {
+        if (this.config.NODE_ENV === 'production') {
+          throw err;
+        }
+        return false;
+      }
+    } else if (this.config.NODE_ENV === 'production') {
+      throw new Error('[Security Invariant Violation] Database client is required for visitor session verification in production');
+    }
+
+    return true;
+  }
+
+  /**
+   * Durably revokes a visitor session token across all application instances
    */
   public async revokeSessionToken(token: string): Promise<boolean> {
     if (!token) return false;
+    await this.ensureInitialized();
+
     const tokenHash = this.hashToken(token);
     this.revokedHashes.add(tokenHash);
 
@@ -199,14 +265,17 @@ export class VisitorSessionService {
           expires_at: expiresAt
         });
         if (error && this.config.NODE_ENV === 'production') {
-          throw new Error('Failed to durably record revoked session: ' + error.message);
+          throw new Error('[Database Invariant Violation] Failed to durably record revoked session: ' + error.message);
         }
       } catch (err: any) {
         if (this.config.NODE_ENV === 'production') {
           throw err;
         }
       }
+    } else if (this.config.NODE_ENV === 'production') {
+      throw new Error('[Security Invariant Violation] Database client is required for session revocation in production');
     }
+
     return true;
   }
 
@@ -214,7 +283,8 @@ export class VisitorSessionService {
    * Creates a public conversation with durable visitor session binding
    */
   public async createConversation(sessionToken: string, title = 'Public Portfolio Inquiry'): Promise<PublicConversationRecord> {
-    if (!this.verifySessionToken(sessionToken)) {
+    await this.ensureInitialized();
+    if (!(await this.verifySessionToken(sessionToken))) {
       throw new Error('[Security Invariant Violation] Cannot create conversation with unverified or revoked session token');
     }
 
@@ -267,7 +337,8 @@ export class VisitorSessionService {
     conversationId: string,
     callerSessionToken: string
   ): Promise<{ status: 'OK' | 'NOT_FOUND' | 'FORBIDDEN'; conversation?: PublicConversationRecord }> {
-    if (!this.verifySessionToken(callerSessionToken)) {
+    await this.ensureInitialized();
+    if (!(await this.verifySessionToken(callerSessionToken))) {
       return { status: 'FORBIDDEN' };
     }
 

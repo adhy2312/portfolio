@@ -148,6 +148,8 @@ export class IdentityAuthService {
         if (!payload.iss || typeof payload.iss !== 'string' || payload.iss !== expectedIssuer) {
           return null;
         }
+      } else if (this.config.NODE_ENV === 'production') {
+        return null;
       }
 
       const email = (payload.email || '').toLowerCase();
@@ -168,13 +170,24 @@ export class IdentityAuthService {
 
   /**
    * Server-controlled owner authorization check (never trusts client bodies)
+   * When canonical owner ID is configured, user ID MUST match it. Never trusts email claims alone.
    */
   public isUserOwner(userId: string, email: string): boolean {
-    if (this.config.OWNER_USER_ID && this.config.OWNER_USER_ID === userId) {
+    const canonicalOwnerId = this.config.OWNER_USER_ID;
+    const allowedEmails = this.config.ownerEmailsList || [];
+
+    if (canonicalOwnerId) {
+      if (canonicalOwnerId !== userId) {
+        return false; // Subject mismatch: cannot claim owner with different sub when canonical owner ID is set
+      }
+      if (email && allowedEmails.length > 0) {
+        return allowedEmails.includes(email.toLowerCase());
+      }
       return true;
     }
-    if (email && this.config.ownerEmailsList && this.config.ownerEmailsList.length > 0) {
-      return this.config.ownerEmailsList.includes(email.toLowerCase());
+
+    if (email && allowedEmails.length > 0) {
+      return allowedEmails.includes(email.toLowerCase());
     }
     return false;
   }

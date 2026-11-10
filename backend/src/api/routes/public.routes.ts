@@ -110,7 +110,7 @@ export const publicRoutes: FastifyPluginAsync<{
       let visitorSessionId = sessionHeader;
 
       // Cryptographic session verification: Do not trust arbitrary unverified tokens
-      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+      if (!sessionHeader || !(await visitorService.verifySessionToken(sessionHeader))) {
         visitorSessionId = visitorService.generateSessionToken();
       }
 
@@ -147,7 +147,7 @@ export const publicRoutes: FastifyPluginAsync<{
       const sessionHeader = request.headers['x-visitor-session-id'] as string;
 
       // Unverified or missing session token is rejected
-      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+      if (!sessionHeader || !(await visitorService.verifySessionToken(sessionHeader))) {
         return reply.status(401).send({
           statusCode: 401,
           error: 'Unauthorized',
@@ -206,7 +206,7 @@ export const publicRoutes: FastifyPluginAsync<{
       const { id } = request.params as { id: string };
       const sessionHeader = request.headers['x-visitor-session-id'] as string;
 
-      if (!sessionHeader || !visitorService.verifySessionToken(sessionHeader)) {
+      if (!sessionHeader || !(await visitorService.verifySessionToken(sessionHeader))) {
         return reply.status(401).send({
           statusCode: 401,
           error: 'Unauthorized',

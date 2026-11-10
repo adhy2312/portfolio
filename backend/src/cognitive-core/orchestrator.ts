@@ -31,7 +31,17 @@ export interface CognitiveExecutionResult {
   delegatedWorker?: string;
   toolAction?: {
     tool: string;
-    status: 'EXECUTED' | 'APPROVAL_REQUIRED' | 'DENIED' | 'UNAVAILABLE';
+    status:
+      | 'PLANNED'
+      | 'DISPATCHED'
+      | 'EXECUTED'
+      | 'ACKNOWLEDGED'
+      | 'VERIFIED'
+      | 'APPROVAL_REQUIRED'
+      | 'DENIED'
+      | 'UNAVAILABLE'
+      | 'NOT_TESTED'
+      | 'INCONCLUSIVE';
     approvalId?: string;
   };
   toolExecution?: ToolExecutionResponse;
@@ -193,15 +203,28 @@ export class CognitiveOrchestrator {
       }
 
       if (toolExecution) {
+        let status: NonNullable<CognitiveExecutionResult['toolAction']>['status'] = 'DENIED';
+        if (toolExecution.requiresApproval) {
+          status = 'APPROVAL_REQUIRED';
+        } else if (toolExecution.verificationState === 'PLANNED') {
+          status = 'PLANNED';
+        } else if (toolExecution.verificationState === 'ACKNOWLEDGED') {
+          status = 'ACKNOWLEDGED';
+        } else if (toolExecution.verificationState === 'VERIFIED') {
+          status = 'VERIFIED';
+        } else if (toolExecution.verificationState === 'UNAVAILABLE' || toolExecution.reason === 'UNAVAILABLE') {
+          status = 'UNAVAILABLE';
+        } else if (toolExecution.verificationState === 'NOT_TESTED') {
+          status = 'NOT_TESTED';
+        } else if (toolExecution.verificationState === 'INCONCLUSIVE') {
+          status = 'INCONCLUSIVE';
+        } else if (toolExecution.success) {
+          status = 'EXECUTED';
+        }
+
         toolAction = {
           tool: toolExecution.toolName,
-          status: toolExecution.success
-            ? 'EXECUTED'
-            : toolExecution.requiresApproval
-            ? 'APPROVAL_REQUIRED'
-            : toolExecution.reason === 'UNAVAILABLE'
-            ? 'UNAVAILABLE'
-            : 'DENIED',
+          status,
           approvalId: toolExecution.approvalId
         };
       }

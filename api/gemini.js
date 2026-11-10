@@ -3,14 +3,16 @@ import crypto from 'crypto';
 // ── 1. Shared / Deployment-Compatible Rate Limiter ────────────────────
 // Supports Upstash Redis REST API when configured (UPSTASH_REDIS_REST_URL + UPSTASH_REDIS_REST_TOKEN).
 // Falls back to constrained process-local in-memory sliding window when unconfigured.
+// Enforces observable status, fail-closed handling on Redis outage when configured, and safe credential handling.
 
-const localRateLimitMap = new Map();
+export const localRateLimitMap = new Map();
 
-async function checkRateLimit(ip) {
+export async function checkRateLimit(ip) {
   const windowSeconds = 60;
   const maxRequests = 15;
   const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
   const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+  let redisStatus = redisUrl && redisToken ? 'connected' : 'unconfigured';
 
   if (redisUrl && redisToken) {
     try {
@@ -36,10 +38,27 @@ async function checkRateLimit(ip) {
           count: currentCount,
           limit: maxRequests,
           storage: 'distributed-redis',
-          resetSeconds: windowSeconds
+          resetSeconds: windowSeconds,
+          redisStatus: 'connected'
         };
       }
-    } catch {}
+      redisStatus = 'degraded';
+    } catch {
+      redisStatus = 'unreachable';
+      // Global throttling fail-closed policy:
+      // If mandatory global rate limiting is configured, fail closed rather than allowing local bypass
+      if (process.env.RATE_LIMIT_FAIL_CLOSED === 'true' || process.env.UPSTASH_FAIL_CLOSED === 'true') {
+        return {
+          limited: true,
+          count: maxRequests + 1,
+          limit: maxRequests,
+          storage: 'redis-outage-fail-closed',
+          resetSeconds: windowSeconds,
+          redisStatus: 'unreachable',
+          error: 'GLOBAL_RATE_LIMITER_OUTAGE_FAIL_CLOSED'
+        };
+      }
+    }
   }
 
   // Constrained in-memory fallback
@@ -56,7 +75,8 @@ async function checkRateLimit(ip) {
       count: 1,
       limit: maxRequests,
       storage: 'process-local-fallback',
-      resetSeconds: windowSeconds
+      resetSeconds: windowSeconds,
+      redisStatus
     };
   }
 
@@ -67,13 +87,14 @@ async function checkRateLimit(ip) {
     count: record.count,
     limit: maxRequests,
     storage: 'process-local-fallback',
-    resetSeconds: Math.ceil((record.resetTime - now) / 1000)
+    resetSeconds: Math.ceil((record.resetTime - now) / 1000),
+    redisStatus
   };
 }
 
-// Periodic memory purge every 5 minutes
+// Periodic memory purge every 5 minutes (unrefed so process can exit cleanly)
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
+  const purgeTimer = setInterval(() => {
     const now = Date.now();
     for (const [ip, record] of localRateLimitMap.entries()) {
       if (now > record.resetTime) {
@@ -81,16 +102,28 @@ if (typeof setInterval !== 'undefined') {
       }
     }
   }, 300000);
+  if (purgeTimer && typeof purgeTimer.unref === 'function') {
+    purgeTimer.unref();
+  }
 }
 
 // ── 2. Trusted Proxy Client IP Resolution ─────────────────────────────
+// Accepts forwarded proxy headers ONLY from verified edge proxy platforms (Vercel, Cloudflare).
+// Caller-controlled spoofed headers from untrusted origins are strictly ignored.
 
-function getClientIp(req) {
-  let ip = req.headers['x-vercel-forwarded-for'] || req.headers['cf-connecting-ip'];
-  if (!ip && req.headers['x-forwarded-for']) {
-    const parts = String(req.headers['x-forwarded-for']).split(',');
-    ip = parts[0]?.trim();
+export function getClientIp(req) {
+  const isTrustedProxy = Boolean(process.env.VERCEL === '1' || process.env.TRUST_PROXY === 'true');
+
+  let ip = null;
+  if (isTrustedProxy) {
+    ip = req.headers['x-vercel-forwarded-for'] || req.headers['cf-connecting-ip'];
+    if (!ip && req.headers['x-forwarded-for']) {
+      const parts = String(req.headers['x-forwarded-for']).split(',');
+      ip = parts[0]?.trim();
+    }
   }
+
+  // Untrusted origin or direct connection -> use socket remote address
   if (!ip) {
     ip = req.socket?.remoteAddress || '127.0.0.1';
   }
@@ -103,39 +136,111 @@ function getClientIp(req) {
   return ip.slice(0, 45);
 }
 
-// ── 3. Authenticated Context Verification ──────────────────────────────
+// ── 3. Authenticated Context Verification (Unified Zero-Trust Rules) ───
 
-function verifyOwnerToken(authHeader) {
+export function verifyOwnerToken(authHeader) {
   if (!authHeader || typeof authHeader !== 'string' || !authHeader.startsWith('Bearer ')) {
     return false;
   }
   const token = authHeader.substring(7).trim();
   const secret = process.env.SUPABASE_JWT_SECRET;
-  if (!secret || token.split('.').length !== 3) {
+  if (!secret || secret.length < 16) {
+    return false;
+  }
+
+  // Production offline verification fail-closed guard
+  if (process.env.NODE_ENV === 'production' && process.env.ALLOW_OFFLINE_JWT_VERIFICATION !== 'true') {
+    return false;
+  }
+
+  const parts = token.split('.');
+  if (parts.length !== 3) {
     return false;
   }
 
   try {
-    const [headerB64, payloadB64, sigB64] = token.split('.');
+    const [headerB64, payloadB64, sigB64] = parts;
+
+    // 1. Enforce explicit HS256 algorithm
+    const headerStr = Buffer.from(headerB64, 'base64url').toString('utf8');
+    const header = JSON.parse(headerStr);
+    if (!header || header.alg !== 'HS256') {
+      return false; // Reject 'none' or unsupported algorithms
+    }
+
+    // 2. Timing-safe signature comparison
     const expectedSig = crypto
       .createHmac('sha256', secret)
       .update(`${headerB64}.${payloadB64}`)
       .digest('base64url');
 
-    if (sigB64.length !== expectedSig.length || !crypto.timingSafeEqual(Buffer.from(sigB64), Buffer.from(expectedSig))) {
+    if (
+      sigB64.length !== expectedSig.length ||
+      !crypto.timingSafeEqual(Buffer.from(sigB64), Buffer.from(expectedSig))
+    ) {
       return false;
     }
 
-    const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+    // 3. Payload decoding & invariant checks
+    const payloadStr = Buffer.from(payloadB64, 'base64url').toString('utf8');
+    const payload = JSON.parse(payloadStr);
+
+    // 4. Require audience === 'authenticated'
+    if (payload.aud !== 'authenticated') {
+      return false;
+    }
+
+    // 5. Require expiration
     const now = Math.floor(Date.now() / 1000);
-    if (typeof payload.exp === 'number' && payload.exp < now) {
+    if (typeof payload.exp !== 'number' || payload.exp < now) {
       return false;
     }
 
+    // 6. Validate not-before (nbf) if present
+    if (typeof payload.nbf === 'number' && payload.nbf > now) {
+      return false;
+    }
+
+    // 7. Require subject (sub)
+    if (!payload.sub || typeof payload.sub !== 'string') {
+      return false;
+    }
+
+    // 8. Exact configured issuer (iss) verification
+    const expectedIssuer =
+      process.env.SUPABASE_JWT_ISSUER ||
+      (process.env.SUPABASE_URL ? `${process.env.SUPABASE_URL.replace(/\/+$/, '')}/auth/v1` : undefined);
+
+    if (expectedIssuer) {
+      if (!payload.iss || typeof payload.iss !== 'string' || payload.iss !== expectedIssuer) {
+        return false;
+      }
+    } else if (process.env.NODE_ENV === 'production') {
+      return false;
+    }
+
+    // 9. Canonical owner ID matching:
+    // Do NOT trust email claims alone when canonical owner ID is configured!
+    const canonicalOwnerId = process.env.OWNER_USER_ID;
     const ownerEmail = (process.env.OWNER_EMAILS || 'adhithyamohan2312@gmail.com').toLowerCase();
-    const ownerId = process.env.OWNER_USER_ID;
-    const isOwner = (payload.email && payload.email.toLowerCase() === ownerEmail) || (ownerId && payload.sub === ownerId);
-    return Boolean(isOwner);
+    const tokenEmail = (payload.email || '').toLowerCase();
+
+    if (canonicalOwnerId) {
+      if (payload.sub !== canonicalOwnerId) {
+        return false; // Subject mismatch: cannot claim owner with different sub
+      }
+      if (tokenEmail && tokenEmail !== ownerEmail) {
+        return false;
+      }
+      return true;
+    }
+
+    // Fallback: If no canonical ID is set, check email
+    if (tokenEmail && tokenEmail === ownerEmail) {
+      return true;
+    }
+
+    return false;
   } catch {
     return false;
   }
@@ -158,14 +263,19 @@ export default async function handler(req, res) {
   res.setHeader('X-RateLimit-Remaining', String(Math.max(0, rateLimitStatus.limit - rateLimitStatus.count)));
   res.setHeader('X-RateLimit-Reset', String(rateLimitStatus.resetSeconds));
   res.setHeader('X-RateLimit-Storage', rateLimitStatus.storage);
+  res.setHeader('X-RateLimit-Fallback', rateLimitStatus.storage === 'distributed-redis' ? 'false' : 'true');
+  if (rateLimitStatus.redisStatus) {
+    res.setHeader('X-RateLimit-Redis-Status', rateLimitStatus.redisStatus);
+  }
   if (rateLimitStatus.storage === 'process-local-fallback') {
-    res.setHeader('X-RateLimit-Warning', 'Upstash Redis not configured; running in constrained process-local throttling mode');
+    res.setHeader('X-RateLimit-Warning', 'Upstash Redis not configured or degraded; running in constrained process-local throttling mode');
   }
 
   if (rateLimitStatus.limited) {
     return res.status(429).json({
       error: 'Cognitive rate limit reached. Please wait a minute before sending another query.',
-      retryAfterSeconds: rateLimitStatus.resetSeconds
+      retryAfterSeconds: rateLimitStatus.resetSeconds,
+      storage: rateLimitStatus.storage
     });
   }
 

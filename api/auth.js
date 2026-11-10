@@ -42,7 +42,7 @@ const resetFailedAttempts = (ip) => {
 };
 
 // Periodic memory purge every 5 minutes
-setInterval(() => {
+const failedAttemptsTimer = setInterval(() => {
   const now = Date.now();
   for (const [ip, record] of failedAttemptsMap.entries()) {
     if (now > record.resetTime) {
@@ -50,6 +50,9 @@ setInterval(() => {
     }
   }
 }, 300000);
+if (failedAttemptsTimer && typeof failedAttemptsTimer.unref === 'function') {
+  failedAttemptsTimer.unref();
+}
 
 // ── Timing-Safe Comparison ──────────────────────────────────────────
 function timingSafeCompare(a = '', b = '') {

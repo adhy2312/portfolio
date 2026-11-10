@@ -11,7 +11,8 @@ import { DurableApprovalService, computeCanonicalPayloadHash } from '../src/appr
 import { IdentityAuthService } from '../src/auth/identity.js';
 import { SupabaseAdapter } from '../src/auth/supabase.js';
 import { VisitorSessionService } from '../src/conversations/visitorSessionService.js';
-import { AgentWorkerRegistry, AgentToolExecutor } from '../src/cognitive-core/agents.js';
+import { AgentWorkerRegistry, AgentToolExecutor, AgentToolAdapterRegistry } from '../src/cognitive-core/agents.js';
+import { MockHardwareGateway } from '../src/hardware/mockBridge.js';
 
 class MockAIAdapter extends BaseAdapter {
   constructor(public readonly id: ProviderId, public readonly isLocal = true) {
@@ -383,12 +384,12 @@ describe('SECOND-PASS P1 — 6. Public Visitor Sessions & Durable Isolation', ()
   test('Generates cryptographically signed visitor session and rejects arbitrary/guessed tokens', async () => {
     const sessionToken = sessionService.generateSessionToken();
     assert.ok(sessionToken.startsWith('vissess_'));
-    assert.equal(sessionService.verifySessionToken(sessionToken), true);
+    assert.equal(await sessionService.verifySessionToken(sessionToken), true);
 
     // Guessed or forged token must be rejected
     const forgedToken = 'vissess_0123456789abcdef01234567.fake_forged_sig_12345';
-    assert.equal(sessionService.verifySessionToken(forgedToken), false);
-    assert.equal(sessionService.verifySessionToken('session_arbitrary_string'), false);
+    assert.equal(await sessionService.verifySessionToken(forgedToken), false);
+    assert.equal(await sessionService.verifySessionToken('session_arbitrary_string'), false);
   });
 
   test('Cross-visitor isolation: Visitor B cannot read Visitor A conversation', async () => {
@@ -414,8 +415,8 @@ describe('SECOND-PASS P1 — 6. Public Visitor Sessions & Durable Isolation', ()
     const conv = await sessionService.createConversation(sessionToken, 'Pre-revocation conversation');
 
     // Revoke session
-    sessionService.revokeSessionToken(sessionToken);
-    assert.equal(sessionService.verifySessionToken(sessionToken), false);
+    await sessionService.revokeSessionToken(sessionToken);
+    assert.equal(await sessionService.verifySessionToken(sessionToken), false);
 
     // Access attempt with revoked token is forbidden
     const readAfterRevoke = await sessionService.getConversation(conv.id, sessionToken);
@@ -431,7 +432,9 @@ describe('SECOND-PASS P1 — 8. Agent Capability Contracts & Tool Executor Bound
   });
   const dbAdapter = new SupabaseAdapter(testConfig);
   const approvalService = new DurableApprovalService(testConfig, dbAdapter);
-  const toolExecutor = new AgentToolExecutor(registry, approvalService);
+  const mockHardware = new MockHardwareGateway();
+  const adapterRegistry = new AgentToolAdapterRegistry({ hardwareGateway: mockHardware });
+  const toolExecutor = new AgentToolExecutor(registry, approvalService, dbAdapter, adapterRegistry);
 
   test('Attempting to execute a tool not in worker capability contract is strictly REJECTED', async () => {
     // EDITH is tactical telemetry, not allowed to execute gpio_pulse or uart_write

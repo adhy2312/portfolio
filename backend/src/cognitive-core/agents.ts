@@ -2,6 +2,8 @@ import { z } from 'zod';
 import crypto from 'crypto';
 import { DurableApprovalService } from '../approvals/durableApprovalService.js';
 import { SupabaseAdapter } from '../auth/supabase.js';
+import { IHardwareGateway } from '../hardware/hardwareGateway.js';
+import { AdversarialAuditEngine } from './adversarialAuditEngine.js';
 
 export type AgentRole = 'DIRECTOR' | 'CHIEF_OF_STAFF' | 'TACTICAL_OPERATOR' | 'SPECIALIST' | 'SOVEREIGN_STRATEGIC';
 export type RiskTier = 'LOW' | 'MEDIUM' | 'HIGH_ACTUATION' | 'CRITICAL_SYSTEM' | 'SOVEREIGN_UNBOUNDED';
@@ -445,11 +447,25 @@ export interface ToolExecutionEvidence {
   details: Record<string, unknown>;
 }
 
+export type VerificationState =
+  | 'PLANNED'
+  | 'DISPATCHED'
+  | 'EXECUTED'
+  | 'ACKNOWLEDGED'
+  | 'VERIFIED'
+  | 'FAILED'
+  | 'UNAVAILABLE'
+  | 'NOT_TESTED'
+  | 'INCONCLUSIVE'
+  | 'SUCCESS_VERIFIED'
+  | 'FAILED_VERIFICATION'
+  | 'UNVERIFIED';
+
 export interface ToolExecutionAdapterResult<TOutput = unknown> {
   success: boolean;
   data?: TOutput;
   error?: string;
-  verificationState: 'SUCCESS_VERIFIED' | 'FAILED_VERIFICATION' | 'UNVERIFIED';
+  verificationState: VerificationState;
   evidence: ToolExecutionEvidence;
   auditMetadata: Record<string, unknown>;
 }
@@ -482,7 +498,7 @@ export interface ToolExecutionResponse {
   agentId: string;
   result?: unknown;
   evidence?: ToolExecutionEvidence;
-  verificationState?: 'SUCCESS_VERIFIED' | 'FAILED_VERIFICATION' | 'UNVERIFIED';
+  verificationState?: VerificationState;
   error?: string;
   reason?: string;
   requiresApproval?: boolean;
@@ -494,7 +510,16 @@ export interface ToolExecutionResponse {
 
 export class AdversarialAuditAdapter implements IToolExecutionAdapter<{ target: string; scope?: string }, Record<string, unknown>> {
   public toolName = 'adversarial_audit';
-  public timeoutMs = 8000;
+  public timeoutMs = 12000;
+  private engine: AdversarialAuditEngine;
+
+  constructor(options?: { projectRoot?: string; dbAdapter?: SupabaseAdapter; hardwareGateway?: IHardwareGateway }) {
+    this.engine = new AdversarialAuditEngine({
+      projectRoot: options?.projectRoot,
+      liveDatabaseAvailable: Boolean(options?.dbAdapter?.getClient()),
+      liveHardwareAvailable: Boolean(options?.hardwareGateway?.isConnected())
+    });
+  }
 
   public validateInput(input: unknown) {
     const res = ToolSchemas.adversarial_audit.safeParse(input);
@@ -512,43 +537,52 @@ export class AdversarialAuditAdapter implements IToolExecutionAdapter<{ target: 
 
   public async execute(input: { target: string; scope?: string }, ctx: ToolExecutionContext): Promise<ToolExecutionAdapterResult<Record<string, unknown>>> {
     const start = Date.now();
-    // Real heuristic and cryptographic boundary scan:
-    const checks = [
-      { id: 'AUTH_BOUNDARY', check: 'Zero-trust owner token requirement', status: 'VERIFIED' },
-      { id: 'MEMORY_ISOLATION', check: 'Multi-tenant owner ID scoping', status: 'VERIFIED' },
-      { id: 'APPROVAL_LOCK', check: 'PostgreSQL FOR UPDATE row-level locking', status: 'VERIFIED' },
-      { id: 'ANTI_REPLAY', check: 'Unique token hash constraints', status: 'VERIFIED' }
-    ];
+    // Run genuine inspection pipeline with source inspection, migration auditing and live probe checks
+    const report = await this.engine.runAudit(input.target, input.scope);
 
     const durationMs = Date.now() - start;
-    const evidenceRaw = `${ctx.agentId}:${input.target}:${start}:${durationMs}:${JSON.stringify(checks)}`;
+    const evidenceRaw = `${ctx.agentId}:${input.target}:${start}:${durationMs}:${report.reportDigest}`;
     const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
 
-    const resultData = {
-      scanStatus: 'COMPLETED',
-      target: input.target,
-      scope: input.scope || 'SYSTEM_BOUNDARIES',
-      vulnerabilitiesFound: 0,
-      checksEvaluated: checks.length,
-      invariantSummary: 'All operational boundaries intact. Sovereign red-team assessment verified.',
-      checks
-    };
+    // Truthful result semantics: Do not return SUCCESS_VERIFIED if vulnerabilities exist or checks are unverified
+    let verificationState: VerificationState = 'VERIFIED';
+    let success = true;
+
+    if (report.vulnerabilitiesFound > 0) {
+      verificationState = 'FAILED';
+      success = false;
+    } else if (report.notTestedCount > 0 && report.passedCount === 0) {
+      verificationState = 'NOT_TESTED';
+    } else if (report.inconclusiveCount > 0) {
+      verificationState = 'INCONCLUSIVE';
+    } else {
+      verificationState = 'VERIFIED';
+    }
 
     return {
-      success: true,
-      data: resultData,
-      verificationState: 'SUCCESS_VERIFIED',
+      success,
+      data: report as unknown as Record<string, unknown>,
+      verificationState,
       evidence: {
         executionTimestamp: start,
         durationMs,
         runtimeEnvironment: process.env.NODE_ENV || 'development',
         evidenceDigest,
-        details: { checksCount: checks.length, target: input.target }
+        details: {
+          target: input.target,
+          totalChecks: report.totalChecks,
+          passedCount: report.passedCount,
+          failedCount: report.failedCount,
+          notTestedCount: report.notTestedCount,
+          vulnerabilitiesFound: report.vulnerabilitiesFound,
+          reportDigest: report.reportDigest
+        }
       },
       auditMetadata: {
         agentId: ctx.agentId,
         toolName: this.toolName,
         target: input.target,
+        vulnerabilitiesFound: report.vulnerabilitiesFound,
         evidenceDigest
       }
     };
@@ -590,22 +624,24 @@ export class PlanTaskAdapter implements IToolExecutionAdapter<{ taskName: string
 
     const resultData = {
       planCreated: true,
+      planStatus: 'PLANNED',
       taskName: input.taskName,
       stepCount: dagSteps.length,
       dagSteps,
       criticalPathLength: dagSteps.length
     };
 
+    // Truthful result semantics: A planning operation reports PLANNED, never EXECUTED or SUCCESS_VERIFIED
     return {
       success: true,
       data: resultData,
-      verificationState: 'SUCCESS_VERIFIED',
+      verificationState: 'PLANNED',
       evidence: {
         executionTimestamp: start,
         durationMs,
         runtimeEnvironment: process.env.NODE_ENV || 'development',
         evidenceDigest,
-        details: { taskName: input.taskName, stepCount: dagSteps.length }
+        details: { taskName: input.taskName, stepCount: dagSteps.length, planStatus: 'PLANNED' }
       },
       auditMetadata: {
         agentId: ctx.agentId,
@@ -619,7 +655,12 @@ export class PlanTaskAdapter implements IToolExecutionAdapter<{ taskName: string
 
 export class CheckServiceHealthAdapter implements IToolExecutionAdapter<{ serviceName: string }, Record<string, unknown>> {
   public toolName = 'check_service_health';
-  public timeoutMs = 3000;
+  public timeoutMs = 5000;
+
+  constructor(
+    private dbAdapter?: SupabaseAdapter,
+    private hardwareGateway?: IHardwareGateway
+  ) {}
 
   public validateInput(input: unknown) {
     const res = ToolSchemas.check_service_health.safeParse(input);
@@ -632,40 +673,143 @@ export class CheckServiceHealthAdapter implements IToolExecutionAdapter<{ servic
 
   public async execute(input: { serviceName: string }, ctx: ToolExecutionContext): Promise<ToolExecutionAdapterResult<Record<string, unknown>>> {
     const start = Date.now();
-    const mem = process.memoryUsage();
+    const service = (input.serviceName || '').toLowerCase().trim();
+
+    // 1. Backend process health probe
+    if (service === 'backend' || service === 'self' || service === 'mini_adhy') {
+      const mem = process.memoryUsage();
+      const durationMs = Date.now() - start;
+      const evidenceRaw = `${service}:${start}:${mem.heapUsed}`;
+      const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
+
+      return {
+        success: true,
+        data: {
+          service: input.serviceName,
+          status: 'HEALTHY',
+          uptimeSeconds: Math.floor(process.uptime()),
+          memoryRssMb: Math.round(mem.rss / 1024 / 1024),
+          heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024)
+        },
+        verificationState: 'VERIFIED',
+        evidence: {
+          executionTimestamp: start,
+          durationMs,
+          runtimeEnvironment: process.env.NODE_ENV || 'development',
+          evidenceDigest,
+          details: { service: input.serviceName }
+        },
+        auditMetadata: {
+          agentId: ctx.agentId,
+          toolName: this.toolName,
+          service: input.serviceName
+        }
+      };
+    }
+
+    // 2. Database service health probe
+    if (service === 'database' || service === 'supabase' || service === 'postgres') {
+      const client = this.dbAdapter?.getClient();
+      const isConnected = Boolean(client);
+      const durationMs = Date.now() - start;
+      const evidenceRaw = `${service}:${isConnected}:${start}`;
+      const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
+
+      return {
+        success: isConnected,
+        data: {
+          service: input.serviceName,
+          status: isConnected ? 'HEALTHY' : 'UNAVAILABLE',
+          connected: isConnected,
+          details: isConnected ? 'Supabase client connected' : 'Database client unconfigured or offline'
+        },
+        verificationState: isConnected ? 'VERIFIED' : 'UNAVAILABLE',
+        evidence: {
+          executionTimestamp: start,
+          durationMs,
+          runtimeEnvironment: process.env.NODE_ENV || 'development',
+          evidenceDigest,
+          details: { service: input.serviceName, connected: isConnected }
+        },
+        auditMetadata: {
+          agentId: ctx.agentId,
+          toolName: this.toolName,
+          service: input.serviceName
+        }
+      };
+    }
+
+    // 3. Hardware Bridge health probe
+    if (service === 'hardware' || service === 'hardware_bridge' || service === 'windows_bridge') {
+      const isConnected = this.hardwareGateway ? this.hardwareGateway.isConnected() : false;
+      const durationMs = Date.now() - start;
+      const evidenceRaw = `${service}:${isConnected}:${start}`;
+      const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
+
+      return {
+        success: isConnected,
+        data: {
+          service: input.serviceName,
+          status: isConnected ? 'HEALTHY' : 'UNAVAILABLE',
+          connected: isConnected,
+          devices: isConnected ? this.hardwareGateway!.getConnectedDevices() : []
+        },
+        verificationState: isConnected ? 'VERIFIED' : 'UNAVAILABLE',
+        evidence: {
+          executionTimestamp: start,
+          durationMs,
+          runtimeEnvironment: 'WINDOWS_BRIDGE',
+          evidenceDigest,
+          details: { service: input.serviceName, connected: isConnected }
+        },
+        auditMetadata: {
+          agentId: ctx.agentId,
+          toolName: this.toolName,
+          service: input.serviceName
+        }
+      };
+    }
+
+    // 4. Unrelated / Unconfigured external service
+    // CRITICAL: NEVER claim process memory proves an unrelated service is healthy!
     const durationMs = Date.now() - start;
-    const evidenceRaw = `${input.serviceName}:${start}:${mem.heapUsed}`;
+    const evidenceRaw = `UNPROBED_SERVICE:${service}:${start}`;
     const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
 
     return {
-      success: true,
+      success: false,
       data: {
         service: input.serviceName,
-        status: 'HEALTHY',
-        uptimeSeconds: Math.floor(process.uptime()),
-        memoryRssMb: Math.round(mem.rss / 1024 / 1024),
-        heapUsedMb: Math.round(mem.heapUsed / 1024 / 1024)
+        status: 'NOT_TESTED',
+        reason: `No health probe adapter configured for external target service: '${input.serviceName}'. Cannot assert health status.`
       },
-      verificationState: 'SUCCESS_VERIFIED',
+      verificationState: 'NOT_TESTED',
       evidence: {
         executionTimestamp: start,
         durationMs,
         runtimeEnvironment: process.env.NODE_ENV || 'development',
         evidenceDigest,
-        details: { service: input.serviceName }
+        details: { service: input.serviceName, reason: 'UNCONFIGURED_TARGET_SERVICE' }
       },
       auditMetadata: {
         agentId: ctx.agentId,
         toolName: this.toolName,
-        service: input.serviceName
+        service: input.serviceName,
+        status: 'NOT_TESTED'
       }
     };
   }
 }
 
-export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; durationMs: number }, Record<string, unknown>> {
+export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; durationMs: number; deviceId?: string }, Record<string, unknown>> {
   public toolName = 'gpio_pulse';
   public timeoutMs = 10000;
+
+  constructor(private hardwareGateway?: IHardwareGateway) {}
+
+  public setHardwareGateway(gateway: IHardwareGateway): void {
+    this.hardwareGateway = gateway;
+  }
 
   public validateInput(input: unknown) {
     const res = ToolSchemas.gpio_pulse.safeParse(input);
@@ -673,39 +817,138 @@ export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; du
   }
 
   public validateOutput(output: unknown) {
-    return { valid: true, parsed: output as Record<string, unknown> };
+    if (!output || typeof output !== 'object') return { valid: false, error: 'Output must be an object' };
+    const o = output as any;
+    if (typeof o.state !== 'string') return { valid: false, error: 'Output missing actuation state' };
+    return { valid: true, parsed: o };
   }
 
-  public async execute(input: { pin: number; durationMs: number }, ctx: ToolExecutionContext): Promise<ToolExecutionAdapterResult<Record<string, unknown>>> {
+  public async execute(
+    input: { pin: number; durationMs: number; deviceId?: string },
+    ctx: ToolExecutionContext
+  ): Promise<ToolExecutionAdapterResult<Record<string, unknown>>> {
     const start = Date.now();
-    // Hardware bridge execution logic with strict verification
+
+    // 1. Strict Authorization Guard: Physical actuation is restricted to verified owners
+    if (!ctx.principal.isOwner) {
+      return {
+        success: false,
+        verificationState: 'FAILED',
+        data: {
+          state: 'FAILED',
+          pin: input.pin,
+          error: 'FORBIDDEN: Physical hardware actuation is strictly restricted to verified authenticated owners.'
+        },
+        evidence: {
+          executionTimestamp: start,
+          durationMs: 0,
+          runtimeEnvironment: 'SECURITY_BOUNDARY',
+          evidenceDigest: crypto.createHash('sha256').update(`UNAUTHORIZED_HARDWARE:${ctx.principal.id}`).digest('hex'),
+          details: { pin: input.pin, error: 'FORBIDDEN' }
+        },
+        auditMetadata: {
+          agentId: ctx.agentId,
+          toolName: this.toolName,
+          principalId: ctx.principal.id,
+          reason: 'UNAUTHORIZED_HARDWARE_ACTUATION'
+        }
+      };
+    }
+
+    // 2. Hardware Bridge Connection Guard: If no gateway is connected, return UNAVAILABLE
+    if (!this.hardwareGateway || !this.hardwareGateway.isConnected()) {
+      const durationMs = Date.now() - start;
+      const evidenceRaw = `HARDWARE_UNAVAILABLE:${input.pin}:${input.durationMs}:${start}`;
+      const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
+
+      return {
+        success: false,
+        verificationState: 'UNAVAILABLE',
+        data: {
+          state: 'UNAVAILABLE',
+          pin: input.pin,
+          requestedPulseMs: input.durationMs,
+          error: 'Physical hardware bridge is not connected or offline on local Windows host. Cannot actuate physical GPIO.'
+        },
+        evidence: {
+          executionTimestamp: start,
+          durationMs,
+          runtimeEnvironment: 'DISCONNECTED',
+          evidenceDigest,
+          details: { pin: input.pin, error: 'HARDWARE_GATEWAY_DISCONNECTED' }
+        },
+        auditMetadata: {
+          agentId: ctx.agentId,
+          toolName: this.toolName,
+          pin: input.pin,
+          state: 'UNAVAILABLE'
+        }
+      };
+    }
+
+    // 3. Dispatch to Hardware Gateway
+    const gatewayResult = await this.hardwareGateway.executePulse(input);
     const durationMs = Date.now() - start;
-    const evidenceRaw = `GPIO:${input.pin}:${input.durationMs}:${ctx.principal.id}:${start}`;
+    const evidenceRaw = `GPIO:${gatewayResult.state}:${input.pin}:${gatewayResult.measuredDurationMs || 0}:${ctx.principal.id}:${start}`;
     const evidenceDigest = crypto.createHash('sha256').update(evidenceRaw).digest('hex');
 
+    // 4. Map Gateway Result to Truthful Result Semantics
+    // CRITICAL: NEVER claim PHYSICALLY_VERIFIED or VERIFIED if transport is MOCK_TEST or readback failed!
+    let verificationState: VerificationState = 'UNAVAILABLE';
+    let success = false;
+
+    if (gatewayResult.state === 'PHYSICALLY_VERIFIED') {
+      verificationState = 'VERIFIED';
+      success = true;
+    } else if (gatewayResult.state === 'ACKNOWLEDGED') {
+      verificationState = 'ACKNOWLEDGED';
+      success = true;
+    } else if (gatewayResult.state === 'DISPATCHED') {
+      verificationState = 'DISPATCHED';
+      success = true;
+    } else if (gatewayResult.state === 'FAILED') {
+      verificationState = 'FAILED';
+      success = false;
+    } else {
+      verificationState = 'UNAVAILABLE';
+      success = false;
+    }
+
     return {
-      success: true,
+      success,
       data: {
-        actuation: 'GPIO_PULSE_EXECUTED',
-        pin: input.pin,
-        requestedPulseMs: input.durationMs,
-        measuredPulseMs: input.durationMs,
-        safetyInterlock: 'DISENGAGED_ONCE_AUTHORIZED',
-        stateAfterPulse: 'LOW'
+        actuation: gatewayResult.state,
+        state: gatewayResult.state,
+        deviceId: gatewayResult.deviceId,
+        pin: gatewayResult.pin,
+        requestedPulseMs: gatewayResult.requestedDurationMs,
+        measuredPulseMs: gatewayResult.measuredDurationMs,
+        deviceAcknowledged: gatewayResult.deviceAcknowledged,
+        physicalReadbackVerified: gatewayResult.physicalReadbackVerified,
+        pinStateAfterPulse: gatewayResult.pinStateAfterPulse,
+        transport: gatewayResult.transport,
+        rawResponse: gatewayResult.rawResponse,
+        error: gatewayResult.error
       },
-      verificationState: 'SUCCESS_VERIFIED',
+      verificationState,
       evidence: {
         executionTimestamp: start,
         durationMs,
-        runtimeEnvironment: 'HARDWARE_ACTUATOR_V1',
+        runtimeEnvironment: gatewayResult.transport || 'HARDWARE_BRIDGE',
         evidenceDigest,
-        details: { pin: input.pin, durationMs: input.durationMs }
+        details: {
+          pin: input.pin,
+          state: gatewayResult.state,
+          physicalReadbackVerified: gatewayResult.physicalReadbackVerified,
+          transport: gatewayResult.transport
+        }
       },
       auditMetadata: {
         agentId: ctx.agentId,
         toolName: this.toolName,
         pin: input.pin,
-        durationMs: input.durationMs,
+        state: gatewayResult.state,
+        transport: gatewayResult.transport,
         evidenceDigest
       }
     };
@@ -714,15 +957,21 @@ export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; du
 
 // ── Adapter Registry ──────────────────────────────────────────────────
 
+export interface AdapterRegistryOptions {
+  hardwareGateway?: IHardwareGateway;
+  dbAdapter?: SupabaseAdapter;
+  projectRoot?: string;
+}
+
 export class AgentToolAdapterRegistry {
   private adapters = new Map<string, IToolExecutionAdapter<any, any>>();
 
-  constructor() {
-    // Register default real execution adapters
-    this.registerAdapter(new AdversarialAuditAdapter());
+  constructor(options: AdapterRegistryOptions = {}) {
+    // Register default real execution adapters with injected gateways
+    this.registerAdapter(new AdversarialAuditAdapter(options));
     this.registerAdapter(new PlanTaskAdapter());
-    this.registerAdapter(new CheckServiceHealthAdapter());
-    this.registerAdapter(new GpioPulseAdapter());
+    this.registerAdapter(new CheckServiceHealthAdapter(options.dbAdapter, options.hardwareGateway));
+    this.registerAdapter(new GpioPulseAdapter(options.hardwareGateway));
   }
 
   public registerAdapter(adapter: IToolExecutionAdapter<any, any>): void {
