@@ -176,6 +176,12 @@ export class IdentityAuthService {
     const canonicalOwnerId = this.config.OWNER_USER_ID;
     const allowedEmails = this.config.ownerEmailsList || [];
 
+    // Production invariant: Canonical owner ID is mandatory in production.
+    // Email-only owner authorization is strictly prohibited in production.
+    if (this.config.NODE_ENV === 'production' && !canonicalOwnerId) {
+      return false;
+    }
+
     if (canonicalOwnerId) {
       if (canonicalOwnerId !== userId) {
         return false; // Subject mismatch: cannot claim owner with different sub when canonical owner ID is set
@@ -186,7 +192,8 @@ export class IdentityAuthService {
       return true;
     }
 
-    if (email && allowedEmails.length > 0) {
+    // Development/testing fallback only when not in production
+    if (this.config.NODE_ENV !== 'production' && email && allowedEmails.length > 0) {
       return allowedEmails.includes(email.toLowerCase());
     }
     return false;

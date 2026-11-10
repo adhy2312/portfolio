@@ -71,6 +71,15 @@ export class MockHardwareGateway implements IHardwareGateway {
     return Array.from(this.devices.values());
   }
 
+  public async readPinState(deviceId: string, pin: number): Promise<'LOW' | 'HIGH' | null> {
+    if (!this.connected) return null;
+    return this.simulateReadbackMismatch ? 'HIGH' : 'LOW';
+  }
+
+  public async emergencyStop(deviceId?: string): Promise<{ success: boolean; reason?: string }> {
+    return { success: true };
+  }
+
   public async executePulse(req: GpioPulseRequest): Promise<GpioPulseExecutionResult> {
     if (!this.connected) {
       return {

@@ -235,8 +235,14 @@ export function verifyOwnerToken(authHeader) {
       return true;
     }
 
-    // Fallback: If no canonical ID is set, check email
-    if (tokenEmail && tokenEmail === ownerEmail) {
+    // Production invariant: Canonical owner ID is mandatory in production.
+    // Email-only owner authorization is strictly prohibited in production.
+    if (process.env.NODE_ENV === 'production' && !canonicalOwnerId) {
+      return false;
+    }
+
+    // Development/testing fallback only when not in production
+    if (process.env.NODE_ENV !== 'production' && tokenEmail && tokenEmail === ownerEmail) {
       return true;
     }
 

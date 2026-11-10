@@ -6,7 +6,7 @@
  * safe default states, and independent physical readback verification.
  */
 
-export type HardwareTransportType = 'SERIAL' | 'USB' | 'LOCAL_IPC' | 'MOCK_TEST';
+export type HardwareTransportType = 'SERIAL' | 'LOCAL_IPC' | 'MOCK_TEST';
 
 export type ActuationState =
   | 'REQUESTED'
@@ -18,7 +18,7 @@ export type ActuationState =
 
 export interface HardwareDeviceDescriptor {
   deviceId: string;
-  deviceType: 'WINDOWS_LOCAL_BRIDGE' | 'ARDUINO_SERIAL' | 'RP2040_USB' | 'MOCK_SIMULATOR';
+  deviceType: 'WINDOWS_LOCAL_BRIDGE' | 'ARDUINO_SERIAL' | 'MOCK_SIMULATOR';
   firmwareVersion: string;
   supportedPins: number[];
   maxPulseDurationMs: number;
@@ -27,6 +27,7 @@ export interface HardwareDeviceDescriptor {
   transport: HardwareTransportType;
   supportsReadback: boolean;
   status: 'ONLINE' | 'OFFLINE' | 'BUSY';
+  capabilities?: string[];
 }
 
 export interface GpioPulseRequest {
@@ -53,11 +54,41 @@ export interface GpioPulseExecutionResult {
   transport?: HardwareTransportType;
 }
 
+/**
+ * Versioned wire protocol packet definition
+ */
+export interface HardwareProtocolPacket {
+  version: '1.0';
+  type:
+    | 'CMD_HANDSHAKE'
+    | 'RSP_HANDSHAKE'
+    | 'CMD_GPIO_PULSE'
+    | 'RSP_GPIO_PULSE'
+    | 'CMD_READ_PIN'
+    | 'RSP_READ_PIN'
+    | 'CMD_EMERGENCY_STOP'
+    | 'RSP_EMERGENCY_STOP'
+    | 'RSP_ERROR';
+  reqId: string;
+  deviceId: string;
+  timestamp: number;
+  payload: Record<string, unknown>;
+  signature?: string;
+}
+
+export interface IHardwareTransport {
+  readonly transportType: HardwareTransportType;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  isConnected(): boolean;
+  sendPacket(packet: HardwareProtocolPacket, timeoutMs?: number): Promise<HardwareProtocolPacket>;
+}
+
 export interface IHardwareGateway {
   readonly gatewayName: string;
   isConnected(): boolean;
   getConnectedDevices(): HardwareDeviceDescriptor[];
   executePulse(req: GpioPulseRequest): Promise<GpioPulseExecutionResult>;
   readPinState?(deviceId: string, pin: number): Promise<'LOW' | 'HIGH' | null>;
+  emergencyStop?(deviceId?: string): Promise<{ success: boolean; reason?: string }>;
 }
-
