@@ -20,6 +20,7 @@ let cryptoModule = null;
 try {
   if (typeof process !== 'undefined' && process.versions && process.versions.node) {
     // Dynamic loader hidden from static bundler analysis
+    // eslint-disable-next-line no-new-func
     const dynamicRequire = new Function('mod', 'return require(mod)');
     cryptoModule = dynamicRequire('crypto');
   }

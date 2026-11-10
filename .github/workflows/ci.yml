@@ -34,6 +34,14 @@ jobs:
           CI: true
         run: npm test -- --watchAll=false --passWithNoTests src/core
 
+      - name: Verify Backend Foundation & Fastify Monolith Test Suite
+        run: |
+          cd backend
+          npm ci || npm install
+          npm test
+          npm run build
+          cd ..
+
   production-build:
     name: Compile Production Web Application Bundle
     needs: core-security-and-cognitive-tests

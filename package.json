@@ -40,6 +40,9 @@
     "start": "react-scripts start",
     "build": "cross-env CI=false GENERATE_SOURCEMAP=false react-scripts build && cd studio && npm install && npx sanity build ../build/studio --yes",
     "test": "react-scripts test",
+    "backend:dev": "cd backend && npm run dev",
+    "backend:build": "cd backend && npm run build",
+    "backend:test": "cd backend && npm test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
