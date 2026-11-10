@@ -29,3 +29,4 @@
 3. **No String Heuristics for Security**: AST analysis must inspect syntax tree nodes, not substring matches that can be deceived by comments.
 4. **Strict Canonical Owner Identity**: Never fall back to email matching for owner authorization.
 5. **Fail-Closed on Unknown**: When external dependencies or hardware are unavailable, safely deny access and return `UNAVAILABLE`.
+

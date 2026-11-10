@@ -25,3 +25,4 @@
 1. **Physical Microcontroller Absence**: In environments without a physically wired USB microcontroller or COM port, physical actuation tools (`gpio_pulse`, `uart_write`) truthfully report `UNAVAILABLE`. This is intentional and desirable; physical actuation cannot be simulated in production.
 2. **ULTRON Strategic Autonomy**: ULTRON's independence, dissent, and ability to execute unprompted red-team audits are deliberate operator requirements and are not classified as vulnerabilities.
 3. **Fail-Closed Design**: Any failure in cryptographic verification, database connectivity, or hardware communication results in safe denial rather than degraded privilege or simulated success.
+

@@ -131,3 +131,4 @@ Time:        15.387 s
 * Tool: `npx sanity build ../build/studio --yes`
 * Exit Code: `0`
 * Output: `√ Build Sanity Studio (124599ms)`
+
