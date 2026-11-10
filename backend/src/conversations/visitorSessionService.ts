@@ -316,6 +316,26 @@ export class VisitorSessionService {
   }
 
   /**
+   * Maintenance: prunes expired revoked session records older than 24h
+   */
+  public async cleanupExpiredRevocations(): Promise<number> {
+    const supabase = this.dbAdapter.getClient();
+    if (!supabase) return 0;
+    try {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from('revoked_visitor_sessions')
+        .delete()
+        .lt('expires_at', nowIso)
+        .select('token_hash');
+      if (error) return 0;
+      return data ? data.length : 0;
+    } catch {
+      return 0;
+    }
+  }
+
+  /**
    * Creates a public conversation with durable visitor session binding
    */
   public async createConversation(sessionToken: string, title = 'Public Portfolio Inquiry'): Promise<PublicConversationRecord> {

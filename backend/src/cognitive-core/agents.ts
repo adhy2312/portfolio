@@ -449,12 +449,18 @@ export interface ToolExecutionEvidence {
 
 export type VerificationState =
   | 'PLANNED'
-  | 'DISPATCHED'
-  | 'EXECUTED'
-  | 'ACKNOWLEDGED'
-  | 'VERIFIED'
+  | 'PREPARED'
+  | 'AWAITING_APPROVAL'
+  | 'APPROVED'
+  | 'EXECUTING'
+  | 'COMPLETED'
   | 'FAILED'
   | 'UNAVAILABLE'
+  | 'SIMULATED'
+  | 'VERIFIED'
+  | 'PARTIAL'
+  | 'DISPATCHED'
+  | 'ACKNOWLEDGED'
   | 'NOT_TESTED'
   | 'INCONCLUSIVE'
   | 'SUCCESS_VERIFIED'
@@ -553,6 +559,8 @@ export class AdversarialAuditAdapter implements IToolExecutionAdapter<{ target: 
       success = false;
     } else if (report.notTestedCount > 0 && report.passedCount === 0) {
       verificationState = 'NOT_TESTED';
+    } else if (report.notTestedCount > 0) {
+      verificationState = 'PARTIAL';
     } else if (report.inconclusiveCount > 0) {
       verificationState = 'INCONCLUSIVE';
     } else {
@@ -916,15 +924,21 @@ export class GpioPulseAdapter implements IToolExecutionAdapter<{ pin: number; du
     let verificationState: VerificationState = 'UNAVAILABLE';
     let success = false;
 
-    if (gatewayResult.state === 'PHYSICALLY_VERIFIED') {
+    if (gatewayResult.state === 'PHYSICALLY_VERIFIED' || gatewayResult.state === 'READBACK_VERIFIED') {
       verificationState = 'VERIFIED';
       success = true;
-    } else if (gatewayResult.state === 'ACKNOWLEDGED') {
+    } else if (gatewayResult.state === 'SIMULATED') {
+      verificationState = 'SIMULATED';
+      success = true;
+    } else if (gatewayResult.state === 'ACKNOWLEDGED' || gatewayResult.state === 'DEVICE_ACKNOWLEDGED') {
       verificationState = 'ACKNOWLEDGED';
       success = true;
-    } else if (gatewayResult.state === 'DISPATCHED') {
+    } else if (gatewayResult.state === 'DISPATCHED' || gatewayResult.state === 'COMMAND_SENT') {
       verificationState = 'DISPATCHED';
       success = true;
+    } else if (gatewayResult.state === 'TIMED_OUT') {
+      verificationState = 'FAILED';
+      success = false;
     } else if (gatewayResult.state === 'FAILED') {
       verificationState = 'FAILED';
       success = false;

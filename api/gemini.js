@@ -108,14 +108,30 @@ if (typeof setInterval !== 'undefined') {
 }
 
 // ── 2. Trusted Proxy Client IP Resolution ─────────────────────────────
-// Accepts forwarded proxy headers ONLY from verified edge proxy platforms (Vercel, Cloudflare).
+// Accepts forwarded proxy headers ONLY from verified edge proxy platforms (Vercel, Cloudflare)
+// or when the connecting socket IP matches explicit trusted proxy allowlist (TRUSTED_PROXIES).
+// Broad TRUST_PROXY=true without socket verification is rejected.
 // Caller-controlled spoofed headers from untrusted origins are strictly ignored.
 
 export function getClientIp(req) {
-  const isTrustedProxy = Boolean(process.env.VERCEL === '1' || process.env.TRUST_PROXY === 'true');
+  const socketIp = req.socket?.remoteAddress || '127.0.0.1';
+  const trustedProxies = (process.env.TRUSTED_PROXIES || '127.0.0.1,::1,::ffff:127.0.0.1')
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+
+  // Socket is trusted proxy ONLY if deployed on Vercel platform or TRUST_PROXY is enabled AND socket IP matches TRUSTED_PROXIES
+  const isProxyTrustEnabled =
+    Boolean(process.env.VERCEL === '1') ||
+    process.env.TRUST_PROXY === 'true' ||
+    process.env.TRUST_PROXY === '1';
+
+  const isSocketTrusted =
+    isProxyTrustEnabled &&
+    trustedProxies.includes(socketIp.toLowerCase());
 
   let ip = null;
-  if (isTrustedProxy) {
+  if (isSocketTrusted) {
     ip = req.headers['x-vercel-forwarded-for'] || req.headers['cf-connecting-ip'];
     if (!ip && req.headers['x-forwarded-for']) {
       const parts = String(req.headers['x-forwarded-for']).split(',');
@@ -123,15 +139,15 @@ export function getClientIp(req) {
     }
   }
 
-  // Untrusted origin or direct connection -> use socket remote address
+  // Untrusted origin or direct connection -> strictly use socket remote address
   if (!ip) {
-    ip = req.socket?.remoteAddress || '127.0.0.1';
+    ip = socketIp;
   }
 
   const ipv4Regex = /^(?:[0-9]{1,3}\.){3}[0-9]{1,3}$/;
   const ipv6Regex = /^[a-fA-F0-9:]+$/;
   if (!ipv4Regex.test(ip) && !ipv6Regex.test(ip)) {
-    return req.socket?.remoteAddress || '127.0.0.1';
+    return socketIp;
   }
   return ip.slice(0, 45);
 }
@@ -220,33 +236,20 @@ export function verifyOwnerToken(authHeader) {
     }
 
     // 9. Canonical owner ID matching:
-    // Do NOT trust email claims alone when canonical owner ID is configured!
+    // Email-based owner fallback is completely removed. Canonical OWNER_USER_ID is strictly mandatory.
     const canonicalOwnerId = process.env.OWNER_USER_ID;
     const ownerEmail = (process.env.OWNER_EMAILS || 'adhithyamohan2312@gmail.com').toLowerCase();
     const tokenEmail = (payload.email || '').toLowerCase();
 
-    if (canonicalOwnerId) {
-      if (payload.sub !== canonicalOwnerId) {
-        return false; // Subject mismatch: cannot claim owner with different sub
-      }
-      if (tokenEmail && tokenEmail !== ownerEmail) {
-        return false;
-      }
-      return true;
-    }
-
-    // Production invariant: Canonical owner ID is mandatory in production.
-    // Email-only owner authorization is strictly prohibited in production.
-    if (process.env.NODE_ENV === 'production' && !canonicalOwnerId) {
+    if (!canonicalOwnerId || payload.sub !== canonicalOwnerId) {
       return false;
     }
 
-    // Development/testing fallback only when not in production
-    if (process.env.NODE_ENV !== 'production' && tokenEmail && tokenEmail === ownerEmail) {
-      return true;
+    if (tokenEmail && tokenEmail !== ownerEmail) {
+      return false;
     }
 
-    return false;
+    return true;
   } catch {
     return false;
   }

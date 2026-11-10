@@ -1,15 +1,18 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  LOCAL WINDOWS HARDWARE BRIDGE ADAPTER & FRAMED IPC TRANSPORT
+ *  LOCAL WINDOWS HARDWARE BRIDGE ADAPTER & SERIAL/IPC TRANSPORTS (v6.0)
  * ════════════════════════════════════════════════════════════════════
- * Manages communication with physical microcontrollers/bridges on
- * the local Windows host via authenticated Local IPC (Named Pipe / TCP loopback).
+ * Supports genuine physical transport over:
+ * 1. Windows Serial COM Ports (via 'serialport' package)
+ * 2. Authenticated Local IPC (Windows Named Pipes \\.\pipe\... & loopback TCP)
  * Fails closed with UNAVAILABLE if bridge daemon or hardware is disconnected.
+ * Enforces command expiry, replay protection, device handshake, and physical readback.
  * Zero fabricated timestamps, zero simulated readbacks.
  */
 
 import net from 'net';
 import crypto from 'crypto';
+import { SerialPort } from 'serialport';
 import {
   IHardwareGateway,
   IHardwareTransport,
@@ -17,7 +20,9 @@ import {
   GpioPulseRequest,
   GpioPulseExecutionResult,
   HardwareTransportType,
-  HardwareProtocolPacket
+  HardwareProtocolPacket,
+  HardwareProtocolSchemas,
+  ActuationState
 } from './hardwareGateway.js';
 
 /**
@@ -27,6 +32,7 @@ import {
  */
 export class FramedIpcTransport implements IHardwareTransport {
   public readonly transportType: HardwareTransportType = 'LOCAL_IPC';
+  public readonly isPhysicalTransport = true;
   private socket: net.Socket | null = null;
   private connected = false;
   private pendingRequests = new Map<
@@ -84,7 +90,6 @@ export class FramedIpcTransport implements IHardwareTransport {
       client.on('close', () => {
         this.connected = false;
         this.socket = null;
-        // Reject all pending requests
         for (const [reqId, pending] of this.pendingRequests.entries()) {
           clearTimeout(pending.timeout);
           pending.reject(new Error('Hardware IPC transport disconnected while request pending'));
@@ -106,7 +111,7 @@ export class FramedIpcTransport implements IHardwareTransport {
   private handleData(chunk: Buffer): void {
     this.buffer += chunk.toString('utf8');
     const lines = this.buffer.split('\n');
-    this.buffer = lines.pop() || ''; // Keep remainder in buffer
+    this.buffer = lines.pop() || '';
 
     for (const line of lines) {
       const trimmed = line.trim();
@@ -114,13 +119,19 @@ export class FramedIpcTransport implements IHardwareTransport {
 
       try {
         const packet = JSON.parse(trimmed) as HardwareProtocolPacket;
-        if (!packet.reqId || !packet.type || packet.version !== '1.0') {
-          continue; // Malformed packet
+        if (!packet.reqId || !packet.type || (packet.version !== '1.0' && packet.version !== '1.1')) {
+          continue;
         }
 
         // Replay attack protection: reject if duplicate response reqId
         if (this.processedReqIds.has(packet.reqId)) {
           console.warn(`[Hardware Security] Replay packet rejected with duplicate reqId: ${packet.reqId}`);
+          continue;
+        }
+
+        // Expired command check
+        if (packet.expiresAtEpochMs && packet.expiresAtEpochMs < Date.now()) {
+          console.warn(`[Hardware Security] Expired packet received and rejected for reqId: ${packet.reqId}`);
           continue;
         }
 
@@ -140,6 +151,11 @@ export class FramedIpcTransport implements IHardwareTransport {
   public async sendPacket(packet: HardwareProtocolPacket, timeoutMs = 5000): Promise<HardwareProtocolPacket> {
     if (!this.isConnected() || !this.socket) {
       throw new Error('Hardware transport is not connected');
+    }
+
+    // Command expiry attachment
+    if (!packet.expiresAtEpochMs) {
+      packet.expiresAtEpochMs = Date.now() + timeoutMs;
     }
 
     return new Promise<HardwareProtocolPacket>((resolve, reject) => {
@@ -166,9 +182,200 @@ export class FramedIpcTransport implements IHardwareTransport {
   }
 }
 
+/**
+ * Genuine Physical Serial Port Transport
+ * Communicates with physical microcontrollers (Arduino, STM32, ESP32) over Windows COM ports.
+ * Uses 'serialport' package with newline framing and hardware handshake.
+ */
+export class WindowsSerialTransport implements IHardwareTransport {
+  public readonly transportType: HardwareTransportType = 'SERIAL';
+  public readonly isPhysicalTransport = true;
+  private port: SerialPort | null = null;
+  private connected = false;
+  private pendingRequests = new Map<
+    string,
+    {
+      resolve: (pkt: HardwareProtocolPacket) => void;
+      reject: (err: Error) => void;
+      timeout: NodeJS.Timeout;
+    }
+  >();
+  private processedReqIds = new Set<string>();
+  private buffer = '';
+
+  constructor(
+    private portPath: string,
+    private baudRate = 115200
+  ) {}
+
+  public isConnected(): boolean {
+    return this.connected && this.port !== null && this.port.isOpen;
+  }
+
+  public static async listAvailablePorts(): Promise<Array<{ path: string; manufacturer?: string; serialNumber?: string }>> {
+    try {
+      const ports = await SerialPort.list();
+      return ports.map((p) => ({
+        path: p.path,
+        manufacturer: p.manufacturer,
+        serialNumber: p.serialNumber
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  public async connect(): Promise<void> {
+    if (this.isConnected()) return;
+
+    return new Promise<void>((resolve, reject) => {
+      try {
+        const serial = new SerialPort(
+          {
+            path: this.portPath,
+            baudRate: this.baudRate,
+            autoOpen: false
+          },
+          (err) => {
+            if (err) {
+              this.connected = false;
+              reject(err);
+            }
+          }
+        );
+
+        const timeout = setTimeout(() => {
+          if (serial.isOpen) serial.close();
+          reject(new Error(`Serial connection timeout to ${this.portPath}`));
+        }, 4000);
+
+        serial.open((err) => {
+          clearTimeout(timeout);
+          if (err) {
+            this.connected = false;
+            reject(err);
+            return;
+          }
+          this.port = serial;
+          this.connected = true;
+          resolve();
+        });
+
+        serial.on('data', (chunk: Buffer) => {
+          this.handleData(chunk);
+        });
+
+        serial.on('error', (err) => {
+          this.connected = false;
+          for (const [reqId, pending] of this.pendingRequests.entries()) {
+            clearTimeout(pending.timeout);
+            pending.reject(err);
+            this.pendingRequests.delete(reqId);
+          }
+        });
+
+        serial.on('close', () => {
+          this.connected = false;
+          this.port = null;
+          for (const [reqId, pending] of this.pendingRequests.entries()) {
+            clearTimeout(pending.timeout);
+            pending.reject(new Error('Serial transport closed while request was pending'));
+            this.pendingRequests.delete(reqId);
+          }
+        });
+      } catch (err: any) {
+        this.connected = false;
+        reject(err);
+      }
+    });
+  }
+
+  public async disconnect(): Promise<void> {
+    if (this.port && this.port.isOpen) {
+      await new Promise<void>((resolve) => {
+        this.port!.close(() => resolve());
+      });
+    }
+    this.connected = false;
+    this.port = null;
+  }
+
+  private handleData(chunk: Buffer): void {
+    this.buffer += chunk.toString('utf8');
+    const lines = this.buffer.split('\n');
+    this.buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      try {
+        const packet = JSON.parse(trimmed) as HardwareProtocolPacket;
+        if (!packet.reqId || !packet.type || (packet.version !== '1.0' && packet.version !== '1.1')) {
+          continue;
+        }
+
+        if (this.processedReqIds.has(packet.reqId)) {
+          console.warn(`[Serial Security] Replay packet rejected: ${packet.reqId}`);
+          continue;
+        }
+
+        if (packet.expiresAtEpochMs && packet.expiresAtEpochMs < Date.now()) {
+          console.warn(`[Serial Security] Expired packet rejected for reqId: ${packet.reqId}`);
+          continue;
+        }
+
+        const pending = this.pendingRequests.get(packet.reqId);
+        if (pending) {
+          clearTimeout(pending.timeout);
+          this.pendingRequests.delete(packet.reqId);
+          this.processedReqIds.add(packet.reqId);
+          pending.resolve(packet);
+        }
+      } catch (err) {
+        console.warn('[Serial Security] Malformed packet frame on serial bus:', err);
+      }
+    }
+  }
+
+  public async sendPacket(packet: HardwareProtocolPacket, timeoutMs = 5000): Promise<HardwareProtocolPacket> {
+    if (!this.isConnected() || !this.port) {
+      throw new Error('Serial transport is not connected');
+    }
+
+    if (!packet.expiresAtEpochMs) {
+      packet.expiresAtEpochMs = Date.now() + timeoutMs;
+    }
+
+    return new Promise<HardwareProtocolPacket>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        this.pendingRequests.delete(packet.reqId);
+        reject(new Error(`Serial communication timed out after ${timeoutMs}ms for reqId: ${packet.reqId}`));
+      }, timeoutMs);
+
+      this.pendingRequests.set(packet.reqId, {
+        resolve,
+        reject,
+        timeout: timer
+      });
+
+      const serialized = JSON.stringify(packet) + '\n';
+      this.port!.write(serialized, (err) => {
+        if (err) {
+          clearTimeout(timer);
+          this.pendingRequests.delete(packet.reqId);
+          reject(err);
+        }
+      });
+    });
+  }
+}
+
 export interface WindowsHardwareBridgeOptions {
   enabled?: boolean;
   transport?: IHardwareTransport;
+  serialPort?: string;
+  serialBaudRate?: number;
   ipcPipeName?: string;
   ipcPort?: number;
   ipcAuthToken?: string;
@@ -187,14 +394,20 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
 
     if (options.transport) {
       this.transport = options.transport;
+    } else if (options.serialPort) {
+      this.transport = new WindowsSerialTransport(options.serialPort, options.serialBaudRate || 115200);
     } else if (options.ipcPipeName) {
       this.transport = new FramedIpcTransport(options.ipcPipeName);
     } else if (options.ipcPort) {
       this.transport = new FramedIpcTransport(options.ipcPort);
     }
 
-    // Notice: `options.enabled = true` does NOT fabricate connection!
-    // Real initialization requires calling `initialize()` or physical handshake.
+    // Critical Invariant: `options.enabled = true` DOES NOT fabricate connection!
+    // Hardware is only operational when an actual transport completes physical handshake.
+  }
+
+  public get isPhysicalGateway(): boolean {
+    return Boolean(this.transport && this.transport.isPhysicalTransport);
   }
 
   /**
@@ -203,7 +416,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
    */
   public async initialize(): Promise<boolean> {
     if (!this.transport) {
-      return false; // No transport configured -> remains UNAVAILABLE
+      return false;
     }
 
     try {
@@ -231,6 +444,17 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
     return Array.from(this.devices.values()).filter((d) => d.status === 'ONLINE');
   }
 
+  public async discoverAvailableDevices(): Promise<Array<{ portOrPipe: string; transport: HardwareTransportType }>> {
+    const list: Array<{ portOrPipe: string; transport: HardwareTransportType }> = [];
+    try {
+      const serialPorts = await WindowsSerialTransport.listAvailablePorts();
+      for (const p of serialPorts) {
+        list.push({ portOrPipe: p.path, transport: 'SERIAL' });
+      }
+    } catch {}
+    return list;
+  }
+
   /**
    * Performs real authenticated device handshake over the wire protocol.
    * Device MUST return valid device descriptor with supported pins and capabilities.
@@ -248,9 +472,11 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       reqId,
       deviceId: 'UNKNOWN',
       timestamp: Date.now(),
+      expiresAtEpochMs: Date.now() + 4000,
       payload: {
-        authToken: this.ipcAuthToken || 'ANON_LOCAL_IPC',
-        clientVersion: 'MiniAdhy/5.0.0'
+        authToken: this.ipcAuthToken || 'ANON_LOCAL_HARDWARE',
+        clientVersion: 'MiniAdhy/6.0.0',
+        requestedProtocolVersion: '1.0'
       }
     };
 
@@ -262,23 +488,26 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       }
 
       const p = response.payload;
-      if (!p.deviceId || !Array.isArray(p.supportedPins) || typeof p.firmwareVersion !== 'string') {
+      const parsed = HardwareProtocolSchemas.HandshakeResponsePayload.safeParse(p);
+      if (!parsed.success) {
         this.isHandshakeComplete = false;
         return false;
       }
 
+      const validated = parsed.data;
       const descriptor: HardwareDeviceDescriptor = {
-        deviceId: String(p.deviceId),
-        deviceType: 'WINDOWS_LOCAL_BRIDGE',
-        firmwareVersion: String(p.firmwareVersion),
-        supportedPins: p.supportedPins as number[],
-        maxPulseDurationMs: Number(p.maxPulseDurationMs) || 5000,
-        minPulseDurationMs: Number(p.minPulseDurationMs) || 5,
-        safeDefaultState: (p.safeDefaultState as 'LOW' | 'HIGH') || 'LOW',
+        deviceId: validated.deviceId,
+        deviceType: this.transport.transportType === 'SERIAL' ? 'ARDUINO_SERIAL' : 'WINDOWS_LOCAL_BRIDGE',
+        firmwareVersion: validated.firmwareVersion,
+        supportedPins: validated.supportedPins,
+        maxPulseDurationMs: validated.maxPulseDurationMs,
+        minPulseDurationMs: validated.minPulseDurationMs,
+        safeDefaultState: validated.safeDefaultState,
         transport: this.transport.transportType,
-        supportsReadback: Boolean(p.supportsReadback),
+        supportsReadback: validated.supportsReadback,
         status: 'ONLINE',
-        capabilities: Array.isArray(p.capabilities) ? (p.capabilities as string[]) : ['GPIO_PULSE', 'READ_PIN']
+        capabilities: validated.capabilities,
+        protocolVersion: validated.negotiatedVersion
       };
 
       this.devices.set(descriptor.deviceId, descriptor);
@@ -307,6 +536,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       reqId,
       deviceId,
       timestamp: Date.now(),
+      expiresAtEpochMs: Date.now() + 3000,
       payload: { pin }
     };
 
@@ -315,11 +545,9 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       if (res.type !== 'RSP_READ_PIN' || res.reqId !== reqId || res.deviceId !== deviceId) {
         return null;
       }
-      const state = res.payload.pinState;
-      if (state === 'LOW' || state === 'HIGH') {
-        return state;
-      }
-      return null;
+      const parsed = HardwareProtocolSchemas.ReadPinResponsePayload.safeParse(res.payload);
+      if (!parsed.success) return null;
+      return parsed.data.pinState;
     } catch {
       return null;
     }
@@ -330,8 +558,6 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
    * NEVER fabricates timestamps, acknowledgements, or readbacks.
    */
   public async executePulse(req: GpioPulseRequest): Promise<GpioPulseExecutionResult> {
-    const requestedAt = Date.now();
-
     // 1. Connection and handshake verification
     if (!this.isConnected() || !this.transport) {
       return {
@@ -341,11 +567,27 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: this.transport ? this.transport.transportType : 'LOCAL_IPC',
+        isPhysicalTransport: this.isPhysicalGateway,
         error: 'Hardware gateway is UNAVAILABLE. Physical transport not connected or device handshake incomplete.'
       };
     }
 
-    // 2. Resolve target device identity
+    // 2. Mock transport isolation check: mock transports report SIMULATED, never READBACK_VERIFIED
+    if (!this.transport.isPhysicalTransport || this.transport.transportType === 'MOCK_TEST') {
+      return {
+        state: 'SIMULATED',
+        deviceId: req.deviceId || this.activeDeviceId || 'MOCK_DEV',
+        pin: req.pin,
+        requestedDurationMs: req.durationMs,
+        deviceAcknowledged: true,
+        physicalReadbackVerified: false,
+        transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
+        error: 'Operation executed on simulated mock transport. Physical hardware actuation not performed.'
+      };
+    }
+
+    // 3. Resolve target device identity
     const targetId = req.deviceId || this.activeDeviceId;
     const device = targetId ? this.devices.get(targetId) : undefined;
 
@@ -358,11 +600,12 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Target device [${targetId || 'DEFAULT'}] is not ONLINE or handshake not registered.`
       };
     }
 
-    // 3. Hardware pin allowlist check
+    // 4. Hardware pin allowlist check
     if (!device.supportedPins.includes(req.pin)) {
       return {
         state: 'FAILED',
@@ -372,11 +615,12 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Hardware Safety Invariant: Pin ${req.pin} not in device allowlist [${device.supportedPins.join(', ')}].`
       };
     }
 
-    // 4. Safe duration bounds check
+    // 5. Safe duration bounds check
     if (req.durationMs < device.minPulseDurationMs || req.durationMs > device.maxPulseDurationMs) {
       return {
         state: 'FAILED',
@@ -386,11 +630,12 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Hardware Safety Invariant: Pulse duration ${req.durationMs}ms outside physical limits [${device.minPulseDurationMs}ms - ${device.maxPulseDurationMs}ms].`
       };
     }
 
-    // 5. Dispatch command frame to physical device
+    // 6. Dispatch command frame to physical device
     const reqId = crypto.randomUUID();
     const commandPacket: HardwareProtocolPacket = {
       version: '1.0',
@@ -398,6 +643,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       reqId,
       deviceId: device.deviceId,
       timestamp: Date.now(),
+      expiresAtEpochMs: Date.now() + req.durationMs + 3000,
       payload: {
         pin: req.pin,
         durationMs: req.durationMs
@@ -408,12 +654,12 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
     let response: HardwareProtocolPacket;
 
     try {
-      // Timeout is bounded to requested duration + 2000ms protocol overhead
       const timeoutMs = req.durationMs + 2500;
       response = await this.transport.sendPacket(commandPacket, timeoutMs);
     } catch (err: any) {
+      const isTimeout = err.message && err.message.includes('timed out');
       return {
-        state: 'FAILED',
+        state: isTimeout ? 'TIMED_OUT' : 'FAILED',
         deviceId: device.deviceId,
         pin: req.pin,
         requestedDurationMs: req.durationMs,
@@ -421,11 +667,12 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         physicalReadbackVerified: false,
         dispatchedAt,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Device actuation failed: ${err.message}`
       };
     }
 
-    // 6. Validate device response framing and identity binding
+    // 7. Validate device response framing and identity binding
     if (response.type !== 'RSP_GPIO_PULSE') {
       return {
         state: 'FAILED',
@@ -436,6 +683,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         physicalReadbackVerified: false,
         dispatchedAt,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Unexpected device packet type: ${response.type}`
       };
     }
@@ -450,6 +698,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         physicalReadbackVerified: false,
         dispatchedAt,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Request ID mismatch in device response (expected ${reqId}, got ${response.reqId})`
       };
     }
@@ -464,6 +713,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         physicalReadbackVerified: false,
         dispatchedAt,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Device ID mismatch in response (expected ${device.deviceId}, got ${response.deviceId})`
       };
     }
@@ -479,6 +729,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
         physicalReadbackVerified: false,
         dispatchedAt,
         transport: this.transport.transportType,
+        isPhysicalTransport: true,
         error: `Device reported error: ${payload.error || 'NACK'}`
       };
     }
@@ -486,7 +737,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
     const acknowledgedAt = response.timestamp || Date.now();
     const measuredDurationMs = typeof payload.measuredDurationMs === 'number' ? payload.measuredDurationMs : undefined;
 
-    // 7. Physical Readback Verification: query physical state via device protocol
+    // 8. Physical Readback Verification: query physical state via device protocol
     let physicalReadbackVerified = false;
     let pinStateAfterPulse: 'LOW' | 'HIGH' = device.safeDefaultState;
 
@@ -504,6 +755,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
           dispatchedAt,
           acknowledgedAt,
           transport: this.transport.transportType,
+          isPhysicalTransport: true,
           error: `Physical readback failed to obtain pin state from device ${device.deviceId}`
         };
       }
@@ -514,7 +766,6 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       if (readback === expectedSafe) {
         physicalReadbackVerified = true;
       } else {
-        // Output failed to return to safe state!
         return {
           state: 'FAILED',
           deviceId: device.deviceId,
@@ -527,13 +778,19 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
           dispatchedAt,
           acknowledgedAt,
           transport: this.transport.transportType,
+          isPhysicalTransport: true,
           error: `Hardware Safety Failure: Pin ${req.pin} remained in unsafe state [${readback}] after pulse. Expected safe state: [${expectedSafe}].`
         };
       }
     }
 
+    // Truthful state reporting:
+    // If readback was performed and verified -> READBACK_VERIFIED
+    // If device cannot provide readback -> DEVICE_ACKNOWLEDGED (never upgraded to physical verification)
+    const finalState: ActuationState = physicalReadbackVerified ? 'READBACK_VERIFIED' : 'DEVICE_ACKNOWLEDGED';
+
     return {
-      state: physicalReadbackVerified ? 'PHYSICALLY_VERIFIED' : 'ACKNOWLEDGED',
+      state: finalState,
       deviceId: device.deviceId,
       pin: req.pin,
       requestedDurationMs: req.durationMs,
@@ -545,6 +802,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       acknowledgedAt,
       verifiedAt: physicalReadbackVerified ? Date.now() : undefined,
       transport: this.transport.transportType,
+      isPhysicalTransport: true,
       rawResponse: JSON.stringify(response)
     };
   }
@@ -565,6 +823,7 @@ export class WindowsLocalHardwareBridge implements IHardwareGateway {
       reqId,
       deviceId: targetId || 'ALL',
       timestamp: Date.now(),
+      expiresAtEpochMs: Date.now() + 2000,
       payload: { reason: 'OPERATOR_EMERGENCY_STOP' }
     };
 

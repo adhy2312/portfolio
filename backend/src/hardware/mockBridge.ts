@@ -1,18 +1,67 @@
 /**
  * ════════════════════════════════════════════════════════════════════
- *  MOCK HARDWARE SIMULATOR (FOR ISOLATED UNIT TESTING)
+ *  MOCK HARDWARE SIMULATOR (FOR ISOLATED UNIT TESTING) (v6.0)
  * ════════════════════════════════════════════════════════════════════
  * Used strictly for unit and regression testing.
  * Mock responses are explicitly tagged with transport = 'MOCK_TEST'
- * and NEVER claim physical verification (PHYSICALLY_VERIFIED) on real hardware.
+ * and isPhysicalTransport = false.
+ * NEVER claims physical verification (READBACK_VERIFIED / PHYSICALLY_VERIFIED) on real hardware.
  */
 
 import {
   IHardwareGateway,
+  IHardwareTransport,
   HardwareDeviceDescriptor,
   GpioPulseRequest,
-  GpioPulseExecutionResult
+  GpioPulseExecutionResult,
+  HardwareTransportType,
+  HardwareProtocolPacket
 } from './hardwareGateway.js';
+
+export class MockTransport implements IHardwareTransport {
+  public readonly transportType: HardwareTransportType = 'MOCK_TEST';
+  public readonly isPhysicalTransport = false;
+  private connected = true;
+
+  constructor(public simulateResponses: Map<string, HardwareProtocolPacket> = new Map()) {}
+
+  public isConnected(): boolean {
+    return this.connected;
+  }
+
+  public async connect(): Promise<void> {
+    this.connected = true;
+  }
+
+  public async disconnect(): Promise<void> {
+    this.connected = false;
+  }
+
+  public async sendPacket(packet: HardwareProtocolPacket): Promise<HardwareProtocolPacket> {
+    const predefined = this.simulateResponses.get(packet.reqId) || this.simulateResponses.get(packet.type);
+    if (predefined) {
+      return predefined;
+    }
+    // Default mock response
+    return {
+      version: '1.0',
+      type: packet.type === 'CMD_HANDSHAKE' ? 'RSP_HANDSHAKE' : 'RSP_GPIO_PULSE',
+      reqId: packet.reqId,
+      deviceId: 'MOCK_DEVICE',
+      timestamp: Date.now(),
+      payload: {
+        status: 'ACK',
+        deviceId: 'MOCK_DEVICE',
+        firmwareVersion: 'MOCK_SIMULATOR_1.0',
+        supportedPins: [4, 7, 17, 22, 27],
+        maxPulseDurationMs: 5000,
+        minPulseDurationMs: 10,
+        safeDefaultState: 'LOW',
+        supportsReadback: false
+      }
+    };
+  }
+}
 
 export interface MockHardwareConfig {
   connected?: boolean;
@@ -24,6 +73,7 @@ export interface MockHardwareConfig {
 
 export class MockHardwareGateway implements IHardwareGateway {
   public readonly gatewayName = 'MOCK_HARDWARE_SIMULATOR';
+  public readonly isPhysicalGateway = false;
   private connected: boolean;
   private devices: Map<string, HardwareDeviceDescriptor> = new Map();
   private simulateAcknowledge: boolean;
@@ -89,6 +139,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: 'Mock hardware gateway is disconnected'
       };
     }
@@ -101,6 +152,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: this.simulateError
       };
     }
@@ -114,6 +166,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: `Device [${req.deviceId}] not found`
       };
     }
@@ -127,6 +180,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: `Pin ${req.pin} is not supported`
       };
     }
@@ -140,6 +194,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: `Duration ${req.durationMs}ms outside bounds`
       };
     }
@@ -153,6 +208,7 @@ export class MockHardwareGateway implements IHardwareGateway {
         deviceAcknowledged: false,
         physicalReadbackVerified: false,
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: 'Hardware acknowledgement missing or timed out'
       };
     }
@@ -168,13 +224,14 @@ export class MockHardwareGateway implements IHardwareGateway {
         physicalReadbackVerified: false,
         pinStateAfterPulse: 'HIGH',
         transport: 'MOCK_TEST',
+        isPhysicalTransport: false,
         error: 'Hardware Readback Mismatch: Pin stuck in HIGH state after pulse'
       };
     }
 
-    // Mock test returns ACKNOWLEDGED, never PHYSICALLY_VERIFIED on real hardware
+    // Mock test returns SIMULATED / ACKNOWLEDGED, never READBACK_VERIFIED on real hardware
     return {
-      state: 'ACKNOWLEDGED',
+      state: 'SIMULATED',
       deviceId: device.deviceId,
       pin: req.pin,
       requestedDurationMs: req.durationMs,
@@ -183,8 +240,8 @@ export class MockHardwareGateway implements IHardwareGateway {
       physicalReadbackVerified: false, // Explicitly false for mock simulator
       pinStateAfterPulse: 'LOW',
       transport: 'MOCK_TEST',
-      rawResponse: `MOCK_ACK:PIN:${req.pin}:DURATION:${req.durationMs}`
+      isPhysicalTransport: false,
+      rawResponse: `MOCK_SIMULATED:PIN:${req.pin}:DURATION:${req.durationMs}`
     };
   }
 }
-
