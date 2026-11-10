@@ -10,6 +10,7 @@ import { getCorsOptions } from '../security/cors.js';
 import { sanitizationHook } from '../security/sanitization.js';
 import { SupabaseAdapter } from '../auth/supabase.js';
 import { IdentityAuthService } from '../auth/identity.js';
+import { SupabaseKeepAliveService } from '../observability/keepAlive.js';
 import { ProviderGateway } from '../providers/gateway.js';
 import { CognitiveOrchestrator } from '../cognitive-core/orchestrator.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
@@ -77,6 +78,14 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   const authService = new IdentityAuthService(appConfig, dbAdapter);
   const providerGateway = new ProviderGateway(appConfig);
   const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway);
+
+  // 14-Minute Keep-Alive Cron to keep Supabase PostgreSQL connection pool alive
+  const keepAlive = new SupabaseKeepAliveService(dbAdapter, 14);
+  keepAlive.start(app.log);
+  app.addHook('onClose', (_instance, done) => {
+    keepAlive.stop();
+    done();
+  });
 
   // 7. Register Route Modules
   await app.register(healthRoutes, { dbAdapter, providerGateway });
