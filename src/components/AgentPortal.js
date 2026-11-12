@@ -166,7 +166,7 @@ const AgentPortal = ({ onExit }) => {
         setGeminiOutput({
           agent: geminiTargetAgent,
           response: result.text || result.fallbackText,
-          provider: `Hugging Face Serverless (${result.model || selectedHfModel})`,
+          provider: `Hugging Face Serverless (${result.model || selectedHfModel})${result.fallbackMode ? ' [Fallback Mode]' : ''}`,
           metrics: result.metrics
         });
       } else {

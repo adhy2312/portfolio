@@ -20,21 +20,54 @@ const isRateLimited = (ip) => {
 };
 
 // Periodic memory purge every 5 minutes
-setInterval(() => {
-  const now = Date.now();
-  for (const [ip, record] of rateLimitMap.entries()) {
-    if (now > record.resetTime) {
-      rateLimitMap.delete(ip);
+if (typeof setInterval !== 'undefined') {
+  const purgeTimer = setInterval(() => {
+    const now = Date.now();
+    for (const [ip, record] of rateLimitMap.entries()) {
+      if (now > record.resetTime) {
+        rateLimitMap.delete(ip);
+      }
     }
+  }, 300000);
+  if (purgeTimer && typeof purgeTimer.unref === 'function') {
+    purgeTimer.unref();
   }
-}, 300000);
+}
 
-// Curated suite of free, high-performance HuggingFace Serverless models
-const ALLOWED_MODELS = {
-  'llama-3.2': 'meta-llama/Llama-3.2-3B-Instruct',
-  'mistral-7b': 'mistralai/Mistral-7B-Instruct-v0.3',
-  'qwen-coder': 'Qwen/Qwen2.5-Coder-7B-Instruct',
+// Curated mapping of model aliases and legacy identifiers to live, supported models
+// on the modern Hugging Face Inference Providers Router (router.huggingface.co).
+const MODEL_MAPPINGS = {
+  // Qwen Family (Code & Architecture)
+  'qwen-coder': 'Qwen/Qwen2.5-72B-Instruct',
+  'qwen-72b': 'Qwen/Qwen2.5-72B-Instruct',
+  'Qwen/Qwen2.5-Coder-7B-Instruct': 'Qwen/Qwen2.5-72B-Instruct',
+  'Qwen/Qwen2.5-Coder-32B-Instruct': 'Qwen/Qwen2.5-72B-Instruct',
+
+  // Llama Family (Reasoning, Security & Defense)
+  'llama-3.1': 'meta-llama/Llama-3.1-8B-Instruct',
+  'llama-3.2': 'meta-llama/Llama-3.1-8B-Instruct',
+  'meta-llama/Llama-3.2-3B-Instruct': 'meta-llama/Llama-3.1-8B-Instruct',
+  'meta-llama/Llama-3.2-1B-Instruct': 'meta-llama/Llama-3.1-8B-Instruct',
+  'llama-3.3': 'meta-llama/Llama-3.3-70B-Instruct',
+  'mistral-7b': 'meta-llama/Llama-3.1-8B-Instruct',
+  'mistralai/Mistral-7B-Instruct-v0.3': 'meta-llama/Llama-3.1-8B-Instruct',
+
+  // Gemma Family (Fast Neural Dialogue)
+  'gemma-3': 'google/gemma-3-4b-it',
+  'google/gemma-2-2b-it': 'google/gemma-3-4b-it',
+
+  // DeepSeek & Specialized
+  'deepseek-v3': 'deepseek-ai/DeepSeek-V3',
+  'deepseek-r1': 'deepseek-ai/DeepSeek-R1',
+  'phi-4': 'microsoft/phi-4',
+
+  // Embeddings (Native Task Pipeline)
   'minilm-embed': 'sentence-transformers/all-MiniLM-L6-v2'
+};
+
+const resolveModelId = (inputModel) => {
+  if (!inputModel) return 'Qwen/Qwen2.5-72B-Instruct';
+  return MODEL_MAPPINGS[inputModel] || inputModel;
 };
 
 export default async function handler(req, res) {
@@ -75,7 +108,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt must be a non-empty string' });
   }
 
-  const resolvedModelId = ALLOWED_MODELS[model] || model;
+  const resolvedModelId = resolveModelId(model);
 
   // If no HuggingFace token is set in environment, return a clean deterministic fallback response
   if (!API_KEY) {
@@ -93,63 +126,75 @@ export default async function handler(req, res) {
     });
   }
 
+  const startTime = Date.now();
+  const FALLBACK_KEY = process.env.HUGGINGFACE_FALLBACK_KEY;
+  let activeKey = API_KEY;
+  let hfResponse = null;
+  let generatedText = '';
+
+  const isEmbeddingTask = resolvedModelId.includes('sentence-transformers') || resolvedModelId.includes('embed');
+
   try {
-    const startTime = Date.now();
-    
-    // Formatting for instruct models
-    const formattedInput = systemPrompt 
-      ? `<s>[SYSTEM]\n${systemPrompt}\n[/SYSTEM]\n[USER]\n${prompt}\n[/USER]\n[ASSISTANT]\n`
-      : prompt;
+    // 1. Primary Route: Modern OpenAI-compatible Chat Completions on router.huggingface.co
+    if (!isEmbeddingTask) {
+      const chatEndpoint = 'https://router.huggingface.co/v1/chat/completions';
+      const messages = [];
+      if (systemPrompt) {
+        messages.push({ role: 'system', content: systemPrompt });
+      }
+      messages.push({ role: 'user', content: prompt });
 
-    // Use Hugging Face Serverless Router
-    const hfEndpoint = `https://router.huggingface.co/hf-inference/models/${resolvedModelId}`;
-    const FALLBACK_KEY = process.env.HUGGINGFACE_FALLBACK_KEY;
+      const chatPayload = {
+        model: resolvedModelId,
+        messages,
+        max_tokens: Math.min(maxTokens, 1500),
+        temperature: Math.max(0.1, Math.min(temperature, 1.2))
+      };
 
-    let activeKey = API_KEY;
-    let hfResponse = await fetch(hfEndpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${activeKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        inputs: formattedInput,
-        parameters: {
-          max_new_tokens: Math.min(maxTokens, 1500),
-          temperature: Math.max(0.1, Math.min(temperature, 1.2)),
-          return_full_text: false
-        }
-      })
-    });
-
-    // If primary key had permission or authentication issues and fallback key exists, retry with fallback key
-    if ((hfResponse.status === 401 || hfResponse.status === 403) && FALLBACK_KEY && FALLBACK_KEY !== activeKey) {
-      activeKey = FALLBACK_KEY;
-      hfResponse = await fetch(hfEndpoint, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${activeKey}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          inputs: formattedInput,
-          parameters: {
-            max_new_tokens: Math.min(maxTokens, 1500),
-            temperature: Math.max(0.1, Math.min(temperature, 1.2)),
-            return_full_text: false
-          }
-        })
-      });
-    }
-
-    // Secondary fallback: Try legacy api-inference endpoint if router rejected permissions
-    if (!hfResponse.ok && (hfResponse.status === 403 || hfResponse.status === 404)) {
       try {
-        const legacyEndpoint = `https://api-inference.huggingface.co/models/${resolvedModelId}`;
-        const legacyRes = await fetch(legacyEndpoint, {
+        hfResponse = await fetch(chatEndpoint, {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${activeKey}`,
+            Authorization: `Bearer ${activeKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(chatPayload)
+        });
+
+        // Key fallback on auth/permission rejection if fallback key configured
+        if ((hfResponse.status === 401 || hfResponse.status === 403) && FALLBACK_KEY && FALLBACK_KEY !== activeKey) {
+          activeKey = FALLBACK_KEY;
+          hfResponse = await fetch(chatEndpoint, {
+            method: 'POST',
+            headers: {
+              Authorization: `Bearer ${activeKey}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(chatPayload)
+          });
+        }
+
+        if (hfResponse.ok) {
+          const chatData = await hfResponse.json();
+          generatedText = chatData.choices?.[0]?.message?.content || '';
+        }
+      } catch (chatErr) {
+        // Continue to secondary pipeline attempt
+      }
+    }
+
+    // 2. Secondary Fallback: Pipeline endpoint on router.huggingface.co
+    if (!generatedText && (!hfResponse || !hfResponse.ok)) {
+      try {
+        const formattedInput = systemPrompt
+          ? `<s>[SYSTEM]\n${systemPrompt}\n[/SYSTEM]\n[USER]\n${prompt}\n[/USER]\n[ASSISTANT]\n`
+          : prompt;
+
+        const pipelineEndpoint = `https://router.huggingface.co/hf-inference/models/${resolvedModelId}`;
+        const pipelineRes = await fetch(pipelineEndpoint, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${activeKey}`,
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
@@ -161,57 +206,68 @@ export default async function handler(req, res) {
             }
           })
         });
-        if (legacyRes.ok) {
-          hfResponse = legacyRes;
+
+        if (pipelineRes.ok) {
+          hfResponse = pipelineRes;
+          const data = await pipelineRes.json();
+          if (Array.isArray(data) && data[0]?.generated_text) {
+            generatedText = data[0].generated_text;
+          } else if (typeof data === 'string') {
+            generatedText = data;
+          } else if (data?.generated_text) {
+            generatedText = data.generated_text;
+          } else {
+            generatedText = JSON.stringify(data);
+          }
+        } else if (!hfResponse) {
+          hfResponse = pipelineRes;
         }
-      } catch {}
+      } catch (pipelineErr) {
+        // Fallback below
+      }
     }
 
     const latencyMs = Date.now() - startTime;
 
-    if (!hfResponse.ok) {
-      const errText = await hfResponse.text();
-      const isPermissionErr = hfResponse.status === 403 || errText.includes('permissions') || errText.includes('Inference Providers');
+    // 3. Fallback response if remote inference failed or returned non-ok
+    if (!generatedText) {
+      const status = hfResponse ? hfResponse.status : 503;
+      let errText = '';
+      try {
+        errText = hfResponse ? await hfResponse.text() : 'Inference router unreachable';
+      } catch {
+        errText = 'Inference router unreachable';
+      }
+
+      const isPermissionErr = status === 403 || errText.includes('permissions') || errText.includes('Inference Providers');
       const guidance = isPermissionErr
         ? "Your Hugging Face token lacks 'Make calls to Inference Providers' scope. In huggingface.co -> Settings -> Access Tokens, create a fine-grained token with Inference enabled, or use Gemini Flash / Groq in the engine selector."
-        : `Hugging Face serverless returned (${hfResponse.status}): ${errText.slice(0, 100)}`;
+        : `Hugging Face inference returned (${status}): ${errText.slice(0, 100)}`;
 
       return res.status(200).json({
-        success: true,
+        success: false,
+        fallbackMode: true,
         model: resolvedModelId,
         agentId,
-        fallbackMode: true,
         text: `[Hugging Face Provider Notice]\n${guidance}\n\nFalling back to local heuristic response for: "${prompt.slice(0, 80)}..."`,
         metrics: {
           latencyMs,
-          tokensGenerated: 54,
+          tokensGenerated: 0,
           costEstimateUSD: 0.000000
         }
       });
     }
 
-    const data = await hfResponse.json();
-    let generatedText = '';
-
-    if (Array.isArray(data) && data[0]?.generated_text) {
-      generatedText = data[0].generated_text;
-    } else if (typeof data === 'string') {
-      generatedText = data;
-    } else if (data?.generated_text) {
-      generatedText = data.generated_text;
-    } else {
-      generatedText = JSON.stringify(data);
-    }
-
     return res.status(200).json({
       success: true,
+      fallbackMode: false,
       model: resolvedModelId,
       agentId,
       text: generatedText.trim(),
       metrics: {
         latencyMs,
         tokensGenerated: Math.round(generatedText.length / 4),
-        costEstimateUSD: 0.000000 // Free serverless tier
+        costEstimateUSD: 0.000000
       }
     });
   } catch (error) {

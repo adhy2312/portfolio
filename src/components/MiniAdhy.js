@@ -452,7 +452,17 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       systemPrompt: activePrompt,
       maxTokens: Math.min(maxTokens, 1200)
     });
-    if (hfResult && hfResult.success && hfResult.text && !hfResult.fallbackMode && !hfResult.text.includes('Notice: Hugging Face serverless router returned')) {
+    if (
+      hfResult &&
+      hfResult.success &&
+      hfResult.text &&
+      !hfResult.fallbackMode &&
+      !hfResult.isFallback &&
+      !hfResult.text.includes('[Hugging Face Provider Notice]') &&
+      !hfResult.text.includes('Notice: Hugging Face serverless router returned') &&
+      !hfResult.text.includes('Hugging Face inference returned') &&
+      !hfResult.text.includes('Falling back to local heuristic response')
+    ) {
       return repairSentenceCutoff(hfResult.text);
     }
   } catch (hfErr) {
