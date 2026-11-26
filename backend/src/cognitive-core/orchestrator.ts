@@ -59,9 +59,11 @@ export class CognitiveOrchestrator {
   constructor(
     private memoryRepo: IMemoryRepository,
     private providerGateway: ProviderGateway,
-    private toolExecutor?: AgentToolExecutor
+    private toolExecutor?: AgentToolExecutor,
+    sharedRegistry?: AgentWorkerRegistry // Injected from app.ts — avoids duplicate registry
   ) {
-    this.agentRegistry = new AgentWorkerRegistry();
+    // Use the injected shared registry when provided; fall back to own instance for tests
+    this.agentRegistry = sharedRegistry ?? new AgentWorkerRegistry();
     this.metacognition = new MetacognitionEngine();
   }
 
@@ -161,15 +163,38 @@ export class CognitiveOrchestrator {
     }
     messages.push({ role: 'user', content: req.message });
 
-    // 3. Delegate to specialist workers when appropriate
+    // 3. Delegate to specialist workers via intent classification
+    // Uses pattern scoring rather than naive includes() to prevent false triggers.
+    // e.g. "I don't feel threatened" should NOT route to ULTRON.
     let delegatedWorker: string | undefined = undefined;
     const lowerMsg = req.message.toLowerCase();
-    if (lowerMsg.includes('threat') || lowerMsg.includes('audit') || lowerMsg.includes('vulnerability')) {
-      delegatedWorker = 'ULTRON';
-    } else if (lowerMsg.includes('security') || lowerMsg.includes('policy') || lowerMsg.includes('permission')) {
-      delegatedWorker = 'FRIDAY';
-    } else if (req.isOwnerAuthenticated && (lowerMsg.includes('plan') || lowerMsg.includes('orchestrate'))) {
-      delegatedWorker = 'JARVIS';
+
+    const intentScore = {
+      ULTRON: 0,
+      FRIDAY: 0,
+      JARVIS: 0,
+    };
+
+    // ULTRON — adversarial / audit focus (requires explicit adversarial intent)
+    if (/\brun\s+(an?\s+)?audit\b/i.test(req.message)) intentScore.ULTRON += 3;
+    if (/\b(adversarial|exploit|vulnerability|red[\s-]?team)\b/i.test(req.message)) intentScore.ULTRON += 2;
+    if (/\b(attack\s+surface|pentest|hack|breach)\b/i.test(req.message)) intentScore.ULTRON += 2;
+
+    // FRIDAY — security / policy focus
+    if (/\b(verify|inspect|check)\s+(token|auth|permission)\b/i.test(req.message)) intentScore.FRIDAY += 3;
+    if (/\b(security\s+policy|access\s+control|zero[\s-]?trust)\b/i.test(req.message)) intentScore.FRIDAY += 2;
+    if (/\b(rate\s+limit|firewall|quarantine)\b/i.test(req.message)) intentScore.FRIDAY += 2;
+
+    // JARVIS — planning / orchestration (owner only)
+    if (req.isOwnerAuthenticated) {
+      if (/\b(plan|orchestrate|schedule|decompose)\s+(this|the|a|an)?\s*(task|project|workflow)\b/i.test(req.message)) intentScore.JARVIS += 3;
+      if (/\b(dispatch|assign|delegate)\s+(worker|agent|specialist)\b/i.test(req.message)) intentScore.JARVIS += 2;
+    }
+
+    const topScore = Math.max(...Object.values(intentScore));
+    if (topScore >= 2) {
+      delegatedWorker = (Object.keys(intentScore) as Array<keyof typeof intentScore>)
+        .find((k) => intentScore[k] === topScore);
     }
 
     // 3b. Execute tool if requested or triggered by specialist worker

@@ -394,3 +394,97 @@ export class CognitiveLoopRunner {
     };
   }
 }
+
+/**
+ * Advanced Engineering & Autonomous Systems Cognitive Pillars
+ * 60 specialized sub-disciplines categorized across the 4 foundational pillars.
+ */
+export const ADVANCED_ENGINEERING_PILLARS = Object.freeze({
+  aiAndCognitiveSystems: {
+    id: 'ai_cognitive_systems',
+    name: 'AI & Cognitive Systems',
+    color: '#8b5cf6',
+    capabilities: [
+      'Artificial Intelligence',
+      'Artificial General Intelligence (AGI)',
+      'Multimodal Foundation Models',
+      'Vision-Language-Action (VLA) Models',
+      'Agentic AI',
+      'Multi-Agent Systems',
+      'Cognitive Architecture',
+      'World Models',
+      'Neural Networks',
+      'Spiking Neural Networks (SNNs)',
+      'Natural Language Processing (NLP)',
+      'Natural Language UI',
+      'Reinforcement Learning',
+      'Transfer Learning',
+      'Computer Vision',
+      'Predictive Modeling',
+      'Recursive Self-Improvement',
+      'AI Alignment & Guardrails'
+    ]
+  },
+  computingAndNeuromorphicHardware: {
+    id: 'computing_neuromorphic_hardware',
+    name: 'Computing & Neuromorphic Hardware',
+    color: '#06b6d4',
+    capabilities: [
+      'Neuromorphic Computing',
+      'Neuromorphic Processors',
+      'Artificial Neurons',
+      'Synaptic Plasticity',
+      'In-Memory Computing',
+      'Memristors',
+      'High-Performance Computing (HPC)',
+      'Mainframe Architecture',
+      'Distributed Computing',
+      'Edge AI',
+      'Low-Latency Streaming Inference',
+      'Memory Architecture',
+      'Data Schematics',
+      'Data Denoising',
+      'Quantum Computing'
+    ]
+  },
+  roboticsAndControlSystems: {
+    id: 'robotics_control_systems',
+    name: 'Robotics & Control Systems',
+    color: '#10b981',
+    capabilities: [
+      'Embodied AI',
+      'Physical AI',
+      'Advanced Robotics',
+      'Humanoid Robotics',
+      'Swarm Robotics',
+      'Biomimetic Actuators',
+      'Soft Robotics',
+      'Closed-Loop Control Systems',
+      'Kinematic Modeling',
+      'Sensor Fusion',
+      'Dynamic Vision Sensors (Event Cameras)',
+      'LiDAR & SLAM (Simultaneous Localization and Mapping)',
+      'Spatial Computing',
+      'Digital Twins',
+      'Autonomous Navigation',
+      'Haptic Feedback Systems',
+      'Human-Machine Interfaces (HMI)',
+      'Brain-Computer Interfaces (BCI)',
+      'Neuroelectric Interfacing'
+    ]
+  },
+  securityNetworkingAndProtocols: {
+    id: 'security_networking_protocols',
+    name: 'Security, Networking & Protocols',
+    color: '#f43f5e',
+    capabilities: [
+      'Communication Protocols',
+      'Safety Protocols',
+      'Cryptanalysis',
+      'Code Decryption',
+      'Cybersecurity & Sandboxing',
+      'Zero-Trust Architecture'
+    ]
+  }
+});
+

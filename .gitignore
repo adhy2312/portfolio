@@ -35,3 +35,20 @@ yarn-error.log*
 .next/
 __pycache__/
 *.pyc
+
+# Scratch / exploration files — never commit these
+*.zip
+src.zip
+test_*.js
+test_*.py
+test-*.js
+*_test.js
+website_audit_report
+vercel_log.txt
+*.log
+studio/dev_out.log
+
+# OS artifacts
+Thumbs.db
+desktop.ini
+*.DS_Store

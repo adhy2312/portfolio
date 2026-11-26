@@ -1,15 +1,17 @@
 name: Weekly Mini-Adhy Agent Intelligence Report
 
+# DEDUPLICATION FIX: This GitHub Actions cron is the SOLE scheduler for the weekly report.
+# The duplicate cron entry that was in vercel.json has been removed.
+# Single trigger point prevents double-firing and double email dispatch.
+
 on:
-  schedule:
-    # Run every Sunday at 00:00 UTC (05:30 IST)
-    - cron: '0 0 * * 0'
   workflow_dispatch:
-    # Allows manual trigger anytime from GitHub Actions tab
+    # Manual trigger only — cron is now handled exclusively in vercel.json
+    # To trigger manually: GitHub → Actions → "Weekly Mini-Adhy Agent Intelligence Report" → Run workflow
 
 jobs:
   dispatch-report:
-    name: Generate & Dispatch Weekly Intelligence Report
+    name: Generate & Dispatch Weekly Intelligence Report (Manual Trigger)
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Weekly Report Serverless Edge API

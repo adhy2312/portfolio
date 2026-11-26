@@ -1022,6 +1022,9 @@ export class AgentToolAdapterRegistry {
 
 // ── AgentToolExecutor ─────────────────────────────────────────────────
 
+// Ring buffer size — prevents unbounded memory growth in long-running servers
+const AUDIT_LOG_MAX_SIZE = 1000;
+
 export class AgentToolExecutor {
   private auditLog: Array<{
     id: string;
@@ -1192,6 +1195,10 @@ export class AgentToolExecutor {
     const auditId = `audit_${Date.now()}_${crypto.randomBytes(4).toString('hex')}`;
     const evidenceDigest = adapterResult.evidence?.evidenceDigest;
 
+    // Ring-buffer eviction: drop oldest entry when at capacity
+    if (this.auditLog.length >= AUDIT_LOG_MAX_SIZE) {
+      this.auditLog.shift();
+    }
     this.auditLog.push({
       id: auditId,
       timestamp: Date.now(),

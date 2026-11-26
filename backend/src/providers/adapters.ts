@@ -148,10 +148,96 @@ export class GeminiAdapter extends BaseAdapter {
   }
 
   async stream(req: GenerateRequest, onChunk: (chunk: StreamChunk) => void): Promise<GenerateResponse> {
-    // For standard fetch streaming or fallback to non-streaming chunk delivery
-    const res = await this.generate(req);
-    onChunk({ delta: res.text, done: true, providerId: this.id });
-    return res;
+    // Real Gemini SSE streaming via streamGenerateContent endpoint
+    if (!this.isAvailable()) {
+      throw new Error('[GeminiAdapter] API key not configured');
+    }
+
+    const start = Date.now();
+    const model = 'gemini-1.5-flash';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${this.apiKey}`;
+
+    const contents = req.messages.map((m) => ({
+      role: m.role === 'assistant' ? 'model' : 'user',
+      parts: [{ text: m.content }]
+    }));
+
+    const body: any = { contents };
+    if (req.systemPrompt) {
+      body.systemInstruction = { parts: [{ text: req.systemPrompt }] };
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Gemini Stream HTTP ${res.status}: ${errorText}`);
+      }
+
+      let fullText = '';
+      let usage: any = {};
+
+      // Parse SSE stream from Gemini
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const delta = parsed.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                if (delta) {
+                  fullText += delta;
+                  onChunk({ delta, done: false, providerId: this.id });
+                }
+                if (parsed.usageMetadata) {
+                  usage = parsed.usageMetadata;
+                }
+              } catch { /* skip malformed SSE lines */ }
+            }
+          }
+        }
+      }
+
+      onChunk({ delta: '', done: true, providerId: this.id });
+
+      return {
+        text: fullText,
+        providerId: this.id,
+        model,
+        usage: {
+          promptTokens: usage.promptTokenCount,
+          completionTokens: usage.candidatesTokenCount,
+          totalTokens: usage.totalTokenCount
+        },
+        latencyMs: Date.now() - start,
+        isFallback: false,
+        provenance: { source: 'Google Gemini 1.5 Flash (SSE)', timestamp: Date.now() }
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
 
@@ -239,14 +325,94 @@ export class GroqAdapter extends BaseAdapter {
   }
 
   async stream(req: GenerateRequest, onChunk: (chunk: StreamChunk) => void): Promise<GenerateResponse> {
-    const res = await this.generate(req);
-    onChunk({ delta: res.text, done: true, providerId: this.id });
-    return res;
+    // Real Groq SSE streaming via OpenAI-compatible stream endpoint
+    if (!this.isAvailable()) {
+      throw new Error('[GroqAdapter] API key not configured');
+    }
+
+    const start = Date.now();
+    const model = 'llama-3.3-70b-versatile';
+    const url = 'https://api.groq.com/openai/v1/chat/completions';
+
+    const messages: any[] = [];
+    if (req.systemPrompt) {
+      messages.push({ role: 'system', content: req.systemPrompt });
+    }
+    messages.push(...req.messages.map((m) => ({ role: m.role, content: m.content })));
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: req.temperature ?? 0.7,
+          max_tokens: req.maxTokens ?? 2048,
+          stream: true
+        }),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`Groq Stream HTTP ${res.status}: ${errorText}`);
+      }
+
+      let fullText = '';
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const delta = parsed.choices?.[0]?.delta?.content || '';
+                if (delta) {
+                  fullText += delta;
+                  onChunk({ delta, done: false, providerId: this.id });
+                }
+              } catch { /* skip malformed SSE lines */ }
+            }
+          }
+        }
+      }
+
+      onChunk({ delta: '', done: true, providerId: this.id });
+
+      return {
+        text: fullText,
+        providerId: this.id,
+        model,
+        latencyMs: Date.now() - start,
+        isFallback: false,
+        provenance: { source: 'Groq LPU Engine (SSE)', timestamp: Date.now() }
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
-
 /**
- * Hugging Face Provider Adapter
+ * Hugging Face Inference Adapter
  */
 export class HuggingFaceAdapter extends BaseAdapter {
   readonly id: ProviderId = 'huggingface';
@@ -325,9 +491,89 @@ export class HuggingFaceAdapter extends BaseAdapter {
   }
 
   async stream(req: GenerateRequest, onChunk: (chunk: StreamChunk) => void): Promise<GenerateResponse> {
-    const res = await this.generate(req);
-    onChunk({ delta: res.text, done: true, providerId: this.id });
-    return res;
+    if (!this.isAvailable()) {
+      throw new Error('[HuggingFaceAdapter] API token not configured');
+    }
+
+    const start = Date.now();
+    const model = 'Qwen/Qwen2.5-Coder-32B-Instruct';
+    const url = `https://router.huggingface.co/hf-inference/models/${model}/v1/chat/completions`;
+
+    const messages = [];
+    if (req.systemPrompt) {
+      messages.push({ role: 'system', content: req.systemPrompt });
+    }
+    messages.push(...req.messages.map((m) => ({ role: m.role, content: m.content })));
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.token}`
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: req.temperature ?? 0.7,
+          max_tokens: req.maxTokens ?? 2048,
+          stream: true
+        }),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`HuggingFace Stream HTTP ${res.status}: ${errorText}`);
+      }
+
+      let fullText = '';
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const delta = parsed.choices?.[0]?.delta?.content || '';
+                if (delta) {
+                  fullText += delta;
+                  onChunk({ delta, done: false, providerId: this.id });
+                }
+              } catch { /* skip malformed SSE lines */ }
+            }
+          }
+        }
+      }
+
+      onChunk({ delta: '', done: true, providerId: this.id });
+
+      return {
+        text: fullText,
+        providerId: this.id,
+        model,
+        latencyMs: Date.now() - start,
+        isFallback: false,
+        provenance: { source: 'Hugging Face Router (SSE)', timestamp: Date.now() }
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
 
@@ -413,9 +659,91 @@ export class OpenRouterAdapter extends BaseAdapter {
   }
 
   async stream(req: GenerateRequest, onChunk: (chunk: StreamChunk) => void): Promise<GenerateResponse> {
-    const res = await this.generate(req);
-    onChunk({ delta: res.text, done: true, providerId: this.id });
-    return res;
+    if (!this.isAvailable()) {
+      throw new Error('[OpenRouterAdapter] API key not configured');
+    }
+
+    const start = Date.now();
+    const model = 'meta-llama/llama-3.1-8b-instruct:free';
+    const url = 'https://openrouter.ai/api/v1/chat/completions';
+
+    const messages = [];
+    if (req.systemPrompt) {
+      messages.push({ role: 'system', content: req.systemPrompt });
+    }
+    messages.push(...req.messages.map((m) => ({ role: m.role, content: m.content })));
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+          'HTTP-Referer': 'https://adhy.tech',
+          'X-Title': 'Mini-Adhy Backend'
+        },
+        body: JSON.stringify({
+          model,
+          messages,
+          temperature: req.temperature ?? 0.7,
+          max_tokens: req.maxTokens ?? 2048,
+          stream: true
+        }),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(`OpenRouter Stream HTTP ${res.status}: ${errorText}`);
+      }
+
+      let fullText = '';
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const jsonStr = line.slice(6).trim();
+              if (!jsonStr || jsonStr === '[DONE]') continue;
+              try {
+                const parsed = JSON.parse(jsonStr);
+                const delta = parsed.choices?.[0]?.delta?.content || '';
+                if (delta) {
+                  fullText += delta;
+                  onChunk({ delta, done: false, providerId: this.id });
+                }
+              } catch { /* skip malformed SSE lines */ }
+            }
+          }
+        }
+      }
+
+      onChunk({ delta: '', done: true, providerId: this.id });
+
+      return {
+        text: fullText,
+        providerId: this.id,
+        model,
+        latencyMs: Date.now() - start,
+        isFallback: false,
+        provenance: { source: 'OpenRouter Gateway (SSE)', timestamp: Date.now() }
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
 
@@ -485,9 +813,81 @@ export class OllamaAdapter extends BaseAdapter {
   }
 
   async stream(req: GenerateRequest, onChunk: (chunk: StreamChunk) => void): Promise<GenerateResponse> {
-    const res = await this.generate(req);
-    onChunk({ delta: res.text, done: true, providerId: this.id });
-    return res;
+    if (!this.isAvailable()) {
+      throw new Error('[OllamaAdapter] Base URL not configured');
+    }
+
+    const start = Date.now();
+    const model = 'llama3.2';
+    const url = `${this.baseUrl}/api/chat`;
+
+    const messages = [];
+    if (req.systemPrompt) {
+      messages.push({ role: 'system', content: req.systemPrompt });
+    }
+    messages.push(...req.messages.map((m) => ({ role: m.role, content: m.content })));
+
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 30000);
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model,
+          messages,
+          stream: true
+        }),
+        signal: controller.signal
+      });
+
+      if (!res.ok) {
+        throw new Error(`Ollama Stream HTTP ${res.status}: ${await res.text()}`);
+      }
+
+      let fullText = '';
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
+      if (reader) {
+        let buffer = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+            try {
+              const parsed = JSON.parse(trimmed);
+              const delta = parsed.message?.content || '';
+              if (delta) {
+                fullText += delta;
+                onChunk({ delta, done: Boolean(parsed.done), providerId: this.id });
+              }
+            } catch { /* skip malformed line */ }
+          }
+        }
+      }
+
+      onChunk({ delta: '', done: true, providerId: this.id });
+
+      return {
+        text: fullText,
+        providerId: this.id,
+        model,
+        latencyMs: Date.now() - start,
+        isFallback: false,
+        provenance: { source: 'Local Ollama Model (Stream)', timestamp: Date.now() }
+      };
+    } finally {
+      clearTimeout(timer);
+    }
   }
 }
 

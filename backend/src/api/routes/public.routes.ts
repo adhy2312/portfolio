@@ -374,47 +374,83 @@ export const publicRoutes: FastifyPluginAsync<{
     }
   );
 
-  // 6. Server-Sent Events (SSE) Streaming endpoint
+  // 6. Server-Sent Events (SSE) Streaming endpoint — real progressive response
   fastify.get(
     '/api/v1/public/chat/stream',
     {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: '1 minute'
+        }
+      },
       schema: {
-        description: 'SSE Streaming chat response for real-time frontend rendering',
+        description: 'SSE Streaming chat — real-time progressive token delivery to the browser',
         tags: ['Public'],
         querystring: {
           type: 'object',
           required: ['message'],
           properties: {
-            message: { type: 'string', minLength: 1, maxLength: 1000 }
+            message: { type: 'string', minLength: 1, maxLength: 1000 },
+            sessionId: { type: 'string' }
           }
         }
       }
     },
     async (request, reply) => {
-      const { message } = request.query as { message: string };
+      const { message, sessionId } = request.query as { message: string; sessionId?: string };
+      const activeSessionId = sessionId || `pub_sse_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`;
 
+      // SSE headers
       reply.raw.setHeader('Content-Type', 'text/event-stream');
       reply.raw.setHeader('Cache-Control', 'no-cache, no-transform');
       reply.raw.setHeader('Connection', 'keep-alive');
       reply.raw.setHeader('X-Accel-Buffering', 'no');
+      reply.raw.flushHeaders?.();
+
+      const sendEvent = (data: object) => {
+        reply.raw.write(`data: ${JSON.stringify(data)}\n\n`);
+      };
+
+      // Signal stream start to the client
+      sendEvent({ type: 'start', sessionId: activeSessionId });
 
       if (!opts.providerGateway) {
-        reply.raw.write(`data: ${JSON.stringify({ text: `Echo: ${message}`, done: true })}\n\n`);
+        // Graceful degradation: echo back without AI
+        sendEvent({ type: 'delta', delta: `Echo (no AI configured): ${message}` });
+        sendEvent({ type: 'done', provider: 'echo', model: 'none' });
         return reply.raw.end();
       }
+
+      const systemPrompt = [
+        'You are Mini-Adhy, the official AI representative for Adhithya Mohan (adhy.tech).',
+        'You are interacting with a PUBLIC VISITOR. Respond progressively and naturally.',
+        'Knowledge boundary: Discuss only public engineering achievements, software, robotics, and published portfolio projects.',
+        'Never disclose private credentials, owner conversations, or internal security tokens.',
+        'Be concise, visionary, and engaging.'
+      ].join('\n');
 
       try {
         await opts.providerGateway.stream(
           {
             messages: [{ role: 'user', content: message }],
-            privacyClass: 'PUBLIC'
+            systemPrompt,
+            privacyClass: 'PUBLIC',
+            taskType: 'general',
+            visitorSessionId: activeSessionId
           },
           (chunk) => {
-            reply.raw.write(`data: ${JSON.stringify({ delta: chunk.delta, done: chunk.done })}\n\n`);
+            if (chunk.delta) {
+              sendEvent({ type: 'delta', delta: chunk.delta });
+            }
+            if (chunk.done) {
+              sendEvent({ type: 'done', provider: chunk.providerId });
+            }
           }
         );
       } catch (err: any) {
-        reply.raw.write(`data: ${JSON.stringify({ error: err.message, done: true })}\n\n`);
+        sendEvent({ type: 'error', message: 'The AI gateway encountered an issue. Please try again.' });
+        request.log.error({ err: err.message, sessionId: activeSessionId }, 'SSE stream error');
       } finally {
         reply.raw.end();
       }

@@ -9,8 +9,25 @@ export class TokenCipher {
   private key: Buffer;
 
   constructor(secretKey?: string) {
-    const rawKey = secretKey || process.env.ENCRYPTION_SECRET || process.env.SUPABASE_JWT_SECRET || 'ephemeral_fallback_key_32_bytes_long_min!';
-    this.key = crypto.createHash('sha256').update(rawKey).digest();
+    const rawKey = secretKey || process.env.ENCRYPTION_SECRET || process.env.SUPABASE_JWT_SECRET;
+
+    // SECURITY: In production, refuse to start with a missing encryption key.
+    // Hardcoded fallback keys are strictly prohibited — they make all encrypted
+    // tokens trivially decryptable by anyone who reads this source file.
+    if (!rawKey) {
+      if (process.env.NODE_ENV === 'production') {
+        throw new Error(
+          '[Security Invariant Violation] ENCRYPTION_SECRET is required in production. ' +
+          'Set it to a cryptographically random 32+ character string. ' +
+          'Hardcoded or empty fallback keys are forbidden.'
+        );
+      }
+      // Dev/test: use a clearly labelled ephemeral key (never the same as prod)
+      console.warn('[TokenCipher] WARNING: No ENCRYPTION_SECRET set. Using dev-only ephemeral key. NEVER deploy this way.');
+    }
+
+    const effectiveKey = rawKey || `dev_ephemeral_${Date.now()}_not_for_production`;
+    this.key = crypto.createHash('sha256').update(effectiveKey).digest();
   }
 
   encrypt(plaintext: string): string {

@@ -2,7 +2,8 @@ import React, { useEffect, useState, useRef } from 'react';
 import './About.css';
 import dp from '../assets/dp.jpg';
 import { FiDownload, FiMapPin } from 'react-icons/fi';
-import { client, urlFor } from '../sanity';
+import { urlFor } from '../sanity';
+import { useSanityQuery } from '../hooks/useSanityQuery';
 import { useStory } from '../contexts/StoryContext';
 import DecryptedText from './DecryptedText';
 import Typography from './motion/Typography';
@@ -22,7 +23,7 @@ const defaultStats = [
 ];
 
 const About = () => {
-  const [aboutData, setAboutData] = useState(null);
+  const { data: aboutData } = useSanityQuery('*[_type == "about"][0]');
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('about');
 
@@ -30,13 +31,6 @@ const About = () => {
   const imageWrapperRef = useRef(null);
   const textColRef = useRef(null);
   const statsRef = useRef(null);
-
-  useEffect(() => {
-    const query = '*[_type == "about"][0]';
-    client.fetch(query).then((data) => {
-      if (data) setAboutData(data);
-    }).catch(console.error);
-  }, []);
 
   const displayData = {
     location: aboutData?.location || "Kerala, India · Open to Remote & Relocation",

@@ -17,6 +17,7 @@ import { VisitorSessionService } from '../conversations/visitorSessionService.js
 import { CognitiveOrchestrator } from '../cognitive-core/orchestrator.js';
 import { AgentWorkerRegistry, AgentToolExecutor, AgentToolAdapterRegistry } from '../cognitive-core/agents.js';
 import { WindowsLocalHardwareBridge } from '../hardware/windowsBridge.js';
+import { fastifyTracingPlugin, tracer, telemetryBuffer } from '../observability/tracing.js';
 import { healthRoutes } from '../api/routes/health.routes.js';
 import { publicRoutes } from '../api/routes/public.routes.js';
 import { ownerRoutes } from '../api/routes/owner.routes.js';
@@ -29,6 +30,9 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
     connectionTimeout: 10000,
     requestTimeout: 15000
   });
+
+  // 0. OpenTelemetry Distributed Tracing
+  await app.register(fastifyTracingPlugin);
 
   // 1. Helmet security headers
   await app.register(helmet, {
@@ -98,11 +102,14 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   const providerGateway = new ProviderGateway(appConfig);
   const approvalService = new DurableApprovalService(appConfig, dbAdapter);
   const visitorSessionService = new VisitorSessionService(appConfig, dbAdapter);
+  // Single shared AgentWorkerRegistry — passed to both toolExecutor and orchestrator
+  // Previously a second registry was silently created inside CognitiveOrchestrator's constructor,
+  // causing the two to diverge. Now one canonical registry is injected everywhere.
   const agentWorkerRegistry = new AgentWorkerRegistry();
   const hardwareBridge = new WindowsLocalHardwareBridge({ enabled: false });
   const adapterRegistry = new AgentToolAdapterRegistry({ dbAdapter, hardwareGateway: hardwareBridge });
   const toolExecutor = new AgentToolExecutor(agentWorkerRegistry, approvalService, dbAdapter, adapterRegistry);
-  const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway, toolExecutor);
+  const orchestrator = new CognitiveOrchestrator(dbAdapter.getMemoryRepository(), providerGateway, toolExecutor, agentWorkerRegistry);
 
   // Attach services to app instance for testing and route injection
   (app as any).approvalService = approvalService;
@@ -110,6 +117,8 @@ export async function buildApp(appConfig: AppConfig): Promise<FastifyInstance> {
   (app as any).visitorSessionService = visitorSessionService;
   (app as any).toolExecutor = toolExecutor;
   (app as any).hardwareBridge = hardwareBridge;
+  (app as any).tracer = tracer;
+  (app as any).telemetryBuffer = telemetryBuffer;
 
   // 14-Minute Keep-Alive Cron to keep Supabase PostgreSQL connection pool alive
   const keepAlive = new SupabaseKeepAliveService(dbAdapter, 14);

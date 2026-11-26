@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import './Skills.css';
 import {
   FiMonitor, FiSettings, FiPenTool, FiZap, FiCamera,
-  FiCpu, FiLayers, FiTerminal, FiServer, FiX
+  FiCpu, FiLayers, FiTerminal, FiServer, FiX,
+  FiShield, FiCompass, FiActivity
 } from 'react-icons/fi';
-import { client } from '../sanity';
+import { useSanityQuery } from '../hooks/useSanityQuery';
 import { useStory } from '../contexts/StoryContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -22,6 +23,9 @@ const iconMap = {
   FiLayers: FiLayers,
   FiTerminal: FiTerminal,
   FiServer: FiServer,
+  FiShield: FiShield,
+  FiCompass: FiCompass,
+  FiActivity: FiActivity,
 };
 
 // Canonical fallback data
@@ -57,26 +61,100 @@ const skillCategories = [
     ],
   },
   {
-    title: 'AI & Automation',
+    title: 'AI & Cognitive Systems',
     iconName: 'FiCpu',
-    color: '#a855f7',
+    color: '#8b5cf6',
     order: 3,
     skills: [
-      { name: 'Python Automation', level: 92 },
-      { name: 'AI-Assisted Development', level: 90 },
-      { name: 'AI Agents', level: 82 },
-      { name: 'AI API Integration', level: 85 },
-      { name: 'Workflow Automation', level: 88 },
-      { name: 'Web Scraping', level: 86 },
-      { name: 'YOLOv8', level: 75 },
-      { name: 'Prompt Engineering', level: 82 },
+      { name: 'Artificial Intelligence', level: 94 },
+      { name: 'Artificial General Intelligence (AGI)', level: 88 },
+      { name: 'Multimodal Foundation Models', level: 92 },
+      { name: 'Vision-Language-Action (VLA) Models', level: 85 },
+      { name: 'Agentic AI', level: 95 },
+      { name: 'Multi-Agent Systems', level: 94 },
+      { name: 'Cognitive Architecture', level: 96 },
+      { name: 'World Models', level: 86 },
+      { name: 'Neural Networks', level: 90 },
+      { name: 'Spiking Neural Networks (SNNs)', level: 82 },
+      { name: 'Natural Language Processing (NLP)', level: 90 },
+      { name: 'Natural Language UI', level: 92 },
+      { name: 'Reinforcement Learning', level: 85 },
+      { name: 'Transfer Learning', level: 88 },
+      { name: 'Computer Vision', level: 89 },
+      { name: 'Predictive Modeling', level: 88 },
+      { name: 'Recursive Self-Improvement', level: 86 },
+      { name: 'AI Alignment & Guardrails', level: 92 },
+    ],
+  },
+  {
+    title: 'Computing & Neuromorphic Hardware',
+    iconName: 'FiActivity',
+    color: '#06b6d4',
+    order: 4,
+    skills: [
+      { name: 'Neuromorphic Computing', level: 85 },
+      { name: 'Neuromorphic Processors', level: 82 },
+      { name: 'Artificial Neurons', level: 86 },
+      { name: 'Synaptic Plasticity', level: 84 },
+      { name: 'In-Memory Computing', level: 80 },
+      { name: 'Memristors', level: 78 },
+      { name: 'High-Performance Computing (HPC)', level: 85 },
+      { name: 'Mainframe Architecture', level: 76 },
+      { name: 'Distributed Computing', level: 88 },
+      { name: 'Edge AI', level: 92 },
+      { name: 'Low-Latency Streaming Inference', level: 94 },
+      { name: 'Memory Architecture', level: 86 },
+      { name: 'Data Schematics', level: 90 },
+      { name: 'Data Denoising', level: 88 },
+      { name: 'Quantum Computing', level: 75 },
+    ],
+  },
+  {
+    title: 'Robotics & Control Systems',
+    iconName: 'FiCompass',
+    color: '#10b981',
+    order: 5,
+    skills: [
+      { name: 'Embodied AI', level: 88 },
+      { name: 'Physical AI', level: 86 },
+      { name: 'Advanced Robotics', level: 85 },
+      { name: 'Humanoid Robotics', level: 82 },
+      { name: 'Swarm Robotics', level: 84 },
+      { name: 'Biomimetic Actuators', level: 80 },
+      { name: 'Soft Robotics', level: 78 },
+      { name: 'Closed-Loop Control Systems', level: 90 },
+      { name: 'Kinematic Modeling', level: 88 },
+      { name: 'Sensor Fusion', level: 92 },
+      { name: 'Dynamic Vision Sensors (Event Cameras)', level: 84 },
+      { name: 'LiDAR & SLAM (Simultaneous Localization & Mapping)', level: 86 },
+      { name: 'Spatial Computing', level: 85 },
+      { name: 'Digital Twins', level: 88 },
+      { name: 'Autonomous Navigation', level: 86 },
+      { name: 'Haptic Feedback Systems', level: 80 },
+      { name: 'Human-Machine Interfaces (HMI)', level: 90 },
+      { name: 'Brain-Computer Interfaces (BCI)', level: 82 },
+      { name: 'Neuroelectric Interfacing', level: 80 },
+    ],
+  },
+  {
+    title: 'Security, Networking & Protocols',
+    iconName: 'FiShield',
+    color: '#f43f5e',
+    order: 6,
+    skills: [
+      { name: 'Communication Protocols', level: 92 },
+      { name: 'Safety Protocols', level: 90 },
+      { name: 'Cryptanalysis', level: 86 },
+      { name: 'Code Decryption', level: 85 },
+      { name: 'Cybersecurity & Sandboxing', level: 94 },
+      { name: 'Zero-Trust Architecture', level: 92 },
     ],
   },
   {
     title: 'Electronics & IoT',
     iconName: 'FiZap',
-    color: '#10b981',
-    order: 4,
+    color: '#34d399',
+    order: 7,
     skills: [
       { name: 'Arduino', level: 92 },
       { name: 'ESP32', level: 90 },
@@ -94,7 +172,7 @@ const skillCategories = [
     title: 'ERP & Engineering Systems',
     iconName: 'FiLayers',
     color: '#3b82f6',
-    order: 5,
+    order: 8,
     skills: [
       { name: 'Odoo ERP', level: 88 },
       { name: 'Odoo Customization', level: 85 },
@@ -108,7 +186,7 @@ const skillCategories = [
     title: 'UI/UX & Design',
     iconName: 'FiPenTool',
     color: '#f59e0b',
-    order: 6,
+    order: 9,
     skills: [
       { name: 'Figma', level: 92 },
       { name: 'UI/UX Design', level: 88 },
@@ -122,8 +200,8 @@ const skillCategories = [
   {
     title: 'Photography & Media',
     iconName: 'FiCamera',
-    color: '#f43f5e',
-    order: 7,
+    color: '#ec4899',
+    order: 10,
     skills: [
       { name: 'Photography', level: 96 },
       { name: 'Event Photography', level: 92 },
@@ -141,8 +219,8 @@ const skillCategories = [
   {
     title: 'Tools & Workflow',
     iconName: 'FiTerminal',
-    color: '#ec4899',
-    order: 8,
+    color: '#a855f7',
+    order: 11,
     skills: [
       { name: 'Google Antigravity', level: 90 },
       { name: 'opencode CLI', level: 80 },
@@ -834,7 +912,7 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
               fontFamily="'Fira Code', monospace"
               style={{ pointerEvents: 'none' }}
             >
-              8 DOMAINS
+              {segCount} DOMAINS
             </text>
 
             <text
@@ -847,7 +925,7 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
               letterSpacing="0.06em"
               style={{ pointerEvents: 'none' }}
             >
-              61 CAPABILITIES
+              {categories.reduce((acc, c) => acc + (c.skills?.length || 0), 0)} CAPABILITIES
             </text>
 
             <text
@@ -896,8 +974,11 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
 
 // ─── Main Skills Component ────────────────────────────────
 const Skills = () => {
-  const [categories, setCategories] = useState(skillCategories);
-  const [learningGoals, setLearningGoals] = useState(DEFAULT_LEARNING_GOALS);
+  const { data: fetchedCategories } = useSanityQuery('*[_type == "skillCategory"] | order(order asc)');
+  const { data: fetchedGoals } = useSanityQuery('*[_type == "learningGoal"] | order(order asc)');
+  const categories = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
+  const learningGoals = (fetchedGoals && fetchedGoals.length > 0) ? fetchedGoals : DEFAULT_LEARNING_GOALS;
+
   const [activeIndex, setActiveIndex] = useState(null);
   const [panelVisible, setPanelVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -906,22 +987,6 @@ const Skills = () => {
 
   const { getStoryForSection, openStory } = useStory();
   const hasStory = !!getStoryForSection('skills');
-
-  useEffect(() => {
-    // Fetch skill categories
-    client.fetch('*[_type == "skillCategory"] | order(order asc)')
-      .then(data => {
-        if (data && data.length > 0) setCategories(data);
-      })
-      .catch(() => {});
-
-    // Fetch learning goals (horizon & radar)
-    client.fetch('*[_type == "learningGoal"] | order(order asc)')
-      .then(data => {
-        if (data && data.length > 0) setLearningGoals(data);
-      })
-      .catch(() => {});
-  }, []);
 
   // GSAP entrance
   useEffect(() => {

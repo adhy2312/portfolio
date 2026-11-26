@@ -266,12 +266,16 @@ export class AdhyModel {
         domain: DOMAIN_TYPES.KNOWLEDGE,
         name: 'Core Engineering Domains',
         domains: [
+          { name: 'AI & Cognitive Systems (AGI, VLA, Multi-Agent, World Models, SNNs, RL, Alignment)', level: 'Autonomous Architect', active: true },
+          { name: 'Computing & Neuromorphic Hardware (Memristors, In-Memory Computing, HPC, Edge AI)', level: 'Hardware Systems Architect', active: true },
+          { name: 'Robotics & Control Systems (Embodied AI, Sensor Fusion, Closed-Loop, Event Cameras, SLAM, HMI/BCI)', level: 'Physical Systems Engineer', active: true },
+          { name: 'Security, Networking & Protocols (Zero-Trust, Cryptanalysis, Sandboxing, Protocol Safety)', level: 'Active Defense Specialist', active: true },
           { name: 'Signal processing & DSP', level: 'Advanced Undergraduate', active: true },
           { name: 'GNU Radio & Software Defined Radio (SDR)', level: 'Practical Practitioner', active: true },
           { name: 'Embedded systems & STM32 ARM Cortex', level: 'Firmware & Hardware Integration', active: true },
           { name: 'KiCad 8 PCB layout & hardware design', level: 'Functional 2-to-4 layer boards', active: true },
           { name: 'MATLAB, Simulink & Simscape Multibody', level: 'Simulation & Modeling', active: true },
-          { name: 'Full-Stack Web & Agent Systems (React, Vite, Node, AI bridges)', level: 'Production Portfolio', active: true }
+          { name: 'Full-Stack Web & Agent Systems (React, Fastify, Node, AI bridges)', level: 'Production Portfolio', active: true }
         ],
         classification: CLASSIFICATION_TYPES.FACT,
         confidence: 0.95,
