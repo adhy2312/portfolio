@@ -799,7 +799,20 @@ const MiniAdhy = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedMsg, setPinnedMsg] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [spotifyLive, setSpotifyLive] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('np_last_track') || 'null'); }
+    catch { return null; }
+  });
   const recognitionRef = useRef(null);
+
+  // Real-time Spotify <-> Mini-Adhy sync
+  useEffect(() => {
+    const onSpotifyUpdate = (e) => {
+      if (e?.detail) setSpotifyLive(e.detail);
+    };
+    window.addEventListener('spotify-track-update', onSpotifyUpdate);
+    return () => window.removeEventListener('spotify-track-update', onSpotifyUpdate);
+  }, []);
 
   // Persist last 20 messages across page reloads
   useEffect(() => {
@@ -1586,6 +1599,18 @@ const MiniAdhy = () => {
                 </button>
                 <button type="button" className="ma-menu-item" onClick={() => { sendMessage('@jarvis give me full system status'); setShowMenu(false); }}>
                   <FiCpu size={13} /> <span>@jarvis System Status</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => {
+                  if (spotifyLive?.authError) {
+                    setMessages(prev => [...prev, { role: 'bot', text: '⚠️ Spotify `SPOTIFY_REFRESH_TOKEN` in Vercel is revoked (`invalid_grant`). Regenerate the refresh token in Spotify OAuth and update it in Vercel Env Vars to restore live track sync.' }]);
+                  } else if (spotifyLive?.title) {
+                    setMessages(prev => [...prev, { role: 'bot', text: `🎵 ${spotifyLive.isPlaying ? 'Now Playing on Spotify:' : 'Last Played on Spotify:'} **"${spotifyLive.title}"** by ${spotifyLive.artist}` }]);
+                  } else {
+                    sendMessage('What is Adhithya listening to on Spotify?');
+                  }
+                  setShowMenu(false);
+                }}>
+                  <FiRadio size={13} /> <span>Spotify Now Playing</span>
                 </button>
                 <div className="ma-menu-divider" />
                 <button type="button" className="ma-menu-item" onClick={() => { handleExportTranscript(); setShowMenu(false); }}>

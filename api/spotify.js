@@ -4,9 +4,9 @@ export default async function handler(req, res) {
   res.setHeader('Pragma', 'no-cache');
   res.setHeader('Expires', '0');
 
-  const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID || process.env.REACT_APP_SPOTIFY_CLIENT_ID;
-  const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET || process.env.REACT_APP_SPOTIFY_CLIENT_SECRET;
-  const REFRESH_TOKEN = process.env.SPOTIFY_REFRESH_TOKEN || process.env.REACT_APP_SPOTIFY_REFRESH_TOKEN;
+  const CLIENT_ID = (process.env.SPOTIFY_CLIENT_ID || process.env.REACT_APP_SPOTIFY_CLIENT_ID || '').trim();
+  const CLIENT_SECRET = (process.env.SPOTIFY_CLIENT_SECRET || process.env.REACT_APP_SPOTIFY_CLIENT_SECRET || '').trim();
+  const REFRESH_TOKEN = (process.env.SPOTIFY_REFRESH_TOKEN || process.env.REACT_APP_SPOTIFY_REFRESH_TOKEN || '').trim();
 
   if (!CLIENT_ID || !CLIENT_SECRET || !REFRESH_TOKEN) {
     return res.status(500).json({ error: 'Spotify API secrets are missing.', isPlaying: false });
@@ -55,7 +55,13 @@ export default async function handler(req, res) {
     
     if (!tokenRes.ok) {
       const errBody = await tokenRes.text();
-      return res.status(tokenRes.status).json({ error: 'Spotify token refresh failed', details: errBody, isPlaying: false });
+      const tokenRevoked = errBody.includes('invalid_grant') || errBody.includes('revoked');
+      return res.status(tokenRes.status).json({
+        error: 'Spotify token refresh failed',
+        tokenRevoked,
+        details: errBody,
+        isPlaying: false
+      });
     }
 
     const { access_token } = await tokenRes.json();

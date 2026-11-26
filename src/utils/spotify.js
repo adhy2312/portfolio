@@ -7,11 +7,18 @@ export const getNowPlaying = async () => {
       headers: { 'Cache-Control': 'no-cache' },
       signal: controller ? controller.signal : undefined,
     });
-    if (res && res.ok) {
+    if (res) {
       const contentType = res.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
         const data = await res.json();
-        if (data && data.title) return data;
+        if (res.ok && data && data.title) return data;
+        if (!res.ok && data?.error) {
+          return {
+            isPlaying: false,
+            authError: Boolean(data.tokenRevoked || res.status === 400 || res.status === 401),
+            errorReason: data.details || data.error
+          };
+        }
       }
     }
   } catch (error) {

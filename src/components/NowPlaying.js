@@ -52,6 +52,7 @@ const NowPlaying = () => {
     }
   });
   const [imgError, setImgError]     = useState(false);
+  const [authError, setAuthError]   = useState(false);
   const [minimized, setMinimized]   = useState(
     () => localStorage.getItem(LS_KEY) === 'true'
   );
@@ -90,8 +91,14 @@ const NowPlaying = () => {
     try {
       const data = await getNowPlaying();
       if (data && data.title) {
+        setAuthError(false);
         setTrack(data);
         localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        window.dispatchEvent(new CustomEvent('spotify-track-update', { detail: data }));
+        ns.emit('SPOTIFY_UPDATE', data);
+      } else if (data?.authError) {
+        setAuthError(true);
+        window.dispatchEvent(new CustomEvent('spotify-track-update', { detail: data }));
       }
     } catch {
       // Keep existing track on error
@@ -323,10 +330,13 @@ const NowPlaying = () => {
           <div className="np-widget np-widget--brutalist">
             {/* 1. Header: Neo-Brutalist Status Tag + External Link + Minimize Button */}
             <div className="np-header">
-              <div className={`np-status-tag ${currentTrack.isPlaying ? 'np-status-tag--live' : ''}`}>
+              <div
+                className={`np-status-tag ${currentTrack.isPlaying ? 'np-status-tag--live' : ''}`}
+                title={authError ? 'Spotify refresh token expired/revoked — update SPOTIFY_REFRESH_TOKEN in Vercel' : undefined}
+              >
                 <span className={`np-status-dot ${currentTrack.isPlaying ? 'np-status-dot--live' : ''}`} />
                 <span className="np-status-text">
-                  {currentTrack.isPlaying ? 'ON AIR // SPOTIFY' : 'PAUSED // SPOTIFY'}
+                  {currentTrack.isPlaying ? 'ON AIR // SPOTIFY' : authError ? 'CACHED // SPOTIFY' : 'PAUSED // SPOTIFY'}
                 </span>
               </div>
 
