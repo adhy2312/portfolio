@@ -48,7 +48,7 @@ import {
   executeRAGRetrieval 
 } from '../core/ai/GeminiEmbeddingEngine';
 import { AgentOrb } from './AgentOrb';
-import { DefenseMeshTab, ApprovalsTab, FindingsTab } from './AgentPortal';
+import { DefenseMeshTab, ApprovalsTab, FindingsTab } from './AgentPortal/index';
 import './AgentPortal.css';
 
 const TARGET_EMAIL = 'adhithyamohan2312@gmail.com';
