@@ -103,15 +103,7 @@ const Hero = () => {
       }
     }, heroRef);
 
-    const particles = useMemo(() => Array.from({ length: 20 }, () => ({
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    dur: `${5 + Math.random() * 6}s`,
-    delay: `${Math.random() * 3}s`,
-    size: `${10 + Math.random() * 14}px`,
-  })), []);
-
-  return () => {
+    return () => {
       ctx.revert();
       if (handleMouseMove) el?.removeEventListener('mousemove', handleMouseMove);
       if (handleMouseLeave) el?.removeEventListener('mouseleave', handleMouseLeave);
@@ -211,15 +203,7 @@ const Hero = () => {
               const nameStr = displayData.name;
               const words = nameStr.split(" ");
               return words.map((word, wordIdx) => {
-                const particles = useMemo(() => Array.from({ length: 20 }, () => ({
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    dur: `${5 + Math.random() * 6}s`,
-    delay: `${Math.random() * 3}s`,
-    size: `${10 + Math.random() * 14}px`,
-  })), []);
-
-  return (
+                return (
                   <span key={wordIdx} className="hero-name-word">
                     {word.split("").map((char, charIdx) => (
                       <span
