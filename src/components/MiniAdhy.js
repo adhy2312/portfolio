@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu, FiRadio, FiMaximize2, FiMinimize2, FiSearch, FiDownload, FiRefreshCw, FiZap, FiX, FiMic, FiMicOff, FiBookmark } from 'react-icons/fi';
+import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu, FiRadio, FiMaximize2, FiMinimize2, FiSearch, FiDownload, FiRefreshCw, FiZap, FiX, FiMic, FiMicOff, FiBookmark, FiMoreVertical, FiActivity, FiSliders, FiFileText } from 'react-icons/fi';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
@@ -794,6 +794,7 @@ const MiniAdhy = () => {
   const [showEmotionHUD, setShowEmotionHUD] = useState(false);
   const [showLiveMode, setShowLiveMode] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedMsg, setPinnedMsg] = useState(null);
@@ -880,17 +881,6 @@ const MiniAdhy = () => {
       URL.revokeObjectURL(url);
     } catch {}
   }, [messages]);
-
-  const QUICK_COMMANDS = [
-    { label: '⚡ Recruiter Brief', action: 'brief' },
-    { label: '🎛 Compare Modes', action: 'modes' },
-    { label: '@ultron audit & optimize', value: '@ultron audit and optimize the system' },
-    { label: '@jarvis status', value: '@jarvis give me full system status' },
-    { label: '@friday security', value: '@friday run a perimeter security check' },
-    { label: '@jocasta 120Hz', value: '@jocasta check render pipeline & FPS' },
-    { label: '/export', action: 'export' },
-    { label: '/fullscreen', action: 'fullscreen' },
-  ];
 
   const FOLLOW_UP_CHIPS = [
     'Summon @ultron to optimize & audit',
@@ -1512,139 +1502,100 @@ const MiniAdhy = () => {
       {/* ── Chat window ── */}
       {open && (
         <div className={`ma-window ${open ? 'ma-window--open' : ''} ${isFullscreen ? 'ma-window--fullscreen' : ''}`}>
-          {/* Header */}
-          <div className={`ma-header ${ownerState.active ? 'ma-header--owner' : ''}`}>
-            <BotAvatar />
-            <div className="ma-header-info">
-              <div className="ma-header-top-row">
+          {/* Clean Modern Header */}
+          <div className={`ma-header ma-header--clean ${ownerState.active ? 'ma-header--owner' : ''}`}>
+            <div className="ma-header-brand">
+              <BotAvatar />
+              <div className="ma-header-title-group">
                 <span className="ma-header-name">Mini-Adhy</span>
-                <span className="ma-consciousness-badge" title="Live Synaptic Tier">
-                  <span className="ma-synapse-dot" />
-                  {consciousness?.consciousnessLabel ? consciousness.consciousnessLabel.replace('_', ' ') : 'CONSCIOUS'}
+                <span className="ma-header-status">
+                  <span className={`ma-status-dot ${loading ? 'ma-status-dot--thinking' : ''}`} />
+                  {ownerState.active ? 'Owner Mode' : loading ? 'Thinking…' : 'Online'}
                 </span>
-                <button
-                  type="button"
-                  className={`ma-emotion-badge ${showEmotionHUD ? 'ma-emotion-badge--active' : ''}`}
-                  onClick={() => setShowEmotionHUD(prev => !prev)}
-                  title={`Live Emotion Engine: ${emotionState.primaryLabel} | Composite: ${emotionState.compositeLabel} (Click to toggle PAD Telemetry)`}
-                  aria-label="Toggle Emotion Engine HUD"
-                >
-                  <span className="ma-emotion-dot" />
-                  <span className="ma-emotion-label">{emotionState.primaryLabel}</span>
-                </button>
-              </div>
-              <div className="ma-telemetry-row">
-                <span className="ma-telemetry-val">Ψ {((consciousness?.consciousnessScore?.current || 75) * 1.0).toFixed(0)}% SYNAPSE</span>
-                <span className="ma-telemetry-sep">•</span>
-                <span className="ma-telemetry-locus">PAD: V{emotionState.valence > 0 ? '+' : ''}{emotionState.valence} A{emotionState.arousal} D{emotionState.dominance}</span>
               </div>
             </div>
-            {ownerState.active && <span className="ma-owner-badge">⚙ Owner</span>}
 
-            {/* Action Buttons Cluster */}
             <div className="ma-header-actions">
-              {/* Mini-Adhy Live Mode (Spoken Voice + Real-Time Camera Vision) */}
               <button
                 type="button"
-                className="ma-live-mode-toggle"
-                onClick={() => setShowLiveMode(true)}
-                title="Mini-Adhy LIVE MODE: Real-time spoken conversation & visual perception"
-                aria-label="Launch Live Mode"
+                className={`ma-icon-btn ${showMenu ? 'ma-icon-btn--active' : ''}`}
+                onClick={() => setShowMenu(m => !m)}
+                title="More options"
+                aria-label="More options"
               >
-                <FiRadio size={13} className="ma-live-pulse-icon" />
-                <span className="ma-live-mode-label">LIVE</span>
+                <FiMoreVertical size={14} />
               </button>
 
-              {/* Clear Conversation Memory */}
-              <button
-                type="button"
-                className="ma-clear-btn"
-                onClick={handleClearConversation}
-                title="Purge session memory & reset"
-                aria-label="Clear session memory"
-              >
-                <FiTrash2 size={13} />
-              </button>
-
-              {/* Neural Voice Synthesis Toggle */}
-              <button
-                type="button"
-                className={`ma-voice-toggle ${voiceEnabled ? 'ma-voice-toggle--active' : ''} ${isSpeaking ? 'ma-voice-toggle--speaking' : ''}`}
-                onClick={toggleVoice}
-                title={voiceEnabled ? "Neural Voice: ACTIVE (Click to Mute)" : "Neural Voice: MUTED (Click to Activate)"}
-                aria-label="Toggle Neural Voice"
-              >
-                {voiceEnabled ? (
-                  <>
-                    <span className="ma-voice-bars">
-                      <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
-                      <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
-                      <span className={`ma-vbar ${isSpeaking ? 'active' : ''}`} />
-                    </span>
-                    <span className="ma-voice-label">{isSpeaking ? 'SPEAKING' : 'VOICE'}</span>
-                  </>
-                ) : (
-                  <>
-                    <FiVolumeX size={13} />
-                    <span className="ma-voice-label">MUTE</span>
-                  </>
-                )}
-              </button>
-
-              {/* In-Chat Search Toggle */}
-              <button
-                type="button"
-                className={`ma-icon-btn ${showSearch ? 'ma-icon-btn--active' : ''}`}
-                onClick={() => { setShowSearch(s => !s); setSearchQuery(''); }}
-                title="Search conversation"
-                aria-label="Search conversation"
-              >
-                <FiSearch size={13} />
-              </button>
-
-              {/* Export Transcript (.md) */}
-              <button
-                type="button"
-                className="ma-icon-btn"
-                onClick={handleExportTranscript}
-                title="Export transcript as Markdown"
-                aria-label="Export transcript"
-              >
-                <FiDownload size={13} />
-              </button>
-
-              {/* Fullscreen Studio Mode Toggle */}
               <button
                 type="button"
                 className={`ma-icon-btn ${isFullscreen ? 'ma-icon-btn--active' : ''}`}
                 onClick={() => setIsFullscreen(f => !f)}
-                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Studio Mode"}
+                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
                 aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
               >
                 {isFullscreen ? <FiMinimize2 size={13} /> : <FiMaximize2 size={13} />}
               </button>
 
-              {/* Prominent, Dedicated Close Button */}
               <button
                 type="button"
-                className="ma-close-btn"
+                className="ma-icon-btn ma-icon-btn--close"
                 onClick={() => {
                   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
                     window.speechSynthesis.cancel();
                   }
                   setIsSpeaking(false);
                   setSpeakingMsgIndex(null);
+                  setShowMenu(false);
                   setOpen(false);
                 }}
                 aria-label="Close Mini-Adhy chat"
-                title="Close Mini-Adhy (Esc)"
+                title="Close (Esc)"
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" width="16" height="16">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
+                <FiX size={14} />
               </button>
             </div>
+
+            {/* 3-Dot Overflow Menu */}
+            {showMenu && (
+              <div className="ma-menu-dropdown" onMouseLeave={() => setShowMenu(false)}>
+                <button type="button" className="ma-menu-item" onClick={() => { setShowLiveMode(true); setShowMenu(false); }}>
+                  <FiRadio size={13} /> <span>LIVE Mode (Voice + Vision)</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { setShowEmotionHUD(p => !p); setShowMenu(false); }}>
+                  <FiActivity size={13} /> <span>{showEmotionHUD ? 'Hide' : 'Show'} Emotion & PAD HUD</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { toggleVoice(); setShowMenu(false); }}>
+                  {voiceEnabled ? <FiVolume2 size={13} /> : <FiVolumeX size={13} />}
+                  <span>Voice Output: {voiceEnabled ? 'ON' : 'OFF'}</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { setShowSearch(s => !s); setSearchQuery(''); setShowMenu(false); }}>
+                  <FiSearch size={13} /> <span>Search Chat</span>
+                </button>
+                <div className="ma-menu-divider" />
+                <button type="button" className="ma-menu-item" onClick={() => { handleGenerateBrief(); setShowMenu(false); }}>
+                  <FiFileText size={13} /> <span>60s Recruiter Brief</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => {
+                  setMessages(prev => [...prev, { role: 'bot', text: 'Switch site experience modes anytime to preview tailored layouts:', showModesCard: true }]);
+                  setShowMenu(false);
+                }}>
+                  <FiSliders size={13} /> <span>Compare Site Modes</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { sendMessage('@ultron audit and optimize the system'); setShowMenu(false); }}>
+                  <FiZap size={13} /> <span>@ultron Audit & Optimize</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { sendMessage('@jarvis give me full system status'); setShowMenu(false); }}>
+                  <FiCpu size={13} /> <span>@jarvis System Status</span>
+                </button>
+                <div className="ma-menu-divider" />
+                <button type="button" className="ma-menu-item" onClick={() => { handleExportTranscript(); setShowMenu(false); }}>
+                  <FiDownload size={13} /> <span>Export Transcript (.md)</span>
+                </button>
+                <button type="button" className="ma-menu-item ma-menu-item--danger" onClick={() => { handleClearConversation(); setShowMenu(false); }}>
+                  <FiTrash2 size={13} /> <span>Clear Conversation</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Biomimetic Brain Oscilloscope with Live Emotional Frequency */}
@@ -1904,32 +1855,6 @@ const MiniAdhy = () => {
             )}
 
             <div ref={bottomRef} />
-          </div>
-
-          {/* Quick Agent & Slash Command Strip */}
-          <div className="ma-quick-strip">
-            {QUICK_COMMANDS.map(cmd => (
-              <button
-                key={cmd.label}
-                type="button"
-                className="ma-quick-pill"
-                onClick={() => {
-                  if (cmd.action === 'export') handleExportTranscript();
-                  else if (cmd.action === 'fullscreen') setIsFullscreen(f => !f);
-                  else if (cmd.action === 'brief') handleGenerateBrief();
-                  else if (cmd.action === 'modes') {
-                    setMessages(prev => [...prev, {
-                      role: 'bot',
-                      text: 'Switch site experience modes anytime to preview tailored layouts:',
-                      showModesCard: true
-                    }]);
-                  }
-                  else if (cmd.value) sendMessage(cmd.value);
-                }}
-              >
-                {cmd.label}
-              </button>
-            ))}
           </div>
 
           {/* Input */}

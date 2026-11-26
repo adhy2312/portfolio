@@ -572,6 +572,7 @@ class MiniAdhyAgentOrchestrator {
    * Dispatches a typed task through the AgentMessageBus with delivery guarantees
    */
   async dispatchDistributedTask(fromAgent, toAgent, taskPayload = {}, options = {}) {
+    this._ensureAgents();
     if (!this.messageBus) {
       throw new Error('AgentMessageBus is not initialized on orchestrator.');
     }

@@ -50,7 +50,7 @@ export default async function handler(req, res) {
       body: new URLSearchParams({
         grant_type: 'refresh_token',
         refresh_token: REFRESH_TOKEN,
-      }),
+      }).toString(),
     });
     
     if (!tokenRes.ok) {
