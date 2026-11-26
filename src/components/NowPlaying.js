@@ -42,7 +42,11 @@ const NowPlaying = () => {
   const [track, setTrack] = useState(() => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
-      return cached ? JSON.parse(cached) : INITIAL_TRACK;
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed && parsed.title) return parsed;
+      }
+      return INITIAL_TRACK;
     } catch {
       return INITIAL_TRACK;
     }
@@ -82,6 +86,7 @@ const NowPlaying = () => {
   };
 
   const fetchTrack = async () => {
+    if (typeof document !== 'undefined' && document.hidden) return;
     try {
       const data = await getNowPlaying();
       if (data && data.title) {

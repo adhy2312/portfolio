@@ -1,5 +1,5 @@
 // src/components/Hero.js — V200
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import './Hero.css';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { client, urlFor } from '../sanity';
@@ -36,7 +36,7 @@ const Hero = () => {
 
       // Greeting slide-in + Typewriter
       if (greetingRef.current) {
-        const fullText = greetingRef.current.getAttribute('data-text');
+        const fullText = greetingRef.current.getAttribute('data-text') || '';
         gsap.set(greetingRef.current, { opacity: 1, y: 0, text: "" });
         tl.to(greetingRef.current, {
           text: {
@@ -103,7 +103,15 @@ const Hero = () => {
       }
     }, heroRef);
 
-    return () => {
+    const particles = useMemo(() => Array.from({ length: 20 }, () => ({
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    dur: `${5 + Math.random() * 6}s`,
+    delay: `${Math.random() * 3}s`,
+    size: `${10 + Math.random() * 14}px`,
+  })), []);
+
+  return () => {
       ctx.revert();
       if (handleMouseMove) el?.removeEventListener('mousemove', handleMouseMove);
       if (handleMouseLeave) el?.removeEventListener('mouseleave', handleMouseLeave);
@@ -137,6 +145,14 @@ const Hero = () => {
 
 
 
+  const particles = useMemo(() => Array.from({ length: 20 }, () => ({
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    dur: `${5 + Math.random() * 6}s`,
+    delay: `${Math.random() * 3}s`,
+    size: `${10 + Math.random() * 14}px`,
+  })), []);
+
   return (
     <section
       id="hero"
@@ -160,13 +176,13 @@ const Hero = () => {
 
       {/* V200: Richer CSS Particles — mix of brutalist shapes */}
       <div className="hero-css-particles">
-        {Array.from({ length: 20 }).map((_, i) => (
+        {particles.map((p, i) => (
           <div key={i} className="css-star" style={{
-            '--top': `${Math.random() * 100}%`,
-            '--left': `${Math.random() * 100}%`,
-            '--dur': `${5 + Math.random() * 6}s`,
-            '--delay': `${Math.random() * 3}s`,
-            '--size': `${10 + Math.random() * 14}px`,
+            '--top': p.top,
+            '--left': p.left,
+            '--dur': p.dur,
+            '--delay': p.delay,
+            '--size': p.size,
           }} />
         ))}
       </div>
@@ -195,7 +211,15 @@ const Hero = () => {
               const nameStr = displayData.name;
               const words = nameStr.split(" ");
               return words.map((word, wordIdx) => {
-                return (
+                const particles = useMemo(() => Array.from({ length: 20 }, () => ({
+    top: `${Math.random() * 100}%`,
+    left: `${Math.random() * 100}%`,
+    dur: `${5 + Math.random() * 6}s`,
+    delay: `${Math.random() * 3}s`,
+    size: `${10 + Math.random() * 14}px`,
+  })), []);
+
+  return (
                   <span key={wordIdx} className="hero-name-word">
                     {word.split("").map((char, charIdx) => (
                       <span

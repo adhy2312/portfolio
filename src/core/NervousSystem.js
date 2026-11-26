@@ -63,7 +63,7 @@ class NervousSystem {
       if (typeof window !== 'undefined' && window.localStorage) {
         const stored = localStorage.getItem('ns_visits');
         if (stored) {
-          totalVisits = parseInt(stored, 10);
+          totalVisits = parseInt(stored, 10) || 0;
           isReturningVisitor = totalVisits > 0;
         }
         localStorage.setItem('ns_visits', (totalVisits + 1).toString());
@@ -263,7 +263,8 @@ class NervousSystem {
   }
 
   setSection(section, emotion) {
-    this.state.activeSection      = section;
+    this.state.activeSection      = section || 'Hero';
+    if (!emotion) return;
     this.state.sectionAtmosphere  = emotion.atmosphere;
     this.state.sectionWarmth      = emotion.warmth;
     this.state.sectionGlow        = emotion.glow;

@@ -23,6 +23,7 @@ import AgentPortal from './components/AgentPortal';
 import pipeline from './core/WorkerPipeline';
 import { useHybridMotion } from './hooks/useHybridMotion';
 import { initSpecularSheen } from './utils/specularSheen';
+import { readEchoes } from './utils/digitalEchoesStore';
 // Initialize core pipelining & smooth scrolling
 pipeline.init();
 
@@ -97,8 +98,35 @@ if (typeof window !== 'undefined') {
       // into browser cache before React Suspense hits it.
       dynamicImports[target]();
     }
+    if (target === 'Photography' || target === 'GamesHub') {
+      import('./components/GamesHub');
+      import('./components/SnakeGame');
+    } else if (target === 'Contact' || target === 'Hero') {
+      import('./components/GravityWell');
+    }
   });
 }
+
+const SANITY_COMPONENT_MAP = {
+  about: About,
+  skillCategory: Skills,
+  statsBento: StatsBento,
+  neuralMap: NeuralMap,
+  experience: Experience,
+  projectListSection: MyWorks,
+  timelineSection: Timeline,
+  photographySection: Photography,
+  achievementsSection: Achievements,
+  trustedBySection: TrustedBy,
+  testimonialsSection: Testimonials,
+  digitalScarsSection: DigitalScars,
+  callToActionSection: CallToAction,
+  contact: Contact,
+  contactSection: Contact,
+  stackVisualizerSection: StackVisualizer,
+  kineticMarqueeSection: KineticMarquee,
+  footerSection: Footer
+};
 
 function LazySection({ name, className = "section-container", visualOptions = {}, children }) {
   const ref = React.useRef();
@@ -165,11 +193,9 @@ function AppContent() {
     fetchPage();
   }, []);
   const [dreamState, setDreamState] = useState(() => {
-    try {
-      const memory = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-      const last = memory.lastInteraction || Date.now();
-      return (Date.now() - last > 3600000); // 1 hour offline
-    } catch { return false; }
+    const memory = readEchoes();
+    const last = memory.lastInteraction || Date.now();
+    return (Date.now() - last > 3600000); // 1 hour offline
   });
   const [activeEgg, setActiveEgg] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -213,34 +239,6 @@ function AppContent() {
     // launch-ttt event (from logo 3-click easter egg)
     const handleLaunch = () => setActiveGame('gameshub');
     window.addEventListener('launch-ttt', handleLaunch);
-
-    // V20 Quantum Prefetching Listener
-    const handlePrefetch = (e) => {
-      const { target } = e.detail || {};
-      if (!target) return;
-      
-      const injectPrefetch = (componentName) => {
-        if (!document.querySelector(`link[data-prefetch="${componentName}"]`)) {
-          const link = document.createElement('link');
-          link.rel = 'prefetch';
-          link.as = 'script';
-          link.href = `/${componentName.toLowerCase()}.chunk.js`; // Simulated chunk name for V20 
-          link.setAttribute('data-prefetch', componentName);
-          document.head.appendChild(link);
-        }
-      };
-
-      // Prefetch specific top-level components
-      injectPrefetch(target);
-      
-      if (target === 'Photography' || target === 'GamesHub') {
-        import('./components/GamesHub');
-        import('./components/SnakeGame');
-      } else if (target === 'Contact' || target === 'Hero') {
-        import('./components/GravityWell');
-      }
-    };
-    window.addEventListener('ml-prefetch', handlePrefetch);
 
     // ML Persona-driven Behavioral Adaptation
     const handlePersona = (e) => {
@@ -370,6 +368,8 @@ function AppContent() {
       clearTimeout(widgetTimer);
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('launch-ttt', handleLaunch);
+      window.removeEventListener('persona-shift', handlePersona);
+      window.removeEventListener('ai-command', handleAiCommand);
       window.removeEventListener('keydown', keydownHandler);
       window.removeEventListener('keydown', adhyHandler);
       window.removeEventListener('trigger-egg', eggHandler);
@@ -420,28 +420,8 @@ function AppContent() {
         {/* Lazy load sections ONLY when near viewport to save LCP/FCP */}
         {pageData && pageData.sections && pageData.sections.length > 0 ? (
           pageData.sections.map((section, index) => {
-            const COMPONENT_MAP = {
-              hero: Hero,
-              about: About,
-              skillCategory: Skills,
-              statsBento: StatsBento,
-              neuralMap: NeuralMap,
-              experience: Experience,
-              projectListSection: MyWorks,
-              timelineSection: Timeline,
-              photographySection: Photography,
-              achievementsSection: Achievements,
-              trustedBySection: TrustedBy,
-              testimonialsSection: Testimonials,
-              digitalScarsSection: DigitalScars,
-              callToActionSection: CallToAction,
-              contact: Contact,
-              contactSection: Contact,
-              stackVisualizerSection: StackVisualizer,
-              kineticMarqueeSection: KineticMarquee,
-              footerSection: Footer
-            };
-            const Component = COMPONENT_MAP[section._type];
+            if (section._type === 'hero') return null;
+            const Component = SANITY_COMPONENT_MAP[section._type];
             if (!Component) return null;
             return (
               <LazySection 

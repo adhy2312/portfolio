@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import ns from '../core/NervousSystem';
+import { readEchoes, writeEchoes, createDefaultEchoes, subscribeEchoes } from '../utils/digitalEchoesStore';
 
 const ConsciousnessContext = createContext();
 
@@ -46,17 +47,11 @@ export const ConsciousnessProvider = ({ children }) => {
   const consciousnessRef   = useRef(TIER.SUBCONSCIOUS); // Live tier without re-renders
   const hyperTimer         = useRef(null);              // HYPER is always transient
 
-  // ─── 1. DIGITAL ECHO SYSTEM ───
-  const [digitalEchoes, setDigitalEchoes] = useState(() => {
+  // ─── 1. DIGITAL ECHO SYSTEM (Ref-backed to avoid re-renders on scroll/telemetry) ───
+  const digitalEchoesRef = useRef(null);
+  if (digitalEchoesRef.current === null) {
     try {
-      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {
-        sectionHeatmap: {},
-        markovMatrix: {},
-        totalVisits: 0,
-        lastDecayTime: Date.now(),
-        persona: 'Wanderer',
-        memoryImportance: 1.0
-      };
+      const stored = readEchoes();
       const daysSince = (Date.now() - stored.lastDecayTime) / (1000 * 60 * 60 * 24);
       if (daysSince >= 1) {
         Object.keys(stored.sectionHeatmap).forEach(key => {
@@ -66,11 +61,42 @@ export const ConsciousnessProvider = ({ children }) => {
         if (stored.memoryImportance < 0.2) stored.persona = 'Fragmented Echo';
         stored.lastDecayTime = Date.now();
       }
-      return stored;
+      digitalEchoesRef.current = stored;
     } catch {
-      return { sectionHeatmap: {}, markovMatrix: {}, totalVisits: 0, lastDecayTime: Date.now(), persona: 'Wanderer', memoryImportance: 1.0 };
+      digitalEchoesRef.current = createDefaultEchoes();
     }
-  });
+  }
+
+  // Debounced localStorage persistence + flush on tab hide/unload
+  const flushTimerRef = useRef(null);
+  const flushEchoes = useCallback(() => {
+    if (flushTimerRef.current) {
+      clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+    writeEchoes(digitalEchoesRef.current);
+  }, []);
+
+  const scheduleEchoesFlush = useCallback(() => {
+    if (flushTimerRef.current) return;
+    flushTimerRef.current = setTimeout(() => {
+      flushTimerRef.current = null;
+      writeEchoes(digitalEchoesRef.current);
+    }, 1500);
+  }, []);
+
+  useEffect(() => {
+    const unsubStorage = subscribeEchoes((latest) => {
+      digitalEchoesRef.current = latest;
+    });
+    const handlePageHide = () => flushEchoes();
+    window.addEventListener('pagehide', handlePageHide);
+    return () => {
+      unsubStorage();
+      window.removeEventListener('pagehide', handlePageHide);
+      flushEchoes();
+    };
+  }, [flushEchoes]);
 
   const [ambientThought, setAmbientThought] = useState(null);
   const [weatherData,    setWeatherData]    = useState(() => {
@@ -101,33 +127,32 @@ export const ConsciousnessProvider = ({ children }) => {
   const previousSectionRef  = useRef(null);
 
   const logInteraction = useCallback((type, detail = {}) => {
-    setDigitalEchoes(prev => {
-      const history = prev.interactionHistory || [];
-      const newEntry = { type, detail, timestamp: Date.now(), timeStr: new Date().toISOString() };
-      const updatedHistory = [newEntry, ...history].slice(0, 30);
-      
-      // ML: Behavioral Persona Classification
-      let newPersona = prev.persona || 'Wanderer';
-      const sections = updatedHistory.filter(h => h.type === 'section_enter').map(h => h.detail.section);
-      
-      const devScore = sections.filter(s => s === 'Skills').length + (type === 'dev_console' ? 5 : 0);
-      const recruiterScore = sections.filter(s => s === 'Hero' || s === 'Projects').length + (type === 'resume_download' ? 5 : 0);
-      const creatorScore = sections.filter(s => s === 'Photography' || s === 'About').length;
-      
-      if (devScore > recruiterScore && devScore > creatorScore && devScore > 2) newPersona = 'Developer';
-      else if (recruiterScore > devScore && recruiterScore > creatorScore && recruiterScore > 2) newPersona = 'Recruiter';
-      else if (creatorScore > devScore && creatorScore > recruiterScore && creatorScore > 2) newPersona = 'Creator';
+    const prev = digitalEchoesRef.current;
+    const history = prev.interactionHistory || [];
+    const newEntry = { type, detail, timestamp: Date.now(), timeStr: new Date().toISOString() };
+    const updatedHistory = [newEntry, ...history].slice(0, 30);
 
-      const updated = { ...prev, interactionHistory: updatedHistory, persona: newPersona };
-      try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(updated)); } catch {}
-      
-      if (prev.persona !== newPersona) {
-        window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: newPersona } }));
-      }
-      
-      return updated;
-    });
-  }, []);
+    // ML: Behavioral Persona Classification
+    let newPersona = prev.persona || 'Wanderer';
+    const sections = updatedHistory.filter(h => h.type === 'section_enter').map(h => h.detail.section);
+
+    const devScore = sections.filter(s => s === 'Skills').length + (type === 'dev_console' ? 5 : 0);
+    const recruiterScore = sections.filter(s => s === 'Hero' || s === 'Projects').length + (type === 'resume_download' ? 5 : 0);
+    const creatorScore = sections.filter(s => s === 'Photography' || s === 'About').length;
+
+    if (devScore > recruiterScore && devScore > creatorScore && devScore > 2) newPersona = 'Developer';
+    else if (recruiterScore > devScore && recruiterScore > creatorScore && recruiterScore > 2) newPersona = 'Recruiter';
+    else if (creatorScore > devScore && creatorScore > recruiterScore && creatorScore > 2) newPersona = 'Creator';
+
+    const prevPersona = prev.persona;
+    prev.interactionHistory = updatedHistory;
+    prev.persona = newPersona;
+    scheduleEchoesFlush();
+
+    if (prevPersona !== newPersona) {
+      window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: newPersona } }));
+    }
+  }, [scheduleEchoesFlush]);
 
   useEffect(() => {
     const handleLogInteraction = (e) => {
@@ -141,11 +166,12 @@ export const ConsciousnessProvider = ({ children }) => {
   // ─── CONSCIOUSNESS TIER CALCULATOR ───
   // Called in RAF-loop interval — no React state, zero renders
   const recalculateConsciousness = useCallback(() => {
-    const visits       = digitalEchoes.totalVisits || 0;
+    const echoes       = digitalEchoesRef.current;
+    const visits       = echoes.totalVisits || 0;
     const interactions = sessionInteractions.current;
     const sessionMins  = (Date.now() - sessionStartTime.current) / 60000;
     const adr          = adrenalineRef.current;
-    const hasHeavyMemory = Object.values(digitalEchoes.sectionHeatmap).some(v => v > 60);
+    const hasHeavyMemory = Object.values(echoes?.sectionHeatmap || {}).some(v => v > 60);
 
     let score = 0;
     // Basis from visit history (max 30 pts)
@@ -177,7 +203,7 @@ export const ConsciousnessProvider = ({ children }) => {
       setConsciousnessLabel(newTier);                 // One render on tier change only
       neuralEventBus.emit('CONSCIOUSNESS_SHIFT', { tier: newTier, score });
     }
-  }, [digitalEchoes]);
+  }, []);
 
   // ─── TRIGGER HYPER-CONSCIOUS (transient peak state, max 20s) ───
   const triggerHyperConscious = useCallback((reason = '') => {
@@ -292,18 +318,15 @@ export const ConsciousnessProvider = ({ children }) => {
     setTemporalAge(days);
 
     // Increment visit count
-    setDigitalEchoes(prev => {
-      const updated = { ...prev, totalVisits: (prev.totalVisits || 0) + 1 };
-      
-      const history = updated.interactionHistory || [];
-      const newEntry = { type: 'visit', detail: { count: updated.totalVisits }, timestamp: Date.now(), timeStr: new Date().toISOString() };
-      updated.interactionHistory = [newEntry, ...history].slice(0, 30);
+    const echoes = digitalEchoesRef.current;
+    echoes.totalVisits = (echoes.totalVisits || 0) + 1;
+    const history = echoes.interactionHistory || [];
+    const newEntry = { type: 'visit', detail: { count: echoes.totalVisits }, timestamp: Date.now(), timeStr: new Date().toISOString() };
+    echoes.interactionHistory = [newEntry, ...history].slice(0, 30);
 
-      ns.state.isReturningVisitor = updated.totalVisits > 1;
-      ns.state.totalVisits        = updated.totalVisits;
-      try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(updated)); } catch {}
-      return updated;
-    });
+    ns.state.isReturningVisitor = echoes.totalVisits > 1;
+    ns.state.totalVisits        = echoes.totalVisits;
+    scheduleEchoesFlush();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -312,70 +335,64 @@ export const ConsciousnessProvider = ({ children }) => {
     const startTime = Date.now();
     logInteraction('section_enter', { section: activeSection });
 
-    // Markov Model: Build transition matrix
+    // Markov Model: Build transition matrix (ref-backed, zero re-render)
     if (previousSectionRef.current && previousSectionRef.current !== activeSection) {
-      setDigitalEchoes(prev => {
-        const matrix = prev.markovMatrix || {};
-        const fromSec = previousSectionRef.current;
-        if (!matrix[fromSec]) matrix[fromSec] = {};
-        matrix[fromSec][activeSection] = (matrix[fromSec][activeSection] || 0) + 1;
-        
-        // ─── EVOLUTION: Normalize to prevent static lock-in (Forget ancient history) ───
-        const totalConnections = Object.values(matrix[fromSec]).reduce((a,b) => a+b, 0);
-        if (totalConnections > 50) { // Keep history tight to adapt quickly
-          for (const key in matrix[fromSec]) {
-            matrix[fromSec][key] = Math.max(1, Math.floor(matrix[fromSec][key] * 0.5));
-          }
+      const echoes = digitalEchoesRef.current;
+      const matrix = echoes.markovMatrix || (echoes.markovMatrix = {});
+      const fromSec = previousSectionRef.current;
+      if (!matrix[fromSec]) matrix[fromSec] = {};
+      matrix[fromSec][activeSection] = (matrix[fromSec][activeSection] || 0) + 1;
+
+      // ─── EVOLUTION: Normalize to prevent static lock-in (Forget ancient history) ───
+      const totalConnections = Object.values(matrix[fromSec]).reduce((a,b) => a+b, 0);
+      if (totalConnections > 50) { // Keep history tight to adapt quickly
+        for (const key in matrix[fromSec]) {
+          matrix[fromSec][key] = Math.max(1, Math.floor(matrix[fromSec][key] * 0.5));
         }
-        
-        // Predict NEXT move based on new activeSection
-        const nextTransitions = matrix[activeSection];
-        if (nextTransitions) {
-          const total = Object.values(nextTransitions).reduce((a,b) => a+b, 0);
-          const likelyNext = Object.entries(nextTransitions)
-            .filter(([_, count]) => (count / total) > 0.6)
-            .sort((a,b) => b[1] - a[1])[0];
-          
-          if (likelyNext) {
-            const target = likelyNext[0];
-            window.dispatchEvent(new CustomEvent('ml-prefetch', { detail: { target } }));
-            logInteraction('ml_predict', { target, confidence: (likelyNext[1]/total).toFixed(2) });
-          }
+      }
+
+      // Predict NEXT move based on new activeSection
+      const nextTransitions = matrix[activeSection];
+      if (nextTransitions) {
+        const total = Object.values(nextTransitions).reduce((a,b) => a+b, 0);
+        const likelyNext = total > 0 ? Object.entries(nextTransitions)
+          .filter(([_, count]) => (count / total) > 0.6)
+          .sort((a,b) => b[1] - a[1])[0] : null;
+
+        if (likelyNext) {
+          const target = likelyNext[0];
+          window.dispatchEvent(new CustomEvent('ml-prefetch', { detail: { target } }));
+          logInteraction('ml_predict', { target, confidence: (likelyNext[1]/total).toFixed(2) });
         }
-        
-        const newState = { ...prev, markovMatrix: matrix };
-        try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(newState)); } catch {}
-        return newState;
-      });
+      }
+
+      scheduleEchoesFlush();
     }
-    
+
     previousSectionRef.current = activeSection;
     return () => {
       const timeSpent = (Date.now() - startTime) / 1000;
-      setDigitalEchoes(prev => {
-        const newHeatmap = { ...prev.sectionHeatmap };
-        newHeatmap[activeSection] = (newHeatmap[activeSection] || 0) + timeSpent;
-        
-        // ─── EVOLUTION: Decay Heatmap (Continuous Adaptation) ───
-        for (const key in newHeatmap) {
-          if (key !== activeSection) newHeatmap[key] *= 0.99; // Forget old sections
-        }
+      const echoes = digitalEchoesRef.current;
+      const newHeatmap = echoes.sectionHeatmap || (echoes.sectionHeatmap = {});
+      newHeatmap[activeSection] = (newHeatmap[activeSection] || 0) + timeSpent;
 
-        // ─── ML AMPLIFICATION: Persona Classification ───
-        const devScore = (newHeatmap['Skills'] || 0) + (newHeatmap['Projects'] || 0) + (newHeatmap['Timeline'] || 0);
-        const creatorScore = (newHeatmap['Photography'] || 0) + (newHeatmap['About'] || 0) + (newHeatmap['Hero'] || 0);
-        
-        // If they heavily bias towards technical sections vs creative sections
-        if (devScore > 15 && devScore > creatorScore * 1.5) {
-          window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Developer', confidence: (devScore / (devScore+creatorScore)).toFixed(2) } }));
-        } else if (creatorScore > 15 && creatorScore > devScore * 1.5) {
-          window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Creator', confidence: (creatorScore / (devScore+creatorScore)).toFixed(2) } }));
-        }
+      // ─── EVOLUTION: Decay Heatmap (Continuous Adaptation) ───
+      for (const key in newHeatmap) {
+        if (key !== activeSection) newHeatmap[key] *= 0.99; // Forget old sections
+      }
 
-        const newState = { ...prev, sectionHeatmap: newHeatmap };
-        try { localStorage.setItem('adhy_digital_echoes', JSON.stringify(newState)); } catch {}
-        return newState;
-      });
+      // ─── ML AMPLIFICATION: Persona Classification ───
+      const devScore = (newHeatmap['Skills'] || 0) + (newHeatmap['Projects'] || 0) + (newHeatmap['Timeline'] || 0);
+      const creatorScore = (newHeatmap['Photography'] || 0) + (newHeatmap['About'] || 0) + (newHeatmap['Hero'] || 0);
+
+      // If they heavily bias towards technical sections vs creative sections
+      if (devScore > 15 && devScore > creatorScore * 1.5) {
+        window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Developer', confidence: (devScore / (devScore+creatorScore)).toFixed(2) } }));
+      } else if (creatorScore > 15 && creatorScore > devScore * 1.5) {
+        window.dispatchEvent(new CustomEvent('persona-shift', { detail: { persona: 'Creator', confidence: (creatorScore / (devScore+creatorScore)).toFixed(2) } }));
+      }
+
+      scheduleEchoesFlush();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeSection]);
@@ -395,7 +412,7 @@ export const ConsciousnessProvider = ({ children }) => {
     }
 
     // Past emotional gravity
-    const pastTimeSpent = digitalEchoes.sectionHeatmap[activeSection] || 0;
+    const pastTimeSpent = digitalEchoesRef.current?.sectionHeatmap?.[activeSection] || 0;
     if (pastTimeSpent > 120) {
       neuralEventBus.emit('VISITOR_DEEP_READING');
       neuralEventBus.emit('ATMOSPHERE_CALM');
@@ -572,32 +589,44 @@ export const ConsciousnessProvider = ({ children }) => {
   }, []);
 
   // ─── GHOST PRESENCE: warmth signal for returning visitors ───
-  const isReturningVisitor = digitalEchoes.totalVisits > 1;
+  const isReturningVisitor = (digitalEchoesRef.current?.totalVisits || 0) > 1;
+
+  const contextValue = useMemo(() => ({
+    activeSection,
+    setActiveSection,
+    idleState,
+    idleTimeRef,
+    fpsRef,
+    isSystemThinkingRef,
+    digitalEchoes: digitalEchoesRef.current,
+    ambientThought,
+    triggerThought,
+    temporalAge,
+    weatherData,
+    // Consciousness Tier
+    consciousnessLabel,
+    consciousnessRef,
+    consciousnessScore,
+    triggerHyperConscious,
+    // Section emotional temperature
+    sectionEmotion: SECTION_EMOTIONS[activeSection] || SECTION_EMOTIONS.Hero,
+    // Ghost presence
+    isReturningVisitor,
+    TIER,
+  }), [
+    activeSection,
+    idleState,
+    ambientThought,
+    triggerThought,
+    temporalAge,
+    weatherData,
+    consciousnessLabel,
+    triggerHyperConscious,
+    isReturningVisitor,
+  ]);
 
   return (
-    <ConsciousnessContext.Provider value={{
-      activeSection,
-      setActiveSection,
-      idleState,
-      idleTimeRef,
-      fpsRef,
-      isSystemThinkingRef,
-      digitalEchoes,
-      ambientThought,
-      triggerThought,
-      temporalAge,
-      weatherData,
-      // Consciousness Tier
-      consciousnessLabel,
-      consciousnessRef,
-      consciousnessScore,
-      triggerHyperConscious,
-      // Section emotional temperature
-      sectionEmotion: SECTION_EMOTIONS[activeSection] || SECTION_EMOTIONS.Hero,
-      // Ghost presence
-      isReturningVisitor,
-      TIER,
-    }}>
+    <ConsciousnessContext.Provider value={contextValue}>
       {children}
     </ConsciousnessContext.Provider>
   );

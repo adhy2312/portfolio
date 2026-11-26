@@ -9,6 +9,7 @@
 import ns from './NervousSystem';
 import { neuralEventBus } from '../utils/NeuralEventBus';
 import { agentOrchestrator } from './agents/AgentOrchestrator';
+import { readEchoes, updateEchoes } from '../utils/digitalEchoesStore';
 
 // Web Audio API Ambient Sound Synthesizer (Zero asset dependency)
 const playSynthesizerTone = (preset = 'chime') => {
@@ -234,7 +235,7 @@ export const MINI_ADHY_SKILLS = [
     command: 'PROFILE',
     execute: () => {
       try {
-        const echoes = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+        const echoes = readEchoes();
         return `Visitor Archetype: [${echoes.persona || 'Curious Wanderer'}] | Visits: ${echoes.totalVisits || 1}`;
       } catch (e) {
         return `Visitor Archetype: Analytical Explorer`;
@@ -287,10 +288,10 @@ export const MINI_ADHY_SKILLS = [
     command: 'MEMORY',
     execute: (note) => {
       try {
-        const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-        stored.memories = stored.memories || [];
-        if (note) stored.memories.push(note);
-        localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+        updateEchoes(prev => ({
+          ...prev,
+          memories: note ? [...(prev.memories || []), note] : (prev.memories || [])
+        }));
         return `Archived memory: "${note}"`;
       } catch (e) {
         return `Memory write fault`;

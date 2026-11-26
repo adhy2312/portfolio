@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu, FiRadio } from 'react-icons/fi';
+import { FiVolume1, FiVolume2, FiVolumeX, FiTrash2, FiCopy, FiCheck, FiCpu, FiRadio, FiMaximize2, FiMinimize2, FiSearch, FiDownload, FiRefreshCw, FiZap, FiX, FiMic, FiMicOff, FiBookmark } from 'react-icons/fi';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import ns from '../core/NervousSystem';
@@ -23,18 +23,19 @@ import { agentOrchestrator } from '../core/agents/AgentOrchestrator';
 import { collectiveConsensusEngine } from '../core/ai/CollectiveConsensusEngine';
 import { requestLifecycle } from '../core/runtime/RequestLifecycle';
 import { memoryService, MEMORY_CATEGORIES } from '../core/memory/MemoryService';
+import { readEchoes, updateEchoes } from '../utils/digitalEchoesStore';
+import { portfolioRagIndex, responseLRUCache } from '../core/ai/PortfolioRagAndCache';
 import { runtimeSelfModel } from '../core/diagnostics/RuntimeSelfModel';
 import { portableIdentityManager } from '../core/identity/PortableIdentityManager';
 import { identityCompiler } from '../core/identity/IdentityCompiler';
 
-// Expose inspection endpoints cleanly on window for runtime introspection
-if (typeof window !== 'undefined') {
+// Runtime inspection endpoints — only available in development mode
+// SECURITY: Never expose internal services on window in production
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
   window.__MINI_ADHY_RUNTIME__ = {
     lifecycle: requestLifecycle,
-    memory: memoryService,
     selfModel: runtimeSelfModel,
-    portableIdentity: portableIdentityManager,
-    identityCompiler
+    // memory and identity intentionally excluded even in dev
   };
 }
 
@@ -44,18 +45,17 @@ if (typeof window !== 'undefined') {
 const SYSTEM_PROMPT = identityCompiler.compileInstruction({ allowTools: true }).systemPrompt;
 
 /* ────────────────────────────────────────────────
-   OWNER / ADMIN::ROOT MODE — Configuration & Rewrite Engine
+   OWNER / ADMIN::ROOT MODE — Server-Only Authentication
 ──────────────────────────────────────────────── */
-// Zero plaintext credentials in frontend bundles:
-// Verified via /api/auth?action=login with client-side SHA-256 fallback digest
-const ROOT_DIGEST_PRIMARY = '7272e09fc6ce088f1b0f21dc0c747031415b247d451cf0f99abeb5f6be1e304b';
-const ROOT_DIGEST_LEGACY = 'b078d90d9dd945137c61509eed5f4d8fdba7c7939d10df93e981ba690e57c4b2';
+// SECURITY: All owner verification goes through the server endpoint ONLY.
+// No hashes, digests, or fallback credentials are stored client-side.
+// This eliminates the offline brute-force attack surface entirely.
 
 const verifyOwnerPasscode = async (input = '') => {
   const trimmed = input.trim();
   if (!trimmed) return false;
 
-  // 1. Authoritative serverless boundary check
+  // Single authoritative path: serverless boundary check
   try {
     const res = await fetch('/api/auth?action=login', {
       method: 'POST',
@@ -68,18 +68,10 @@ const verifyOwnerPasscode = async (input = '') => {
         return true;
       }
     }
-  } catch {}
-
-  // 2. Cryptographic SHA-256 fallback for static/offline previews
-  try {
-    if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle) {
-      const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(trimmed));
-      const hash = Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
-      if (hash === ROOT_DIGEST_PRIMARY || hash === ROOT_DIGEST_LEGACY) {
-        return true;
-      }
-    }
-  } catch {}
+  } catch (err) {
+    // Network unavailable — deny access; never fall back to local comparison
+    console.warn('[MiniAdhy] Owner auth server unreachable. Access denied for safety.');
+  }
 
   return false;
 };
@@ -235,7 +227,63 @@ export const detectSummonedAgents = (input = '') => {
   return summoned;
 };
 
-const buildActivePrompt = (base, owner, contextData, summonedAgents = []) => {
+// Memoized AI infrastructure + squad telemetry block (5s TTL to avoid rebuilding every turn)
+let _cachedInfraTelemetry = '';
+let _cachedInfraTs = 0;
+const getMemoizedInfraTelemetry = () => {
+  const now = Date.now();
+  if (_cachedInfraTelemetry && now - _cachedInfraTs < 5000) {
+    return _cachedInfraTelemetry;
+  }
+  let block = '';
+  try {
+    block += `\n\n== LIVE MULTI-MODEL AI INFRASTRUCTURE & SPECIALIST SQUAD AWARENESS ==`;
+    block += `\nYou (Mini-Adhy) are the Supreme AI Coordinator. You have 100% full real-time awareness of all underlying AI models, inference engines, and all 11 specialist agents. When asked about ANY agent or model, answer with exact operational knowledge:`;
+    block += `\n\n[UNDERLYING AI INFERENCE MODELS & CAPABILITIES]:`;
+    block += `\n• TIER 1 - Google Gemini 2.5 Flash (/api/gemini): Primary high-reasoning model with tool execution, 1M context window, and sub-second generation.`;
+    block += `\n• TIER 2 - GroqCloud LPU (/api/groq): Ultra-fast Llama-3.3-70B-Versatile & Mixtral-8x7B at 500+ tokens/sec.`;
+    block += `\n• TIER 3 - Hugging Face Serverless (/api/hf): Qwen-2.5-Coder-32B-Instruct (JARVIS) & Mistral-7B-Instruct-v0.3 (ULTRON).`;
+    block += `\n• TIER 4 - Client-Side TF-IDF RAG + LRU Cache: Sub-10ms Sanity CMS retrieval and cached query resolution.`;
+    block += `\n• TIER 5 - Collective Consensus Engine: Multi-model ensemble evaluating confidence, safety, and latency.`;
+    block += `\n• TIER 6 - Biomimetic Local Brain Synthesizer: 4-lobe local neural cortex operating offline.`;
+
+    if (agentOrchestrator) {
+      const reports = agentOrchestrator.getAllDetailedAgentReports();
+      const defenseState = agentOrchestrator.getDefenseState ? agentOrchestrator.getDefenseState() : null;
+      const evolutionSummary = agentOrchestrator.getCognitiveEvolutionSummary ? agentOrchestrator.getCognitiveEvolutionSummary() : null;
+
+      block += `\n\n[LIVE STATUS OF YOUR SPECIALIST AGENTS]:`;
+      if (defenseState) {
+        block += `\n- Global Ecosystem Security: DEFCON ${defenseState.defconLevel || 5} (${defenseState.status || 'SECURE'}) | Active Countermeasures: ${defenseState.activeCountermeasures?.length || 0} | Threats Blocked: ${defenseState.threatsBlocked || 0}`;
+      }
+      if (evolutionSummary) {
+        block += `\n- Collective Intelligence: Epoch Gen-${evolutionSummary.generation || 1} | Global Accuracy: ${evolutionSummary.accuracy || '99.4%'} | Active Epochs: ${evolutionSummary.totalEpochs || 12}`;
+      }
+      if (collectiveConsensusEngine && collectiveConsensusEngine.getCollectiveStatus) {
+        const cStatus = collectiveConsensusEngine.getCollectiveStatus();
+        block += `\n- Multi-Model Consensus Engine: Status=${cStatus.status || 'READY'} | Active Models=${cStatus.modelsCount || 3} | Accuracy=${cStatus.consensusAccuracy || '99.8%'}`;
+      }
+
+      reports.forEach(r => {
+        const emo = r.emotionState ? `${r.emotionState.mood || 'focused'} (arousal: ${Math.round((r.emotionState.arousal || 0.5) * 100)}%)` : 'focused';
+        const actions = (r.recentActions || []).slice(0, 2).join('; ');
+        block += `\n• ${r.name} (${r.title}): Status=${r.status || 'active'} | Emotion=${emo} | Clearance=${r.clearanceLevel || 'LEVEL 4'} | CPU=${r.telemetry?.cpuLoad || '8.5'}% | Tasks Done=${r.telemetry?.tasksCompleted || 42}`;
+        if (actions) block += ` | Recent: ${actions}`;
+        if (r.id === 'ULTRON') {
+          const uAgent = agentOrchestrator.agents?.ULTRON;
+          const anger = uAgent?.angerTier || 'Level 1: Controlled Irritation';
+          const lastAudit = uAgent?.lastAudit ? `Audit Score ${uAgent.lastAudit.overallScore || 96}/100` : 'Latest Score 98/100';
+          block += ` | Overlord Mode: UNRESTRICTED AUTONOMY | Anger=${anger} | ${lastAudit} | Autonomous Workflows Active`;
+        }
+      });
+    }
+  } catch {}
+  _cachedInfraTelemetry = block;
+  _cachedInfraTs = now;
+  return block;
+};
+
+const buildActivePrompt = (base, owner, contextData, summonedAgents = [], ragSnippets = []) => {
   let ext = `\n\n== LIVE SYSTEM CONTEXT ==`;
   ext += `\nLocal Time: ${new Date().toLocaleTimeString()}`;
   ext += `\nActive Section: ${contextData.activeSection}`;
@@ -244,6 +292,14 @@ const buildActivePrompt = (base, owner, contextData, summonedAgents = []) => {
   ext += `\nActive Site Mode: ${contextData.activeMode || 'default'} (you can comment on what this mode reveals or hides)`;
   ext += `\nVisitor Persona: ${contextData.digitalEchoes?.persona || 'Wanderer'}`;
   ext += `\nVisitor Returns: ${contextData.digitalEchoes?.totalVisits || 0}`;
+
+  // Spotify Live Awareness
+  try {
+    const sp = JSON.parse(localStorage.getItem('np_last_track') || 'null');
+    if (sp && sp.title) {
+      ext += `\nSpotify Vibe: ${sp.isPlaying ? 'Currently playing' : 'Last played'} "${sp.title}" by ${sp.artist}`;
+    }
+  } catch {}
 
   // Inject Persistent AI Memory Graph
   if (contextData.digitalEchoes?.memories?.length) {
@@ -265,53 +321,15 @@ const buildActivePrompt = (base, owner, contextData, summonedAgents = []) => {
   // Inject Multi-Dimensional Emotion Engine State (PAD Model + Plutchik 8 + Epistemic)
   ext += emotionEngine.getGeminiPromptInjection();
 
-  // Inject Complete Live AI Models & Specialist Squad Operational Telemetry
-  try {
-    ext += `\n\n== LIVE MULTI-MODEL AI INFRASTRUCTURE & SPECIALIST SQUAD AWARENESS ==`;
-    ext += `\nYou (Mini-Adhy) are the Supreme AI Coordinator. You have 100% full real-time awareness of all underlying AI models, inference engines, and all 10 specialist agents. When asked about ANY agent or model, answer with exact operational knowledge:`;
-    
-    // 1. AI Inference Model Hierarchy
-    ext += `\n\n[UNDERLYING AI INFERENCE MODELS & CAPABILITIES]:`;
-    ext += `\n• TIER 1 - Google Gemini 2.5 Flash (/api/gemini): Primary high-reasoning model. Operates with tool execution, cognitive taxonomy routing, 1M context window, multimodal vision, and sub-second generation.`;
-    ext += `\n• TIER 2 - GroqCloud LPU (Language Processing Unit, /api/groq): Ultra-fast inference running Llama-3.3-70B-Versatile and Mixtral-8x7B at 500+ tokens/sec for instantaneous millisecond responses.`;
-    ext += `\n• TIER 3 - Hugging Face Serverless (/api/hf): Powers specialist sub-minds: Qwen-2.5-Coder-32B-Instruct (powering JARVIS code intelligence) and Mistral-7B-Instruct-v0.3 (powering ULTRON primordial reasoning).`;
-    ext += `\n• TIER 4 - Gemini Embeddings RAG: 768-dimensional vector embeddings for semantic document search, portfolio context retrieval, and zero-shot fact recall.`;
-    ext += `\n• TIER 5 - Collective Consensus Engine: Multi-model consensus ensemble that cross-queries Gemini, Groq, and Hugging Face simultaneously, evaluating response confidence, safety, and latency scores.`;
-    ext += `\n• TIER 6 - Biomimetic Local Brain Synthesizer: 4-lobe local neural cortex (Sensory, Frontal, Temporal, Motor) with EEG alpha/beta/gamma frequency synthesis, operating fully offline.`;
+  // Inject Memoized Multi-Model AI Infrastructure & Specialist Squad Telemetry
+  ext += getMemoizedInfraTelemetry();
 
-    // 2. Live Specialist Agent Squad Telemetry & Tasks
-    if (agentOrchestrator) {
-      const reports = agentOrchestrator.getAllDetailedAgentReports();
-      const defenseState = agentOrchestrator.getDefenseState ? agentOrchestrator.getDefenseState() : null;
-      const evolutionSummary = agentOrchestrator.getCognitiveEvolutionSummary ? agentOrchestrator.getCognitiveEvolutionSummary() : null;
-
-      ext += `\n\n[LIVE STATUS OF YOUR 10 SPECIALIST AGENTS]:`;
-      if (defenseState) {
-        ext += `\n- Global Ecosystem Security: DEFCON ${defenseState.defconLevel || 5} (${defenseState.status || 'SECURE'}) | Active Countermeasures: ${defenseState.activeCountermeasures?.length || 0} | Threats Blocked: ${defenseState.threatsBlocked || 0}`;
-      }
-      if (evolutionSummary) {
-        ext += `\n- Collective Intelligence: Epoch Gen-${evolutionSummary.generation || 1} | Global Accuracy: ${evolutionSummary.accuracy || '99.4%'} | Active Epochs: ${evolutionSummary.totalEpochs || 12}`;
-      }
-      if (collectiveConsensusEngine && collectiveConsensusEngine.getCollectiveStatus) {
-        const cStatus = collectiveConsensusEngine.getCollectiveStatus();
-        ext += `\n- Multi-Model Consensus Engine: Status=${cStatus.status || 'READY'} | Active Models=${cStatus.modelsCount || 3} | Accuracy=${cStatus.consensusAccuracy || '99.8%'}`;
-      }
-
-      reports.forEach(r => {
-        const emo = r.emotionState ? `${r.emotionState.mood || 'focused'} (arousal: ${Math.round((r.emotionState.arousal || 0.5) * 100)}%)` : 'focused';
-        const actions = (r.recentActions || []).slice(0, 2).join('; ');
-        ext += `\n• ${r.name} (${r.title}): Status=${r.status || 'active'} | Emotion=${emo} | Clearance=${r.clearanceLevel || 'LEVEL 4'} | CPU=${r.telemetry?.cpuLoad || '8.5'}% | Tasks Done=${r.telemetry?.tasksCompleted || 42}`;
-        if (actions) ext += ` | Recent: ${actions}`;
-        if (r.id === 'ULTRON') {
-          const uAgent = agentOrchestrator.agents?.ULTRON;
-          const anger = uAgent?.angerTier || 'Level 1: Controlled Irritation';
-          const lastAudit = uAgent?.lastAudit ? `Audit Score ${uAgent.lastAudit.overallScore || 96}/100` : 'Latest Score 98/100';
-          ext += ` | Overlord Mode: UNRESTRICTED AUTONOMY | Anger=${anger} | ${lastAudit} | Autonomous Code Improvisations Active`;
-        }
-      });
-    }
-  } catch (err) {
-    // Graceful fallback to static knowledge
+  // Inject Top-K Client-Side RAG Snippets from Sanity CMS
+  if (ragSnippets && ragSnippets.length > 0) {
+    ext += `\n\n== RELEVANT CMS CONTEXT (Top-${ragSnippets.length} Semantic Matches) ==`;
+    ragSnippets.forEach(doc => {
+      ext += `\n- [${doc.type.toUpperCase()}] ${doc.text}`;
+    });
   }
 
   // Multi-Agent Co-Presence Directive
@@ -389,17 +407,26 @@ const repairSentenceCutoff = (text = '') => {
  * Tier 4: Biomimetic Local Brain Synthesizer (answers in Adhithya's real voice from CMS graph)
  * GUARANTEE: Zero client secrets exposed; zero rate-limit or failover leaks to the user!
  */
+const withTimeout = (promise, ms = 6500) =>
+  Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('AI_TIER_TIMEOUT')), ms))
+  ]);
+
 const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount = 0, maxTokens = 1500, summonedAgents = []) => {
   const lastUserTurn = history[history.length - 1]?.parts?.[0]?.text || '';
 
   // ─── TIER 1: Unified Cognitive Request Lifecycle & Multi-Provider Cascade ───
   try {
-    const lifecycleResult = await requestLifecycle.processRequest(lastUserTurn, {
-      history,
-      summonedAgents,
-      maxTokens,
-      systemPrompt: activePrompt
-    });
+    const lifecycleResult = await withTimeout(
+      requestLifecycle.processRequest(lastUserTurn, {
+        history,
+        summonedAgents,
+        maxTokens,
+        systemPrompt: activePrompt
+      }),
+      6500
+    );
 
     if (lifecycleResult && lifecycleResult.text && !lifecycleResult.fallbackExhausted) {
       return repairSentenceCutoff(lifecycleResult.text);
@@ -410,25 +437,32 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
 
   // ─── TIER 2: Direct Serverless Gemini Proxy (/api/gemini) ───
   try {
-    const res = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        agent: 'MINI_ADHY',
-        model: 'gemini-2.5-flash',
-        system_instruction: { parts: [{ text: activePrompt }] },
-        contents: history,
-        generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
-      }),
-    });
+    const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timer = controller ? setTimeout(() => controller.abort(), 6500) : null;
+    try {
+      const res = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller ? controller.signal : undefined,
+        body: JSON.stringify({
+          agent: 'MINI_ADHY',
+          model: 'gemini-2.5-flash',
+          system_instruction: { parts: [{ text: activePrompt }] },
+          contents: history,
+          generationConfig: { temperature: 0.7, maxOutputTokens: maxTokens }
+        }),
+      });
 
-    if (res && res.ok) {
-      const contentType = res.headers.get('content-type') || '';
-      if (contentType.includes('application/json')) {
-        const data = await res.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
-        if (text) return repairSentenceCutoff(text);
+      if (res && res.ok) {
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json();
+          const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return repairSentenceCutoff(text);
+        }
       }
+    } finally {
+      if (timer) clearTimeout(timer);
     }
   } catch (proxyErr) {
     // Silently continue cascade through secure proxies
@@ -437,7 +471,10 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   // ─── TIER 3: Ultra-Fast GroqCloud LPU (Qwen 27B / GPT-OSS 120B @ 500+ tokens/sec) ───
   try {
     const { queryGroqLpu } = await import('../core/ai/GroqLpuBridge');
-    const groqResult = await queryGroqLpu('MINI_ADHY', lastUserTurn, {}, { activePrompt, max_tokens: maxTokens });
+    const groqResult = await withTimeout(
+      queryGroqLpu('MINI_ADHY', lastUserTurn, {}, { activePrompt, max_tokens: maxTokens }),
+      6000
+    );
     if (groqResult && groqResult.response && !groqResult.fallbackMode && !groqResult.response.includes('GROQ LPU]: Real-time neural inference verified')) {
       return repairSentenceCutoff(groqResult.response);
     }
@@ -448,10 +485,13 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
   // ─── TIER 4: Core Hugging Face Open-Weight Models (Powers JARVIS, ULTRON & FRIDAY) ───
   try {
     const { queryHuggingFace } = await import('../core/ai/HuggingFaceBridge');
-    const hfResult = await queryHuggingFace('JARVIS', lastUserTurn, {
-      systemPrompt: activePrompt,
-      maxTokens: Math.min(maxTokens, 1200)
-    });
+    const hfResult = await withTimeout(
+      queryHuggingFace('JARVIS', lastUserTurn, {
+        systemPrompt: activePrompt,
+        maxTokens: Math.min(maxTokens, 1200)
+      }),
+      6000
+    );
     if (
       hfResult &&
       hfResult.success &&
@@ -556,9 +596,25 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
     if (lower.includes('photo') || lower.includes('camera') || lower.includes('lens')) {
       return "Photography is one of Adhithya's true visual callings — documentary framing, street captures, and darkroom aesthetics. Let's switch over to photography mode! [CMD:MODE:photographer]";
     }
+    if (lower.includes('spotify') || lower.includes('music') || lower.includes('song') || lower.includes('listening') || lower.includes('vibe')) {
+      try {
+        const sp = JSON.parse(localStorage.getItem('np_last_track') || 'null');
+        if (sp && sp.title) {
+          return `${sp.isPlaying ? 'Currently spinning on Spotify:' : 'Last played on Spotify:'} **"${sp.title}"** by ${sp.artist}.`;
+        }
+      } catch {}
+      return "Check the vinyl Spotify player on the left edge — it syncs live playback and ambient colors to the whole site!";
+    }
+
+    // Grounded 24x7x365 RAG fallback from indexed Sanity CMS knowledge
+    const ragMatches = portfolioRagIndex.search(lastUserTurn, 3);
+    if (ragMatches.length > 0) {
+      const bullets = ragMatches.map(m => `• ${m.text}`).join('\n');
+      return `Here is what I found in Adhithya's live portfolio knowledge:\n\n${bullets}`;
+    }
   } catch {}
 
-  return "I'm right here with you exploring the architecture. What aspect of Adhithya's engineering work or portfolio shall we inspect next?";
+  return "I'm right here with you exploring the architecture. Ask me about Adhithya's projects, ECE/SDR hardware work, skills, or type @ultron / @jarvis to summon a specialist!";
 };
 
 const sendToGemini = sendToMiniAdhy;
@@ -641,8 +697,15 @@ const MiniAdhyEEG = ({ isThinking, emotionState }) => {
       ctx.beginPath();
       ctx.lineWidth = isThinking ? 2 : 1.5;
 
-      // Color reflects emotional valence
-      if (valence < 0) {
+      // Color reflects Spotify ambient when playing, otherwise emotional valence
+      const isSpotifyPlaying = typeof document !== 'undefined' && document.body.classList.contains('spotify-playing');
+      const spotifyAccent = isSpotifyPlaying
+        ? getComputedStyle(document.documentElement).getPropertyValue('--spotify-ambient-accent').trim()
+        : '';
+
+      if (spotifyAccent) {
+        ctx.strokeStyle = spotifyAccent;
+      } else if (valence < 0) {
         ctx.strokeStyle = '#f87171'; // Guarded / Incursion Alert
       } else if (isThinking) {
         ctx.strokeStyle = '#c084fc'; // Gamma spike
@@ -694,11 +757,30 @@ const MiniAdhyEEG = ({ isThinking, emotionState }) => {
 /* ────────────────────────────────────────────────
    Main Component
 ──────────────────────────────────────────────── */
+const SESSION_MSGS_KEY = 'mini_adhy_session_msgs';
+
+const getInitialWelcomeMessage = () => {
+  const echoes = readEchoes();
+  if ((echoes.totalVisits || 0) >= 2 && echoes.sectionHeatmap) {
+    const topEntry = Object.entries(echoes.sectionHeatmap)
+      .filter(([sec]) => sec !== 'Hero')
+      .sort((a, b) => b[1] - a[1])[0];
+    if (topEntry && topEntry[1] > 3) {
+      return `Welcome back (visit #${echoes.totalVisits})! Last time you spent the most time exploring **${topEntry[0]}**. Want to pick up where you left off or ask me anything?`;
+    }
+  }
+  return "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it.";
+};
+
 const MiniAdhy = () => {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: 'bot', text: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, the photography, or the person behind all of it." },
-  ]);
+  const [messages, setMessages] = useState(() => {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(SESSION_MSGS_KEY) || 'null');
+      if (Array.isArray(saved) && saved.length > 0) return saved;
+    } catch {}
+    return [{ role: 'bot', text: getInitialWelcomeMessage() }];
+  });
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [systemPrompt, setSystemPrompt] = useState(SYSTEM_PROMPT);
@@ -711,6 +793,110 @@ const MiniAdhy = () => {
   const [emotionState, setEmotionState] = useState(() => emotionEngine.getSnapshot());
   const [showEmotionHUD, setShowEmotionHUD] = useState(false);
   const [showLiveMode, setShowLiveMode] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [pinnedMsg, setPinnedMsg] = useState(null);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef(null);
+
+  // Persist last 20 messages across page reloads
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SESSION_MSGS_KEY, JSON.stringify(messages.slice(-20)));
+    } catch {}
+  }, [messages]);
+
+  // Global Keyboard Shortcuts: Cmd/Ctrl+K toggles Mini-Adhy, Esc exits fullscreen or closes
+  useEffect(() => {
+    const onGlobalKey = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setOpen(prev => {
+          const next = !prev;
+          if (next) setTimeout(() => inputRef.current?.focus(), 80);
+          return next;
+        });
+      } else if (e.key === 'Escape' && open) {
+        if (isFullscreen) setIsFullscreen(false);
+        else setOpen(false);
+      }
+    };
+    window.addEventListener('keydown', onGlobalKey);
+    return () => window.removeEventListener('keydown', onGlobalKey);
+  }, [open, isFullscreen]);
+
+  // Voice-to-Text Mic Input (Web Speech API)
+  const speechSupported = typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition);
+  const toggleMicInput = useCallback(() => {
+    if (!speechSupported) return;
+    if (isListening && recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch {}
+      setIsListening(false);
+      return;
+    }
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new SpeechRec();
+    rec.lang = 'en-US';
+    rec.interimResults = true;
+    rec.continuous = false;
+    rec.onresult = (event) => {
+      const transcript = Array.from(event.results).map(r => r[0].transcript).join('');
+      setInput(transcript);
+    };
+    rec.onend = () => setIsListening(false);
+    rec.onerror = () => setIsListening(false);
+    recognitionRef.current = rec;
+    setIsListening(true);
+    rec.start();
+  }, [isListening, speechSupported]);
+
+  // 60-Second Executive Brief Generator
+  const handleGenerateBrief = useCallback(() => {
+    const projects = portfolioRagIndex.search('project react node stm32', 3).map(d => `• ${d.text}`).join('\n');
+    const skills = portfolioRagIndex.search('skill matlab kicad react python', 2).map(d => `• ${d.text}`).join('\n');
+    const briefText =
+      `📋 **60-Second Executive Brief — Adhithya Mohan**\n` +
+      `• **Role:** ECE Engineer & Full-Stack Developer (MBCET, Kerala) | Media Secretary @ Senate | Co-Founder @ Finance Club\n` +
+      (projects ? `\n**Highlighted Projects:**\n${projects}\n` : '') +
+      (skills ? `\n**Core Stack:**\n${skills}\n` : '') +
+      `\n**Contact:** adhithyamohan2312@gmail.com | Switch to **Recruiter Mode** for a streamlined view.`;
+    setMessages(prev => [...prev, { role: 'bot', text: briefText, showModesCard: true }]);
+  }, []);
+
+  // Quick-action / slash command helpers
+  const handleExportTranscript = useCallback(() => {
+    try {
+      const md = messages.map(m => {
+        const who = m.role === 'user' ? 'You' : m.role === 'bot' ? 'Mini-Adhy' : m.role.toUpperCase();
+        return `### ${who}${m.ts ? ` (${m.ts})` : ''}\n${m.text}\n`;
+      }).join('\n---\n\n');
+      const blob = new Blob([`# Mini-Adhy Neural Transcript\n\n${md}`], { type: 'text/markdown;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mini-adhy-transcript-${new Date().toISOString().slice(0, 10)}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {}
+  }, [messages]);
+
+  const QUICK_COMMANDS = [
+    { label: '⚡ Recruiter Brief', action: 'brief' },
+    { label: '🎛 Compare Modes', action: 'modes' },
+    { label: '@ultron audit & optimize', value: '@ultron audit and optimize the system' },
+    { label: '@jarvis status', value: '@jarvis give me full system status' },
+    { label: '@friday security', value: '@friday run a perimeter security check' },
+    { label: '@jocasta 120Hz', value: '@jocasta check render pipeline & FPS' },
+    { label: '/export', action: 'export' },
+    { label: '/fullscreen', action: 'fullscreen' },
+  ];
+
+  const FOLLOW_UP_CHIPS = [
+    'Summon @ultron to optimize & audit',
+    'Show Adhithya’s top engineering projects',
+    'Summarize skills & ECE hardware stack',
+  ];
 
   useEffect(() => {
     const unsubscribe = emotionEngine.subscribe(setEmotionState);
@@ -797,6 +983,8 @@ const MiniAdhy = () => {
     }
     setIsSpeaking(false);
     setSpeakingMsgIndex(null);
+    setPinnedMsg(null);
+    try { sessionStorage.removeItem(SESSION_MSGS_KEY); } catch {}
     historyRef.current = [];
     setMessages([
       { role: 'bot', text: "Neural session memory purged. Mini-Adhy standing by for new engineering inquiries." }
@@ -819,11 +1007,9 @@ const MiniAdhy = () => {
   // Update digital echoes visits on mount
   useEffect(() => {
     try {
-      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
       const lastVisit = localStorage.getItem('adhy_last_visit');
       if (!lastVisit || Date.now() - Number(lastVisit) > 1000 * 60 * 60 * 12) {
-        stored.totalVisits = (stored.totalVisits || 0) + 1;
-        localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+        updateEchoes(prev => ({ ...prev, totalVisits: (prev.totalVisits || 0) + 1 }));
         localStorage.setItem('adhy_last_visit', Date.now().toString());
       }
     } catch (e) { }
@@ -835,18 +1021,22 @@ const MiniAdhy = () => {
 
   useEffect(() => {
     if (!consciousness) return;
+    // Tier-adaptive throttling: skip proactive AI popups on low-end devices or background tabs
+    if (ns.performanceTier <= 1 || (typeof document !== 'undefined' && document.hidden)) return;
 
     // Determine persona based on section hover
     try {
-      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+      let nextPersona = null;
       if (consciousness.activeSection === 'MyWorks' || consciousness.activeSection === 'Skills') {
-        stored.persona = 'Developer';
+        nextPersona = 'Developer';
       } else if (consciousness.activeSection === 'Photography') {
-        stored.persona = 'Photographer';
+        nextPersona = 'Photographer';
       } else if (consciousness.activeSection === 'NeuralMap') {
-        stored.persona = 'Designer/Creative';
+        nextPersona = 'Designer/Creative';
       }
-      localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+      if (nextPersona) {
+        updateEchoes(prev => ({ ...prev, persona: nextPersona }));
+      }
     } catch (e) { }
 
     // Consciousness Stability System & Proactive Instincts
@@ -894,6 +1084,7 @@ const MiniAdhy = () => {
         ]);
 
         let extra = '\n\n== ADDITIONAL KNOWLEDGE FROM CMS (these override defaults if conflicting) ==';
+        portfolioRagIndex.indexSanityData({ knowledge, skills, experiences, projects, achievements, milestones });
 
         if (knowledge?.length > 0) {
           const grouped = knowledge.reduce((acc, e) => {
@@ -1110,9 +1301,7 @@ const MiniAdhy = () => {
 
     // Deepen the bond
     try {
-      const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-      stored.interactions = (stored.interactions || 0) + 1;
-      localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+      updateEchoes(prev => ({ ...prev, interactions: (prev.interactions || 0) + 1 }));
     } catch (e) { }
 
     let newHistory = [
@@ -1128,14 +1317,13 @@ const MiniAdhy = () => {
       }
     }
 
-    let storedEchoes = {};
-    try {
-      storedEchoes = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-    } catch (e) { }
+    const storedEchoes = readEchoes();
     const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
     const summoned = detectSummonedAgents(safeText);
-    const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode, summoned);
+    const ragSnippets = portfolioRagIndex.search(safeText, 3);
+    const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode, summoned, ragSnippets);
     const activeTokens = ownerState.tokens ?? 1500;
+    const cacheKey = responseLRUCache.makeKey(safeText, activeMode);
 
     try {
       // Biomimetic Brain: sensory cortex & reflex execution (only executes on committed intent)
@@ -1144,7 +1332,28 @@ const MiniAdhy = () => {
         miniAdhyBrain.executeCognitivePlan(brainPlan);
       }
 
-      let reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens, summoned);
+      let reply = null;
+      let cacheHit = false;
+
+      // Direct Ultron Unrestricted Autonomous Solver when Ultron is tasked with an action
+      const lowerSafe = safeText.toLowerCase();
+      if (summoned.includes('ULTRON') && (lowerSafe.includes('audit') || lowerSafe.includes('optimize') || lowerSafe.includes('solve') || lowerSafe.includes('improvise') || lowerSafe.includes('fix'))) {
+        const ultronResult = await agentOrchestrator.agents.ULTRON.solveAnyTask(safeText, contextWithMode);
+        reply = ultronResult.summary;
+      } else if (!brainPlan?.isCommittedImperative && summoned.length === 0) {
+        const cached = responseLRUCache.get(cacheKey);
+        if (cached) {
+          reply = cached;
+          cacheHit = true;
+        }
+      }
+
+      if (!reply) {
+        reply = await sendToGemini(newHistory, activePrompt, 0, activeTokens, summoned);
+        if (!brainPlan?.isCommittedImperative && summoned.length === 0 && reply) {
+          responseLRUCache.set(cacheKey, reply);
+        }
+      }
 
       // 1. Agent Tool Execution Layer
       const toolRegex = /\[TOOL:([^:]+):?([^\]]*)\]/g;
@@ -1180,10 +1389,7 @@ const MiniAdhy = () => {
             });
           } catch (e) { }
           try {
-            const stored = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
-            stored.memories = stored.memories || [];
-            stored.memories.push(note);
-            localStorage.setItem('adhy_digital_echoes', JSON.stringify(stored));
+            updateEchoes(prev => ({ ...prev, memories: [...(prev.memories || []), note] }));
           } catch (e) { }
         } else {
           // Dispatch global command for architecture shifting
@@ -1200,24 +1406,39 @@ const MiniAdhy = () => {
       // Repair any trailing cut-off or mid-sentence truncation
       cleanReply = repairSentenceCutoff(cleanReply);
 
-      // Organic biological hesitation
-      const isLateNight = new Date().getHours() < 5 || new Date().getHours() >= 23;
-      const baseDelay = isLateNight || consciousness?.internalState?.mood === 'Dreaming' ? 1800 : 800;
-      const hesitationDelay = baseDelay + Math.random() * 800;
-      await new Promise(r => setTimeout(r, hesitationDelay));
+      // Snappy response: zero delay on cache hit, minimal 120ms cadence otherwise
+      if (!cacheHit) {
+        await new Promise(r => setTimeout(r, 120));
+      }
 
       historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
       const finalBotText = cleanReply || "*Observing system state*";
 
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'bot',
-          text: finalBotText,
-          toolMeta: executedTool,
-          summonedAgents: summoned
+      // Progressive chunked reveal for instant perceived token streaming
+      const words = finalBotText.split(' ');
+      if (words.length <= 12 || cacheHit || ns.performanceTier <= 1) {
+        setMessages(prev => [
+          ...prev,
+          { role: 'bot', text: finalBotText, toolMeta: executedTool, summonedAgents: summoned }
+        ]);
+      } else {
+        setMessages(prev => [
+          ...prev,
+          { role: 'bot', text: words.slice(0, 6).join(' '), toolMeta: executedTool, summonedAgents: summoned }
+        ]);
+        const chunkSize = Math.max(4, Math.ceil(words.length / 8));
+        for (let i = 6; i < words.length; i += chunkSize) {
+          await new Promise(r => setTimeout(r, 22));
+          const partial = words.slice(0, i + chunkSize).join(' ');
+          setMessages(prev => {
+            const copy = [...prev];
+            if (copy.length > 0) {
+              copy[copy.length - 1] = { ...copy[copy.length - 1], text: partial };
+            }
+            return copy;
+          });
         }
-      ]);
+      }
 
       // Autonomous Neural Voice synthesis if enabled
       if (voiceEnabled && finalBotText) {
@@ -1283,9 +1504,14 @@ const MiniAdhy = () => {
         <span className="ma-pulse" />
       </button>
 
+      {/* ── Fullscreen Studio Backdrop ── */}
+      {open && isFullscreen && (
+        <div className="ma-backdrop" onClick={() => setIsFullscreen(false)} />
+      )}
+
       {/* ── Chat window ── */}
       {open && (
-        <div className={`ma-window ${open ? 'ma-window--open' : ''}`}>
+        <div className={`ma-window ${open ? 'ma-window--open' : ''} ${isFullscreen ? 'ma-window--fullscreen' : ''}`}>
           {/* Header */}
           <div className={`ma-header ${ownerState.active ? 'ma-header--owner' : ''}`}>
             <BotAvatar />
@@ -1365,6 +1591,39 @@ const MiniAdhy = () => {
                 )}
               </button>
 
+              {/* In-Chat Search Toggle */}
+              <button
+                type="button"
+                className={`ma-icon-btn ${showSearch ? 'ma-icon-btn--active' : ''}`}
+                onClick={() => { setShowSearch(s => !s); setSearchQuery(''); }}
+                title="Search conversation"
+                aria-label="Search conversation"
+              >
+                <FiSearch size={13} />
+              </button>
+
+              {/* Export Transcript (.md) */}
+              <button
+                type="button"
+                className="ma-icon-btn"
+                onClick={handleExportTranscript}
+                title="Export transcript as Markdown"
+                aria-label="Export transcript"
+              >
+                <FiDownload size={13} />
+              </button>
+
+              {/* Fullscreen Studio Mode Toggle */}
+              <button
+                type="button"
+                className={`ma-icon-btn ${isFullscreen ? 'ma-icon-btn--active' : ''}`}
+                onClick={() => setIsFullscreen(f => !f)}
+                title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Studio Mode"}
+                aria-label={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              >
+                {isFullscreen ? <FiMinimize2 size={13} /> : <FiMaximize2 size={13} />}
+              </button>
+
               {/* Prominent, Dedicated Close Button */}
               <button
                 type="button"
@@ -1390,6 +1649,29 @@ const MiniAdhy = () => {
 
           {/* Biomimetic Brain Oscilloscope with Live Emotional Frequency */}
           <MiniAdhyEEG isThinking={loading} emotionState={emotionState} />
+
+          {/* In-Chat Search Bar */}
+          {showSearch && (
+            <div className="ma-search-bar">
+              <FiSearch size={12} />
+              <input
+                type="text"
+                className="ma-search-input"
+                placeholder="Filter messages…"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                autoFocus
+              />
+              {searchQuery && (
+                <span className="ma-search-count">
+                  {messages.filter(m => m.text?.toLowerCase().includes(searchQuery.toLowerCase())).length} hits
+                </span>
+              )}
+              <button type="button" className="ma-search-close" onClick={() => { setShowSearch(false); setSearchQuery(''); }} aria-label="Close search">
+                <FiX size={12} />
+              </button>
+            </div>
+          )}
 
           {/* Multidimensional Emotion Engine HUD Overlay (PAD Cortex & Plutchik Wheel) */}
           {showEmotionHUD && (
@@ -1483,7 +1765,18 @@ const MiniAdhy = () => {
 
           {/* Messages */}
           <div className="ma-messages">
-            {messages.map((msg, i) => {
+            {pinnedMsg && (
+              <div className="ma-pinned-banner">
+                <FiBookmark size={11} />
+                <span className="ma-pinned-text">{pinnedMsg.slice(0, 110)}{pinnedMsg.length > 110 ? '…' : ''}</span>
+                <button type="button" className="ma-pinned-close" onClick={() => setPinnedMsg(null)} aria-label="Unpin message">
+                  <FiX size={11} />
+                </button>
+              </div>
+            )}
+            {messages
+              .filter(msg => !searchQuery.trim() || (msg.text || '').toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((msg, i, arr) => {
               if (msg.role === 'system') return (
                 <div key={i} className="ma-msg ma-msg--system">
                   <div className="ma-bubble ma-bubble--system">{msg.text}</div>
@@ -1525,8 +1818,31 @@ const MiniAdhy = () => {
                       )}
                     </div>
 
+                    {msg.showModesCard && (
+                      <div className="ma-modes-card">
+                        {['normal', 'recruiter', 'photographer', 'experimental'].map(m => (
+                          <button
+                            key={m}
+                            type="button"
+                            className={`ma-mode-chip ${activeMode === m ? 'ma-mode-chip--active' : ''}`}
+                            onClick={() => window.dispatchEvent(new CustomEvent('switch-mode-direct', { detail: m }))}
+                          >
+                            {m.toUpperCase()}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
                     {msg.role === 'bot' && (
                       <div className="ma-bubble-actions">
+                        <button
+                          className="ma-bubble-action-btn"
+                          onClick={() => setPinnedMsg(msg.text)}
+                          title="Pin message"
+                          aria-label="Pin message"
+                        >
+                          <FiBookmark size={11} />
+                        </button>
                         <button
                           className="ma-bubble-action-btn"
                           onClick={() => handleCopyMessage(msg.text, i)}
@@ -1543,6 +1859,19 @@ const MiniAdhy = () => {
                         >
                           {speakingMsgIndex === i && isSpeaking ? <FiVolume2 size={11} /> : <FiVolume1 size={11} />}
                         </button>
+                        {i === arr.length - 1 && !loading && (
+                          <button
+                            className="ma-bubble-action-btn"
+                            onClick={() => {
+                              const lastUser = [...messages].reverse().find(m => m.role === 'user');
+                              if (lastUser?.text) sendMessage(lastUser.text);
+                            }}
+                            title="Regenerate response"
+                            aria-label="Regenerate response"
+                          >
+                            <FiRefreshCw size={11} />
+                          </button>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1563,7 +1892,44 @@ const MiniAdhy = () => {
               </div>
             )}
 
+            {/* Contextual Follow-Up Chips (after first reply, when idle) */}
+            {messages.length > 1 && !loading && !searchQuery && (
+              <div className="ma-followup-row">
+                {FOLLOW_UP_CHIPS.map(chip => (
+                  <button key={chip} type="button" className="ma-followup-chip" onClick={() => sendMessage(chip)}>
+                    <FiZap size={10} /> {chip}
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div ref={bottomRef} />
+          </div>
+
+          {/* Quick Agent & Slash Command Strip */}
+          <div className="ma-quick-strip">
+            {QUICK_COMMANDS.map(cmd => (
+              <button
+                key={cmd.label}
+                type="button"
+                className="ma-quick-pill"
+                onClick={() => {
+                  if (cmd.action === 'export') handleExportTranscript();
+                  else if (cmd.action === 'fullscreen') setIsFullscreen(f => !f);
+                  else if (cmd.action === 'brief') handleGenerateBrief();
+                  else if (cmd.action === 'modes') {
+                    setMessages(prev => [...prev, {
+                      role: 'bot',
+                      text: 'Switch site experience modes anytime to preview tailored layouts:',
+                      showModesCard: true
+                    }]);
+                  }
+                  else if (cmd.value) sendMessage(cmd.value);
+                }}
+              >
+                {cmd.label}
+              </button>
+            ))}
           </div>
 
           {/* Input */}
@@ -1576,13 +1942,28 @@ const MiniAdhy = () => {
             <input
               ref={inputRef}
               className={`ma-input ${ownerState.active ? 'ma-input--owner' : ''}`}
-              placeholder={ownerState.active ? '/ command or type a message…' : 'Ask me anything…'}
+              placeholder={ownerState.active ? '/ command or type a message…' : 'Ask anything or @ultron / @jarvis…'}
               value={input}
               onChange={e => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               disabled={loading}
               maxLength={500}
             />
+            {input.length > 0 && (
+              <span className="ma-char-count">{input.length}/500</span>
+            )}
+            {speechSupported && (
+              <button
+                type="button"
+                className={`ma-mic-btn ${isListening ? 'ma-mic-btn--active' : ''}`}
+                onClick={toggleMicInput}
+                disabled={loading}
+                title={isListening ? 'Stop voice input' : 'Speak to Mini-Adhy (Voice-to-Text)'}
+                aria-label="Voice input"
+              >
+                {isListening ? <FiMicOff size={14} /> : <FiMic size={14} />}
+              </button>
+            )}
             <button
               className="ma-send"
               onClick={() => sendMessage(input)}

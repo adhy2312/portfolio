@@ -26,6 +26,7 @@ export const SystemOrchestratorProvider = ({ children }) => {
     immersiveEngine.init(ns);
     return () => {
       ns.stop();
+      lifeEngine.dispose();
       hapticEngine.stop();
       immersiveEngine.stop();
     };

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './DreamStateLoader.css';
 import ns from '../core/NervousSystem';
+import { readEchoes } from '../utils/digitalEchoesStore';
 
 export default function DreamStateLoader({ onAwake }) {
   const [phase, setPhase] = useState(0); // 0: Sleeping, 1: Waking, 2: Awake
@@ -8,7 +9,7 @@ export default function DreamStateLoader({ onAwake }) {
 
   useEffect(() => {
     // Generate poetic dream log based on ML persona
-    const echoes = JSON.parse(localStorage.getItem('adhy_digital_echoes')) || {};
+    const echoes = readEchoes();
     const totalVisits = echoes.totalVisits || 1;
     
     const logs = [

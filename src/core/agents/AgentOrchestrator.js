@@ -41,8 +41,27 @@ import { agentMessageBus, AGENT_MESSAGE_TYPES } from '../distribution/AgentMessa
 class MiniAdhyAgentOrchestrator {
   constructor() {
     this.messageBus = agentMessageBus;
-    // 1. Initialize the 10 Specialist Agents under Mini-Adhy
-    this.agents = {
+    this._agents = null;
+    this._busRegistered = false;
+
+    // Central Ecosystem Stores
+    this.findings = [];
+    this.maxFindings = 80;
+    this.isScanning = false;
+    this.lastFullAudit = null;
+    this.weeklyReports = [];
+
+    // Load persisted state if available (lightweight, no agent instantiation)
+    this.loadState();
+  }
+
+  /**
+   * Lazy-boot the 11 specialist agents only when first accessed.
+   * Keeps initial page load free of unnecessary class & EmotionEngine allocations.
+   */
+  _ensureAgents() {
+    if (this._agents) return this._agents;
+    this._agents = {
       JARVIS: new JarvisAgent(),
       FRIDAY: new FridayAgent(),
       DUM_E: new DumEAgent(),
@@ -56,23 +75,25 @@ class MiniAdhyAgentOrchestrator {
       HERMES: new HermesAgent()
     };
 
-    // Guarantee that every specialist agent has a live calibrated EmotionEngine
-    Object.values(this.agents).forEach(a => {
+    Object.values(this._agents).forEach(a => {
       if (!a.emotionEngine) {
         a.emotionEngine = new EmotionEngine(a.id);
       }
     });
 
-    // 2. Central Ecosystem Stores
-    this.findings = [];
-    this.maxFindings = 80;
-    this.isScanning = false;
-    this.lastFullAudit = null;
-    this.weeklyReports = [];
+    if (!this._busRegistered) {
+      this._busRegistered = true;
+      this._registerBusHandlers();
+    }
+    return this._agents;
+  }
 
-    // Load persisted state if available
-    this.loadState();
-    this._registerBusHandlers();
+  get agents() {
+    return this._ensureAgents();
+  }
+
+  set agents(val) {
+    this._agents = val;
   }
 
   loadState() {

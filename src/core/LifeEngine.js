@@ -31,6 +31,8 @@ class LifeEngine {
       survivalState: 'NORMAL'
     };
     this._initialized = false;
+    this._unsubs = [];
+    this._onMessage = null;
   }
 
   init() {
@@ -47,7 +49,7 @@ class LifeEngine {
     });
 
     // 3. Listen to the Worker Thread
-    this.worker.addEventListener('message', (e) => {
+    this._onMessage = (e) => {
       const { type, payload } = e.data;
 
       if (type === 'SAVE_MEMORY') {
@@ -77,13 +79,26 @@ class LifeEngine {
           ns.emit('DREAM_STATE', { dream: payload.dreamText });
         }
       }
-    });
+    };
+    this.worker.addEventListener('message', this._onMessage);
 
     // 4. Connect NervousSystem Events to the Worker
-    ns.subscribe('VISITOR_DEEP_READING', () => this.worker.postMessage({ type: 'RECORD_EVENT', payload: { event: 'deep_read' } }));
-    ns.subscribe('TIMELINE_LINGER',      () => this.worker.postMessage({ type: 'RECORD_EVENT', payload: { event: 'timeline_explore' } }));
-    ns.subscribe('MINIADHY_THINKING_END',() => this.worker.postMessage({ type: 'RECORD_EVENT', payload: { event: 'ai_interaction' } }));
-    ns.subscribe('SYSTEM_OVERLOAD',      () => this.worker.postMessage({ type: 'RECORD_EVENT', payload: { event: 'system_stress' } }));
+    const onDeepRead = () => this.worker?.postMessage({ type: 'RECORD_EVENT', payload: { event: 'deep_read' } });
+    const onTimeline = () => this.worker?.postMessage({ type: 'RECORD_EVENT', payload: { event: 'timeline_explore' } });
+    const onAiDone   = () => this.worker?.postMessage({ type: 'RECORD_EVENT', payload: { event: 'ai_interaction' } });
+    const onOverload = () => this.worker?.postMessage({ type: 'RECORD_EVENT', payload: { event: 'system_stress' } });
+
+    ns.subscribe('VISITOR_DEEP_READING',  onDeepRead);
+    ns.subscribe('TIMELINE_LINGER',       onTimeline);
+    ns.subscribe('MINIADHY_THINKING_END', onAiDone);
+    ns.subscribe('SYSTEM_OVERLOAD',       onOverload);
+
+    this._unsubs = [
+      () => ns.unsubscribe('VISITOR_DEEP_READING',  onDeepRead),
+      () => ns.unsubscribe('TIMELINE_LINGER',       onTimeline),
+      () => ns.unsubscribe('MINIADHY_THINKING_END', onAiDone),
+      () => ns.unsubscribe('SYSTEM_OVERLOAD',       onOverload),
+    ];
 
     // 5. Send Low-Frequency Ticks to the Worker
     // The main thread does NO math here. It just sends raw data to the backend thread.
@@ -95,7 +110,7 @@ class LifeEngine {
         const velocity = Math.abs(currentScroll - lastScrollPos) / 5; // Pixels per second
         lastScrollPos = currentScroll;
         
-        this.worker.postMessage({
+        this.worker?.postMessage({
           type: 'TICK',
           payload: {
             idleSeconds: ns.state.idleSeconds,
@@ -106,6 +121,18 @@ class LifeEngine {
         lastTick = time;
       }
     }, { priority: 'LOW', cooldown: 5000 });
+  }
+
+  dispose() {
+    if (!this._initialized) return;
+    ns.unregister('LifeEngineTick');
+    this._unsubs.forEach(fn => fn());
+    this._unsubs = [];
+    if (this.worker && this._onMessage) {
+      this.worker.removeEventListener('message', this._onMessage);
+    }
+    this._onMessage = null;
+    this._initialized = false;
   }
 
   // ─── LOCAL STORAGE -> INDEXEDDB (V20 Upgrade) ───
