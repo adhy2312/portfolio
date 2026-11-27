@@ -289,6 +289,21 @@ const MyWorks = () => {
                           <FiGithub size={18} />
                         </a>
                       )}
+                      <button
+                        type="button"
+                        className="vault-icon-link"
+                        title={`Ask Mini-Adhy about ${project.title}`}
+                        aria-label={`Ask Mini-Adhy about ${project.title}`}
+                        onClick={() => {
+                          window.dispatchEvent(new CustomEvent('miniadhy:ask', {
+                            detail: {
+                              prompt: `Explain the architecture, tech stack (${(project.tags || []).join(', ')}), and key engineering takeaways of Adhithya's project "${project.title}": ${project.description}`
+                            }
+                          }));
+                        }}
+                      >
+                        <FiZap size={16} />
+                      </button>
                     </div>
                     
                     {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (

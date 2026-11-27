@@ -35,6 +35,7 @@ const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
 const BetaLabSuite = lazy(() => import('./components/beta/BetaLabSuite'));
+const BetaFeedbackSection = lazy(() => import('./components/beta/BetaLabSuite').then(m => ({ default: m.BetaFeedbackSection })));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -476,6 +477,12 @@ function AppContent() {
         )}
 
       </div>
+
+      {mode === 'beta' && (
+        <Suspense fallback={null}>
+          <BetaFeedbackSection />
+        </Suspense>
+      )}
 
       {mode === 'photographer' && (
         <Suspense fallback={null}>

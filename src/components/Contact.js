@@ -253,6 +253,30 @@ ${message}`;
           {/* Form */}
           <div className="contact-form-wrap" ref={formWrapRef}>
             <form ref={form} onSubmit={sendEmail} className="contact-form glass-card specular-card">
+              {/* Smart Intent Presets */}
+              <div className="contact-intent-presets" style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '12px' }}>
+                {[
+                  { label: 'Hiring / Internship', subject: 'Engineering Role / Internship Opportunity', msg: 'Hi Adhithya, we reviewed your portfolio and would like to discuss an engineering opportunity...' },
+                  { label: 'Freelance Project', subject: 'Freelance Web / AI Project Inquiry', msg: 'Hi Adhithya, we have a web/AI project in mind and would love to collaborate...' },
+                  { label: 'ECE / Hardware', subject: 'ECE / Embedded / SDR Collaboration', msg: 'Hi Adhithya, reaching out regarding your STM32 / KiCad / GNU Radio hardware work...' },
+                  { label: 'Say Hi', subject: 'Hello from your portfolio!', msg: 'Hey Adhithya, just wanted to connect and say hello!' }
+                ].map(preset => (
+                  <button
+                    key={preset.label}
+                    type="button"
+                    className="tag"
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => {
+                      if (!form.current) return;
+                      if (form.current.subject) form.current.subject.value = preset.subject;
+                      if (form.current.message) form.current.message.value = preset.msg;
+                    }}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="form-row">
                 <div className="form-group">
                   <label className="form-label">Your Name</label>

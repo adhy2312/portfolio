@@ -1,4 +1,26 @@
-import React from 'react';
+import React, { useState } from 'react';
+
+const CodeBlock = ({ lang, code }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard?.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
+  return (
+    <div className="ma-code-block-wrap">
+      <div className="ma-code-header">
+        <span className="ma-code-lang">{lang || 'code'}</span>
+        <button type="button" className="ma-code-copy-btn" onClick={handleCopy}>
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+      <pre className="ma-code-block">
+        <code>{code}</code>
+      </pre>
+    </div>
+  );
+};
 
 /**
  * Parses inline markdown tokens:
@@ -132,14 +154,7 @@ export const MiniAdhyFormattedText = ({ content = '' }) => {
     <div className="ma-formatted-text">
       {segments.map((seg, sIdx) => {
         if (seg.type === 'code') {
-          return (
-            <div key={sIdx} className="ma-code-block-wrap">
-              {seg.lang && <div className="ma-code-lang">{seg.lang}</div>}
-              <pre className="ma-code-block">
-                <code>{seg.code}</code>
-              </pre>
-            </div>
-          );
+          return <CodeBlock key={sIdx} lang={seg.lang} code={seg.code} />;
         }
 
         const lines = seg.value.split('\n');

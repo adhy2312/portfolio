@@ -820,6 +820,9 @@ const MiniAdhy = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedMsg, setPinnedMsg] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [voiceRate, setVoiceRate] = useState(1.0);
+  const [showFaqDrawer, setShowFaqDrawer] = useState(false);
+  const [detectedTopics, setDetectedTopics] = useState([]);
   const [voiceLang, setVoiceLang] = useState(() => {
     try { return localStorage.getItem('mini_adhy_voice_lang') || 'en-IN'; }
     catch { return 'en-IN'; }
@@ -829,6 +832,48 @@ const MiniAdhy = () => {
     catch { return null; }
   });
   const recognitionRef = useRef(null);
+
+  const browserSuggestedLang = React.useMemo(() => {
+    if (typeof navigator === 'undefined') return null;
+    const raw = (navigator.language || '').toLowerCase();
+    const match = SUPPORTED_LANGUAGES.find(l => l.code.toLowerCase() === raw || l.code.split('-')[0] === raw.split('-')[0]);
+    return match && match.code !== voiceLang ? match : null;
+  }, [voiceLang]);
+
+  const OFFLINE_FAQS = [
+    { q: 'Who is Adhithya Mohan?', a: 'ECE Engineer & Full-Stack Developer at MBCET, Kerala — Media Secretary @ Senate, Co-Founder @ Finance Club, and documentary photographer (@zoomout_frames).' },
+    { q: 'What is his core tech stack?', a: 'React 19, Node.js/Fastify, Python, Three.js, Sanity CMS, plus ECE hardware: STM32, KiCad PCB, GNU Radio SDR, and MATLAB/Simulink.' },
+    { q: 'How can I contact him?', a: 'Email adhithyamohan2312@gmail.com or use the Contact section below.' },
+    { q: 'What are the Site Modes?', a: 'Default, Recruiter, Photographer, Experimental Lab, and Beta Channel (isolated UI redesign).' },
+    { q: 'How does Mini-Adhy work offline?', a: 'It uses a client-side TF-IDF RAG index over Sanity CMS + a 4-lobe local neural synthesizer.' },
+  ];
+
+  const handleSummarizeChat = useCallback(() => {
+    const userTurns = messages.filter(m => m.role === 'user').map(m => m.text);
+    const botTurns = messages.filter(m => m.role === 'bot').map(m => m.text);
+    const topics = detectedTopics.length ? detectedTopics.join(', ') : 'Portfolio & Engineering';
+    const summary =
+      `📝 **Conversation Takeaway (${messages.length} turns)**\n` +
+      `• **Topics Discussed:** ${topics}\n` +
+      `• **Last Question:** ${userTurns[userTurns.length - 1] || 'General Exploration'}\n` +
+      `• **Key Highlight:** ${(botTurns[botTurns.length - 1] || '').slice(0, 140)}…`;
+    setMessages(prev => [...prev, { role: 'bot', text: summary, metaBadge: 'Summary · 0ms' }]);
+  }, [messages, detectedTopics]);
+
+  const handleMatchJD = useCallback(() => {
+    const jd = window.prompt('Paste a Job Description or required skills (e.g. React, Node, Embedded, STM32, Python):');
+    if (!jd || !jd.trim()) return;
+    const matches = portfolioRagIndex.search(jd, 4);
+    const score = Math.min(98, 62 + matches.length * 9);
+    const bullets = matches.length
+      ? matches.map(m => `• **${m.title}**: ${m.text}`).join('\n')
+      : '• Full-Stack Web (React 19, Node.js, Fastify) + ECE Hardware (STM32, KiCad, MATLAB)';
+    setMessages(prev => [
+      ...prev,
+      { role: 'user', text: `Match JD: ${jd.slice(0, 120)}${jd.length > 120 ? '…' : ''}` },
+      { role: 'bot', text: `🎯 **JD Compatibility Score: ${score}%**\n\n**Strongest Matching Evidence:**\n${bullets}`, metaBadge: 'JD Matcher · 4ms' }
+    ]);
+  }, []);
 
   // Real-time Spotify <-> Mini-Adhy sync
   useEffect(() => {
@@ -992,7 +1037,8 @@ const MiniAdhy = () => {
       () => {
         setIsSpeaking(false);
         setSpeakingMsgIndex(null);
-      }
+      },
+      { rate: voiceRate, lang: voiceLang }
     );
   }, [speakingMsgIndex, isSpeaking]);
 
@@ -1360,6 +1406,15 @@ const MiniAdhy = () => {
     const activeTokens = ownerState.tokens ?? 1500;
     const cacheKey = responseLRUCache.makeKey(safeText, activeMode);
 
+    const TOPIC_KEYWORDS = ['React', 'STM32', 'Photography', 'SDR', 'AI', 'Python', 'Node', 'KiCad', 'Three.js', 'Spotify'];
+    const foundTopics = TOPIC_KEYWORDS.filter(t => safeText.toLowerCase().includes(t.toLowerCase()));
+    if (foundTopics.length > 0) {
+      setDetectedTopics(prev => [...new Set([...prev, ...foundTopics])].slice(-6));
+    }
+
+    const reqStart = typeof performance !== 'undefined' ? performance.now() : Date.now();
+    let replySource = 'Cloud AI';
+
     try {
       // Biomimetic Brain: sensory cortex & reflex execution (only executes on committed intent)
       const brainPlan = miniAdhyBrain.processSensoryInput(safeText);
@@ -1375,11 +1430,13 @@ const MiniAdhy = () => {
       if (summoned.includes('ULTRON') && (lowerSafe.includes('audit') || lowerSafe.includes('optimize') || lowerSafe.includes('solve') || lowerSafe.includes('improvise') || lowerSafe.includes('fix'))) {
         const ultronResult = await agentOrchestrator.agents.ULTRON.solveAnyTask(safeText, contextWithMode);
         reply = ultronResult.summary;
+        replySource = 'ULTRON';
       } else if (!brainPlan?.isCommittedImperative && summoned.length === 0) {
         const cached = responseLRUCache.get(cacheKey);
         if (cached) {
           reply = cached;
           cacheHit = true;
+          replySource = 'Cache';
         }
       }
 
@@ -1448,18 +1505,20 @@ const MiniAdhy = () => {
 
       historyRef.current = [...newHistory, { role: 'model', parts: [{ text: reply }] }];
       const finalBotText = cleanReply || "*Observing system state*";
+      const elapsedMs = cacheHit ? 0 : Math.max(1, Math.round((typeof performance !== 'undefined' ? performance.now() : Date.now()) - reqStart));
+      const metaBadge = `${replySource} · ${elapsedMs}ms`;
 
       // Progressive chunked reveal for instant perceived token streaming
       const words = finalBotText.split(' ');
       if (words.length <= 12 || cacheHit || ns.performanceTier <= 1) {
         setMessages(prev => [
           ...prev,
-          { role: 'bot', text: finalBotText, toolMeta: executedTool, summonedAgents: summoned }
+          { role: 'bot', text: finalBotText, toolMeta: executedTool, summonedAgents: summoned, metaBadge }
         ]);
       } else {
         setMessages(prev => [
           ...prev,
-          { role: 'bot', text: words.slice(0, 6).join(' '), toolMeta: executedTool, summonedAgents: summoned }
+          { role: 'bot', text: words.slice(0, 6).join(' '), toolMeta: executedTool, summonedAgents: summoned, metaBadge }
         ]);
         const chunkSize = Math.max(4, Math.ceil(words.length / 8));
         for (let i = 6; i < words.length; i += chunkSize) {
@@ -1483,7 +1542,8 @@ const MiniAdhy = () => {
           () => {
             setIsSpeaking(false);
             setSpeakingMsgIndex(null);
-          }
+          },
+          { rate: voiceRate, lang: voiceLang }
         );
       }
     } catch (e) {
@@ -1505,6 +1565,19 @@ const MiniAdhy = () => {
       sendMessage(input);
     }
   };
+
+  // Listen for Project-Aware "Ask Mini-Adhy" events from MyWorks
+  useEffect(() => {
+    const onAskProject = (e) => {
+      const prompt = e.detail?.prompt;
+      if (!prompt) return;
+      setOpen(true);
+      setTimeout(() => sendMessage(prompt), 120);
+    };
+    window.addEventListener('miniadhy:ask', onAskProject);
+    return () => window.removeEventListener('miniadhy:ask', onAskProject);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <>
@@ -1630,6 +1703,30 @@ const MiniAdhy = () => {
                     ))}
                   </select>
                 </div>
+                <div className="ma-menu-lang-row">
+                  <span className="ma-menu-lang-label">🔊 Speed</span>
+                  <div className="ma-speed-pills">
+                    {[0.9, 1.0, 1.2].map(r => (
+                      <button
+                        key={r}
+                        type="button"
+                        className={`ma-speed-pill ${voiceRate === r ? 'active' : ''}`}
+                        onClick={() => setVoiceRate(r)}
+                      >
+                        {r}x
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <button type="button" className="ma-menu-item" onClick={() => { setShowFaqDrawer(f => !f); setShowMenu(false); }}>
+                  <FiFileText size={13} /> <span>Offline FAQ Drawer</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { handleMatchJD(); setShowMenu(false); }}>
+                  <FiCpu size={13} /> <span>Smart JD Matcher</span>
+                </button>
+                <button type="button" className="ma-menu-item" onClick={() => { handleSummarizeChat(); setShowMenu(false); }}>
+                  <FiFileText size={13} /> <span>Summarize Chat</span>
+                </button>
                 <button type="button" className="ma-menu-item" onClick={() => { setShowSearch(s => !s); setSearchQuery(''); setShowMenu(false); }}>
                   <FiSearch size={13} /> <span>Search Chat</span>
                 </button>
@@ -1790,6 +1887,43 @@ const MiniAdhy = () => {
 
           {/* Messages */}
           <div className="ma-messages">
+            {browserSuggestedLang && (
+              <div className="ma-lang-suggest-banner">
+                <span>Detected {browserSuggestedLang.label}</span>
+                <button type="button" className="ma-lang-suggest-btn" onClick={() => setVoiceLang(browserSuggestedLang.code)}>
+                  Switch
+                </button>
+              </div>
+            )}
+            {detectedTopics.length > 0 && (
+              <div className="ma-topics-bar">
+                {detectedTopics.map(topic => (
+                  <button
+                    key={topic}
+                    type="button"
+                    className="ma-topic-pill"
+                    onClick={() => setDetectedTopics(prev => prev.filter(t => t !== topic))}
+                    title="Click to remove topic"
+                  >
+                    #{topic} ×
+                  </button>
+                ))}
+              </div>
+            )}
+            {showFaqDrawer && (
+              <div className="ma-faq-drawer">
+                <div className="ma-faq-header">
+                  <span>Offline Quick FAQ</span>
+                  <button type="button" onClick={() => setShowFaqDrawer(false)}><FiX size={12} /></button>
+                </div>
+                {OFFLINE_FAQS.map(item => (
+                  <details key={item.q} className="ma-faq-item">
+                    <summary>{item.q}</summary>
+                    <p>{item.a}</p>
+                  </details>
+                ))}
+              </div>
+            )}
             {pinnedMsg && (
               <div className="ma-pinned-banner">
                 <FiBookmark size={11} />
@@ -1858,8 +1992,24 @@ const MiniAdhy = () => {
                       </div>
                     )}
 
+                    {msg.role === 'bot' && (msg.text?.toLowerCase().includes('project') || msg.text?.includes('adhithyamohan2312@gmail.com')) && (
+                      <div className="ma-inline-actions">
+                        {msg.text.toLowerCase().includes('project') && (
+                          <button type="button" className="ma-inline-card-btn" onClick={() => document.querySelector('#works, .my-works-section')?.scrollIntoView({ behavior: 'smooth' })}>
+                            View Projects →
+                          </button>
+                        )}
+                        {msg.text.includes('adhithyamohan2312@gmail.com') && (
+                          <a href="mailto:adhithyamohan2312@gmail.com" className="ma-inline-card-btn">
+                            Email Adhithya →
+                          </a>
+                        )}
+                      </div>
+                    )}
+
                     {msg.role === 'bot' && (
                       <div className="ma-bubble-actions">
+                        {msg.metaBadge && <span className="ma-latency-pill">{msg.metaBadge}</span>}
                         <button
                           className="ma-bubble-action-btn"
                           onClick={() => setPinnedMsg(msg.text)}

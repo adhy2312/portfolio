@@ -140,3 +140,133 @@
   background: rgba(239, 68, 68, 0.08);
   font-family: 'Fira Code', monospace;
 }
+
+.beta-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.beta-progress-pill {
+  display: inline-block;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: var(--border-brutal, 1px solid rgba(9, 9, 11, 0.12));
+  color: var(--text-secondary, #52525b);
+  margin-bottom: 8px;
+}
+
+.beta-lang-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: var(--border-brutal, 1px solid rgba(9, 9, 11, 0.12));
+  background: transparent;
+}
+
+.beta-lang-select {
+  border: none;
+  background: transparent;
+  color: var(--text-primary, #09090b);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Resume Modal */
+.beta-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(9, 9, 11, 0.65);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.beta-modal-card {
+  width: min(920px, 100%);
+  height: min(86vh, 820px);
+  background: var(--bg-card, #fff);
+  border: var(--border-brutal, 1px solid rgba(255,255,255,0.15));
+  border-radius: 22px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+}
+
+.beta-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 22px;
+  border-bottom: 1px solid rgba(128,128,128,0.16);
+}
+
+.beta-modal-title { margin: 0; font-size: 1.05rem; font-weight: 800; }
+.beta-modal-sub { font-size: 0.75rem; opacity: 0.7; }
+.beta-modal-actions { display: flex; align-items: center; gap: 8px; }
+.beta-modal-body { flex: 1; background: #18181b; }
+.beta-resume-frame { width: 100%; height: 100%; border: none; }
+
+/* Beta Feedback Section */
+.beta-feedback-section {
+  padding: 24px 20px 48px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.beta-feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.beta-feedback-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .beta-feedback-row { grid-template-columns: 1fr; }
+}
+
+.beta-fb-input,
+.beta-fb-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: var(--border-brutal, 1px solid rgba(9, 9, 11, 0.14));
+  background: rgba(128, 128, 128, 0.05);
+  color: var(--text-primary, #09090b);
+  font-family: inherit;
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.beta-feedback-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.beta-fb-target {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  opacity: 0.65;
+}

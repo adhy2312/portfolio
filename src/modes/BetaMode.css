@@ -40,9 +40,58 @@ body.mode-beta.dark-mode {
   --shadow-brutal-deep: 0 20px 50px rgba(0, 0, 0, 0.65) !important;
 }
 
-/* Soft ambient studio mesh in Hero */
+/* Soft ambient studio mesh + subtle 24px dot-grid background */
+body.mode-beta::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(rgba(9, 9, 11, 0.16) 1px, transparent 1px);
+  background-size: 24px 24px;
+  opacity: 0.35;
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
+  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
+}
+
+body.mode-beta.dark-mode::before {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+}
+
 body.mode-beta .hero-minimal::before {
   background: radial-gradient(circle at 50% 25%, rgba(99, 102, 241, 0.14), transparent 60%) !important;
+}
+
+/* Glassmorphic Floating Docks (SiteModeSwitcher, NowPlaying, Mini-Adhy) */
+body.mode-beta .smp-trigger,
+body.mode-beta .np-dock,
+body.mode-beta .np-widget,
+body.mode-beta .ma-dock,
+body.mode-beta .ma-window {
+  border-radius: 22px !important;
+  border: var(--border-brutal) !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(20px) saturate(165%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
+}
+
+/* Fluid Editorial Display Scale (Playfair Display + Space Grotesk) */
+body.mode-beta .hero-name-giant {
+  font-size: clamp(2.6rem, 7vw, 5.4rem) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+  letter-spacing: -0.035em !important;
+}
+
+body.mode-beta .section-title {
+  font-size: clamp(1.85rem, 4vw, 3rem) !important;
+  font-family: 'Space Grotesk', sans-serif !important;
+}
+
+body.mode-beta .section-title span {
+  font-family: 'Playfair Display', serif !important;
+  font-style: italic !important;
+  font-weight: 600 !important;
 }
 
 /* Frosted Glass Pill Navbar */
@@ -122,3 +171,4 @@ body.mode-beta .section-container {
   padding-top: 84px;
   padding-bottom: 84px;
 }
+

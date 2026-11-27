@@ -454,7 +454,7 @@ export const cleanTextForSpeech = (rawText = '') => {
  * ── SUPREME NEURAL VOICE SYNTHESIS ENGINE ────────────────────────────
  * Prioritizes high-fidelity natural English voices (Indian / UK / US)
  */
-export const speakNeuralVoice = (text = '', onStart, onEnd) => {
+export const speakNeuralVoice = (text = '', onStart, onEnd, opts = {}) => {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     if (onEnd) onEnd();
     return;
@@ -478,7 +478,9 @@ export const speakNeuralVoice = (text = '', onStart, onEnd) => {
     // 2. Natural / Neural English voice
     // 3. Google UK / US English
     // 4. Samantha / Daniel
-    const preferredVoice = voices.find(v => 
+    const targetLang = opts.lang || 'en-IN';
+    const langPrefix = targetLang.split('-')[0];
+    const preferredVoice = voices.find(v => v.lang === targetLang) || voices.find(v => v.lang.startsWith(langPrefix)) || voices.find(v => 
       v.lang === 'en-IN' || v.name.includes('India') || v.name.includes('Indian')
     ) || voices.find(v => 
       v.lang.startsWith('en') && (
@@ -495,7 +497,8 @@ export const speakNeuralVoice = (text = '', onStart, onEnd) => {
       utterance.voice = preferredVoice;
     }
 
-    utterance.rate = 1.02;  // Natural conversational tempo
+    utterance.lang = targetLang;
+    utterance.rate = opts.rate || 1.02;  // Natural conversational tempo
     utterance.pitch = 0.98; // Subtle baritone resonance
 
     utterance.onstart = () => { if (onStart) onStart(); };

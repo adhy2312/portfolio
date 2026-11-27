@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { client } from '../sanity';
+import { translate, detectBrowserLanguage, SITE_LANGUAGES } from '../i18n/translations';
 
 const SiteModeContext = createContext();
 
@@ -67,6 +68,22 @@ export function SiteModeProvider({ children }) {
       return false; // Force light mode as the default aesthetic
     } catch { return false; }
   });
+
+  const [lang, setLangState] = useState(() => {
+    try { return localStorage.getItem('portfolio-lang') || 'en'; }
+    catch { return 'en'; }
+  });
+
+  const setLang = useCallback((nextLang) => {
+    setLangState(nextLang);
+    try { localStorage.setItem('portfolio-lang', nextLang); } catch {}
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = nextLang;
+    }
+  }, []);
+
+  const t = useCallback((key, fallback) => translate(lang, key, fallback), [lang]);
+  const detectedBrowserLang = detectBrowserLanguage();
 
   // Persist mode with smooth 180ms crossfade
   const setMode = useCallback((m) => {
@@ -240,6 +257,11 @@ export function SiteModeProvider({ children }) {
     isPhotographer: mode === MODES.PHOTOGRAPHER,
     isExperimental: mode === MODES.EXPERIMENTAL,
     isBeta: mode === MODES.BETA,
+    lang,
+    setLang,
+    t,
+    detectedBrowserLang,
+    siteLanguages: SITE_LANGUAGES,
   };
 
   return (

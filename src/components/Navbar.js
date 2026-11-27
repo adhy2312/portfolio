@@ -5,6 +5,7 @@ import './Navbar.css';
 import MagneticButton from './MagneticButton';
 import { playClickSound } from '../utils/sound';
 import { useConsciousness } from '../contexts/ConsciousnessContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import RainDroplets from './RainDroplets';
 
 const Navbar = () => {
@@ -17,6 +18,7 @@ const Navbar = () => {
   const linksRef = useRef([]);
 
   const { weatherData } = useConsciousness();
+  const { t } = useSiteMode();
   
   const getAmbientClass = (data) => {
     if (!data) {
@@ -303,7 +305,7 @@ const Navbar = () => {
                   onClick={(e) => handleNavClick(e, link.target)}
                   style={{ position: 'relative', zIndex: 1 }}
                 >
-                  {link.label}
+                  {t(`nav.${link.target}`, link.label)}
                 </a>
               </li>
             ))}
