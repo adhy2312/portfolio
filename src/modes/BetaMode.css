@@ -383,30 +383,55 @@ body.mode-beta .section-container {
 }
 
 .hero-beta-portrait-stage {
+  --rx: 0deg;
+  --ry: 0deg;
+  --px: 50%;
+  --py: 40%;
   position: relative;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 460px;
+  min-height: 480px;
+  perspective: 1000px;
+  cursor: pointer;
 }
 
 .hero-beta-portrait-aura {
   position: absolute;
-  inset: 10% 8% 8%;
+  inset: 4%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(229, 193, 88, 0.28) 0%, rgba(229, 193, 88, 0.08) 45%, transparent 72%);
-  filter: blur(26px);
+  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.36) 0%, rgba(229, 193, 88, 0.1) 42%, transparent 72%);
+  filter: blur(28px);
   pointer-events: none;
+  transition: background 0.15s ease;
+}
+
+.hero-beta-portrait-frame {
+  position: relative;
+  z-index: 2;
+  border-radius: 26px;
+  padding: 12px 12px 0;
+  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.14), rgba(16, 16, 24, 0.55) 70%);
+  border: 1px solid rgba(229, 193, 88, 0.22);
+  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  overflow: hidden;
+}
+
+.hero-beta-portrait-stage:hover .hero-beta-portrait-frame {
+  border-color: rgba(229, 193, 88, 0.5);
 }
 
 .hero-beta-portrait-img {
-  position: relative;
-  z-index: 2;
-  width: min(430px, 100%);
-  max-height: 540px;
+  display: block;
+  width: min(390px, 100%);
+  max-height: 500px;
   object-fit: contain;
   object-position: bottom center;
-  filter: drop-shadow(0 28px 48px rgba(0, 0, 0, 0.78)) contrast(1.04) saturate(1.04);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85)) contrast(1.03) saturate(1.03);
+  -webkit-mask-image: radial-gradient(ellipse 88% 92% at 50% 48%, #000 68%, transparent 100%);
+  mask-image: radial-gradient(ellipse 88% 92% at 50% 48%, #000 68%, transparent 100%);
   user-select: none;
   pointer-events: none;
 }
@@ -416,10 +441,118 @@ body.mode-beta .section-container {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 32%;
+  height: 30%;
   z-index: 3;
   pointer-events: none;
-  background: linear-gradient(to top, #050508 6%, rgba(5, 5, 8, 0.65) 48%, transparent 100%);
+  background: linear-gradient(to top, #050508 4%, rgba(5, 5, 8, 0.6) 45%, transparent 100%);
+}
+
+/* ─── GLOBAL BETA CONTRAST & READABILITY FIXES ─── */
+body.mode-beta h1,
+body.mode-beta h2,
+body.mode-beta h3,
+body.mode-beta h4,
+body.mode-beta .section-title,
+body.mode-beta .vault-title,
+body.mode-beta .bento-title,
+body.mode-beta .experience-role,
+body.mode-beta .contact-info-title {
+  color: #f4f4f5 !important;
+}
+
+body.mode-beta p,
+body.mode-beta .section-desc,
+body.mode-beta .vault-desc,
+body.mode-beta .contact-info-text,
+body.mode-beta .contact-info-value,
+body.mode-beta .form-label {
+  color: #cbd5e1 !important;
+}
+
+body.mode-beta .section-label,
+body.mode-beta .contact-info-label,
+body.mode-beta .metric-label {
+  color: #e5c158 !important;
+}
+
+body.mode-beta .vault-card,
+body.mode-beta .bento-card,
+body.mode-beta .bento-cell,
+body.mode-beta .skill-card,
+body.mode-beta .skill-item,
+body.mode-beta .experience-card,
+body.mode-beta .timeline-card,
+body.mode-beta .achievement-card,
+body.mode-beta .testimonial-card,
+body.mode-beta .contact-info-card,
+body.mode-beta .contact-form,
+body.mode-beta .glass-card {
+  background: rgba(16, 16, 24, 0.84) !important;
+  color: #f4f4f5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.mode-beta .form-input,
+body.mode-beta .beta-fb-input,
+body.mode-beta .beta-fb-textarea,
+body.mode-beta .beta-lang-select {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #f4f4f5 !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+}
+
+body.mode-beta .form-input::placeholder,
+body.mode-beta .beta-fb-input::placeholder,
+body.mode-beta .beta-fb-textarea::placeholder {
+  color: rgba(244, 244, 245, 0.45) !important;
+}
+
+body.mode-beta .beta-btn--ghost,
+body.mode-beta .beta-jump-pill,
+body.mode-beta .beta-progress-pill,
+body.mode-beta .beta-lang-wrap {
+  color: #f4f4f5 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+body.mode-beta .nav-link {
+  color: #e4e4e7 !important;
+}
+
+body.mode-beta .nav-link:hover {
+  color: #e5c158 !important;
+}
+
+body.mode-beta .footer,
+body.mode-beta .footer-link {
+  background: #050508 !important;
+  color: #a1a1aa !important;
+}
+
+body.mode-beta .ma-dock-label,
+body.mode-beta .ma-header-name,
+body.mode-beta .ma-header-status,
+body.mode-beta .ma-menu-item,
+body.mode-beta .ma-menu-lang-label {
+  color: #f4f4f5 !important;
+}
+
+body.mode-beta .ma-menu-dropdown {
+  background: #12121a !important;
+  border-color: rgba(255, 255, 255, 0.16) !important;
+}
+
+body.mode-beta .ma-bubble--bot {
+  background: rgba(24, 24, 34, 0.95) !important;
+  color: #f4f4f5 !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+body.mode-beta .ma-starter-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #f4f4f5 !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
 }
 
 .hero-beta-portrait-badge {

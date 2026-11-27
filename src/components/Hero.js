@@ -62,17 +62,19 @@ const Hero = () => {
         }, 0.6);
       }
 
-      // Scroll Parallax
-      gsap.to(contentRef.current, {
-        y: 150,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: heroRef.current,
-          start: 'top top',
-          end: 'bottom top',
-          scrub: true
-        }
-      });
+      // Scroll Parallax (skip in Beta so cinematic shell stays anchored)
+      if (!isBeta && contentRef.current) {
+        gsap.to(contentRef.current, {
+          y: 150,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: heroRef.current,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: true
+          }
+        });
+      }
 
       // 3D tilt on experimental mode (GSAP-powered)
       if (isExperimental && contentRef.current) {
@@ -109,7 +111,7 @@ const Hero = () => {
       if (handleMouseMove) el?.removeEventListener('mousemove', handleMouseMove);
       if (handleMouseLeave) el?.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [isExperimental, heroData?.role]);
+  }, [isExperimental, isBeta, heroData?.role]);
 
   useEffect(() => {
     const query = '*[_type == "hero"][0]';
@@ -209,14 +211,33 @@ const Hero = () => {
             </div>
           </div>
 
-          <div className="hero-beta-portrait-stage">
+          <div
+            className="hero-beta-portrait-stage"
+            onMouseMove={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              const x = (e.clientX - rect.left) / rect.width;
+              const y = (e.clientY - rect.top) / rect.height;
+              e.currentTarget.style.setProperty('--rx', `${((0.5 - y) * 10).toFixed(2)}deg`);
+              e.currentTarget.style.setProperty('--ry', `${((x - 0.5) * 12).toFixed(2)}deg`);
+              e.currentTarget.style.setProperty('--px', `${(x * 100).toFixed(1)}%`);
+              e.currentTarget.style.setProperty('--py', `${(y * 100).toFixed(1)}%`);
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.setProperty('--rx', '0deg');
+              e.currentTarget.style.setProperty('--ry', '0deg');
+              e.currentTarget.style.setProperty('--px', '50%');
+              e.currentTarget.style.setProperty('--py', '40%');
+            }}
+          >
             <div className="hero-beta-portrait-aura" aria-hidden="true" />
-            <img
-              src={betaHeroPortrait}
-              alt={displayData.name}
-              className="hero-beta-portrait-img"
-            />
-            <div className="hero-beta-portrait-fade" aria-hidden="true" />
+            <div className="hero-beta-portrait-frame">
+              <img
+                src={betaHeroPortrait}
+                alt={displayData.name}
+                className="hero-beta-portrait-img"
+              />
+              <div className="hero-beta-portrait-fade" aria-hidden="true" />
+            </div>
             <div className="hero-beta-portrait-badge">
               <span className="hero-beta-rec-dot" />
               <span>DIRECTOR&apos;S CUT // BETA</span>
