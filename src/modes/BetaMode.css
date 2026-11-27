@@ -854,39 +854,7 @@ body.mode-beta .vault-card.vault-card--skill-highlighted {
   border-color: var(--beta-accent, #e5c158) !important;
 }
 
-/* ── #31 Hero 2 AM vs 2 PM Mood Switch & #84 Parallax Depth Layers ── */
-.hero-beta-top-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.hero-beta-mood-switch {
-  display: inline-flex;
-  padding: 2px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-}
-
-.hero-beta-mood-btn {
-  padding: 3px 9px;
-  border-radius: 999px;
-  border: none;
-  background: transparent;
-  color: #a1a1aa;
-  font-family: 'Fira Code', monospace;
-  font-size: 0.6rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.hero-beta-mood-btn.is-active {
-  background: var(--beta-accent, #e5c158);
-  color: #09090b;
-}
-
+/* ── #84 Parallax Depth Layers on Hero Portrait ── */
 .hero-beta-portrait-img {
   transform: translate3d(var(--ix, 0px), var(--iy, 0px), 12px);
   transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);

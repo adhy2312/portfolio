@@ -18,7 +18,6 @@ gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
-  const [heroMood, setHeroMood] = useState('2pm');
 
   const { isExperimental, isBeta, lang, t } = useSiteMode();
   const heroRef = useRef(null);
@@ -165,27 +164,9 @@ const Hero = () => {
 
         <div className="hero-beta-shell" ref={contentRef}>
           <div className="hero-beta-main">
-            <div className="hero-beta-top-row">
-              <div className="hero-beta-slate-tag">
-                <span className="hero-beta-rec-dot" />
-                <span>SCENE 01 // {displayData.greeting.toUpperCase()}</span>
-              </div>
-              <div className="hero-beta-mood-switch" role="group" aria-label="Mood switch">
-                <button
-                  type="button"
-                  className={`hero-beta-mood-btn ${heroMood === '2pm' ? 'is-active' : ''}`}
-                  onClick={() => setHeroMood('2pm')}
-                >
-                  2 PM
-                </button>
-                <button
-                  type="button"
-                  className={`hero-beta-mood-btn ${heroMood === '2am' ? 'is-active' : ''}`}
-                  onClick={() => setHeroMood('2am')}
-                >
-                  2 AM
-                </button>
-              </div>
+            <div className="hero-beta-slate-tag">
+              <span className="hero-beta-rec-dot" />
+              <span>SCENE 01 // {displayData.greeting.toUpperCase()}</span>
             </div>
 
             <h1 className="hero-beta-title">
@@ -194,15 +175,11 @@ const Hero = () => {
             </h1>
 
             <p className="hero-beta-logline">
-              {heroMood === '2am'
-                ? 'Late-night builder · Soldering PCBs, tuning GSAP timelines & shipping before sunrise.'
-                : displayData.role}
+              {displayData.role}
             </p>
 
             <p className="hero-beta-bio">
-              {heroMood === '2am'
-                ? 'At 2 AM the pitch decks disappear — it is just clean slate, cold coffee, an ESP32 on the desk, and figuring out why the last 2% of polish matters most.'
-                : displayData.bio}
+              {displayData.bio}
             </p>
 
             <div className="hero-beta-cta-row">
