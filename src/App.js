@@ -4,6 +4,7 @@ import './index.css';
 import './modes/RecruiterMode.css';
 import './modes/ExperimentalMode.css';
 import './modes/PhotographerMode.css';
+import './modes/BetaMode.css';
 import { client } from './sanity';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';

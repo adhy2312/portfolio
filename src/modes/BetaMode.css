@@ -1,0 +1,124 @@
+/* ══════════════════════════════════════════════════════════════════
+   BETA MODE — Next-Gen Editorial Glass & Obsidian-Ink Redesign
+   Clean, spacious, modern studio aesthetic (distinct from Experimental)
+   ══════════════════════════════════════════════════════════════════ */
+
+body.mode-beta {
+  --bg-primary: #fafaf8 !important;
+  --bg-secondary: #f3f3ef !important;
+  --bg-tertiary: #e8e8e2 !important;
+  --bg-card: rgba(255, 255, 255, 0.88) !important;
+  --bg-card-hover: #ffffff !important;
+  --text-primary: #09090b !important;
+  --text-secondary: #52525b !important;
+  --text-muted: #71717a !important;
+  --accent-primary: #6366f1 !important;
+  --accent-primary-rgb: 99, 102, 241 !important;
+  --border-brutal: 1px solid rgba(9, 9, 11, 0.09) !important;
+  --border-heavy: 1px solid rgba(9, 9, 11, 0.14) !important;
+  --shadow-brutal: 0 4px 20px rgba(9, 9, 11, 0.05) !important;
+  --shadow-brutal-deep: 0 18px 42px rgba(9, 9, 11, 0.1) !important;
+  --border-radius-bento: 22px !important;
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+}
+
+body.mode-beta.dark-mode {
+  --bg-primary: #09090b !important;
+  --bg-secondary: #111115 !important;
+  --bg-tertiary: #18181f !important;
+  --bg-card: rgba(20, 20, 26, 0.86) !important;
+  --bg-card-hover: rgba(28, 28, 36, 0.96) !important;
+  --text-primary: #fafafa !important;
+  --text-secondary: #a1a1aa !important;
+  --text-muted: #71717a !important;
+  --accent-primary: #818cf8 !important;
+  --accent-primary-rgb: 129, 140, 248 !important;
+  --border-brutal: 1px solid rgba(255, 255, 255, 0.09) !important;
+  --border-heavy: 1px solid rgba(255, 255, 255, 0.14) !important;
+  --shadow-brutal: 0 8px 28px rgba(0, 0, 0, 0.4) !important;
+  --shadow-brutal-deep: 0 20px 50px rgba(0, 0, 0, 0.65) !important;
+}
+
+/* Soft ambient studio mesh in Hero */
+body.mode-beta .hero-minimal::before {
+  background: radial-gradient(circle at 50% 25%, rgba(99, 102, 241, 0.14), transparent 60%) !important;
+}
+
+/* Frosted Glass Pill Navbar */
+body.mode-beta .navbar,
+body.mode-beta .nav-pill {
+  backdrop-filter: blur(22px) saturate(170%) !important;
+  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
+  border: var(--border-brutal) !important;
+  box-shadow: var(--shadow-brutal) !important;
+}
+
+/* Editorial Typography */
+body.mode-beta h1,
+body.mode-beta h2,
+body.mode-beta h3,
+body.mode-beta .section-title,
+body.mode-beta .hero-name-giant {
+  letter-spacing: -0.03em !important;
+  text-shadow: none !important;
+}
+
+body.mode-beta .hero-name-giant::before,
+body.mode-beta .hero-name-giant::after {
+  display: none !important;
+}
+
+/* Modern Rounded Cards across the whole page */
+body.mode-beta .bento-card,
+body.mode-beta .bento-cell,
+body.mode-beta .work-card,
+body.mode-beta .skill-card,
+body.mode-beta .glass-card,
+body.mode-beta .achievement-card,
+body.mode-beta .testimonial-card,
+body.mode-beta .experience-card,
+body.mode-beta .marquee-card {
+  border-radius: 22px !important;
+  border: var(--border-brutal) !important;
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
+  box-shadow: var(--shadow-brutal) !important;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+}
+
+body.mode-beta .bento-card:hover,
+body.mode-beta .work-card:hover,
+body.mode-beta .skill-card:hover,
+body.mode-beta .achievement-card:hover {
+  transform: translateY(-4px) !important;
+  border-color: rgba(var(--accent-primary-rgb), 0.4) !important;
+  box-shadow: var(--shadow-brutal-deep) !important;
+}
+
+/* Refined Buttons & Badges */
+body.mode-beta .btn-primary,
+body.mode-beta .nav-resume-btn {
+  background: var(--accent-primary) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 999px !important;
+  box-shadow: 0 6px 20px rgba(var(--accent-primary-rgb), 0.32) !important;
+}
+
+body.mode-beta .tag,
+body.mode-beta .work-tag,
+body.mode-beta .skill-tag {
+  background: rgba(var(--accent-primary-rgb), 0.09) !important;
+  color: var(--accent-primary) !important;
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.22) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+/* Spacious section rhythm */
+body.mode-beta .section-container {
+  padding-top: 84px;
+  padding-bottom: 84px;
+}

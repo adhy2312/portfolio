@@ -214,8 +214,14 @@ export function SiteModeProvider({ children }) {
        return !hiddenInNormal.includes(sectionName);
     }
 
-    if (mode === MODES.EXPERIMENTAL || mode === MODES.BETA) {
-      // Show everything in Experimental & Beta modes
+    if (mode === MODES.BETA) {
+      // Clean next-gen UI redesign without Experimental-only lab/stack clutter
+      const hiddenInBeta = ['DigitalScars', 'digitalScarsSection', 'StackVisualizer', 'stackVisualizerSection', 'ScrollCanvasSequence'];
+      return !hiddenInBeta.includes(sectionName);
+    }
+
+    if (mode === MODES.EXPERIMENTAL) {
+      // Show everything in Experimental mode
       return true;
     }
 
