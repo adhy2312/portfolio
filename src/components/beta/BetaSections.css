@@ -1,0 +1,356 @@
+/* ── 1. Minimal Proof Bar ── */
+.beta-proof-section {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 20px 24px 8px;
+}
+
+.beta-proof-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 16px 22px;
+  border-radius: 18px;
+  background: #0e0e16;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.beta-proof-orgs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.beta-proof-kicker {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  color: #e5c158;
+}
+
+.beta-proof-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.beta-proof-org {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #d4d4d8;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.beta-proof-metrics {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.beta-proof-metric {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.beta-proof-metric strong {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.05rem;
+  color: #fafafa;
+}
+
+.beta-proof-metric span {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: #a1a1aa;
+}
+
+/* ── 2. Unified Interactive Career Rail ── */
+.beta-career-section,
+.beta-studio-section {
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 64px 24px;
+}
+
+.beta-section-head {
+  margin-bottom: 24px;
+}
+
+.beta-section-sub {
+  margin: 10px 0 0;
+  color: #a1a1aa;
+  font-size: 0.94rem;
+  max-width: 620px;
+  line-height: 1.6;
+}
+
+.beta-rail-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.beta-rail-filter {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d4d4d8;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.beta-rail-filter.is-active {
+  background: #e5c158;
+  color: #09090b;
+  border-color: #e5c158;
+  font-weight: 700;
+}
+
+.beta-rail-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.beta-rail-item {
+  display: grid;
+  grid-template-columns: 72px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+@media (max-width: 640px) {
+  .beta-rail-item {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+.beta-rail-year {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #e5c158;
+  padding-top: 16px;
+}
+
+.beta-rail-card {
+  width: 100%;
+  text-align: left;
+  padding: 16px 20px;
+  border-radius: 18px;
+  background: #101018;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  color: #f4f4f5;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.beta-rail-card:hover,
+.beta-rail-item.is-open .beta-rail-card {
+  border-color: rgba(229, 193, 88, 0.42);
+}
+
+.beta-rail-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.beta-rail-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.beta-rail-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(229, 193, 88, 0.12);
+  color: #e5c158;
+}
+
+.beta-rail-period {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  color: #a1a1aa;
+}
+
+.beta-rail-role {
+  margin: 0 0 2px;
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: #fafafa;
+}
+
+.beta-rail-org {
+  font-size: 0.84rem;
+  color: #a1a1aa;
+}
+
+.beta-rail-chevron {
+  color: #a1a1aa;
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+}
+
+.beta-rail-chevron.rotated {
+  transform: rotate(180deg);
+  color: #e5c158;
+}
+
+.beta-rail-bullets {
+  margin: 14px 0 0;
+  padding: 12px 0 0 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #d4d4d8;
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.beta-rail-bullets li + li {
+  margin-top: 6px;
+}
+
+/* ── 3. Single Cinematic Inquiry Studio ── */
+.beta-studio-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 32px;
+  padding: 32px;
+  border-radius: 24px;
+  background: #0e0e16;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 860px) {
+  .beta-studio-grid {
+    grid-template-columns: 1fr;
+    padding: 22px;
+  }
+}
+
+.beta-studio-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 18px 0 16px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+}
+
+.beta-studio-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #10b981;
+}
+
+.beta-studio-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.beta-studio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e4e4e7;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.beta-studio-chip--static {
+  cursor: default;
+}
+
+.beta-studio-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.beta-studio-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.beta-preset-pill {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid rgba(229, 193, 88, 0.28);
+  background: rgba(229, 193, 88, 0.08);
+  color: #e5c158;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  cursor: pointer;
+}
+
+.beta-studio-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+@media (max-width: 540px) {
+  .beta-studio-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.beta-studio-input,
+.beta-studio-textarea {
+  width: 100%;
+  padding: 11px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: #f4f4f5;
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.beta-studio-input:focus,
+.beta-studio-textarea:focus {
+  border-color: #e5c158;
+}
+
+.beta-studio-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+}

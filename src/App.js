@@ -36,6 +36,9 @@ const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
 const BetaLabSuite = lazy(() => import('./components/beta/BetaLabSuite'));
 const BetaFeedbackSection = lazy(() => import('./components/beta/BetaLabSuite').then(m => ({ default: m.BetaFeedbackSection })));
+const BetaProofBar = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaProofBar })));
+const BetaCareerRail = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaCareerRail })));
+const BetaInquiryStudio = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaInquiryStudio })));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -435,6 +438,7 @@ function AppContent() {
         {mode === 'beta' && (
           <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '220px' }} />}>
             <BetaLabSuite />
+            <BetaProofBar />
           </Suspense>
         )}
 
@@ -480,6 +484,8 @@ function AppContent() {
 
       {mode === 'beta' && (
         <Suspense fallback={null}>
+          <BetaCareerRail />
+          <BetaInquiryStudio />
           <BetaFeedbackSection />
         </Suspense>
       )}

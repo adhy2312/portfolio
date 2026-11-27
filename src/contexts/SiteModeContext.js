@@ -232,8 +232,19 @@ export function SiteModeProvider({ children }) {
     }
 
     if (mode === MODES.BETA) {
-      // Clean next-gen UI redesign without Experimental-only lab/stack clutter
-      const hiddenInBeta = ['DigitalScars', 'digitalScarsSection', 'StackVisualizer', 'stackVisualizerSection', 'ScrollCanvasSequence'];
+      // Clean next-gen UI redesign without Experimental-only lab/stack clutter;
+      // replaces StatsBento/TrustedBy, Experience/Timeline, CallToAction/Contact with unified Beta sections
+      const hiddenInBeta = [
+        'DigitalScars', 'digitalScarsSection',
+        'StackVisualizer', 'stackVisualizerSection',
+        'ScrollCanvasSequence',
+        'StatsBento', 'statsBento',
+        'TrustedBy', 'trustedBySection',
+        'Experience', 'experience',
+        'Timeline', 'timelineSection',
+        'CallToAction', 'callToActionSection',
+        'Contact', 'contact',
+      ];
       return !hiddenInBeta.includes(sectionName);
     }
 

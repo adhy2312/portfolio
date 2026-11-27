@@ -89,6 +89,19 @@ body.mode-beta .section-title span:not(.section-title-inner):not(.section-title-
   background: none !important;
 }
 
+body.mode-beta .section-title-hover-text {
+  display: none !important;
+}
+
+body.mode-beta .section-title[data-hover] {
+  cursor: default !important;
+}
+
+body.mode-beta .section-title[data-hover]:hover .section-title-content {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
 body.mode-beta .section-label {
   background: rgba(229, 193, 88, 0.08) !important;
   border: 1px solid rgba(229, 193, 88, 0.24) !important;
@@ -435,24 +448,28 @@ body.mode-beta .section-container {
 .hero-beta-portrait-frame {
   position: relative;
   z-index: 2;
-  border: none;
-  background: transparent;
-  box-shadow: none;
-  padding: 0;
+  border-radius: 26px;
+  padding: 12px 12px 0;
+  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.14), rgba(14, 14, 22, 0.78) 72%);
+  border: 1px solid rgba(229, 193, 88, 0.24);
+  box-shadow: 0 24px 56px rgba(0, 0, 0, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform: rotateX(var(--rx)) rotateY(var(--ry));
   will-change: transform;
-  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.hero-beta-portrait-stage:hover .hero-beta-portrait-frame {
+  border-color: rgba(229, 193, 88, 0.48);
 }
 
 .hero-beta-portrait-img {
   display: block;
-  width: min(400px, 100%);
-  max-height: 520px;
+  width: min(390px, 100%);
+  max-height: 500px;
   object-fit: contain;
   object-position: bottom center;
   mix-blend-mode: lighten;
-  -webkit-mask-image: radial-gradient(ellipse 76% 82% at 50% 45%, #000 50%, transparent 94%);
-  mask-image: radial-gradient(ellipse 76% 82% at 50% 45%, #000 50%, transparent 94%);
   user-select: none;
   pointer-events: none;
 }
