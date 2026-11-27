@@ -4,40 +4,40 @@
    ══════════════════════════════════════════════════════════════════ */
 
 body.mode-beta {
-  --bg-primary: #060609 !important;
-  --bg-secondary: #0c0c12 !important;
-  --bg-tertiary: #14141d !important;
-  --bg-card: rgba(16, 16, 22, 0.78) !important;
-  --bg-card-hover: rgba(24, 24, 34, 0.92) !important;
+  --bg-primary: #0f131d !important;
+  --bg-secondary: #151a27 !important;
+  --bg-tertiary: #1c2233 !important;
+  --bg-card: #151a27 !important;
+  --bg-card-hover: #1c2334 !important;
   --text-primary: #f4f4f5 !important;
-  --text-secondary: #a1a1aa !important;
-  --text-muted: #71717a !important;
-  --accent-primary: #e5c158 !important;
-  --accent-primary-rgb: 229, 193, 88 !important;
-  --border-brutal: 1px solid rgba(255, 255, 255, 0.09) !important;
+  --text-secondary: #b4bcd0 !important;
+  --text-muted: #8690a8 !important;
+  --accent-primary: var(--beta-accent, #e5c158) !important;
+  --accent-primary-rgb: var(--beta-accent-rgb, 229, 193, 88) !important;
+  --border-brutal: 1px solid rgba(255, 255, 255, 0.1) !important;
   --border-heavy: 1px solid rgba(255, 255, 255, 0.16) !important;
-  --shadow-brutal: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
-  --shadow-brutal-deep: 0 24px 60px rgba(0, 0, 0, 0.72) !important;
+  --shadow-brutal: 0 12px 32px rgba(0, 0, 0, 0.35) !important;
+  --shadow-brutal-deep: 0 22px 54px rgba(0, 0, 0, 0.5) !important;
   --border-radius-bento: 20px !important;
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
 }
 
 body.mode-beta:not(.dark-mode) {
-  --bg-primary: #060609 !important;
+  --bg-primary: #0f131d !important;
 }
 
 body.mode-beta.dark-mode {
-  --bg-primary: #09090b !important;
-  --bg-secondary: #111115 !important;
-  --bg-tertiary: #18181f !important;
-  --bg-card: rgba(20, 20, 26, 0.86) !important;
-  --bg-card-hover: rgba(28, 28, 36, 0.96) !important;
+  --bg-primary: #0b0e16 !important;
+  --bg-secondary: #111521 !important;
+  --bg-tertiary: #171c2b !important;
+  --bg-card: #121622 !important;
+  --bg-card-hover: #191f30 !important;
   --text-primary: #fafafa !important;
   --text-secondary: #a1a1aa !important;
   --text-muted: #71717a !important;
-  --accent-primary: #818cf8 !important;
-  --accent-primary-rgb: 129, 140, 248 !important;
+  --accent-primary: var(--beta-accent, #818cf8) !important;
+  --accent-primary-rgb: var(--beta-accent-rgb, 129, 140, 248) !important;
   --border-brutal: 1px solid rgba(255, 255, 255, 0.09) !important;
   --border-heavy: 1px solid rgba(255, 255, 255, 0.14) !important;
   --shadow-brutal: 0 8px 28px rgba(0, 0, 0, 0.4) !important;
@@ -84,8 +84,8 @@ body.mode-beta .section-title span:not(.section-title-inner):not(.section-title-
   font-family: 'Playfair Display', serif !important;
   font-style: italic !important;
   font-weight: 600 !important;
-  color: #e5c158 !important;
-  -webkit-text-fill-color: #e5c158 !important;
+  color: var(--beta-accent, #e5c158) !important;
+  -webkit-text-fill-color: var(--beta-accent, #e5c158) !important;
   background: none !important;
 }
 
@@ -104,11 +104,11 @@ body.mode-beta .section-title[data-hover]:hover .section-title-content {
 
 body.mode-beta .section-label {
   white-space: nowrap !important;
-  background: rgba(229, 193, 88, 0.08) !important;
-  border: 1px solid rgba(229, 193, 88, 0.24) !important;
-  border-top: 1px solid rgba(229, 193, 88, 0.24) !important;
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.1) !important;
+  border: 1px solid rgba(var(--beta-accent-rgb, 229, 193, 88), 0.28) !important;
+  border-top: 1px solid rgba(var(--beta-accent-rgb, 229, 193, 88), 0.28) !important;
   border-radius: 999px !important;
-  color: #e5c158 !important;
+  color: var(--beta-accent, #e5c158) !important;
   box-shadow: none !important;
 }
 
@@ -215,14 +215,14 @@ body.mode-beta.dark-mode .nav-resume-btn {
 /* About Stat Boxes — high-contrast dark cards */
 body.mode-beta .about-stat,
 body.mode-beta .about-stat:nth-child(n) {
-  background: #12121c !important;
+  background: #161b29 !important;
   border: 1px solid rgba(255, 255, 255, 0.12) !important;
   border-radius: 16px !important;
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35) !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.3) !important;
 }
 
 body.mode-beta .about-stat .stat-value {
-  color: #e5c158 !important;
+  color: var(--beta-accent, #e5c158) !important;
 }
 
 body.mode-beta .about-stat .stat-label {
@@ -274,9 +274,9 @@ body.mode-beta .ach-emoji {
   justify-content: center;
   padding: 112px 24px 72px;
   overflow: hidden;
-  background: radial-gradient(ellipse at 70% 20%, rgba(229, 193, 88, 0.12), transparent 55%),
-              radial-gradient(ellipse at 20% 80%, rgba(99, 102, 241, 0.10), transparent 55%),
-              #050508;
+  background: radial-gradient(ellipse at 70% 22%, rgba(var(--beta-accent-rgb, 229, 193, 88), 0.13), transparent 55%),
+              radial-gradient(ellipse at 18% 80%, rgba(99, 102, 241, 0.12), transparent 58%),
+              linear-gradient(180deg, #101421 0%, #0f131d 100%);
 }
 
 .hero-beta-beam {
@@ -360,7 +360,7 @@ body.mode-beta .ach-emoji {
   font-family: 'Playfair Display', serif;
   font-style: italic;
   font-weight: 500;
-  color: #e5c158;
+  color: var(--beta-accent, #e5c158);
 }
 
 .hero-beta-logline {
@@ -390,14 +390,14 @@ body.mode-beta .ach-emoji {
   padding: 12px 24px;
   border-radius: 999px;
   border: none;
-  background: #e5c158;
+  background: var(--beta-accent, #e5c158);
   color: #09090b;
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   font-size: 0.9rem;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 28px rgba(229, 193, 88, 0.28);
+  box-shadow: 0 8px 28px rgba(var(--beta-accent-rgb, 229, 193, 88), 0.28);
 }
 
 .hero-beta-cta-primary:hover {
@@ -624,7 +624,7 @@ body.mode-beta .nav-link:hover {
 
 body.mode-beta .footer,
 body.mode-beta .footer-link {
-  background: #050508 !important;
+  background: #0c0f18 !important;
   color: #a1a1aa !important;
 }
 

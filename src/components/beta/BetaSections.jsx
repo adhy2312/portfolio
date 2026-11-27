@@ -89,18 +89,6 @@ const CAREER_MILESTONES = [
       'Mentored junior photographers in composition, low-light shooting, and documentary framing.',
     ],
   },
-  {
-    id: 'ece-eng-2025',
-    year: '2025',
-    period: 'Jan 2025 — Present',
-    org: 'Full-Stack, AI & ECE Systems',
-    role: 'Developer & Hardware Builder',
-    tag: 'Engineering',
-    bullets: [
-      'Built production web apps with React, Next.js, Node.js, Sanity CMS, and Gemini-powered AI agents.',
-      'Designed embedded IoT & hardware workflows spanning ESP32, STM32, KiCad BOM automation, and SDR.',
-    ],
-  },
 ];
 
 export function BetaCareerRail() {
@@ -110,7 +98,6 @@ export function BetaCareerRail() {
   const tags = [
     { id: 'All', label: t('career.filterAll', 'All') },
     { id: 'Leadership', label: t('career.filterLeadership', 'Leadership') },
-    { id: 'Engineering', label: t('career.filterEngineering', 'Engineering') },
     { id: 'Community', label: t('career.filterCommunity', 'Community') },
   ];
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteMode, MODES } from '../contexts/SiteModeContext';
-import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet, FiVolume2, FiSliders, FiActivity } from 'react-icons/fi';
+import { FiSettings, FiX, FiBriefcase, FiCamera, FiZap, FiEye, FiMonitor, FiType, FiMousePointer, FiDroplet, FiVolume2, FiSliders, FiActivity, FiSun, FiMoon } from 'react-icons/fi';
 import './SiteModeSwitcher.css';
 
 // ─── Color Theme Palettes ───
@@ -150,10 +150,19 @@ const COLOR_THEMES = [
   },
 ];
 
+const BETA_THEME_ACCENTS = {
+  default: { accent: '#e5c158', rgb: '229, 193, 88' },
+  red:     { accent: '#f87171', rgb: '248, 113, 113' },
+  green:   { accent: '#34d399', rgb: '52, 211, 153' },
+  blue:    { accent: '#60a5fa', rgb: '96, 165, 250' },
+  cyan:    { accent: '#22d3ee', rgb: '34, 211, 238' },
+  teal:    { accent: '#2dd4bf', rgb: '45, 212, 191' },
+};
+
 const THEME_STORAGE_KEY = 'adhy_color_theme';
 
 export const SiteModePanel = ({ inline = false, onClose }) => {
-  const { mode, setMode, a11y, toggleA11y, isPhotographer } = useSiteMode();
+  const { mode, setMode, a11y, toggleA11y, isPhotographer, isDarkMode, toggleDarkMode } = useSiteMode();
 
   const [colorTheme, setColorTheme] = useState(() => {
     try { return localStorage.getItem(THEME_STORAGE_KEY) || 'default'; } catch { return 'default'; }
@@ -176,6 +185,9 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
       });
       Object.entries(theme.vars).forEach(([k, v]) => root.setProperty(k, v));
     }
+    const betaPalette = BETA_THEME_ACCENTS[themeKey] || BETA_THEME_ACCENTS.default;
+    root.setProperty('--beta-accent', betaPalette.accent);
+    root.setProperty('--beta-accent-rgb', betaPalette.rgb);
     try { localStorage.setItem(THEME_STORAGE_KEY, themeKey); } catch {}
     setColorTheme(themeKey);
   };
@@ -264,6 +276,14 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
         <span className="smp-label">EXPERIENCE & CONTROLS</span>
       </div>
       <div className="smp-a11y">
+        <button
+          className={`smp-a11y-btn ${isDarkMode ? 'smp-a11y-active' : ''}`}
+          onClick={toggleDarkMode}
+        >
+          {isDarkMode ? <FiMoon size={14} /> : <FiSun size={14} />}
+          <span>{isDarkMode ? 'Deep Obsidian Theme' : 'Slate Studio Theme'}</span>
+          <span className="smp-toggle-dot" />
+        </button>
         {advancedSettings.map((f) => (
           <button
             key={f.key}

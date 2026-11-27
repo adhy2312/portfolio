@@ -484,8 +484,8 @@ function AppContent() {
         {mode === 'beta' && (
           <Suspense fallback={null}>
             <BetaCareerRail />
-            <BetaInquiryStudio />
             <BetaFeedbackSection />
+            <BetaInquiryStudio />
             <Footer />
           </Suspense>
         )}
