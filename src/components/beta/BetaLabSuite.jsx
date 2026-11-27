@@ -316,35 +316,85 @@ function BetaWorkspaceBar() {
   );
 }
 
+const GUESTBOOK_STORAGE_KEY = 'beta-digital-guestbook-v1';
+
+const DEFAULT_GUESTBOOK_ENTRIES = [
+  {
+    id: 'seed-1',
+    name: 'Kiran V.',
+    category: 'Collab',
+    message: 'Loved the ESP32 + KiCad integration. Would be awesome to collaborate on an open-source hardware dashboard.',
+    date: 'Nov 2026',
+  },
+  {
+    id: 'seed-2',
+    name: 'Meera S.',
+    category: 'Feedback',
+    message: 'The Skill-to-Project cross-highlighter and Solari board make browsing way faster than standard portfolios.',
+    date: 'Nov 2026',
+  },
+];
+
 export function BetaFeedbackSection() {
-  const { t } = useSiteMode();
   const [fbName, setFbName] = useState('');
-  const [fbEmail, setFbEmail] = useState('');
-  const [fbCategory, setFbCategory] = useState('Visual / UI');
+  const [fbCategory, setFbCategory] = useState('Message');
   const [fbMessage, setFbMessage] = useState('');
+  const [notifyEmail, setNotifyEmail] = useState(false);
   const [sent, setSent] = useState(false);
+  const [filterCat, setFilterCat] = useState('All');
+  const [entries, setEntries] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(GUESTBOOK_STORAGE_KEY) || 'null');
+      if (Array.isArray(saved) && saved.length > 0) return saved;
+    } catch {}
+    return DEFAULT_GUESTBOOK_ENTRIES;
+  });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!fbMessage.trim()) return;
-    const subject = encodeURIComponent(`[Beta Feedback - ${fbCategory}] from ${fbName || 'Portfolio Visitor'}`);
-    const body = encodeURIComponent(
-      `Category: ${fbCategory}\nFrom: ${fbName || 'Anonymous'} (${fbEmail || 'No email provided'})\n\n${fbMessage}`
-    );
-    window.location.href = `mailto:adhithyamohan2312@gmail.com?subject=${subject}&body=${body}`;
+    const msg = fbMessage.trim();
+    if (!msg) return;
+
+    const newEntry = {
+      id: `gb-${Date.now()}`,
+      name: fbName.trim() || 'Anonymous Visitor',
+      category: fbCategory,
+      message: msg,
+      date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    };
+
+    const nextEntries = [newEntry, ...entries];
+    setEntries(nextEntries);
+    try {
+      localStorage.setItem(GUESTBOOK_STORAGE_KEY, JSON.stringify(nextEntries));
+    } catch {}
+
+    if (notifyEmail) {
+      const subject = encodeURIComponent(`[Guestbook - ${fbCategory}] from ${newEntry.name}`);
+      const body = encodeURIComponent(`Category: ${fbCategory}\nFrom: ${newEntry.name}\n\n${msg}`);
+      window.location.href = `mailto:adhithyamohan2312@gmail.com?subject=${subject}&body=${body}`;
+    }
+
+    setFbName('');
+    setFbMessage('');
     setSent(true);
-    setTimeout(() => setSent(false), 4000);
+    setTimeout(() => setSent(false), 3200);
   };
 
+  const visibleEntries = filterCat === 'All'
+    ? entries
+    : entries.filter((item) => item.category === filterCat);
+
   return (
-    <section className="beta-feedback-section" id="beta-feedback">
+    <section className="beta-feedback-section" id="beta-guestbook">
       <div className="beta-suite-card">
         <div className="beta-badges-row">
-          <span className="beta-pill">BETA FEEDBACK // DIRECT TO ADHITHYA</span>
+          <span className="beta-pill">DIGITAL GUESTBOOK // SIGN THE WALL</span>
+          <span className="beta-progress-pill">{entries.length} entries</span>
         </div>
-        <h3 className="beta-title">{t('feedback.title', 'Beta Feedback')}</h3>
+        <h3 className="beta-title">Digital Guestbook</h3>
         <p className="beta-subtitle" style={{ marginBottom: '16px' }}>
-          {t('feedback.desc')}
+          Leave a message, suggestion, collaboration request, or quick feedback — pinned straight to the wall.
         </p>
 
         <form className="beta-feedback-form" onSubmit={handleSubmit}>
@@ -352,46 +402,71 @@ export function BetaFeedbackSection() {
             <input
               type="text"
               className="beta-fb-input"
-              placeholder="Your name (optional)"
+              placeholder="Your name or handle (optional)"
               value={fbName}
               onChange={(e) => setFbName(e.target.value)}
-            />
-            <input
-              type="email"
-              className="beta-fb-input"
-              placeholder="Your email (optional)"
-              value={fbEmail}
-              onChange={(e) => setFbEmail(e.target.value)}
             />
             <select
               className="beta-fb-input"
               value={fbCategory}
               onChange={(e) => setFbCategory(e.target.value)}
-              aria-label="Feedback category"
+              aria-label="Guestbook entry type"
             >
-              <option value="Visual / UI">Visual / UI</option>
-              <option value="AI / Mini-Adhy">AI / Mini-Adhy</option>
-              <option value="Language / Translation">Language / Translation</option>
-              <option value="Bug Report">Bug Report</option>
+              <option value="Message">Message</option>
+              <option value="Suggestion">Suggestion</option>
+              <option value="Collab">Collaboration Request</option>
+              <option value="Feedback">Feedback</option>
             </select>
+            <label className="beta-gb-email-check">
+              <input
+                type="checkbox"
+                checked={notifyEmail}
+                onChange={(e) => setNotifyEmail(e.target.checked)}
+              />
+              <span>Also send via email</span>
+            </label>
           </div>
 
           <textarea
             className="beta-fb-textarea"
             rows={3}
-            placeholder="Share your thoughts, bugs, or feature ideas for Beta..."
+            placeholder="Write a note, suggest a feature, or pitch a collaboration..."
             value={fbMessage}
             onChange={(e) => setFbMessage(e.target.value)}
             required
           />
 
           <div className="beta-feedback-footer">
-            <span className="beta-fb-target">Target: adhithyamohan2312@gmail.com</span>
+            <div className="beta-gb-filters">
+              {['All', 'Message', 'Suggestion', 'Collab', 'Feedback'].map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  className={`beta-fx-pill ${filterCat === cat ? 'is-on' : ''}`}
+                  onClick={() => setFilterCat(cat)}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
             <button type="submit" className="beta-btn">
-              {sent ? <><FiCheckCircle size={13} /> Opening Mail Client…</> : <><FiSend size={13} /> {t('feedback.send', 'Send Feedback')}</>}
+              {sent ? <><FiCheckCircle size={13} /> Pinned to Wall!</> : <><FiSend size={13} /> Sign Guestbook</>}
             </button>
           </div>
         </form>
+
+        <div className="beta-gb-wall">
+          {visibleEntries.map((item) => (
+            <article key={item.id} className="beta-gb-entry">
+              <div className="beta-gb-entry-top">
+                <strong className="beta-gb-author">{item.name}</strong>
+                <span className="beta-gb-tag">{item.category}</span>
+                <span className="beta-gb-date">{item.date}</span>
+              </div>
+              <p className="beta-gb-msg">{item.message}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

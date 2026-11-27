@@ -306,6 +306,77 @@
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
+/* ── Digital Guestbook Wall ── */
+.beta-gb-email-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  color: #d4d4d8;
+  cursor: pointer;
+}
+
+.beta-gb-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.beta-gb-wall {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 12px;
+}
+
+.beta-gb-entry {
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.beta-gb-entry-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.beta-gb-author {
+  font-size: 0.86rem;
+  color: #fafafa;
+}
+
+.beta-gb-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.15);
+  color: var(--beta-accent, #e5c158);
+}
+
+.beta-gb-date {
+  margin-left: auto;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  color: #71717a;
+}
+
+.beta-gb-msg {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  color: #d4d4d8;
+}
+
 .beta-lang-wrap {
   display: inline-flex;
   align-items: center;

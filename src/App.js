@@ -40,6 +40,7 @@ const BetaProofBar = lazy(() => import('./components/beta/BetaSections').then(m 
 const BetaCareerRail = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaCareerRail })));
 const BetaInquiryStudio = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaInquiryStudio })));
 const BetaAmbientController = lazy(() => import('./components/beta/BetaAmbientController'));
+const NotFoundTerminal = lazy(() => import('./components/NotFoundTerminal'));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -548,11 +549,21 @@ function App() {
     );
   };
 
+  const checkIsNotFound = () => {
+    if (typeof window === 'undefined') return false;
+    const p = (window.location.pathname || '/').toLowerCase();
+    if (p === '/' || p === '' || p === '/index.html') return false;
+    if (p === '/agentp' || p === '/agentp/' || p.startsWith('/agentp/')) return false;
+    return true;
+  };
+
   const [isAgentP, setIsAgentP] = useState(checkIsAgentP);
+  const [isNotFound, setIsNotFound] = useState(checkIsNotFound);
 
   useEffect(() => {
     const handleLocationChange = () => {
       setIsAgentP(checkIsAgentP());
+      setIsNotFound(checkIsNotFound());
     };
 
     window.addEventListener('popstate', handleLocationChange);
@@ -597,6 +608,28 @@ function App() {
             setIsAgentP(false);
           }} />
         </div>
+      </ErrorBoundary>
+    );
+  }
+
+  if (isNotFound) {
+    return (
+      <ErrorBoundary>
+        <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0b0e16' }} />}>
+          <NotFoundTerminal
+            path={typeof window !== 'undefined' ? window.location.pathname : '/unknown'}
+            onGoHome={() => {
+              try { window.history.pushState({}, '', '/'); } catch {}
+              setIsNotFound(false);
+              setIsAgentP(false);
+            }}
+            onOpenAgentPortal={() => {
+              try { window.history.pushState({}, '', '/agentp'); } catch { window.location.hash = '#agentp'; }
+              setIsNotFound(false);
+              setIsAgentP(true);
+            }}
+          />
+        </Suspense>
       </ErrorBoundary>
     );
   }
