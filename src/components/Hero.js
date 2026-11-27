@@ -255,7 +255,7 @@ const Hero = () => {
             </div>
             <div className="hero-beta-portrait-badge">
               <span className="hero-beta-rec-dot" />
-              <span>DIRECTOR&apos;S CUT // BETA</span>
+              <span>ME</span>
             </div>
           </div>
         </div>

@@ -491,8 +491,8 @@ body.mode-beta .ach-emoji {
   position: absolute;
   inset: -18%;
   z-index: 0;
-  background: radial-gradient(circle at 50% 42%, rgba(229, 193, 88, 0.34) 0%, rgba(229, 193, 88, 0.1) 38%, transparent 68%);
-  opacity: 0.72;
+  background: radial-gradient(circle at 50% 42%, rgba(var(--beta-accent-rgb, 229, 193, 88), 0.2) 0%, rgba(var(--beta-accent-rgb, 229, 193, 88), 0.06) 36%, transparent 64%);
+  opacity: 0.45;
   transform: translate3d(var(--gx), var(--gy), 0);
   will-change: transform, opacity;
   transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
@@ -500,7 +500,7 @@ body.mode-beta .ach-emoji {
 }
 
 .hero-beta-portrait-stage:hover .hero-beta-portrait-aura {
-  opacity: 1;
+  opacity: 0.72;
 }
 
 .hero-beta-portrait-frame {
@@ -539,10 +539,10 @@ body.mode-beta .ach-emoji {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 32%;
+  height: 30%;
   z-index: 3;
   pointer-events: none;
-  background: linear-gradient(to top, #050508 6%, rgba(5, 5, 8, 0.65) 48%, transparent 100%);
+  background: linear-gradient(to top, #0c0f18 6%, rgba(12, 15, 24, 0.65) 48%, transparent 100%);
 }
 
 /* ─── GLOBAL BETA CONTRAST & READABILITY FIXES ─── */
@@ -571,6 +571,44 @@ body.mode-beta .section-label,
 body.mode-beta .contact-info-label,
 body.mode-beta .metric-label {
   color: #e5c158 !important;
+}
+
+/* MyWorks (Featured Projects) clean dark-theme pills, icons & tags */
+body.mode-beta .filter-btn {
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #cbd5e1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 999px !important;
+  box-shadow: none !important;
+}
+
+body.mode-beta .filter-btn.filter-btn-active {
+  background: var(--beta-accent, #e5c158) !important;
+  color: #09090b !important;
+  border-color: var(--beta-accent, #e5c158) !important;
+  font-weight: 700 !important;
+}
+
+body.mode-beta .vault-icon {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+body.mode-beta .vault-status,
+body.mode-beta .vault-tag,
+body.mode-beta .vault-btn,
+body.mode-beta .vault-locked {
+  background: rgba(255, 255, 255, 0.06) !important;
+  color: #e4e4e7 !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: none !important;
+}
+
+body.mode-beta .vault-tag {
+  border-radius: 999px !important;
+  color: #cbd5e1 !important;
 }
 
 body.mode-beta .vault-card,
