@@ -854,5 +854,165 @@ body.mode-beta .vault-card.vault-card--skill-highlighted {
   border-color: var(--beta-accent, #e5c158) !important;
 }
 
+/* ── #31 Hero 2 AM vs 2 PM Mood Switch & #84 Parallax Depth Layers ── */
+.hero-beta-top-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hero-beta-mood-switch {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.hero-beta-mood-btn {
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hero-beta-mood-btn.is-active {
+  background: var(--beta-accent, #e5c158);
+  color: #09090b;
+}
+
+.hero-beta-portrait-img {
+  transform: translate3d(var(--ix, 0px), var(--iy, 0px), 12px);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.hero-beta-portrait-badge {
+  transform: translate3d(var(--bx, 0px), var(--by, 0px), 34px);
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── #76 Live IST Sky Tint (3% ambient wash) ── */
+body.mode-beta[data-ist-sky="dawn"] {
+  background-image: radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.045), transparent 55%) !important;
+}
+body.mode-beta[data-ist-sky="day"] {
+  background-image: radial-gradient(circle at 80% 10%, rgba(56, 189, 248, 0.035), transparent 55%) !important;
+}
+body.mode-beta[data-ist-sky="dusk"] {
+  background-image: radial-gradient(circle at 80% 10%, rgba(249, 115, 22, 0.045), transparent 55%) !important;
+}
+body.mode-beta[data-ist-sky="night"] {
+  background-image: radial-gradient(circle at 80% 10%, rgba(99, 102, 241, 0.045), transparent 55%) !important;
+}
+
+/* ── #82 Paper-Grain (35mm film texture) ── */
+body.mode-beta.beta-paper-grain::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9990;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── #77 Monsoon Rain Canvas ── */
+.beta-monsoon-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9985;
+}
+
+/* ── #30 Ink-Bleed Hover Reveal ── */
+body.mode-beta .vault-title,
+body.mode-beta .beta-rail-role {
+  color: #d4d4d8 !important;
+  transition: color 0.22s ease, text-shadow 0.22s ease;
+}
+
+body.mode-beta .vault-card:hover .vault-title,
+body.mode-beta .beta-rail-card:hover .beta-rail-role {
+  color: #ffffff !important;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.14);
+}
+
+/* ── #12 Thermal Glow Mode ── */
+body.mode-beta.beta-thermal-mode .vault-card,
+body.mode-beta.beta-thermal-mode .beta-rail-card,
+body.mode-beta.beta-thermal-mode .about-stat {
+  transition: border-color 0.9s ease, box-shadow 0.9s ease, background 0.9s ease !important;
+}
+
+body.mode-beta.beta-thermal-mode .vault-card:hover,
+body.mode-beta.beta-thermal-mode .beta-rail-card:hover,
+body.mode-beta.beta-thermal-mode .about-stat:hover {
+  border-color: rgba(249, 115, 22, 0.62) !important;
+  box-shadow: 0 14px 36px rgba(239, 68, 68, 0.18), inset 0 0 28px rgba(249, 115, 22, 0.08) !important;
+}
+
+/* ── #3 KiCad Schematic Easter-Egg Layer ── */
+body.mode-beta.beta-kicad-mode .vault-card,
+body.mode-beta.beta-kicad-mode .beta-rail-card,
+body.mode-beta.beta-kicad-mode .skill-panel {
+  background-image: url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23e5c158' stroke-opacity='0.08' stroke-width='1'%3E%3Cpath d='M0 24 H36 L48 36 H84 M20 120 V80 L36 64 H72 M96 0 V48 L80 64 V120'/%3E%3Ccircle cx='36' cy='24' r='2.5'/%3E%3Ccircle cx='84' cy='36' r='2.5'/%3E%3Ccircle cx='72' cy='64' r='2.5'/%3E%3C/g%3E%3C/svg%3E") !important;
+  background-size: 120px 120px !important;
+}
+
+/* ── #88 Zero-Motion Zen Reading Mode ── */
+body.mode-beta.beta-zen-mode *,
+body.mode-beta.beta-zen-mode *::before,
+body.mode-beta.beta-zen-mode *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+body.mode-beta.beta-zen-mode .vault-card,
+body.mode-beta.beta-zen-mode .beta-rail-card,
+body.mode-beta.beta-zen-mode .beta-studio-grid {
+  box-shadow: none !important;
+  border-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* ── #85 Print-Ready Portfolio Mode ── */
+@media print {
+  body.mode-beta {
+    background: #ffffff !important;
+    color: #111827 !important;
+  }
+  body.mode-beta .navbar,
+  body.mode-beta .site-mode-switcher,
+  body.mode-beta .ma-dock,
+  body.mode-beta .ma-window,
+  body.mode-beta .beta-suite-section,
+  body.mode-beta .beta-feedback-section,
+  body.mode-beta .beta-monsoon-canvas,
+  body.mode-beta .hero-beta-scroll-cue {
+    display: none !important;
+  }
+  body.mode-beta .vault-card,
+  body.mode-beta .beta-rail-card,
+  body.mode-beta .beta-proof-bar,
+  body.mode-beta .beta-studio-grid {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid #d1d5db !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  body.mode-beta h1, body.mode-beta h2, body.mode-beta h3, body.mode-beta p, body.mode-beta li, body.mode-beta span {
+    color: #111827 !important;
+  }
+}
+
+
 
 

@@ -1,7 +1,8 @@
-import React, { Component, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { FiSun, FiMoon, FiArrowUpRight, FiCompass, FiFileText, FiDownload, FiX, FiGlobe, FiSend, FiCheckCircle } from 'react-icons/fi';
 import { useSiteMode, MODES } from '../../contexts/SiteModeContext';
 import { useConsciousness } from '../../contexts/ConsciousnessContext';
+import { readAmbientFlags, writeAmbientFlags } from './BetaAmbientController';
 import './BetaLabSuite.css';
 
 class BetaErrorBoundary extends Component {
@@ -42,6 +43,43 @@ function BetaWorkspaceBar() {
   const { setMode, isDarkMode, toggleDarkMode, lang, setLang, t, detectedBrowserLang, siteLanguages } = useSiteMode();
   const { digitalEchoes, activeSection } = useConsciousness();
   const [showResumeModal, setShowResumeModal] = useState(false);
+  const [uptimeSec, setUptimeSec] = useState(0);
+  const [scrollPct, setScrollPct] = useState(0);
+  const [ambientFlags, setAmbientFlags] = useState(readAmbientFlags);
+
+  useEffect(() => {
+    const id = setInterval(() => setUptimeSec((s) => s + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    let raf = null;
+    const onScroll = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(() => {
+        raf = null;
+        const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        setScrollPct(Math.min(100, Math.max(0, Math.round((window.scrollY / max) * 100))));
+      });
+    };
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  const toggleAmbient = (key) => {
+    setAmbientFlags((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      writeAmbientFlags(next);
+      return next;
+    });
+  };
+
+  const uptimeStr = `${String(Math.floor(uptimeSec / 60)).padStart(2, '0')}:${String(uptimeSec % 60).padStart(2, '0')}`;
+  const vuAngle = -42 + (scrollPct / 100) * 84;
 
   const exploredSet = new Set(Object.keys(digitalEchoes?.sectionHeatmap || {}));
   if (activeSection) exploredSet.add(activeSection);
@@ -59,6 +97,26 @@ function BetaWorkspaceBar() {
           <div className="beta-brand-block">
             <div className="beta-badges-row">
               <span className="beta-pill">BETA v2.0 // STUDIO REDESIGN</span>
+              <span className="beta-deploy-pill" title="Production Deployment Status">
+                <span className="beta-deploy-dot" aria-hidden="true" />
+                PROD · HEALTHY
+              </span>
+              <span className="beta-uptime-pill" title="Active Session Uptime">
+                UPTIME {uptimeStr}
+              </span>
+              <span className="beta-vu-meter" title={`Scroll Depth: ${scrollPct}%`} aria-label={`Scroll depth ${scrollPct} percent`}>
+                <svg viewBox="0 0 36 20" width="32" height="18" aria-hidden="true">
+                  <path d="M4 18 A14 14 0 0 1 32 18" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
+                  <path d="M24 7 A14 14 0 0 1 32 18" fill="none" stroke="#e5c158" strokeWidth="2" />
+                  <line
+                    x1="18" y1="18" x2="18" y2="5"
+                    stroke="#fafafa" strokeWidth="1.5" strokeLinecap="round"
+                    style={{ transformOrigin: '18px 18px', transform: `rotate(${vuAngle}deg)`, transition: 'transform 120ms ease-out' }}
+                  />
+                  <circle cx="18" cy="18" r="2" fill="#e5c158" />
+                </svg>
+                <span>{scrollPct}%</span>
+              </span>
               <span className="beta-progress-pill" title="Sections explored in this session">
                 {exploredCount}/6 {t('beta.explored', 'sections explored')}
               </span>
@@ -119,6 +177,27 @@ function BetaWorkspaceBar() {
               </button>
             ))}
           </div>
+        </div>
+
+        <div className="beta-lab-toggles">
+          <span className="beta-jump-label">LAB FX:</span>
+          {[
+            { key: 'paperGrain', label: '35mm Grain' },
+            { key: 'monsoonRain', label: 'Monsoon Rain' },
+            { key: 'zenMode', label: 'Zen Reading' },
+            { key: 'thermalGlow', label: 'Thermal Glow' },
+            { key: 'kicadLayer', label: 'KiCad PCB' },
+          ].map((fx) => (
+            <button
+              key={fx.key}
+              type="button"
+              className={`beta-fx-pill ${ambientFlags[fx.key] ? 'is-on' : ''}`}
+              onClick={() => toggleAmbient(fx.key)}
+              aria-pressed={ambientFlags[fx.key]}
+            >
+              {fx.label}
+            </button>
+          ))}
         </div>
       </div>
 

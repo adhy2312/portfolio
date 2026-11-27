@@ -39,6 +39,7 @@ const BetaFeedbackSection = lazy(() => import('./components/beta/BetaLabSuite').
 const BetaProofBar = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaProofBar })));
 const BetaCareerRail = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaCareerRail })));
 const BetaInquiryStudio = lazy(() => import('./components/beta/BetaSections').then(m => ({ default: m.BetaInquiryStudio })));
+const BetaAmbientController = lazy(() => import('./components/beta/BetaAmbientController'));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -483,6 +484,7 @@ function AppContent() {
 
         {mode === 'beta' && (
           <Suspense fallback={null}>
+            <BetaAmbientController />
             <BetaCareerRail />
             <BetaFeedbackSection />
             <BetaInquiryStudio />

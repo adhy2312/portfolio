@@ -413,6 +413,20 @@ export function BetaInquiryStudio() {
               <span>Kerala, India</span>
             </span>
           </div>
+
+          <div className="beta-open-matrix" aria-label="Availability Matrix">
+            {[
+              { role: 'Internships', status: 'Yes', tone: 'open' },
+              { role: 'Freelance', status: 'Select', tone: 'select' },
+              { role: 'Hardware', status: 'Yes', tone: 'open' },
+              { role: 'Speaking', status: 'Yes', tone: 'open' },
+            ].map((cell) => (
+              <div key={cell.role} className="beta-open-cell">
+                <span className="beta-open-role">{cell.role}</span>
+                <span className={`beta-open-status is-${cell.tone}`}>{cell.status}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="beta-studio-form">

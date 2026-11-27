@@ -642,6 +642,42 @@
   cursor: pointer;
 }
 
+/* ── Open-To Availability Matrix (#92) ── */
+.beta-open-matrix {
+  margin-top: 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.beta-open-cell {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+}
+
+.beta-open-role {
+  color: #a1a1aa;
+}
+
+.beta-open-status {
+  font-weight: 700;
+}
+
+.beta-open-status.is-open {
+  color: #6ee7b7;
+}
+
+.beta-open-status.is-select {
+  color: var(--beta-accent, #e5c158);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .beta-solari-cell.is-flipping,
   .beta-rail-item.is-unfiltered .beta-rail-role,

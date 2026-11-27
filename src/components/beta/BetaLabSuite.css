@@ -158,6 +158,69 @@
   margin-bottom: 8px;
 }
 
+.beta-deploy-pill,
+.beta-uptime-pill,
+.beta-vu-meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e4e4e7;
+  margin-bottom: 8px;
+}
+
+.beta-deploy-pill {
+  border-color: rgba(16, 185, 129, 0.32);
+  background: rgba(16, 185, 129, 0.1);
+  color: #6ee7b7;
+}
+
+.beta-deploy-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+
+.beta-lab-toggles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.beta-fx-pill {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a1a1aa;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease, border-color 0.16s ease;
+}
+
+.beta-fx-pill:hover {
+  color: #fafafa;
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.beta-fx-pill.is-on {
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.18);
+  border-color: var(--beta-accent, #e5c158);
+  color: var(--beta-accent, #e5c158);
+}
+
 .beta-lang-wrap {
   display: inline-flex;
   align-items: center;

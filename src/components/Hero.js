@@ -18,6 +18,7 @@ gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
+  const [heroMood, setHeroMood] = useState('2pm');
 
   const { isExperimental, isBeta, lang, t } = useSiteMode();
   const heroRef = useRef(null);
@@ -164,9 +165,27 @@ const Hero = () => {
 
         <div className="hero-beta-shell" ref={contentRef}>
           <div className="hero-beta-main">
-            <div className="hero-beta-slate-tag">
-              <span className="hero-beta-rec-dot" />
-              <span>SCENE 01 // {displayData.greeting.toUpperCase()}</span>
+            <div className="hero-beta-top-row">
+              <div className="hero-beta-slate-tag">
+                <span className="hero-beta-rec-dot" />
+                <span>SCENE 01 // {displayData.greeting.toUpperCase()}</span>
+              </div>
+              <div className="hero-beta-mood-switch" role="group" aria-label="Mood switch">
+                <button
+                  type="button"
+                  className={`hero-beta-mood-btn ${heroMood === '2pm' ? 'is-active' : ''}`}
+                  onClick={() => setHeroMood('2pm')}
+                >
+                  2 PM
+                </button>
+                <button
+                  type="button"
+                  className={`hero-beta-mood-btn ${heroMood === '2am' ? 'is-active' : ''}`}
+                  onClick={() => setHeroMood('2am')}
+                >
+                  2 AM
+                </button>
+              </div>
             </div>
 
             <h1 className="hero-beta-title">
@@ -175,11 +194,15 @@ const Hero = () => {
             </h1>
 
             <p className="hero-beta-logline">
-              {displayData.role}
+              {heroMood === '2am'
+                ? 'Late-night builder · Soldering PCBs, tuning GSAP timelines & shipping before sunrise.'
+                : displayData.role}
             </p>
 
             <p className="hero-beta-bio">
-              {displayData.bio}
+              {heroMood === '2am'
+                ? 'At 2 AM the pitch decks disappear — it is just clean slate, cold coffee, an ESP32 on the desk, and figuring out why the last 2% of polish matters most.'
+                : displayData.bio}
             </p>
 
             <div className="hero-beta-cta-row">
@@ -232,6 +255,10 @@ const Hero = () => {
                 target.style.setProperty('--py', `${(y * 100).toFixed(1)}%`);
                 target.style.setProperty('--gx', `${((x - 0.5) * 44).toFixed(1)}px`);
                 target.style.setProperty('--gy', `${((y - 0.5) * 44).toFixed(1)}px`);
+                target.style.setProperty('--ix', `${((x - 0.5) * 10).toFixed(1)}px`);
+                target.style.setProperty('--iy', `${((y - 0.5) * 8).toFixed(1)}px`);
+                target.style.setProperty('--bx', `${((x - 0.5) * 18).toFixed(1)}px`);
+                target.style.setProperty('--by', `${((y - 0.5) * 14).toFixed(1)}px`);
               });
             }}
             onMouseLeave={(e) => {
@@ -242,6 +269,10 @@ const Hero = () => {
               e.currentTarget.style.setProperty('--py', '40%');
               e.currentTarget.style.setProperty('--gx', '0px');
               e.currentTarget.style.setProperty('--gy', '0px');
+              e.currentTarget.style.setProperty('--ix', '0px');
+              e.currentTarget.style.setProperty('--iy', '0px');
+              e.currentTarget.style.setProperty('--bx', '0px');
+              e.currentTarget.style.setProperty('--by', '0px');
             }}
           >
             <div className="hero-beta-portrait-frame">

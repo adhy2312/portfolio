@@ -638,6 +638,49 @@ const STARTERS = [
   "Show me photography gear & visual style"
 ];
 
+const TWENTY_QUESTIONS = [
+  "What projects has Adhithya built?",
+  "Tell me about your ECE hardware & SDR modeling",
+  "Summarize credentials for an engineering recruiter",
+  "How does Odoo-KiCad BOM Sync work?",
+  "What did you build for ISTE MBCET?",
+  "Explain the Smart Lighting ESP32 system",
+  "How did you co-found Finance Club MBCET?",
+  "What does Media Secretary at MBCET Senate involve?",
+  "Why combine ECE hardware with React & Next.js?",
+  "What is your strongest frontend stack?",
+  "Tell me about the Automated Certificate Generator",
+  "How does IoT Home Automation use MQTT?",
+  "What are you currently planning to learn next?",
+  "Which project taught you the hardest debugging lesson?",
+  "What is your Figma design system approach?",
+  "How is Mini-Adhy architected under the hood?",
+  "Are you open to internships or freelance collabs?",
+  "What is your workflow for shipping fast?",
+  "Tell me about your leadership across 300+ members",
+  "Give me a 15-second elevator pitch for Adhithya"
+];
+
+const SITE_LANG_TO_VOICE = {
+  en: 'en-IN',
+  hi: 'hi-IN',
+  ml: 'ml-IN',
+  ta: 'ta-IN',
+  te: 'te-IN',
+  kn: 'kn-IN',
+  bn: 'bn-IN',
+};
+
+const BETA_WELCOME_BY_LANG = {
+  en: "Hey — I'm Mini-Adhy, Adhithya's digital extension living inside this portfolio. Ask me anything about the work, the architecture, or the person behind all of it.",
+  hi: "नमस्ते — मैं मिनी-अधि हूँ, इस पोर्टफोलियो में आदित्य का डिजिटल असिस्टेंट। प्रोजेक्ट्स, टेक स्टैक या अनुभव के बारे में कुछ भी पूछें।",
+  ml: "ഹായ് — ഞാൻ മിനി-അധി, ആദിത്യയുടെ പോർട്ട്‌ഫോളിയോയിലെ ഡിജിറ്റൽ അസിസ്റ്റന്റ്. പ്രോജക്ടുകളെക്കുറിച്ചോ സാങ്കേതികവിദ്യയെക്കുറിച്ചോ എന്തും ചോദിക്കൂ.",
+  ta: "வணக்கம் — நான் மினி-அதி, ஆதித்யாவின் போர்ட்ஃபோலியோ உதவியாளர். திட்டங்கள் அல்லது திறன்கள் பற்றி எதுவும் கேளுங்கள்.",
+  te: "హాయ్ — నేను మినీ-అధి, ఆదిత్య పోర్ట్‌ఫోలియో అసిస్టెంట్‌ను. ప్రాజెక్టులు లేదా నైపుణ్యాల గురించి ఏదైనా అడగండి.",
+  kn: "ನಮಸ್ಕಾರ — ನಾನು ಮಿನಿ-ಅಧಿ, ಆದಿತ್ಯ ಅವರ ಪೋರ್ಟ್‌ಫೋಲಿಯೋ ಸಹಾಯಕ. ಪ್ರಾಜೆಕ್ಟ್‌ಗಳು ಅಥವಾ ಕೌಶಲ್ಯಗಳ ಬಗ್ಗೆ ಏನಾದರೂ ಕೇಳಿ.",
+  bn: "হ্যালো — আমি মিনি-অধি, আদিত্যর পোর্টফোলিও অ্যাসিস্ট্যান্ট। প্রজেক্ট বা দক্ষতা সম্পর্কে যেকোনো প্রশ্ন করুন।",
+};
+
 /* ────────────────────────────────────────────────
    Bot avatar SVG
 ──────────────────────────────────────────────── */
@@ -1076,7 +1119,27 @@ const MiniAdhy = () => {
   }, []);
 
   const consciousness = useConsciousness();
-  const { mode: activeMode } = useSiteMode();
+  const { mode: activeMode, lang: siteLang } = useSiteMode();
+  const [qDeckPage, setQDeckPage] = useState(0);
+
+  // #67 Multilingual Mini-Adhy Sync in Beta Mode
+  useEffect(() => {
+    if (activeMode !== 'beta') return;
+    const mapped = SITE_LANG_TO_VOICE[siteLang];
+    if (mapped && mapped !== voiceLang) {
+      setVoiceLang(mapped);
+      try { localStorage.setItem('mini_adhy_voice_lang', mapped); } catch {}
+    }
+    const localizedWelcome = BETA_WELCOME_BY_LANG[siteLang];
+    if (localizedWelcome) {
+      setMessages((prev) => {
+        if (prev.length === 1 && prev[0]?.role === 'bot') {
+          return [{ role: 'bot', text: localizedWelcome }];
+        }
+        return prev;
+      });
+    }
+  }, [activeMode, siteLang, voiceLang]);
 
   // Update digital echoes visits on mount
   useEffect(() => {
@@ -2059,11 +2122,31 @@ const MiniAdhy = () => {
             {/* Starters (only show before first user message) */}
             {messages.length === 1 && (
               <div className="ma-starters">
-                {STARTERS.map(s => (
-                  <button key={s} className="ma-starter-btn" onClick={() => sendMessage(s)}>
-                    {s}
-                  </button>
-                ))}
+                {activeMode === 'beta' ? (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginBottom: '4px', fontSize: '0.68rem', opacity: 0.78, fontFamily: 'Fira Code, monospace' }}>
+                      <span>20 QUESTIONS // DECK {qDeckPage + 1}/5</span>
+                      <button
+                        type="button"
+                        onClick={() => setQDeckPage((p) => (p + 1) % 5)}
+                        style={{ background: 'transparent', border: 'none', color: '#e5c158', cursor: 'pointer', fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 700 }}
+                      >
+                        Shuffle ↻
+                      </button>
+                    </div>
+                    {TWENTY_QUESTIONS.slice(qDeckPage * 4, qDeckPage * 4 + 4).map((q) => (
+                      <button key={q} className="ma-starter-btn" onClick={() => sendMessage(q)}>
+                        {q}
+                      </button>
+                    ))}
+                  </>
+                ) : (
+                  STARTERS.map(s => (
+                    <button key={s} className="ma-starter-btn" onClick={() => sendMessage(s)}>
+                      {s}
+                    </button>
+                  ))
+                )}
               </div>
             )}
 
