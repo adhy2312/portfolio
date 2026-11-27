@@ -71,15 +71,31 @@ body.mode-beta .hero-name-giant {
   letter-spacing: -0.035em !important;
 }
 
-body.mode-beta .section-title {
+body.mode-beta .section-title,
+body.mode-beta .section-title-inner {
   font-size: clamp(1.85rem, 4vw, 3rem) !important;
   font-family: 'Space Grotesk', sans-serif !important;
+  color: #f4f4f5 !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+  background: none !important;
 }
 
-body.mode-beta .section-title span {
+body.mode-beta .section-title span:not(.section-title-inner):not(.section-title-hover-text) {
   font-family: 'Playfair Display', serif !important;
   font-style: italic !important;
   font-weight: 600 !important;
+  color: #e5c158 !important;
+  -webkit-text-fill-color: #e5c158 !important;
+  background: none !important;
+}
+
+body.mode-beta .section-label {
+  background: rgba(229, 193, 88, 0.08) !important;
+  border: 1px solid rgba(229, 193, 88, 0.24) !important;
+  border-top: 1px solid rgba(229, 193, 88, 0.24) !important;
+  border-radius: 999px !important;
+  color: #e5c158 !important;
+  box-shadow: none !important;
 }
 
 /* Centered Floating Pill Navbar (outer .navbar stays transparent, .navbar-inner is the pill) */
