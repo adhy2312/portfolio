@@ -52,7 +52,7 @@ const projects = [
     tags: ['ESP32', 'Arduino', 'Embedded C', 'IoT'],
     category: 'electronics',
     liveLink: null,
-    githubLink: null,
+    githubLink: 'https://github.com/adhy2312/lumina-studio',
     accent: 'var(--accent-green)',
     icon: <FiZap />,
   },
@@ -218,9 +218,10 @@ const MyWorks = () => {
         defaultIcon = <FiGlobe />;
       }
 
-      const cleanGithub = (p.githubLink && p.githubLink !== 'null' && p.githubLink !== '#') 
+      const rawGithub = (p.githubLink && p.githubLink !== 'null' && p.githubLink !== '#') 
         ? p.githubLink 
         : ((p.github && p.github !== 'null' && p.github !== '#') ? p.github : null);
+      const cleanGithub = rawGithub || (p.title?.toLowerCase().includes('smart lighting') ? 'https://github.com/adhy2312/lumina-studio' : null);
       const cleanLive = (p.liveLink && p.liveLink !== 'null' && p.liveLink !== '#') 
         ? p.liveLink 
         : ((p.link && p.link !== 'null' && p.link !== '#') ? p.link : null);
@@ -424,6 +425,10 @@ const MyWorks = () => {
                     {(project.liveLink || project.link) && (project.liveLink || project.link) !== '#' ? (
                       <a href={project.liveLink || project.link} target="_blank" rel="noopener noreferrer" className="vault-action-btn" style={{ background: project.accent, boxShadow: `0 4px 15px ${project.accent}40` }}>
                         Access Vault <FiArrowRight size={16} />
+                      </a>
+                    ) : project.githubLink ? (
+                      <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="vault-action-btn" style={{ background: project.accent, boxShadow: `0 4px 15px ${project.accent}40` }}>
+                        View Repo <FiArrowRight size={16} />
                       </a>
                     ) : (
                       <span className="vault-action-btn vault-btn-disabled">Locked</span>
