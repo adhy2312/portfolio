@@ -86,6 +86,10 @@
   align-items: start;
 }
 
+.contact-grid > * {
+  min-width: 0;
+}
+
 /* ── Brutalist Info Panel ── */
 .contact-info-card {
   padding: 2rem;
@@ -130,6 +134,12 @@
   display: flex;
   align-items: flex-start;
   gap: 14px;
+  min-width: 0;
+}
+
+.contact-info-item > div {
+  min-width: 0;
+  flex: 1;
 }
 
 .contact-info-icon {
@@ -273,6 +283,8 @@
 /* Brutalist input fields */
 .form-input {
   width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 14px 16px;
   background: #fff;
   border: var(--border-brutal);
@@ -355,6 +367,17 @@
 }
 
 /* ── Availability dot ── */
+.contact-availability {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 .avail-dot {
   width: 9px;
   height: 9px;
@@ -388,11 +411,18 @@
     width: 100%;
     box-sizing: border-box;
   }
+  .contact .container {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    box-sizing: border-box;
+  }
   .contact-header {
     margin-bottom: 2rem;
   }
   .contact-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
     width: 100%;
     max-width: 100%;
@@ -402,14 +432,22 @@
   .contact-form-wrap {
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     box-sizing: border-box;
   }
   .contact-info-card {
+    height: auto;
     padding: 1.4rem 1.2rem;
     border-radius: 0 !important;
     box-shadow: 4px 4px 0px #000 !important;
     box-sizing: border-box;
     width: 100%;
+    max-width: 100%;
+  }
+  .contact-info-card:hover {
+    transform: none;
+  }
+  .copy-email-btn {
     max-width: 100%;
   }
   .contact-form {
