@@ -1,26 +1,30 @@
 /* ══════════════════════════════════════════════════════════════════
-   BETA MODE — Next-Gen Editorial Glass & Obsidian-Ink Redesign
-   Clean, spacious, modern studio aesthetic (distinct from Experimental)
+   BETA MODE — Cinematic Dark-Cinema & Editorial Glass Redesign
+   Atmospheric, filmic, spacious (distinct from playful & Experimental)
    ══════════════════════════════════════════════════════════════════ */
 
 body.mode-beta {
-  --bg-primary: #fafaf8 !important;
-  --bg-secondary: #f3f3ef !important;
-  --bg-tertiary: #e8e8e2 !important;
-  --bg-card: rgba(255, 255, 255, 0.88) !important;
-  --bg-card-hover: #ffffff !important;
-  --text-primary: #09090b !important;
-  --text-secondary: #52525b !important;
+  --bg-primary: #060609 !important;
+  --bg-secondary: #0c0c12 !important;
+  --bg-tertiary: #14141d !important;
+  --bg-card: rgba(16, 16, 22, 0.78) !important;
+  --bg-card-hover: rgba(24, 24, 34, 0.92) !important;
+  --text-primary: #f4f4f5 !important;
+  --text-secondary: #a1a1aa !important;
   --text-muted: #71717a !important;
-  --accent-primary: #6366f1 !important;
-  --accent-primary-rgb: 99, 102, 241 !important;
-  --border-brutal: 1px solid rgba(9, 9, 11, 0.09) !important;
-  --border-heavy: 1px solid rgba(9, 9, 11, 0.14) !important;
-  --shadow-brutal: 0 4px 20px rgba(9, 9, 11, 0.05) !important;
-  --shadow-brutal-deep: 0 18px 42px rgba(9, 9, 11, 0.1) !important;
-  --border-radius-bento: 22px !important;
+  --accent-primary: #e5c158 !important;
+  --accent-primary-rgb: 229, 193, 88 !important;
+  --border-brutal: 1px solid rgba(255, 255, 255, 0.09) !important;
+  --border-heavy: 1px solid rgba(255, 255, 255, 0.16) !important;
+  --shadow-brutal: 0 12px 36px rgba(0, 0, 0, 0.45) !important;
+  --shadow-brutal-deep: 0 24px 60px rgba(0, 0, 0, 0.72) !important;
+  --border-radius-bento: 20px !important;
   background-color: var(--bg-primary) !important;
   color: var(--text-primary) !important;
+}
+
+body.mode-beta:not(.dark-mode) {
+  --bg-primary: #060609 !important;
 }
 
 body.mode-beta.dark-mode {
@@ -171,4 +175,238 @@ body.mode-beta .section-container {
   padding-top: 84px;
   padding-bottom: 84px;
 }
+
+/* ─── CINEMATIC BETA HERO ─── */
+.hero-beta-cinematic {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 112px 24px 72px;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 70% 20%, rgba(229, 193, 88, 0.12), transparent 55%),
+              radial-gradient(ellipse at 20% 80%, rgba(99, 102, 241, 0.10), transparent 55%),
+              #050508;
+}
+
+.hero-beta-beam {
+  position: absolute;
+  top: -20%;
+  left: 35%;
+  width: 55vw;
+  height: 140%;
+  background: linear-gradient(115deg, transparent 0%, rgba(229, 193, 88, 0.06) 48%, transparent 100%);
+  transform: rotate(-12deg);
+  pointer-events: none;
+  animation: betaBeamDrift 14s ease-in-out infinite alternate;
+}
+
+@keyframes betaBeamDrift {
+  0%   { transform: translateX(-4%) rotate(-12deg); opacity: 0.55; }
+  100% { transform: translateX(6%) rotate(-9deg); opacity: 0.9; }
+}
+
+.hero-beta-vignette {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  box-shadow: inset 0 0 140px rgba(0, 0, 0, 0.85);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.hero-beta-shell {
+  position: relative;
+  z-index: 2;
+  max-width: 1180px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1.45fr 0.95fr;
+  gap: 48px;
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .hero-beta-shell {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.hero-beta-slate-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  color: #e5c158;
+  margin-bottom: 18px;
+}
+
+.hero-beta-rec-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e5c158;
+  box-shadow: 0 0 12px rgba(229, 193, 88, 0.8);
+}
+
+.hero-beta-title {
+  margin: 0 0 18px;
+  font-size: clamp(3rem, 8vw, 6.2rem);
+  line-height: 0.96;
+  letter-spacing: -0.04em;
+  color: #fafafa;
+}
+
+.hero-beta-first {
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 800;
+}
+
+.hero-beta-last {
+  font-family: 'Playfair Display', serif;
+  font-style: italic;
+  font-weight: 500;
+  color: #e5c158;
+}
+
+.hero-beta-logline {
+  margin: 0 0 12px;
+  font-size: clamp(1rem, 1.8vw, 1.25rem);
+  font-weight: 500;
+  color: #e4e4e7;
+  max-width: 620px;
+}
+
+.hero-beta-bio {
+  margin: 0 0 28px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+  color: #a1a1aa;
+  max-width: 560px;
+}
+
+.hero-beta-cta-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero-beta-cta-primary {
+  padding: 12px 24px;
+  border-radius: 999px;
+  border: none;
+  background: #e5c158;
+  color: #09090b;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 28px rgba(229, 193, 88, 0.28);
+}
+
+.hero-beta-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 34px rgba(229, 193, 88, 0.42);
+}
+
+.hero-beta-cta-secondary {
+  padding: 12px 22px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  color: #f4f4f5;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.hero-beta-cta-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+
+.hero-beta-card {
+  background: rgba(18, 18, 24, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 22px;
+  padding: 24px;
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.hero-beta-card-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  color: #e5c158;
+}
+
+.hero-beta-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  font-size: 0.82rem;
+  color: #a1a1aa;
+}
+
+.hero-beta-card-row strong {
+  color: #fafafa;
+  font-weight: 600;
+  text-align: right;
+}
+
+.hero-beta-ai-btn {
+  margin-top: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(229, 193, 88, 0.35);
+  background: rgba(229, 193, 88, 0.1);
+  color: #e5c158;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.hero-beta-ai-btn:hover {
+  background: rgba(229, 193, 88, 0.2);
+}
+
+.hero-beta-scroll-cue {
+  position: absolute;
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.hero-beta-scroll-line {
+  width: 1px;
+  height: 26px;
+  background: linear-gradient(180deg, #e5c158, transparent);
+}
+
 

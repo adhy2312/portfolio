@@ -18,7 +18,7 @@ gsap.registerPlugin(TextPlugin, ScrollTrigger);
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
 
-  const { isExperimental } = useSiteMode();
+  const { isExperimental, isBeta } = useSiteMode();
   const heroRef = useRef(null);
   const contentRef = useRef(null);
   const greetingRef = useRef(null);
@@ -144,6 +144,90 @@ const Hero = () => {
     delay: `${Math.random() * 3}s`,
     size: `${10 + Math.random() * 14}px`,
   })), []);
+
+  if (isBeta) {
+    const nameParts = (displayData.name || 'Adhithya Mohan').split(' ');
+    const firstName = nameParts[0] || 'Adhithya';
+    const lastName = nameParts.slice(1).join(' ') || 'Mohan';
+
+    return (
+      <section id="hero" className="hero-beta-cinematic" ref={heroRef}>
+        <div className="hero-beta-beam" aria-hidden="true" />
+        <div className="hero-beta-vignette" aria-hidden="true" />
+
+        <div className="hero-beta-shell" ref={contentRef}>
+          <div className="hero-beta-main">
+            <div className="hero-beta-slate-tag">
+              <span className="hero-beta-rec-dot" />
+              <span>SCENE 01 // {displayData.greeting.toUpperCase()}</span>
+            </div>
+
+            <h1 className="hero-beta-title">
+              <span className="hero-beta-first">{firstName}</span>{' '}
+              <span className="hero-beta-last">{lastName}</span>
+            </h1>
+
+            <p className="hero-beta-logline">
+              {displayData.role}
+            </p>
+
+            <p className="hero-beta-bio">
+              {displayData.bio}
+            </p>
+
+            <div className="hero-beta-cta-row">
+              <button
+                type="button"
+                className="hero-beta-cta-primary"
+                onClick={() => document.querySelector('#works, .my-works-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Explore Selected Works →
+              </button>
+              <button
+                type="button"
+                className="hero-beta-cta-secondary"
+                onClick={() => document.querySelector('#contact, .contact-section')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                Start a Conversation
+              </button>
+            </div>
+          </div>
+
+          <aside className="hero-beta-aside">
+            <div className="hero-beta-card">
+              <div className="hero-beta-card-label">DIRECTOR&apos;S TELEMETRY</div>
+              <div className="hero-beta-card-row">
+                <span>Discipline</span>
+                <strong>ECE · Full-Stack · AI</strong>
+              </div>
+              <div className="hero-beta-card-row">
+                <span>Base</span>
+                <strong>Kerala, India (IST)</strong>
+              </div>
+              <div className="hero-beta-card-row">
+                <span>Core Stack</span>
+                <strong>{(displayData.techStack || []).slice(0, 4).join(' · ')}</strong>
+              </div>
+              <button
+                type="button"
+                className="hero-beta-ai-btn"
+                onClick={() => window.dispatchEvent(new CustomEvent('miniadhy:ask', {
+                  detail: { prompt: 'Give me a cinematic 3-sentence introduction to Adhithya Mohan and his standout work.' }
+                }))}
+              >
+                ✦ Ask Mini-Adhy for Intro
+              </button>
+            </div>
+          </aside>
+        </div>
+
+        <div className="hero-beta-scroll-cue">
+          <span>SCROLL TO EXPLORE</span>
+          <div className="hero-beta-scroll-line" />
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
