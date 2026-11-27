@@ -221,6 +221,91 @@
   color: var(--beta-accent, #e5c158);
 }
 
+/* ── Agentic Co-Pilot Command Bar ── */
+.beta-agentic-bar {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.beta-agentic-form {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(var(--beta-accent-rgb, 229, 193, 88), 0.25);
+}
+
+.beta-agentic-icon {
+  color: var(--beta-accent, #e5c158);
+  flex-shrink: 0;
+}
+
+.beta-agentic-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: #f4f4f5;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  outline: none;
+}
+
+.beta-agentic-input::placeholder {
+  color: rgba(244, 244, 245, 0.45);
+}
+
+.beta-agentic-run {
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: none;
+  background: var(--beta-accent, #e5c158);
+  color: #09090b;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.beta-agentic-goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.beta-agentic-goal {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.03);
+  color: #d4d4d8;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.beta-agentic-goal:hover {
+  border-color: var(--beta-accent, #e5c158);
+  color: var(--beta-accent, #e5c158);
+}
+
+.beta-agentic-trace {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  color: #6ee7b7;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
 .beta-lang-wrap {
   display: inline-flex;
   align-items: center;

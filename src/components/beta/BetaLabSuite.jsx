@@ -1,8 +1,9 @@
-import React, { Component, useEffect, useState } from 'react';
-import { FiSun, FiMoon, FiArrowUpRight, FiCompass, FiFileText, FiDownload, FiX, FiGlobe, FiSend, FiCheckCircle } from 'react-icons/fi';
+import React, { Component, useEffect, useRef, useState } from 'react';
+import { FiSun, FiMoon, FiArrowUpRight, FiCompass, FiFileText, FiDownload, FiX, FiGlobe, FiSend, FiCheckCircle, FiCpu } from 'react-icons/fi';
 import { useSiteMode, MODES } from '../../contexts/SiteModeContext';
 import { useConsciousness } from '../../contexts/ConsciousnessContext';
 import { readAmbientFlags, writeAmbientFlags } from './BetaAmbientController';
+import { runBetaAgenticIntent, dispatchAgenticAction } from '../../core/betaAgenticBus';
 import './BetaLabSuite.css';
 
 class BetaErrorBoundary extends Component {
@@ -46,6 +47,46 @@ function BetaWorkspaceBar() {
   const [uptimeSec, setUptimeSec] = useState(0);
   const [scrollPct, setScrollPct] = useState(0);
   const [ambientFlags, setAmbientFlags] = useState(readAmbientFlags);
+  const [copilotQuery, setCopilotQuery] = useState('');
+  const [agenticTrace, setAgenticTrace] = useState('');
+  const copilotInputRef = useRef(null);
+
+  useEffect(() => {
+    const onTrace = (e) => {
+      if (e?.detail?.label) setAgenticTrace(e.detail.label);
+    };
+    const onAmbient = (e) => {
+      if (e?.detail) setAmbientFlags(e.detail);
+    };
+    const onKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        copilotInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('beta:agentic-trace', onTrace);
+    window.addEventListener('beta:ambient-change', onAmbient);
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.removeEventListener('beta:agentic-trace', onTrace);
+      window.removeEventListener('beta:ambient-change', onAmbient);
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, []);
+
+  const handleCopilotSubmit = (e) => {
+    e.preventDefault();
+    const q = copilotQuery.trim();
+    if (!q) return;
+    const result = runBetaAgenticIntent(q);
+    if (result.matched) {
+      setAgenticTrace(result.summary);
+    } else {
+      setAgenticTrace(`Forwarded "${q}" to Mini-Adhy`);
+      window.dispatchEvent(new CustomEvent('miniadhy:ask', { detail: { prompt: q } }));
+    }
+    setCopilotQuery('');
+  };
 
   useEffect(() => {
     const id = setInterval(() => setUptimeSec((s) => s + 1), 1000);
@@ -198,6 +239,42 @@ function BetaWorkspaceBar() {
               {fx.label}
             </button>
           ))}
+        </div>
+
+        {/* Agentic Co-Pilot Command Bar */}
+        <div className="beta-agentic-bar">
+          <form className="beta-agentic-form" onSubmit={handleCopilotSubmit}>
+            <FiCpu size={14} className="beta-agentic-icon" />
+            <input
+              ref={copilotInputRef}
+              type="text"
+              className="beta-agentic-input"
+              value={copilotQuery}
+              onChange={(e) => setCopilotQuery(e.target.value)}
+              placeholder="Agentic Co-Pilot (Ctrl+K): 'Show ESP32 projects', 'Unfiltered story', 'Scope an AI build'..."
+              aria-label="Agentic Co-Pilot command input"
+            />
+            <button type="submit" className="beta-agentic-run">Execute</button>
+          </form>
+
+          <div className="beta-agentic-goals">
+            {[
+              { label: 'Hiring: React Stack', run: () => { dispatchAgenticAction('HIGHLIGHT_SKILL', { skill: 'React' }); dispatchAgenticAction('PREFILL_INQUIRY', { what: 'Web', pace: '1 Month', stage: 'Scale', scroll: false }); } },
+              { label: 'Hardware / ESP32 Proof', run: () => { dispatchAgenticAction('TOGGLE_LAB_FX', { key: 'kicadLayer', value: true }); dispatchAgenticAction('HIGHLIGHT_SKILL', { skill: 'ESP32' }); } },
+              { label: 'Unfiltered Story', run: () => dispatchAgenticAction('SET_CAREER_VIEW', { perspective: 'unfiltered', scroll: true }) },
+              { label: 'Scope AI Prototype', run: () => dispatchAgenticAction('PREFILL_INQUIRY', { what: 'AI', pace: '1 Month', stage: 'Prototype', scroll: true }) },
+            ].map((goal) => (
+              <button key={goal.label} type="button" className="beta-agentic-goal" onClick={goal.run}>
+                {goal.label}
+              </button>
+            ))}
+          </div>
+
+          {agenticTrace && (
+            <div className="beta-agentic-trace" role="status" aria-live="polite">
+              <span>AGENT TRACE // {agenticTrace}</span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -186,6 +186,16 @@ export function BetaCareerRail() {
   const [activeTag, setActiveTag] = useState('All');
   const [expandedId, setExpandedId] = useState('senate-2026');
   const [isUnfiltered, setIsUnfiltered] = useState(false);
+
+  useEffect(() => {
+    const onCareerView = (e) => {
+      const { perspective, filter } = e?.detail || {};
+      if (perspective) setIsUnfiltered(perspective === 'unfiltered');
+      if (filter) setActiveTag(filter);
+    };
+    window.addEventListener('beta:career-view', onCareerView);
+    return () => window.removeEventListener('beta:career-view', onCareerView);
+  }, []);
   const tags = [
     { id: 'All', label: t('career.filterAll', 'All') },
     { id: 'Leadership', label: t('career.filterLeadership', 'Leadership') },
@@ -315,6 +325,29 @@ export function BetaInquiryStudio() {
     const id = setInterval(update, 30000);
     return () => clearInterval(id);
   }, []);
+
+  useEffect(() => {
+    const onPrefill = (e) => {
+      const d = e?.detail || {};
+      const nextWhat = d.what && DIAL_STACKS[d.what] ? d.what : dialWhat;
+      const nextPace = d.pace || dialPace;
+      const nextStage = d.stage || dialStage;
+      if (d.what && DIAL_STACKS[d.what]) setDialWhat(d.what);
+      if (d.pace) setDialPace(d.pace);
+      if (d.stage) setDialStage(d.stage);
+      setShowBuilder(true);
+      if (formRef.current) {
+        if (formRef.current.subject) {
+          formRef.current.subject.value = d.subject || `[${nextWhat} · ${nextPace}] ${nextStage} Build Inquiry`;
+        }
+        if (formRef.current.message) {
+          formRef.current.message.value = d.message || `Hi Adhithya, I'm looking to collaborate on a ${nextWhat} project (${nextStage} stage — focused on ${DIAL_STAGE_NOTES[nextStage] || 'delivery'}) with a ${nextPace} pace. Suggested stack: ${DIAL_STACKS[nextWhat]}.`;
+        }
+      }
+    };
+    window.addEventListener('beta:inquiry-prefill', onPrefill);
+    return () => window.removeEventListener('beta:inquiry-prefill', onPrefill);
+  }, [dialWhat, dialPace, dialStage]);
 
   const generatedStack = DIAL_STACKS[dialWhat];
   const generatedSubject = `[${dialWhat} · ${dialPace}] ${dialStage} Build Inquiry`;

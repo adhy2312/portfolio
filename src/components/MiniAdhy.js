@@ -28,6 +28,7 @@ import { portfolioRagIndex, responseLRUCache } from '../core/ai/PortfolioRagAndC
 import { runtimeSelfModel } from '../core/diagnostics/RuntimeSelfModel';
 import { portableIdentityManager } from '../core/identity/PortableIdentityManager';
 import { identityCompiler } from '../core/identity/IdentityCompiler';
+import { runBetaAgenticIntent } from '../core/betaAgenticBus';
 
 // Runtime inspection endpoints — only available in development mode
 // SECURITY: Never expose internal services on window in production
@@ -1312,6 +1313,13 @@ const MiniAdhy = () => {
     const lastSent = lastSentRef.current;
     if (now - lastSent < 1500) return;
     lastSentRef.current = now;
+
+    /* Beta Agentic Portfolio Action Bus: let Mini-Adhy drive the UI safely */
+    if (activeMode === 'beta' && !ownerState.active && !trimmed.startsWith('/')) {
+      try {
+        runBetaAgenticIntent(trimmed);
+      } catch {}
+    }
 
     /* ── Secret unlock code (Serverless + SHA-256 Auth Boundary) ── */
     const isRootUnlock = await verifyOwnerPasscode(trimmed);
