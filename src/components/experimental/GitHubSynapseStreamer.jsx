@@ -73,8 +73,43 @@ export default function GitHubSynapseStreamer({ onClose }) {
   const [copiedSha, setCopiedSha] = useState(null);
   const [isFiringSynapse, setIsFiringSynapse] = useState(false);
   const [pulseCount, setPulseCount] = useState(0);
+  const [loadingDiff, setLoadingDiff] = useState(false);
 
   const canvasRef = useRef(null);
+  const detailCacheRef = useRef(new Map());
+
+  const fetchCommitDetail = useCallback(async (commit) => {
+    const shaKey = commit?.fullSha || commit?.sha;
+    if (!shaKey) return;
+    if (detailCacheRef.current.has(shaKey)) {
+      const cached = detailCacheRef.current.get(shaKey);
+      setSelectedCommit(prev => (prev?.sha === commit.sha ? { ...prev, ...cached } : prev));
+      return;
+    }
+    setLoadingDiff(true);
+    try {
+      const res = await fetch(`https://api.github.com/repos/adhy2312/portfolio/commits/${shaKey}`);
+      if (res.ok) {
+        const detail = await res.json();
+        const stats = detail.stats || {};
+        const files = (detail.files || []).slice(0, 5).map(f => ({
+          filename: f.filename,
+          status: f.status,
+          additions: f.additions || 0,
+          deletions: f.deletions || 0,
+        }));
+        const patchMeta = {
+          additions: stats.additions ?? commit.additions,
+          deletions: stats.deletions ?? commit.deletions,
+          files,
+        };
+        detailCacheRef.current.set(shaKey, patchMeta);
+        setSelectedCommit(prev => (prev?.sha === commit.sha ? { ...prev, ...patchMeta } : prev));
+      }
+    } catch {} finally {
+      setLoadingDiff(false);
+    }
+  }, []);
 
   // Fetch real commits from GitHub API
   const fetchCommits = useCallback(async () => {
@@ -96,6 +131,7 @@ export default function GitHubSynapseStreamer({ onClose }) {
         if (formatted.length > 0) {
           setCommits(formatted);
           setSelectedCommit(formatted[0]);
+          fetchCommitDetail(formatted[0]);
         }
       }
     } catch (e) {
@@ -298,9 +334,32 @@ export default function GitHubSynapseStreamer({ onClose }) {
                 <span className="synapse-diff-add">+{selectedCommit.additions} lines</span>
                 <span className="synapse-diff-del">-{selectedCommit.deletions} lines</span>
                 <span className="synapse-energy-meter">
-                  SYNAPSE VOLTAGE: {(selectedCommit.synapseEnergy * 100).toFixed(0)}mV
+                  {loadingDiff ? 'FETCHING DIFF…' : `SYNAPSE VOLTAGE: ${(selectedCommit.synapseEnergy * 100).toFixed(0)}mV`}
                 </span>
               </div>
+
+              {(selectedCommit.additions + selectedCommit.deletions) > 0 && (
+                <div className="synapse-diff-ratio-bar" title={`+${selectedCommit.additions} / -${selectedCommit.deletions}`}>
+                  <div
+                    className="synapse-diff-ratio-add"
+                    style={{ width: `${Math.round((selectedCommit.additions / (selectedCommit.additions + selectedCommit.deletions)) * 100)}%` }}
+                  />
+                </div>
+              )}
+
+              {selectedCommit.files && selectedCommit.files.length > 0 && (
+                <div className="synapse-files-list">
+                  {selectedCommit.files.map(f => (
+                    <div key={f.filename} className="synapse-file-row">
+                      <span className="synapse-file-name" title={f.filename}>{f.filename.split('/').pop()}</span>
+                      <span className="synapse-file-stats">
+                        <span className="synapse-diff-add">+{f.additions}</span>{' '}
+                        <span className="synapse-diff-del">-{f.deletions}</span>
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -338,7 +397,11 @@ export default function GitHubSynapseStreamer({ onClose }) {
                 <div 
                   key={c.sha + i} 
                   className={`synapse-commit-item ${isSelected ? 'active' : ''}`}
-                  onClick={() => setSelectedCommit(c)}
+                  onClick={() => {
+                    setSelectedCommit(c);
+                    fetchCommitDetail(c);
+                    fireActionPotential();
+                  }}
                 >
                   <div className="synapse-commit-line" />
                   <div className="synapse-node-bullet">
