@@ -17,40 +17,48 @@ export const VERIFIED_PORTFOLIO_DATA = {
     education: 'B.Tech in Electronics and Communication Engineering (ECE) @ Mar Baselios College of Engineering and Technology (MBCET), APJ Abdul Kalam Technological University',
     roles: [
       'Media Secretary @ MBCET College Senate',
-      'Co-Founder @ Finance Club MBCET',
-      'Full-Stack Developer & Hardware Engineer'
+      'Co-Founder & Director of External Affairs @ Finance Club MBCET',
+      'Chairperson @ ISTE SC MBCET (Aug–Oct 2026)',
+      'Lead Photographer @ FRAMES MBCET',
+      'Full-Stack Developer & ECE Hardware Engineer'
     ],
     contact: {
-      email: 'adhithyamohan.work@gmail.com',
+      email: 'adhithyamohan2312@gmail.com',
       github: 'https://github.com/adhy2312',
-      linkedin: 'https://linkedin.com/in/adhithyamohan',
-      instagram: 'https://instagram.com/adhy.lens'
+      linkedin: 'https://www.linkedin.com/in/adhithya-mohan-s',
+      instagram: 'https://www.instagram.com/zoomout_frames'
     }
   },
   skills: {
-    frontend: ['React 19', 'Next.js', 'Vanilla CSS / Glassmorphism', 'GSAP', 'WebGL / Three.js', 'Lenis Scroll'],
-    embeddedAndHardware: ['MATLAB', 'Simulink', 'Simscape', 'GNU Radio (SDR)', 'KiCad PCB Design', 'STM32', 'IoT Architectures'],
-    backendAndCloud: ['Node.js', 'Express', 'Sanity CMS', 'Supabase', 'Vercel Serverless', 'Python'],
-    learningHorizon: ['Advanced Linux Internals', 'Cross-Platform Mobile App Dev', 'Cybersecurity & Offensive Auditing']
+    frontend: ['React.js', 'Next.js', 'TypeScript', 'JavaScript (ES6+)', 'Tailwind CSS', 'HTML5 & CSS3', 'Three.js'],
+    embeddedAndHardware: ['ESP32', 'Arduino', 'Embedded Systems', 'IoT', 'KiCad PCB Design', 'Circuit Design', 'Sensor Interfacing'],
+    backendAndCloud: ['Node.js', 'Express.js', 'Python', 'PostgreSQL', 'Firebase', 'Sanity CMS', 'Odoo ERP'],
+    learningHorizon: ['Linux Kernel & POSIX SysAdmin', 'Cross-Platform Mobile App Dev', 'Cybersecurity & AppSec']
   },
   experience: [
     {
       role: 'Media Secretary',
-      organization: 'MBCET College Senate',
-      period: '2024 – Present',
-      highlight: 'Spearheaded college-wide media production, digital visual branding, and broadcast pipelines across campus initiatives.'
+      organization: 'MBCET Senate',
+      period: 'Oct 2026 – Present',
+      highlight: 'Directing official campus communications, institutional press coverage, and digital media strategy at the apex student governance level.'
     },
     {
-      role: 'Co-Founder & Tech Lead',
+      role: 'Co-Founder & Director of External Affairs',
       organization: 'Finance Club MBCET',
-      period: '2024 – Present',
-      highlight: 'Established financial analytics workshops, algorithmic trading seminars, and digital platform infrastructure.'
+      period: 'Oct 2026 – Present',
+      highlight: 'Co-founded the chapter, built industry partnerships for financial literacy workshops, and connected student builders with fintech mentors.'
     },
     {
-      role: 'Electronics & Communication Engineering',
-      organization: 'MBCET / KTU',
-      period: '2023 – 2027',
-      highlight: 'Deep modeling of hardware physical systems in Simulink/Simscape and RF signal processing using GNU Radio SDR.'
+      role: 'Chairperson',
+      organization: 'ISTE SC MBCET',
+      period: 'Aug 2026 – Oct 2026',
+      highlight: 'Led 300+ student members across technical workshops, state conventions, and oversaw the official ISTE MBCET Next.js + Sanity portal.'
+    },
+    {
+      role: 'Lead Photographer',
+      organization: 'FRAMES MBCET',
+      period: 'Aug 2026 – Present',
+      highlight: 'Leading visual storytelling, event documentation, and Lightroom editorial direction for flagship campus events.'
     }
   ],
   photography: {

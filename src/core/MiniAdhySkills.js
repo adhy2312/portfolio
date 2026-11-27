@@ -396,7 +396,7 @@ export const MINI_ADHY_SKILLS = [
     command: 'SOCIAL',
     execute: (network = 'github') => {
       if (network.toLowerCase() === 'linkedin') {
-        window.open('https://linkedin.com/in/adhithyamohan', '_blank');
+        window.open('https://www.linkedin.com/in/adhithya-mohan-s', '_blank');
       } else {
         window.open('https://github.com/adhy2312', '_blank');
       }

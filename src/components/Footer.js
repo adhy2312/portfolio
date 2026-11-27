@@ -400,7 +400,7 @@ const Footer = () => {
                   <strong>2. Zero Third-Party Selling:</strong> We never sell, monetize, or broker personal information. All contact form inputs are routed solely via encrypted channels to respond to professional inquiries.
                 </p>
                 <p style={{ fontSize: '0.82rem', lineHeight: '1.6', marginBottom: '12px' }}>
-                  <strong>3. GDPR Rights:</strong> Under Articles 15-22 of the GDPR, visitors possess the right to access, rectify, or request immediate deletion of any submitted contact correspondence by emailing adhithyamohan.work@gmail.com.
+                  <strong>3. GDPR Rights:</strong> Under Articles 15-22 of the GDPR, visitors possess the right to access, rectify, or request immediate deletion of any submitted contact correspondence by emailing adhithyamohan2312@gmail.com.
                 </p>
                 <p style={{ fontSize: '0.82rem', lineHeight: '1.6' }}>
                   <strong>4. Data Retention:</strong> Contact messages are stored only for the duration of the professional dialogue and purged systematically thereafter.
