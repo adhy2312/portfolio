@@ -226,6 +226,8 @@ const Hero = () => {
                 target.style.setProperty('--ry', `${((x - 0.5) * 11).toFixed(2)}deg`);
                 target.style.setProperty('--px', `${(x * 100).toFixed(1)}%`);
                 target.style.setProperty('--py', `${(y * 100).toFixed(1)}%`);
+                target.style.setProperty('--gx', `${((x - 0.5) * 44).toFixed(1)}px`);
+                target.style.setProperty('--gy', `${((y - 0.5) * 44).toFixed(1)}px`);
               });
             }}
             onMouseLeave={(e) => {
@@ -234,10 +236,12 @@ const Hero = () => {
               e.currentTarget.style.setProperty('--ry', '0deg');
               e.currentTarget.style.setProperty('--px', '50%');
               e.currentTarget.style.setProperty('--py', '40%');
+              e.currentTarget.style.setProperty('--gx', '0px');
+              e.currentTarget.style.setProperty('--gy', '0px');
             }}
           >
-            <div className="hero-beta-portrait-aura" aria-hidden="true" />
             <div className="hero-beta-portrait-frame">
+              <div className="hero-beta-portrait-aura" aria-hidden="true" />
               <img
                 src={betaHeroPortrait}
                 alt={displayData.name}

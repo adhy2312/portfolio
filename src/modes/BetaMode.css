@@ -428,6 +428,8 @@ body.mode-beta .section-container {
   --ry: 0deg;
   --px: 50%;
   --py: 40%;
+  --gx: 0px;
+  --gy: 0px;
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -439,10 +441,18 @@ body.mode-beta .section-container {
 
 .hero-beta-portrait-aura {
   position: absolute;
-  inset: 2%;
-  border-radius: 50%;
-  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.24) 0%, rgba(229, 193, 88, 0.06) 40%, transparent 68%);
+  inset: -18%;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 42%, rgba(229, 193, 88, 0.34) 0%, rgba(229, 193, 88, 0.1) 38%, transparent 68%);
+  opacity: 0.72;
+  transform: translate3d(var(--gx), var(--gy), 0);
+  will-change: transform, opacity;
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
   pointer-events: none;
+}
+
+.hero-beta-portrait-stage:hover .hero-beta-portrait-aura {
+  opacity: 1;
 }
 
 .hero-beta-portrait-frame {
@@ -450,7 +460,7 @@ body.mode-beta .section-container {
   z-index: 2;
   border-radius: 26px;
   padding: 12px 12px 0;
-  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.14), rgba(14, 14, 22, 0.78) 72%);
+  background: linear-gradient(165deg, rgba(24, 24, 34, 0.9) 0%, rgba(10, 10, 16, 0.96) 100%);
   border: 1px solid rgba(229, 193, 88, 0.24);
   box-shadow: 0 24px 56px rgba(0, 0, 0, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transform: rotateX(var(--rx)) rotateY(var(--ry));
@@ -464,6 +474,8 @@ body.mode-beta .section-container {
 }
 
 .hero-beta-portrait-img {
+  position: relative;
+  z-index: 1;
   display: block;
   width: min(390px, 100%);
   max-height: 500px;
