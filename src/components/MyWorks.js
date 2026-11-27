@@ -89,20 +89,6 @@ const projects = [
     accent: 'var(--accent-magenta)',
     icon: <FiCamera />,
   },
-  {
-    title: 'IoT Home Automation',
-    description:
-      'A wireless home automation prototype using NodeMCU and MQTT protocol. Control appliances via a custom-built React dashboard with real-time state sync.',
-    tags: ['NodeMCU', 'MQTT', 'React', 'IoT'],
-    category: 'electronics',
-    liveLink: null,
-    githubLink: null,
-    accent: 'var(--accent-green)',
-    icon: <FiHome />,
-    buildTime: 'Built during the 2021 lockdown',
-    soundtrack: 'listening to lo-fi beats',
-    emotionalNote: 'Debugging hardware over Wi-Fi taught me patience the hard way.'
-  },
 ];
 
 const filters = [
