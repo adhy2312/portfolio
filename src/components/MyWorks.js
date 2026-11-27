@@ -41,7 +41,7 @@ const projects = [
     tags: ['Python', 'Odoo ERP', 'KiCad', 'Cron Job'],
     category: 'electronics',
     liveLink: null,
-    githubLink: null,
+    githubLink: 'https://github.com/adhy2312/Odoo-KiCad-Sync',
     accent: 'var(--accent-blue, #6495ED)',
     icon: <FiZap />,
   },
@@ -221,7 +221,13 @@ const MyWorks = () => {
       const rawGithub = (p.githubLink && p.githubLink !== 'null' && p.githubLink !== '#') 
         ? p.githubLink 
         : ((p.github && p.github !== 'null' && p.github !== '#') ? p.github : null);
-      const cleanGithub = rawGithub || (p.title?.toLowerCase().includes('smart lighting') ? 'https://github.com/adhy2312/lumina-studio' : null);
+      const lowerTitle = (p.title || '').toLowerCase();
+      const defaultRepo = lowerTitle.includes('smart lighting')
+        ? 'https://github.com/adhy2312/lumina-studio'
+        : lowerTitle.includes('odoo') && lowerTitle.includes('kicad')
+          ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
+          : null;
+      const cleanGithub = rawGithub || defaultRepo;
       const cleanLive = (p.liveLink && p.liveLink !== 'null' && p.liveLink !== '#') 
         ? p.liveLink 
         : ((p.link && p.link !== 'null' && p.link !== '#') ? p.link : null);
