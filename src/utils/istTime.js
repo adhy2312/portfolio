@@ -14,3 +14,4 @@ export function getIstClock() {
   const ist = getIstDate();
   return `${String(ist.getHours()).padStart(2, '0')}:${String(ist.getMinutes()).padStart(2, '0')}`;
 }
+

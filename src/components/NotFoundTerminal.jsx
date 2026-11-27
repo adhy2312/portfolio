@@ -146,3 +146,4 @@ export default function NotFoundTerminal({ path, onGoHome, onOpenAgentPortal }) 
     </main>
   );
 }
+
