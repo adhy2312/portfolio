@@ -26,7 +26,7 @@ const defaultStats = [
 const About = () => {
   const { data: aboutData } = useSanityQuery('*[_type == "about"][0]');
   const { getStoryForSection, openStory } = useStory();
-  const { t } = useSiteMode();
+  const { lang, t } = useSiteMode();
   const hasStory = !!getStoryForSection('about');
 
   const sectionRef = useRef(null);
@@ -34,14 +34,23 @@ const About = () => {
   const textColRef = useRef(null);
   const statsRef = useRef(null);
 
+  const translatedBios = [
+    t('about.bio1'),
+    t('about.bio2'),
+    t('about.bio3'),
+  ];
+
+  const translatedStats = (aboutData?.stats || defaultStats).map((s, idx) => ({
+    ...s,
+    label: lang === 'en' ? s.label : t(`about.stat${idx}`, s.label),
+  }));
+
   const displayData = {
-    location: aboutData?.location || "Kerala, India · Open to Remote & Relocation",
-    bioParagraphs: aboutData?.bioParagraphs || [
-      "I'm Adhithya Mohan,Media Secretary at MBCET Senate, Co-Founder & Director of External Affairs at Finance Club MBCET, Electronics and Communication Engineering (ECE) student, and full-stack developer. I drive high-impact financial literacy and technical initiatives while blending engineering precision with creative software design.",
-      "My work spans software, leadership, and hardware — building financial communities, prototyping in Figma, crafting scalable web apps with React & Node.js, and designing embedded IoT systems with ESP32 & STM32.",
-      "I bring a founder's perspective and a photographer's eye to every project, building digital experiences that scale beyond the classroom."
-    ],
-    stats: aboutData?.stats || defaultStats,
+    location: lang === 'en' ? (aboutData?.location || t('about.location')) : t('about.location'),
+    bioParagraphs: lang === 'en'
+      ? (aboutData?.bioParagraphs || translatedBios)
+      : translatedBios,
+    stats: translatedStats,
     profileImage: aboutData?.profileImage ? urlFor(aboutData.profileImage).url() : dp,
     experienceYears: aboutData?.experienceYears || "2+"
   };
@@ -219,7 +228,7 @@ const About = () => {
             </div>
 
             {displayData.bioParagraphs.map((p, i) => (
-              <Typography key={i} variant="split" as="p" className="about-p" text={p} />
+              <Typography key={`${lang}-${i}`} variant="split" as="p" className="about-p" text={p} />
             ))}
 
             <div className="about-stats" ref={statsRef}>

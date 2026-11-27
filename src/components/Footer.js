@@ -3,6 +3,7 @@ import './Footer.css';
 import { FiGithub, FiLinkedin, FiInstagram, FiMail, FiMessageCircle } from 'react-icons/fi';
 import CopyEmail from './CopyEmail';
 import { client } from '../sanity';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -26,6 +27,7 @@ const links = [
 
 
 const Footer = () => {
+  const { t } = useSiteMode();
   const [footerData, setFooterData] = useState(null);
   const [legalModalTab, setLegalModalTab] = useState(null);
   const footerRef = useRef(null);

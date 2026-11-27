@@ -7,18 +7,19 @@ import './BetaSections.css';
 
 /* ── 1. Minimal Proof Bar (Replaces StatsBento & TrustedBy in Beta) ── */
 export function BetaProofBar() {
+  const { t } = useSiteMode();
   const orgs = ['MBCET Senate', 'Finance Club MBCET', 'ISTE SC MBCET', 'FRAMES MBCET'];
   const metrics = [
-    { value: '300+', label: 'Members Led' },
-    { value: '15+', label: 'Projects Built' },
-    { value: '10+', label: 'Tech Stacks' },
+    { value: '300+', label: t('proof.membersLed', 'Members Led') },
+    { value: '15+', label: t('proof.projectsBuilt', 'Projects Built') },
+    { value: '10+', label: t('proof.techStacks', 'Tech Stacks') },
   ];
 
   return (
     <section className="beta-proof-section" aria-label="Proof and Affiliations">
       <div className="beta-proof-bar">
         <div className="beta-proof-orgs">
-          <span className="beta-proof-kicker">AFFILIATIONS</span>
+          <span className="beta-proof-kicker">{t('proof.affiliations', 'AFFILIATIONS')}</span>
           <div className="beta-proof-badges">
             {orgs.map((org) => (
               <span key={org} className="beta-proof-org">{org}</span>
@@ -103,9 +104,15 @@ const CAREER_MILESTONES = [
 ];
 
 export function BetaCareerRail() {
+  const { t } = useSiteMode();
   const [activeTag, setActiveTag] = useState('All');
   const [expandedId, setExpandedId] = useState('senate-2026');
-  const tags = ['All', 'Leadership', 'Engineering', 'Community'];
+  const tags = [
+    { id: 'All', label: t('career.filterAll', 'All') },
+    { id: 'Leadership', label: t('career.filterLeadership', 'Leadership') },
+    { id: 'Engineering', label: t('career.filterEngineering', 'Engineering') },
+    { id: 'Community', label: t('career.filterCommunity', 'Community') },
+  ];
 
   const visible = activeTag === 'All'
     ? CAREER_MILESTONES
@@ -114,24 +121,24 @@ export function BetaCareerRail() {
   return (
     <section className="beta-career-section" id="experience">
       <div className="beta-section-head">
-        <span className="section-label">{'// career & milestones'}</span>
+        <span className="section-label">{t('career.label', '// career & milestones')}</span>
         <h2 className="section-title">
-          Interactive <span>Career Rail</span>
+          {t('career.title', 'Interactive')} <span>{t('career.titleAccent', 'Career Rail')}</span>
         </h2>
         <p className="beta-section-sub">
-          Unified timeline of leadership roles, engineering builds, and community initiatives — click any milestone to inspect impact.
+          {t('career.sub', 'Unified timeline of leadership roles, engineering builds, and community initiatives — click any milestone to inspect impact.')}
         </p>
       </div>
 
       <div className="beta-rail-filters">
         {tags.map((tag) => (
           <button
-            key={tag}
+            key={tag.id}
             type="button"
-            className={`beta-rail-filter ${activeTag === tag ? 'is-active' : ''}`}
-            onClick={() => setActiveTag(tag)}
+            className={`beta-rail-filter ${activeTag === tag.id ? 'is-active' : ''}`}
+            onClick={() => setActiveTag(tag.id)}
           >
-            {tag}
+            {tag.label}
           </button>
         ))}
       </div>
@@ -195,10 +202,10 @@ export function BetaInquiryStudio() {
   }, []);
 
   const presets = [
-    { label: 'Internship / Role', subject: 'Engineering Role / Internship Opportunity', msg: 'Hi Adhithya, we reviewed your portfolio and would like to discuss an engineering opportunity...' },
-    { label: 'Freelance', subject: 'Freelance Web / AI Project Inquiry', msg: 'Hi Adhithya, we have a web/AI project in mind and would love to collaborate...' },
-    { label: 'Hardware Collab', subject: 'ECE / Embedded / SDR Collaboration', msg: 'Hi Adhithya, reaching out regarding your STM32 / KiCad / GNU Radio hardware work...' },
-    { label: 'Quick Hi', subject: 'Hello from your portfolio!', msg: 'Hey Adhithya, just wanted to connect and say hello!' },
+    { label: t('studio.presetInternship', 'Internship / Role'), subject: 'Engineering Role / Internship Opportunity', msg: 'Hi Adhithya, we reviewed your portfolio and would like to discuss an engineering opportunity...' },
+    { label: t('studio.presetFreelance', 'Freelance'), subject: 'Freelance Web / AI Project Inquiry', msg: 'Hi Adhithya, we have a web/AI project in mind and would love to collaborate...' },
+    { label: t('studio.presetHardware', 'Hardware Collab'), subject: 'ECE / Embedded / SDR Collaboration', msg: 'Hi Adhithya, reaching out regarding your STM32 / KiCad / GNU Radio hardware work...' },
+    { label: t('studio.presetHi', 'Quick Hi'), subject: 'Hello from your portfolio!', msg: 'Hey Adhithya, just wanted to connect and say hello!' },
   ];
 
   const handleCopyEmail = () => {
@@ -249,7 +256,7 @@ export function BetaInquiryStudio() {
     <section className="beta-studio-section" id="contact">
       <div className="beta-studio-grid">
         <div className="beta-studio-info">
-          <span className="section-label">{'// studio inquiry'}</span>
+          <span className="section-label">{t('studio.label', '// studio inquiry')}</span>
           <h2 className="section-title">
             {t('contact.title', "Let's Connect")}
           </h2>
@@ -265,7 +272,7 @@ export function BetaInquiryStudio() {
           <div className="beta-studio-quick">
             <button type="button" className="beta-studio-chip" onClick={handleCopyEmail}>
               {copied ? <FiCheck size={14} /> : <FiCopy size={14} />}
-              <span>{copied ? 'Copied email!' : 'adhithyamohan2312@gmail.com'}</span>
+              <span>{copied ? t('studio.copied', 'Copied email!') : 'adhithyamohan2312@gmail.com'}</span>
             </button>
             <a
               href="https://www.linkedin.com/in/adhithya-mohan-s"
@@ -322,3 +329,4 @@ export function BetaInquiryStudio() {
     </section>
   );
 }
+

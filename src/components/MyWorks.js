@@ -242,15 +242,24 @@ const MyWorks = () => {
 
         {/* Filter tabs */}
         <div className="works-filters" ref={filtersRef}>
-          {filters.map((f) => (
-            <button
-              key={f.value}
-              className={`filter-btn ${activeFilter === f.value ? 'filter-btn-active' : ''}`}
-              onClick={() => setActiveFilter(f.value)}
-            >
-              {f.label}
-            </button>
-          ))}
+          {filters.map((f) => {
+            const labelMap = {
+              all: t('works.filterAll', f.label),
+              fullstack: t('works.filterFullstack', f.label),
+              electronics: t('works.filterElectronics', f.label),
+              design: t('works.filterDesign', f.label),
+              photography: t('works.filterPhoto', f.label),
+            };
+            return (
+              <button
+                key={f.value}
+                className={`filter-btn ${activeFilter === f.value ? 'filter-btn-active' : ''}`}
+                onClick={() => setActiveFilter(f.value)}
+              >
+                {labelMap[f.value] || f.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Vault Grid Layout */}

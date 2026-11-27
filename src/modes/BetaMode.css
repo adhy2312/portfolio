@@ -103,12 +103,17 @@ body.mode-beta .section-title[data-hover]:hover .section-title-content {
 }
 
 body.mode-beta .section-label {
+  white-space: nowrap !important;
   background: rgba(229, 193, 88, 0.08) !important;
   border: 1px solid rgba(229, 193, 88, 0.24) !important;
   border-top: 1px solid rgba(229, 193, 88, 0.24) !important;
   border-radius: 999px !important;
   color: #e5c158 !important;
   box-shadow: none !important;
+}
+
+body.mode-beta .section-label::after {
+  display: none !important;
 }
 
 /* Centered Floating Pill Navbar (outer .navbar stays transparent, .navbar-inner is the pill) */

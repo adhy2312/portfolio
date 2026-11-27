@@ -3,6 +3,7 @@ import './Achievements.css';
 import { FiAward, FiZap, FiPenTool, FiCamera, FiGlobe, FiBookOpen } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -34,6 +35,7 @@ const Achievements = () => {
   const gridRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
+  const { t } = useSiteMode();
   const hasStory = !!getStoryForSection('achievements');
 
   useEffect(() => {
@@ -88,10 +90,10 @@ const Achievements = () => {
     <section className="achievements" id="achievements" ref={sectionRef}>
       <div className="container">
         <div className="ach-header" ref={headerRef}>
-          <span className="section-label">{"// highlights"}</span>
+          <span className="section-label">{t('ach.label', '// highlights')}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Milestones">
-              <span className="section-title-inner">What I <span>Bring</span></span>
+              <span className="section-title-inner">{t('ach.title', 'What I')} <span>{t('ach.titleAccent', 'Bring')}</span></span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('achievements')} aria-label="Read story behind this section">

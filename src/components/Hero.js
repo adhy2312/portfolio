@@ -19,7 +19,7 @@ gsap.registerPlugin(TextPlugin, ScrollTrigger);
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
 
-  const { isExperimental, isBeta, t } = useSiteMode();
+  const { isExperimental, isBeta, lang, t } = useSiteMode();
   const heroRef = useRef(null);
   const contentRef = useRef(null);
   const greetingRef = useRef(null);
@@ -121,18 +121,22 @@ const Hero = () => {
   }, []);
 
   const hour = new Date().getHours();
-  let timeGreeting = "Welcome.";
-  if (hour < 5 || hour >= 23) timeGreeting = "Still here at this hour.";
-  else if (hour < 12) timeGreeting = "The morning is early yet.";
-  else if (hour < 18) timeGreeting = "Afternoon — a good time to explore.";
-  else timeGreeting = "The day is winding down.";
+  let timeGreeting = t('hero.greetingMorning', 'Welcome.');
+  if (hour < 5 || hour >= 23) timeGreeting = t('hero.greetingNight', 'Still here at this hour.');
+  else if (hour < 12) timeGreeting = t('hero.greetingMorning', 'The morning is early yet.');
+  else if (hour < 18) timeGreeting = t('hero.greetingAfternoon', 'Afternoon — a good time to explore.');
+  else timeGreeting = t('hero.greetingEvening', 'The day is winding down.');
 
   const displayData = {
     greeting: timeGreeting,
     name: heroData?.name || "Adhithya Mohan",
     heading: heroData?.heading || "Full-Stack Developer & Creator",
-    role: heroData?.role || "Media Secretary @ MBCET Senate | Co-Founder @ Finance Club | ECE Engineer",
-    bio: heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks.",
+    role: lang === 'en'
+      ? (heroData?.role || t('hero.role'))
+      : t('hero.role', heroData?.role || "Media Secretary @ MBCET Senate | Co-Founder @ Finance Club | ECE Engineer"),
+    bio: lang === 'en'
+      ? (heroData?.bio || t('hero.bio'))
+      : t('hero.bio', heroData?.bio || "Building responsive web apps and IoT solutions with modern tech stacks."),
     techStack: heroData?.techStack || ["React", "Node.js", "Python", "STM32", "SupaBase"],
     resumeUrl: heroData?.resumeUrl || "#",
     heroImage: heroData?.heroImage ? urlFor(heroData.heroImage).url() : null
@@ -205,7 +209,7 @@ const Hero = () => {
             </div>
 
             <div className="hero-beta-credits">
-              <span>BASE: KERALA, IN</span>
+              <span>{t('hero.base', 'BASE: KERALA, IN')}</span>
               <span>•</span>
               <span>STACK: {(displayData.techStack || []).slice(0, 4).join(' · ')}</span>
             </div>
