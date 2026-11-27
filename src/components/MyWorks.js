@@ -52,7 +52,7 @@ const projects = [
     tags: ['ESP32', 'Arduino', 'Embedded C', 'IoT'],
     category: 'electronics',
     liveLink: null,
-    githubLink: 'https://github.com/adhy2312/Odoo-KiCad-Sync',
+    githubLink: 'https://github.com/adhy2312/lumina-studio',
     accent: 'var(--accent-green)',
     icon: <FiZap />,
   },
@@ -215,7 +215,7 @@ const MyWorks = () => {
           : lowerTitle.includes('odoo') && lowerTitle.includes('kicad')
             ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
             : lowerTitle.includes('smart lighting')
-              ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
+              ? 'https://github.com/adhy2312/lumina-studio'
               : lowerTitle.includes('portfolio')
                 ? 'https://github.com/adhy2312/portfolio'
                 : null;
