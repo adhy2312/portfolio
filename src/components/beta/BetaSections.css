@@ -355,3 +355,299 @@
   width: fit-content;
 }
 
+/* ── Mechanical Split-Flap Solari Board ── */
+.beta-solari-board {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #0d111b;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.2s ease;
+}
+
+.beta-solari-board:hover {
+  border-color: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.4);
+}
+
+.beta-solari-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.beta-solari-led {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--beta-accent, #e5c158);
+  box-shadow: 0 0 8px var(--beta-accent, #e5c158);
+}
+
+.beta-solari-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.12em;
+  color: var(--beta-accent, #e5c158);
+}
+
+.beta-solari-cells {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.beta-solari-cells::-webkit-scrollbar {
+  display: none;
+}
+
+@keyframes solariFlip {
+  0% {
+    transform: perspective(160px) rotateX(-75deg);
+    opacity: 0.45;
+  }
+  100% {
+    transform: perspective(160px) rotateX(0deg);
+    opacity: 1;
+  }
+}
+
+.beta-solari-cell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 26px;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #1b2234 0%, #121725 49%, #0e121e 51%, #161c2c 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f4f4f5;
+  flex-shrink: 0;
+  transform-origin: center center;
+}
+
+.beta-solari-cell::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.65);
+  pointer-events: none;
+}
+
+.beta-solari-cell.is-flipping {
+  animation: solariFlip 240ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+.beta-solari-cell.is-blank {
+  background: #101420;
+  color: transparent;
+}
+
+.beta-solari-cycle {
+  color: #71717a;
+  display: inline-flex;
+  flex-shrink: 0;
+  transition: color 0.18s ease, transform 0.25s ease;
+}
+
+.beta-solari-board:hover .beta-solari-cycle {
+  color: var(--beta-accent, #e5c158);
+  transform: rotate(90deg);
+}
+
+/* ── Formal vs. Unfiltered Flip Toggle ── */
+.beta-rail-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 22px;
+}
+
+.beta-rail-controls .beta-rail-filters {
+  margin-bottom: 0;
+}
+
+.beta-story-toggle {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: 999px;
+  background: #0d111b;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.beta-story-btn {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  background: transparent;
+  color: #a1a1aa;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.beta-story-btn.is-active {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fafafa;
+  font-weight: 700;
+}
+
+.beta-story-btn.is-active.is-unfiltered {
+  background: var(--beta-accent, #e5c158);
+  color: #09090b;
+}
+
+@keyframes railFlipSwap {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.beta-rail-item.is-unfiltered .beta-rail-role,
+.beta-rail-item.is-unfiltered .beta-rail-bullets {
+  animation: railFlipSwap 220ms ease-out;
+}
+
+.beta-rail-item.is-unfiltered .beta-rail-card {
+  border-color: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.28);
+}
+
+/* ── Scope Your Idea Dial Builder ── */
+.beta-dial-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.beta-dial-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: #d4d4d8;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  cursor: pointer;
+}
+
+.beta-dial-toggle.is-open {
+  border-color: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.45);
+  color: var(--beta-accent, #e5c158);
+}
+
+.beta-dial-builder {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #0f1420;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.beta-dial-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.beta-dial-label {
+  width: 44px;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: #71717a;
+  flex-shrink: 0;
+}
+
+.beta-dial-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.beta-dial-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  color: #a1a1aa;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.beta-dial-pill.is-selected {
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.16);
+  border-color: var(--beta-accent, #e5c158);
+  color: var(--beta-accent, #e5c158);
+  font-weight: 700;
+}
+
+.beta-dial-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.beta-dial-stack {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  color: #d4d4d8;
+}
+
+.beta-dial-apply {
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: none;
+  background: var(--beta-accent, #e5c158);
+  color: #09090b;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .beta-solari-cell.is-flipping,
+  .beta-rail-item.is-unfiltered .beta-rail-role,
+  .beta-rail-item.is-unfiltered .beta-rail-bullets {
+    animation: none !important;
+  }
+}
+
+

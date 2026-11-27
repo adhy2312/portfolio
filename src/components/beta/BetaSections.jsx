@@ -1,13 +1,48 @@
 import React, { useState, useRef, useEffect } from 'react';
 import emailjs from 'emailjs-com';
-import { FiChevronDown, FiSend, FiCheckCircle, FiXCircle, FiCopy, FiCheck, FiMapPin, FiLinkedin } from 'react-icons/fi';
+import { FiChevronDown, FiSend, FiCheckCircle, FiXCircle, FiCopy, FiCheck, FiMapPin, FiLinkedin, FiRefreshCw, FiSliders } from 'react-icons/fi';
 import { hermesAgent } from '../../core/agents/specialists/HermesAgent';
 import { useSiteMode } from '../../contexts/SiteModeContext';
 import './BetaSections.css';
 
-/* ── 1. Minimal Proof Bar (Replaces StatsBento & TrustedBy in Beta) ── */
+const SOLARI_WIDTH = 34;
+
+function formatSolariLine(text) {
+  return String(text || '')
+    .toUpperCase()
+    .slice(0, SOLARI_WIDTH)
+    .padEnd(SOLARI_WIDTH, ' ');
+}
+
+function getIstClock() {
+  const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  return `${String(ist.getHours()).padStart(2, '0')}:${String(ist.getMinutes()).padStart(2, '0')}`;
+}
+
+/* ── 1. Minimal Proof Bar + Mechanical Solari Split-Flap Display ── */
 export function BetaProofBar() {
   const { t } = useSiteMode();
+  const [lineIdx, setLineIdx] = useState(0);
+  const [istClock, setIstClock] = useState(getIstClock);
+
+  useEffect(() => {
+    const clockId = setInterval(() => setIstClock(getIstClock()), 30000);
+    const cycleId = setInterval(() => setLineIdx((prev) => (prev + 1) % 4), 4200);
+    return () => {
+      clearInterval(clockId);
+      clearInterval(cycleId);
+    };
+  }, []);
+
+  const solariLines = [
+    `IST ${istClock} // OPEN FOR COLLABS`,
+    'BUILDING // BETA LABS + AGENTIC UI',
+    'STACK    // REACT . PYTHON . ESP32',
+    'BASE     // KERALA IN . 29C CLEAR',
+  ];
+
+  const activeChars = formatSolariLine(solariLines[lineIdx]).split('');
+
   const orgs = ['MBCET Senate', 'Finance Club MBCET', 'ISTE SC MBCET', 'FRAMES MBCET'];
   const metrics = [
     { value: '300+', label: t('proof.membersLed', 'Members Led') },
@@ -35,6 +70,41 @@ export function BetaProofBar() {
           ))}
         </div>
       </div>
+
+      {/* Mechanical Split-Flap Solari Board */}
+      <div
+        className="beta-solari-board"
+        onClick={() => setLineIdx((prev) => (prev + 1) % solariLines.length)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setLineIdx((prev) => (prev + 1) % solariLines.length);
+          }
+        }}
+        title="Click to cycle live status board"
+        aria-label={`Live status board: ${solariLines[lineIdx]}`}
+      >
+        <div className="beta-solari-meta">
+          <span className="beta-solari-led" aria-hidden="true" />
+          <span className="beta-solari-tag">SOLARI // LIVE</span>
+        </div>
+        <div className="beta-solari-cells" aria-hidden="true">
+          {activeChars.map((ch, idx) => (
+            <span
+              key={`${idx}-${ch}-${lineIdx}`}
+              className={`beta-solari-cell ${ch === ' ' ? 'is-blank' : 'is-flipping'}`}
+              style={{ animationDelay: `${idx * 14}ms` }}
+            >
+              {ch === ' ' ? '\u00A0' : ch}
+            </span>
+          ))}
+        </div>
+        <span className="beta-solari-cycle" aria-hidden="true">
+          <FiRefreshCw size={12} />
+        </span>
+      </div>
     </section>
   );
 }
@@ -47,10 +117,15 @@ const CAREER_MILESTONES = [
     period: 'Oct 2026 — Present',
     org: 'MBCET Senate',
     role: 'Media Secretary',
+    unfilteredRole: 'The 11 PM Rapid-Response Media Desk',
     tag: 'Leadership',
     bullets: [
       'Direct official campus communications, institutional press coverage, and digital media strategy at the apex student governance level.',
       'Coordinate multi-club announcements and student media representation across college-wide initiatives.',
+    ],
+    unfilteredBullets: [
+      'Turning last-minute 10 PM event changes into clean press releases and campus-wide rollouts before morning assembly.',
+      'Balancing 10+ club voices without letting a single announcement clash or miss its deadline.',
     ],
   },
   {
@@ -59,10 +134,15 @@ const CAREER_MILESTONES = [
     period: 'Oct 2026 — Present',
     org: 'Finance Club MBCET',
     role: 'Co-Founder & Director of External Affairs',
+    unfilteredRole: 'Building a Finance Chapter From Zero',
     tag: 'Community',
     bullets: [
       'Co-founded the chapter and built industry partnerships for campus financial literacy workshops.',
       'Connected student builders with professional mentors across fintech, markets, and strategy.',
+    ],
+    unfilteredBullets: [
+      'Cold-messaged mentors and industry speakers until the first room of skeptical engineering students actually showed up.',
+      'Learned how to translate dry market jargon into practical sessions people stay awake for.',
     ],
   },
   {
@@ -71,10 +151,15 @@ const CAREER_MILESTONES = [
     period: 'Aug 2026 — Oct 2026',
     org: 'ISTE SC MBCET',
     role: 'Chairperson',
+    unfilteredRole: '300+ Members, 1 Portal, Zero Sleep',
     tag: 'Leadership',
     bullets: [
       'Led 300+ student members across technical workshops, state conventions, and chapter operations.',
       'Architected and oversaw the official ISTE MBCET Next.js + Sanity digital portal.',
+    ],
+    unfilteredBullets: [
+      'Shipped the Next.js + Sanity portal while simultaneously juggling convention logistics and volunteer firefighting.',
+      'Discovered that automating certificates in code saves way more sanity than manual spreadsheets.',
     ],
   },
   {
@@ -83,10 +168,15 @@ const CAREER_MILESTONES = [
     period: 'Aug 2026 — Present',
     org: 'FRAMES MBCET',
     role: 'Lead Photographer',
+    unfilteredRole: 'Chasing Golden Hour Between Labs',
     tag: 'Community',
     bullets: [
       'Lead visual storytelling, event documentation, and Lightroom editorial direction for flagship campus events.',
       'Mentored junior photographers in composition, low-light shooting, and documentary framing.',
+    ],
+    unfilteredBullets: [
+      'Sprinting across campus with a camera bag right after circuits lab to catch the last 10 minutes of stage lighting.',
+      'Batch-culling 800 RAW frames at 2 AM so event highlights hit socials before breakfast.',
     ],
   },
 ];
@@ -95,6 +185,7 @@ export function BetaCareerRail() {
   const { t } = useSiteMode();
   const [activeTag, setActiveTag] = useState('All');
   const [expandedId, setExpandedId] = useState('senate-2026');
+  const [isUnfiltered, setIsUnfiltered] = useState(false);
   const tags = [
     { id: 'All', label: t('career.filterAll', 'All') },
     { id: 'Leadership', label: t('career.filterLeadership', 'Leadership') },
@@ -117,24 +208,45 @@ export function BetaCareerRail() {
         </p>
       </div>
 
-      <div className="beta-rail-filters">
-        {tags.map((tag) => (
+      <div className="beta-rail-controls">
+        <div className="beta-rail-filters">
+          {tags.map((tag) => (
+            <button
+              key={tag.id}
+              type="button"
+              className={`beta-rail-filter ${activeTag === tag.id ? 'is-active' : ''}`}
+              onClick={() => setActiveTag(tag.id)}
+            >
+              {tag.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="beta-story-toggle" role="group" aria-label="Perspective toggle">
           <button
-            key={tag.id}
             type="button"
-            className={`beta-rail-filter ${activeTag === tag.id ? 'is-active' : ''}`}
-            onClick={() => setActiveTag(tag.id)}
+            className={`beta-story-btn ${!isUnfiltered ? 'is-active' : ''}`}
+            onClick={() => setIsUnfiltered(false)}
           >
-            {tag.label}
+            Formal
           </button>
-        ))}
+          <button
+            type="button"
+            className={`beta-story-btn ${isUnfiltered ? 'is-active is-unfiltered' : ''}`}
+            onClick={() => setIsUnfiltered(true)}
+          >
+            Unfiltered
+          </button>
+        </div>
       </div>
 
       <div className="beta-rail-list">
         {visible.map((item) => {
           const isOpen = expandedId === item.id;
+          const displayRole = isUnfiltered ? item.unfilteredRole : item.role;
+          const displayBullets = isUnfiltered ? item.unfilteredBullets : item.bullets;
           return (
-            <div key={item.id} className={`beta-rail-item ${isOpen ? 'is-open' : ''}`}>
+            <div key={item.id} className={`beta-rail-item ${isOpen ? 'is-open' : ''} ${isUnfiltered ? 'is-unfiltered' : ''}`}>
               <div className="beta-rail-year">{item.year}</div>
               <button
                 type="button"
@@ -145,18 +257,18 @@ export function BetaCareerRail() {
                 <div className="beta-rail-top">
                   <div>
                     <div className="beta-rail-meta">
-                      <span className="beta-rail-tag">{item.tag}</span>
+                      <span className="beta-rail-tag">{isUnfiltered ? 'Behind the Scenes' : item.tag}</span>
                       <span className="beta-rail-period">{item.period}</span>
                     </div>
-                    <h3 className="beta-rail-role">{item.role}</h3>
+                    <h3 className="beta-rail-role" key={`${item.id}-${isUnfiltered ? 'u' : 'f'}`}>{displayRole}</h3>
                     <div className="beta-rail-org">{item.org}</div>
                   </div>
                   <FiChevronDown className={`beta-rail-chevron ${isOpen ? 'rotated' : ''}`} size={18} />
                 </div>
 
                 {isOpen && (
-                  <ul className="beta-rail-bullets">
-                    {item.bullets.map((b, i) => (
+                  <ul className="beta-rail-bullets" key={`${item.id}-b-${isUnfiltered ? 'u' : 'f'}`}>
+                    {displayBullets.map((b, i) => (
                       <li key={i}>{b}</li>
                     ))}
                   </ul>
@@ -170,23 +282,49 @@ export function BetaCareerRail() {
   );
 }
 
-/* ── 3. Single Cinematic Inquiry Studio (Replaces CallToAction + Contact in Beta) ── */
+const DIAL_STACKS = {
+  Web: 'Next.js · React · Supabase · GSAP',
+  IoT: 'ESP32 · KiCad · MQTT · React Dashboard',
+  AI: 'Gemini / LLM · Python · Tool Calling · Next.js',
+  Design: 'Figma · Design System · Interactive Prototype',
+};
+
+const DIAL_STAGE_NOTES = {
+  Idea: 'architecture & rapid proof-of-concept',
+  Prototype: 'end-to-end working build & polish',
+  Scale: 'production hardening, performance & deployment',
+};
+
+/* ── 3. Single Cinematic Inquiry Studio + Scope Your Idea Dial Builder ── */
 export function BetaInquiryStudio() {
   const { t } = useSiteMode();
   const formRef = useRef(null);
   const [status, setStatus] = useState('idle');
   const [copied, setCopied] = useState(false);
   const [istTime, setIstTime] = useState('');
+  const [dialWhat, setDialWhat] = useState('Web');
+  const [dialPace, setDialPace] = useState('1 Month');
+  const [dialStage, setDialStage] = useState('Prototype');
+  const [showBuilder, setShowBuilder] = useState(true);
 
   useEffect(() => {
     const update = () => {
-      const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-      setIstTime(`${String(ist.getHours()).padStart(2, '0')}:${String(ist.getMinutes()).padStart(2, '0')} IST`);
+      setIstTime(`${getIstClock()} IST`);
     };
     update();
     const id = setInterval(update, 30000);
     return () => clearInterval(id);
   }, []);
+
+  const generatedStack = DIAL_STACKS[dialWhat];
+  const generatedSubject = `[${dialWhat} · ${dialPace}] ${dialStage} Build Inquiry`;
+  const generatedBrief = `Hi Adhithya, I'm looking to collaborate on a ${dialWhat} project (${dialStage} stage — focused on ${DIAL_STAGE_NOTES[dialStage]}) with a ${dialPace} pace. Suggested stack: ${generatedStack}.`;
+
+  const applyDialBrief = () => {
+    if (!formRef.current) return;
+    if (formRef.current.subject) formRef.current.subject.value = generatedSubject;
+    if (formRef.current.message) formRef.current.message.value = generatedBrief;
+  };
 
   const presets = [
     { label: t('studio.presetInternship', 'Internship / Role'), subject: 'Engineering Role / Internship Opportunity', msg: 'Hi Adhithya, we reviewed your portfolio and would like to discuss an engineering opportunity...' },
@@ -278,22 +416,89 @@ export function BetaInquiryStudio() {
         </div>
 
         <form ref={formRef} onSubmit={handleSubmit} className="beta-studio-form">
-          <div className="beta-studio-presets">
-            {presets.map((p) => (
-              <button
-                key={p.label}
-                type="button"
-                className="beta-preset-pill"
-                onClick={() => {
-                  if (!formRef.current) return;
-                  if (formRef.current.subject) formRef.current.subject.value = p.subject;
-                  if (formRef.current.message) formRef.current.message.value = p.msg;
-                }}
-              >
-                {p.label}
-              </button>
-            ))}
+          <div className="beta-dial-header">
+            <div className="beta-studio-presets">
+              {presets.map((p) => (
+                <button
+                  key={p.label}
+                  type="button"
+                  className="beta-preset-pill"
+                  onClick={() => {
+                    if (!formRef.current) return;
+                    if (formRef.current.subject) formRef.current.subject.value = p.subject;
+                    if (formRef.current.message) formRef.current.message.value = p.msg;
+                  }}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+            <button
+              type="button"
+              className={`beta-dial-toggle ${showBuilder ? 'is-open' : ''}`}
+              onClick={() => setShowBuilder((v) => !v)}
+            >
+              <FiSliders size={12} />
+              <span>Scope Dial</span>
+            </button>
           </div>
+
+          {showBuilder && (
+            <div className="beta-dial-builder">
+              <div className="beta-dial-group">
+                <span className="beta-dial-label">WHAT</span>
+                <div className="beta-dial-pills">
+                  {['Web', 'IoT', 'AI', 'Design'].map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`beta-dial-pill ${dialWhat === opt ? 'is-selected' : ''}`}
+                      onClick={() => setDialWhat(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="beta-dial-group">
+                <span className="beta-dial-label">PACE</span>
+                <div className="beta-dial-pills">
+                  {['Weekend Sprint', '1 Month', 'Ongoing'].map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`beta-dial-pill ${dialPace === opt ? 'is-selected' : ''}`}
+                      onClick={() => setDialPace(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="beta-dial-group">
+                <span className="beta-dial-label">STAGE</span>
+                <div className="beta-dial-pills">
+                  {['Idea', 'Prototype', 'Scale'].map((opt) => (
+                    <button
+                      key={opt}
+                      type="button"
+                      className={`beta-dial-pill ${dialStage === opt ? 'is-selected' : ''}`}
+                      onClick={() => setDialStage(opt)}
+                    >
+                      {opt}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="beta-dial-preview">
+                <div className="beta-dial-stack">STACK // {generatedStack}</div>
+                <button type="button" className="beta-dial-apply" onClick={applyDialBrief}>
+                  Apply to Brief →
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="beta-studio-row">
             <input type="text" name="from_name" required placeholder={t('contact.yourName', 'Your Name')} className="beta-studio-input" />
