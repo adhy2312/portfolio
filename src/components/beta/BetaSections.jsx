@@ -3,6 +3,8 @@ import emailjs from 'emailjs-com';
 import { FiChevronDown, FiSend, FiCheckCircle, FiXCircle, FiCopy, FiCheck, FiMapPin, FiLinkedin, FiRefreshCw, FiSliders } from 'react-icons/fi';
 import { hermesAgent } from '../../core/agents/specialists/HermesAgent';
 import { useSiteMode } from '../../contexts/SiteModeContext';
+import { getIstClock } from '../../utils/istTime';
+import { getBetaUrlParam, updateBetaUrlParam } from '../../core/betaAgenticBus';
 import './BetaSections.css';
 
 const SOLARI_WIDTH = 34;
@@ -12,11 +14,6 @@ function formatSolariLine(text) {
     .toUpperCase()
     .slice(0, SOLARI_WIDTH)
     .padEnd(SOLARI_WIDTH, ' ');
-}
-
-function getIstClock() {
-  const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-  return `${String(ist.getHours()).padStart(2, '0')}:${String(ist.getMinutes()).padStart(2, '0')}`;
 }
 
 /* ── 1. Minimal Proof Bar + Mechanical Solari Split-Flap Display ── */
@@ -185,7 +182,12 @@ export function BetaCareerRail() {
   const { t } = useSiteMode();
   const [activeTag, setActiveTag] = useState('All');
   const [expandedId, setExpandedId] = useState('senate-2026');
-  const [isUnfiltered, setIsUnfiltered] = useState(false);
+  const [isUnfiltered, setIsUnfiltered] = useState(() => getBetaUrlParam('view') === 'unfiltered');
+
+  const setPerspective = (unfiltered) => {
+    setIsUnfiltered(unfiltered);
+    updateBetaUrlParam('view', unfiltered ? 'unfiltered' : null);
+  };
 
   useEffect(() => {
     const onCareerView = (e) => {
@@ -236,14 +238,14 @@ export function BetaCareerRail() {
           <button
             type="button"
             className={`beta-story-btn ${!isUnfiltered ? 'is-active' : ''}`}
-            onClick={() => setIsUnfiltered(false)}
+            onClick={() => setPerspective(false)}
           >
             Formal
           </button>
           <button
             type="button"
             className={`beta-story-btn ${isUnfiltered ? 'is-active is-unfiltered' : ''}`}
-            onClick={() => setIsUnfiltered(true)}
+            onClick={() => setPerspective(true)}
           >
             Unfiltered
           </button>

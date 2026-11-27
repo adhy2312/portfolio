@@ -6,7 +6,7 @@ import { readAmbientFlags, writeAmbientFlags } from './BetaAmbientController';
 import { runBetaAgenticIntent, dispatchAgenticAction } from '../../core/betaAgenticBus';
 import './BetaLabSuite.css';
 
-class BetaErrorBoundary extends Component {
+export class BetaErrorBoundary extends Component {
   constructor(props) {
     super(props);
     this.state = { hasError: false, error: null };
@@ -49,7 +49,17 @@ function BetaWorkspaceBar() {
   const [ambientFlags, setAmbientFlags] = useState(readAmbientFlags);
   const [copilotQuery, setCopilotQuery] = useState('');
   const [agenticTrace, setAgenticTrace] = useState('');
+  const [loadMs, setLoadMs] = useState(null);
   const copilotInputRef = useRef(null);
+
+  useEffect(() => {
+    try {
+      const nav = performance.getEntriesByType?.('navigation')?.[0];
+      if (nav && nav.domInteractive > 0) {
+        setLoadMs(Math.round(nav.domInteractive));
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const onTrace = (e) => {
@@ -140,7 +150,7 @@ function BetaWorkspaceBar() {
               <span className="beta-pill">BETA v2.0 // STUDIO REDESIGN</span>
               <span className="beta-deploy-pill" title="Production Deployment Status">
                 <span className="beta-deploy-dot" aria-hidden="true" />
-                PROD · HEALTHY
+                PROD · HEALTHY{loadMs ? ` · ${loadMs}ms` : ''}
               </span>
               <span className="beta-uptime-pill" title="Active Session Uptime">
                 UPTIME {uptimeStr}

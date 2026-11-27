@@ -1013,6 +1013,31 @@ body.mode-beta.beta-zen-mode .beta-studio-grid {
   }
 }
 
+/* ── Semantic Tokens, Focus Accessibility & Render Containment ── */
+body.mode-beta {
+  --beta-surface: #151a27;
+  --beta-surface-elevated: #1b2234;
+  --beta-border-subtle: rgba(255, 255, 255, 0.1);
+  --beta-border-focus: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.55);
+}
+
+body.mode-beta button:focus-visible,
+body.mode-beta a:focus-visible,
+body.mode-beta input:focus-visible,
+body.mode-beta textarea:focus-visible,
+body.mode-beta select:focus-visible {
+  outline: 2px solid var(--beta-accent, #e5c158) !important;
+  outline-offset: 2px !important;
+}
+
+body.mode-beta .beta-career-section,
+body.mode-beta .beta-studio-section,
+body.mode-beta .beta-feedback-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 520px;
+}
+
+
 
 
 

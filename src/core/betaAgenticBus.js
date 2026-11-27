@@ -24,6 +24,25 @@ const ALLOWED_FX = new Set([
   'kicadLayer',
 ]);
 
+export function updateBetaUrlParam(key, value) {
+  if (typeof window === 'undefined') return;
+  try {
+    const url = new URL(window.location.href);
+    if (value) url.searchParams.set(key, value);
+    else url.searchParams.delete(key);
+    window.history.replaceState({}, '', url.toString());
+  } catch {}
+}
+
+export function getBetaUrlParam(key) {
+  if (typeof window === 'undefined') return null;
+  try {
+    return new URLSearchParams(window.location.search).get(key);
+  } catch {
+    return null;
+  }
+}
+
 export function dispatchAgenticAction(type, payload = {}) {
   if (typeof window === 'undefined') return null;
 
@@ -43,6 +62,7 @@ export function dispatchAgenticAction(type, payload = {}) {
     case 'HIGHLIGHT_SKILL': {
       const skill = String(payload.skill || '').trim();
       if (!skill) return null;
+      updateBetaUrlParam('skill', skill);
       window.dispatchEvent(new CustomEvent('beta:skill-highlight', { detail: { skill } }));
       const worksEl = document.getElementById('works');
       if (worksEl) worksEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -51,9 +71,11 @@ export function dispatchAgenticAction(type, payload = {}) {
     }
 
     case 'SET_CAREER_VIEW': {
+      const perspective = payload.perspective === 'unfiltered' ? 'unfiltered' : 'formal';
+      updateBetaUrlParam('view', perspective === 'unfiltered' ? 'unfiltered' : null);
       window.dispatchEvent(new CustomEvent('beta:career-view', {
         detail: {
-          perspective: payload.perspective === 'unfiltered' ? 'unfiltered' : 'formal',
+          perspective,
           filter: payload.filter || null,
         },
       }));
@@ -167,3 +189,4 @@ export function runBetaAgenticIntent(rawQuery = '') {
     summary: steps.length > 0 ? steps.join(' → ') : '',
   };
 }
+

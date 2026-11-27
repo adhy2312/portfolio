@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useSiteMode } from '../../contexts/SiteModeContext';
+import { getIstHour } from '../../utils/istTime';
 
 const AMBIENT_STORAGE_KEY = 'beta-ambient-flags';
 
@@ -29,11 +30,6 @@ export function writeAmbientFlags(next) {
     localStorage.setItem(AMBIENT_STORAGE_KEY, JSON.stringify(next));
   } catch {}
   window.dispatchEvent(new CustomEvent('beta:ambient-change', { detail: next }));
-}
-
-function getIstHour() {
-  const ist = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
-  return ist.getHours();
 }
 
 function getSkyPhase(hour) {
@@ -198,3 +194,4 @@ export default function BetaAmbientController() {
     />
   );
 }
+

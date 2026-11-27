@@ -4,6 +4,7 @@ import { FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, Fi
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
+import { getBetaUrlParam, updateBetaUrlParam } from '../core/betaAgenticBus';
 import DecryptedText from './DecryptedText';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -244,6 +245,7 @@ const MyWorks = () => {
 
   const clearHighlightedSkill = () => {
     setHighlightedSkill(null);
+    updateBetaUrlParam('skill', null);
     if (highlightTimerRef.current) {
       clearTimeout(highlightTimerRef.current);
       highlightTimerRef.current = null;
@@ -255,14 +257,21 @@ const MyWorks = () => {
       clearHighlightedSkill();
       return;
     }
+    const urlSkill = getBetaUrlParam('skill');
+    if (urlSkill) {
+      setActiveFilter('all');
+      setHighlightedSkill(urlSkill);
+    }
     const onSkillHighlight = (e) => {
       const skill = e?.detail?.skill;
       if (!skill) return;
       setActiveFilter('all');
       setHighlightedSkill(skill);
+      updateBetaUrlParam('skill', skill);
       if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
       highlightTimerRef.current = setTimeout(() => {
         setHighlightedSkill(null);
+        updateBetaUrlParam('skill', null);
       }, 6000);
     };
     window.addEventListener('beta:skill-highlight', onSkillHighlight);
