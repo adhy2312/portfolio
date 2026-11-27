@@ -12,6 +12,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import EntropyText from './motion/EntropyText';
 import LiquidText from './motion/LiquidText';
 import ExpertDoc from './ExpertDoc';
+import betaHeroPortrait from '../assets/beta-hero-cutout.png';
 
 gsap.registerPlugin(TextPlugin, ScrollTrigger);
 
@@ -190,24 +191,6 @@ const Hero = () => {
               >
                 Start a Conversation
               </button>
-            </div>
-          </div>
-
-          <aside className="hero-beta-aside">
-            <div className="hero-beta-card">
-              <div className="hero-beta-card-label">DIRECTOR&apos;S TELEMETRY</div>
-              <div className="hero-beta-card-row">
-                <span>Discipline</span>
-                <strong>ECE · Full-Stack · AI</strong>
-              </div>
-              <div className="hero-beta-card-row">
-                <span>Base</span>
-                <strong>Kerala, India (IST)</strong>
-              </div>
-              <div className="hero-beta-card-row">
-                <span>Core Stack</span>
-                <strong>{(displayData.techStack || []).slice(0, 4).join(' · ')}</strong>
-              </div>
               <button
                 type="button"
                 className="hero-beta-ai-btn"
@@ -215,10 +198,30 @@ const Hero = () => {
                   detail: { prompt: 'Give me a cinematic 3-sentence introduction to Adhithya Mohan and his standout work.' }
                 }))}
               >
-                ✦ Ask Mini-Adhy for Intro
+                ✦ Ask Mini-Adhy
               </button>
             </div>
-          </aside>
+
+            <div className="hero-beta-credits">
+              <span>BASE: KERALA, IN</span>
+              <span>•</span>
+              <span>STACK: {(displayData.techStack || []).slice(0, 4).join(' · ')}</span>
+            </div>
+          </div>
+
+          <div className="hero-beta-portrait-stage">
+            <div className="hero-beta-portrait-aura" aria-hidden="true" />
+            <img
+              src={betaHeroPortrait}
+              alt={displayData.name}
+              className="hero-beta-portrait-img"
+            />
+            <div className="hero-beta-portrait-fade" aria-hidden="true" />
+            <div className="hero-beta-portrait-badge">
+              <span className="hero-beta-rec-dot" />
+              <span>DIRECTOR&apos;S CUT // BETA</span>
+            </div>
+          </div>
         </div>
 
         <div className="hero-beta-scroll-cue">
