@@ -1,3 +1,9 @@
+body.mode-switching {
+  opacity: 0.92;
+  filter: blur(2.5px);
+  transition: opacity 180ms ease, filter 180ms ease;
+}
+
 /* Fonts are loaded in index.html to avoid duplicate requests. Only @font-face overrides here. */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap');
 

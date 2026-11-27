@@ -297,10 +297,17 @@ function AppContent() {
     };
     window.addEventListener('ai-command', handleAiCommand);
 
+    const isEditableTarget = (target) => {
+      if (!target) return false;
+      const tag = target.tagName;
+      return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || Boolean(target.isContentEditable);
+    };
+
     // Konami code → barrel roll
     const konami = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
     let ki = 0;
     const keydownHandler = (e) => {
+      if (isEditableTarget(e.target)) return;
       if (e.key === konami[ki]) {
         ki++;
         if (ki === konami.length) {
@@ -315,6 +322,10 @@ function AppContent() {
     let adhyKeyIndex = 0;
     const adhySequence = ['a', 'd', 'h', 'y'];
     const adhyHandler = (e) => {
+      if (isEditableTarget(e.target)) {
+        adhyKeyIndex = 0;
+        return;
+      }
       if (e.key.toLowerCase() === adhySequence[adhyKeyIndex]) {
         adhyKeyIndex++;
         if (adhyKeyIndex === adhySequence.length) {

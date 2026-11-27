@@ -1,4 +1,4 @@
-import React, { useState, lazy, Suspense } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import './GamesHub.css';
 
 const TicTacToe = lazy(() => import('./TicTacToe'));
@@ -9,6 +9,18 @@ export default function GamesHub({ onClose }) {
   const isMobile = window.innerWidth <= 768;
   // Default to Snake
   const [selectedGame, setSelectedGame] = useState('snake');
+  const [arcadeScores, setArcadeScores] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('adhy_arcade_scores') || '{}'); }
+    catch { return {}; }
+  });
+
+  useEffect(() => {
+    const onScore = (e) => {
+      if (e?.detail) setArcadeScores(e.detail);
+    };
+    window.addEventListener('arcade-score', onScore);
+    return () => window.removeEventListener('arcade-score', onScore);
+  }, []);
 
   return (
     <div className="games-hub-overlay">
@@ -20,7 +32,7 @@ export default function GamesHub({ onClose }) {
             className={`games-hub-tab ${selectedGame === 'snake' ? 'active' : ''}`}
             onClick={() => setSelectedGame('snake')}
           >
-            Snake Xenzia
+            Snake Xenzia {arcadeScores.snake ? `(${arcadeScores.snake})` : ''}
           </button>
           
           <button 

@@ -441,9 +441,19 @@ export default function DeveloperModeOS({ onClose, onLaunchGame }) {
       });
     }, 4000);
 
+    const onEgg = (e) => {
+      const name = e.detail?.name ?? e.detail;
+      if (name === 'matrix') unlockAchievement('matrix');
+    };
+    const onGameLaunch = () => unlockAchievement('gamer');
+    window.addEventListener('trigger-egg', onEgg);
+    window.addEventListener('launch-ttt', onGameLaunch);
+
     return () => {
       clearInterval(interval);
       clearInterval(glitchInterval);
+      window.removeEventListener('trigger-egg', onEgg);
+      window.removeEventListener('launch-ttt', onGameLaunch);
     };
   }, []);
 

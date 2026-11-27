@@ -348,6 +348,13 @@ const buildActivePrompt = (base, owner, contextData, summonedAgents = [], ragSni
     ext += `\n• If JOCASTA is called: 120Hz render pipeline, Web Vitals, GPU draw call optimization.`;
   }
 
+  // Multilingual & Regional Indian Language Support
+  const langLabel = contextData.voiceLangLabel || 'English (India)';
+  ext += `\n\n== MULTILINGUAL RESPONSE DIRECTIVE ==`;
+  ext += `\nPreferred Language Setting: ${langLabel} (${contextData.voiceLang || 'en-IN'}).`;
+  ext += `\nYou fluently support English and major Indian languages including Hindi (हिन्दी), Malayalam (മലയാളം), Tamil (தமிழ்), Telugu (తెలుగు), Kannada (ಕನ್ನಡ), Bengali (বাংলা), Marathi (मराठी), Gujarati (ગુજરાતી), and Punjabi (ਪੰਜਾਬੀ).`;
+  ext += `\nIf the user writes or speaks in an Indian language (or selects one), reply in that language using accurate native script, correct spelling, and natural grammar (avoid broken transliteration unless the user uses Manglish/Hinglish).`;
+
   // Sentence completion directive to prevent cut-offs
   ext += `\n\nCRITICAL SPEECH COMPLETION DIRECTIVE:\nAlways complete your thoughts and sentences fully. Never stop mid-sentence. If you are close to the token limit, conclude your final sentence cleanly with proper punctuation.`;
 
@@ -757,6 +764,20 @@ const MiniAdhyEEG = ({ isThinking, emotionState }) => {
 /* ────────────────────────────────────────────────
    Main Component
 ──────────────────────────────────────────────── */
+const SUPPORTED_LANGUAGES = [
+  { code: 'en-IN', label: 'English (India)' },
+  { code: 'en-US', label: 'English (US)' },
+  { code: 'hi-IN', label: 'Hindi (हिन्दी)' },
+  { code: 'ml-IN', label: 'Malayalam (മലയാളം)' },
+  { code: 'ta-IN', label: 'Tamil (தமிழ்)' },
+  { code: 'te-IN', label: 'Telugu (తెలుగు)' },
+  { code: 'kn-IN', label: 'Kannada (ಕನ್ನಡ)' },
+  { code: 'bn-IN', label: 'Bengali (বাংলা)' },
+  { code: 'mr-IN', label: 'Marathi (मराठी)' },
+  { code: 'gu-IN', label: 'Gujarati (ગુજરાતી)' },
+  { code: 'pa-IN', label: 'Punjabi (ਪੰਜਾਬੀ)' },
+];
+
 const SESSION_MSGS_KEY = 'mini_adhy_session_msgs';
 
 const getInitialWelcomeMessage = () => {
@@ -799,6 +820,10 @@ const MiniAdhy = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedMsg, setPinnedMsg] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [voiceLang, setVoiceLang] = useState(() => {
+    try { return localStorage.getItem('mini_adhy_voice_lang') || 'en-IN'; }
+    catch { return 'en-IN'; }
+  });
   const [spotifyLive, setSpotifyLive] = useState(() => {
     try { return JSON.parse(localStorage.getItem('np_last_track') || 'null'); }
     catch { return null; }
@@ -851,7 +876,7 @@ const MiniAdhy = () => {
     }
     const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new SpeechRec();
-    rec.lang = 'en-US';
+    rec.lang = voiceLang || 'en-IN';
     rec.interimResults = true;
     rec.continuous = false;
     rec.onresult = (event) => {
@@ -863,7 +888,7 @@ const MiniAdhy = () => {
     recognitionRef.current = rec;
     setIsListening(true);
     rec.start();
-  }, [isListening, speechSupported]);
+  }, [isListening, speechSupported, voiceLang]);
 
   // 60-Second Executive Brief Generator
   const handleGenerateBrief = useCallback(() => {
@@ -1321,7 +1346,14 @@ const MiniAdhy = () => {
     }
 
     const storedEchoes = readEchoes();
-    const contextWithMode = { ...(consciousness || {}), activeMode, digitalEchoes: storedEchoes };
+    const voiceLangObj = SUPPORTED_LANGUAGES.find(l => l.code === voiceLang);
+    const contextWithMode = {
+      ...(consciousness || {}),
+      activeMode,
+      digitalEchoes: storedEchoes,
+      voiceLang,
+      voiceLangLabel: voiceLangObj?.label || 'English (India)'
+    };
     const summoned = detectSummonedAgents(safeText);
     const ragSnippets = portfolioRagIndex.search(safeText, 3);
     const activePrompt = buildActivePrompt(systemPrompt, ownerState, contextWithMode, summoned, ragSnippets);
@@ -1581,6 +1613,23 @@ const MiniAdhy = () => {
                   {voiceEnabled ? <FiVolume2 size={13} /> : <FiVolumeX size={13} />}
                   <span>Voice Output: {voiceEnabled ? 'ON' : 'OFF'}</span>
                 </button>
+                <div className="ma-menu-lang-row">
+                  <span className="ma-menu-lang-label">🌐 Language</span>
+                  <select
+                    className="ma-lang-select"
+                    value={voiceLang}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      setVoiceLang(next);
+                      try { localStorage.setItem('mini_adhy_voice_lang', next); } catch {}
+                    }}
+                    aria-label="Select voice and response language"
+                  >
+                    {SUPPORTED_LANGUAGES.map(l => (
+                      <option key={l.code} value={l.code}>{l.label}</option>
+                    ))}
+                  </select>
+                </div>
                 <button type="button" className="ma-menu-item" onClick={() => { setShowSearch(s => !s); setSearchQuery(''); setShowMenu(false); }}>
                   <FiSearch size={13} /> <span>Search Chat</span>
                 </button>

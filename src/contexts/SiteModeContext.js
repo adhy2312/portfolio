@@ -67,8 +67,12 @@ export function SiteModeProvider({ children }) {
     } catch { return false; }
   });
 
-  // Persist mode
+  // Persist mode with smooth 180ms crossfade
   const setMode = useCallback((m) => {
+    if (typeof document !== 'undefined') {
+      document.body.classList.add('mode-switching');
+      setTimeout(() => document.body.classList.remove('mode-switching'), 180);
+    }
     setModeState(m);
     try { localStorage.setItem('portfolio-mode', m); } catch {}
   }, []);

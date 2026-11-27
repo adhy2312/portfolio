@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import './NowPlaying.css';
 import { getNowPlaying } from '../utils/spotify';
 import ns from '../core/NervousSystem';
+import { hermesAgent } from '../core/agents/specialists/HermesAgent';
 
 const POLL_INTERVAL = 6000;
 const LS_KEY = 'np_minimized';
@@ -56,9 +57,10 @@ const NowPlaying = () => {
   const [minimized, setMinimized]   = useState(
     () => localStorage.getItem(LS_KEY) === 'true'
   );
-  const intervalRef  = useRef(null);
-  const progressRef  = useRef(null);
-  const audioRef     = useRef(null);
+  const intervalRef    = useRef(null);
+  const progressRef    = useRef(null);
+  const audioRef       = useRef(null);
+  const authAlertedRef = useRef(false);
   const [previewPlaying, setPreviewPlaying] = useState(false);
 
   // Reset image error state whenever track album art changes
@@ -99,6 +101,17 @@ const NowPlaying = () => {
       } else if (data?.authError) {
         setAuthError(true);
         window.dispatchEvent(new CustomEvent('spotify-track-update', { detail: data }));
+        if (!authAlertedRef.current) {
+          authAlertedRef.current = true;
+          ns.emit('SPOTIFY_TOKEN_REVOKED', data);
+          try {
+            hermesAgent.dispatchToast(
+              'Spotify Token Alert',
+              'Spotify refresh token expired or revoked. Renew SPOTIFY_REFRESH_TOKEN in Vercel.',
+              { type: 'warning' }
+            );
+          } catch {}
+        }
       }
     } catch {
       // Keep existing track on error

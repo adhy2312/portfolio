@@ -244,33 +244,21 @@ export const ConsciousnessProvider = ({ children }) => {
     };
 
     const fetchWeather = async () => {
+      // Stale-while-revalidate: skip network fetch if cache is < 30 minutes old
+      try {
+        const cached = localStorage.getItem('adhy_weather_cache');
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed && Date.now() - (parsed._cachedAt || 0) < 30 * 60 * 1000) {
+            if (parsed.condition) ns.setWeather(parsed.condition);
+            return;
+          }
+        }
+      } catch {}
+
       const isDayCurrent = getIstIsDay();
 
-      // Primary: OpenWeatherMap
-      try {
-        const apiKey = '92e41715eebf95a75dca713b1bf3fe06';
-        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=Thiruvananthapuram,IN&appid=${apiKey}&units=metric`);
-        const data = await res.json();
-        if (data.cod === 200 && data.weather?.length > 0) {
-          const cond = data.weather[0].main;
-          const isDay = data.dt > data.sys.sunrise && data.dt < data.sys.sunset;
-          const weatherPayload = {
-            condition: cond,
-            temp: Math.round(data.main.temp),
-            isDay,
-            description: data.weather[0].description,
-            _cachedAt: Date.now()
-          };
-          setWeatherData(weatherPayload);
-          localStorage.setItem('adhy_weather_cache', JSON.stringify(weatherPayload));
-          ns.setWeather(cond);
-          return;
-        }
-      } catch {
-        // Fall through to Open-Meteo
-      }
-
-      // Secondary: Open-Meteo (No API key needed, never rate-limited or blocked)
+      // Primary: Open-Meteo (Zero-key, open-source weather API)
       try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=8.4833&longitude=76.9167&current_weather=true');
         const data = await res.json();

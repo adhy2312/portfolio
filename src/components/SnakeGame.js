@@ -235,6 +235,14 @@ export default function SnakeGame({ onClose }) {
             playBeep('die');
             s.gameOver = true;
             setGameOver(true);
+            try {
+              const scores = JSON.parse(localStorage.getItem('adhy_arcade_scores') || '{}');
+              if (s.score > (scores.snake || 0)) {
+                scores.snake = s.score;
+                localStorage.setItem('adhy_arcade_scores', JSON.stringify(scores));
+                window.dispatchEvent(new CustomEvent('arcade-score', { detail: scores }));
+              }
+            } catch {}
           } else {
             s.snake.unshift(newHead); // Add new head
 
