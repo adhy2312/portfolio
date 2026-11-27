@@ -33,6 +33,7 @@ const MiniAdhy = lazy(() => import('./components/MiniAdhy'));
 const StatsBento = lazy(() => import('./components/StatsBento'));
 const CameraViewfinder = lazy(() => import('./components/CameraViewfinder'));
 const ExperimentalLabSuite = lazy(() => import('./components/experimental/ExperimentalLabSuite'));
+const BetaLabSuite = lazy(() => import('./components/beta/BetaLabSuite'));
 
 // const CreativeLab = lazy(() => import('./components/CreativeLab'));
 
@@ -264,7 +265,7 @@ function AppContent() {
       console.log(`[Ghost In The Machine] Executing Command: ${type}:${value}`);
       
       if (type === 'MODE') {
-        const modes = ['default', 'recruiter', 'expert', 'photographer', 'experimental'];
+        const modes = ['default', 'normal', 'recruiter', 'expert', 'photographer', 'experimental', 'beta'];
         if (modes.includes(value)) {
           window.dispatchEvent(new CustomEvent('switch-mode-direct', { detail: value }));
         }
@@ -425,6 +426,13 @@ function AppContent() {
         {mode === 'experimental' && (
           <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '300px' }} />}>
             <ExperimentalLabSuite />
+          </Suspense>
+        )}
+
+        {/* Beta Channel — Isolated sandbox for upcoming upgrades */}
+        {mode === 'beta' && (
+          <Suspense fallback={<div className="lazy-loading-skeleton" style={{ minHeight: '220px' }} />}>
+            <BetaLabSuite />
           </Suspense>
         )}
 

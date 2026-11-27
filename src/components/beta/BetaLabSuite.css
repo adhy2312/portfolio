@@ -1,0 +1,138 @@
+.beta-suite-section {
+  padding: 28px 20px 16px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.beta-suite-card {
+  background: var(--bg-card, #ffffff);
+  border: var(--border-brutal, 2px solid #000);
+  border-radius: 16px;
+  padding: 22px 24px;
+  box-shadow: var(--shadow-brutal, 5px 5px 0px #000);
+}
+
+.beta-suite-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.beta-pill {
+  display: inline-block;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f59e0b;
+  color: #000;
+  border: 1.5px solid #000;
+  margin-bottom: 8px;
+}
+
+.beta-title {
+  margin: 0 0 4px;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.beta-subtitle {
+  margin: 0;
+  font-size: 0.86rem;
+  opacity: 0.78;
+  max-width: 680px;
+}
+
+.beta-btn {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 2px solid #000;
+  background: var(--accent-primary, #facc15);
+  color: #000;
+  cursor: pointer;
+  box-shadow: 2px 2px 0px #000;
+}
+
+.beta-btn--ghost {
+  background: transparent;
+  color: var(--text-primary, #000);
+}
+
+.beta-workbench {
+  border-top: 1.5px dashed rgba(0, 0, 0, 0.18);
+  padding-top: 16px;
+}
+
+body.dark-mode .beta-workbench {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
+.beta-bench-label {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.66rem;
+  font-weight: 700;
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+.beta-gate-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.beta-bit-btn,
+.beta-gate-select,
+.beta-output-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 2px solid #000;
+}
+
+.beta-bit-btn {
+  background: #e2e8f0;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.beta-bit-btn.on {
+  background: #38bdf8;
+}
+
+.beta-gate-select {
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+}
+
+.beta-output-badge.high {
+  background: #10b981;
+  color: #000;
+}
+
+.beta-output-badge.low {
+  background: #f43f5e;
+  color: #fff;
+}
+
+.beta-error-box {
+  max-width: 720px;
+  margin: 24px auto;
+  padding: 20px;
+  border-radius: 14px;
+  border: 2px solid #ef4444;
+  background: rgba(239, 68, 68, 0.08);
+  font-family: 'Fira Code', monospace;
+}

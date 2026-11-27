@@ -1845,7 +1845,7 @@ const MiniAdhy = () => {
 
                     {msg.showModesCard && (
                       <div className="ma-modes-card">
-                        {['normal', 'recruiter', 'photographer', 'experimental'].map(m => (
+                        {['normal', 'recruiter', 'photographer', 'experimental', 'beta'].map(m => (
                           <button
                             key={m}
                             type="button"

@@ -9,6 +9,7 @@ export const MODES = {
   RECRUITER: 'recruiter',
   PHOTOGRAPHER: 'photographer',
   EXPERIMENTAL: 'experimental',
+  BETA: 'beta',
 };
 
 // Accessibility and environment sub-flags
@@ -107,7 +108,7 @@ export function SiteModeProvider({ children }) {
   useEffect(() => {
     const cl = document.body.classList;
     // Remove old mode classes
-    cl.remove('mode-recruiter', 'mode-photographer', 'mode-experimental', 'mode-normal', 'mode-default');
+    cl.remove('mode-recruiter', 'mode-photographer', 'mode-experimental', 'mode-beta', 'mode-normal', 'mode-default');
     cl.add(`mode-${mode}`);
 
     // A11y classes
@@ -213,8 +214,8 @@ export function SiteModeProvider({ children }) {
        return !hiddenInNormal.includes(sectionName);
     }
 
-    if (mode === MODES.EXPERIMENTAL) {
-      // Show everything, it's the lab!
+    if (mode === MODES.EXPERIMENTAL || mode === MODES.BETA) {
+      // Show everything in Experimental & Beta modes
       return true;
     }
 
@@ -232,6 +233,7 @@ export function SiteModeProvider({ children }) {
     isRecruiter: mode === MODES.RECRUITER,
     isPhotographer: mode === MODES.PHOTOGRAPHER,
     isExperimental: mode === MODES.EXPERIMENTAL,
+    isBeta: mode === MODES.BETA,
   };
 
   return (

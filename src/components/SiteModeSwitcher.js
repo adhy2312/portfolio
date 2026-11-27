@@ -191,6 +191,7 @@ export const SiteModePanel = ({ inline = false, onClose }) => {
     { key: MODES.RECRUITER,    icon: <FiBriefcase size={16} />,  label: 'Recruiter',       desc: 'Focused portfolio view' },
     { key: MODES.PHOTOGRAPHER, icon: <FiCamera size={16} />,     label: 'Photographer',    desc: 'Creative direction & lens focus' },
     { key: MODES.EXPERIMENTAL, icon: <FiZap size={16} />,        label: 'Experimental Lab', desc: 'Bleeding-edge effects' },
+    { key: MODES.BETA,         icon: <FiActivity size={16} />,   label: 'Beta Channel',    desc: 'Isolated sandbox for new upgrades' },
   ];
 
   const advancedSettings = [
