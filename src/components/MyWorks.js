@@ -114,15 +114,42 @@ const filters = [
 ];
 
 
+const normalizeTechToken = (value = '') =>
+  String(value)
+    .toLowerCase()
+    .replace(/\(.*?\)/g, '')
+    .replace(/\.js\b/g, '')
+    .replace(/[^a-z0-9+#]+/g, ' ')
+    .trim();
+
+const projectMatchesSkill = (project, skillName) => {
+  const needle = normalizeTechToken(skillName);
+  if (!needle) return false;
+  const tags = Array.isArray(project.tags) ? project.tags : [];
+  if (tags.some((tag) => {
+    const normTag = normalizeTechToken(tag);
+    return normTag === needle || normTag.includes(needle) || needle.includes(normTag);
+  })) {
+    return true;
+  }
+  const needleWords = needle.split(/\s+/).filter((w) => w.length >= 3);
+  return tags.some((tag) => {
+    const normTag = normalizeTechToken(tag);
+    return needleWords.some((w) => normTag === w || normTag.includes(w));
+  });
+};
+
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [fetchedProjects, setFetchedProjects] = useState([]);
+  const [highlightedSkill, setHighlightedSkill] = useState(null);
+  const highlightTimerRef = useRef(null);
   const sectionRef = useRef(null);
   const headerRef = useRef(null);
   const filtersRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
-  const { t } = useSiteMode();
+  const { t, mode } = useSiteMode();
   const hasStory = !!getStoryForSection('projects');
 
   useEffect(() => {
@@ -213,10 +240,45 @@ const MyWorks = () => {
       ? currentProjects
       : currentProjects.filter((p) => p.category === activeFilter);
 
-  // No activeIndex to reset
+  const isBeta = mode === 'beta';
+
+  const clearHighlightedSkill = () => {
+    setHighlightedSkill(null);
+    if (highlightTimerRef.current) {
+      clearTimeout(highlightTimerRef.current);
+      highlightTimerRef.current = null;
+    }
+  };
+
   useEffect(() => {
-    // any filter change specific actions
-  }, [activeFilter]);
+    if (!isBeta) {
+      clearHighlightedSkill();
+      return;
+    }
+    const onSkillHighlight = (e) => {
+      const skill = e?.detail?.skill;
+      if (!skill) return;
+      setActiveFilter('all');
+      setHighlightedSkill(skill);
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+      highlightTimerRef.current = setTimeout(() => {
+        setHighlightedSkill(null);
+      }, 6000);
+    };
+    window.addEventListener('beta:skill-highlight', onSkillHighlight);
+    return () => {
+      window.removeEventListener('beta:skill-highlight', onSkillHighlight);
+      if (highlightTimerRef.current) clearTimeout(highlightTimerRef.current);
+    };
+  }, [isBeta]);
+
+  const skillMatchedProjects = (isBeta && highlightedSkill)
+    ? currentProjects.filter((p) => projectMatchesSkill(p, highlightedSkill))
+    : [];
+
+  const displayedProjects = (isBeta && highlightedSkill && skillMatchedProjects.length > 0)
+    ? skillMatchedProjects
+    : filtered;
 
 
   return (
@@ -254,7 +316,10 @@ const MyWorks = () => {
               <button
                 key={f.value}
                 className={`filter-btn ${activeFilter === f.value ? 'filter-btn-active' : ''}`}
-                onClick={() => setActiveFilter(f.value)}
+                onClick={() => {
+                  clearHighlightedSkill();
+                  setActiveFilter(f.value);
+                }}
               >
                 {labelMap[f.value] || f.label}
               </button>
@@ -262,13 +327,33 @@ const MyWorks = () => {
           })}
         </div>
 
+        {isBeta && highlightedSkill && (
+          <div className="beta-skill-highlight-bar" role="status" aria-live="polite">
+            <span className="beta-skill-highlight-pill">
+              <span className="beta-skill-highlight-dot" aria-hidden="true" />
+              {skillMatchedProjects.length > 0
+                ? `Showing ${skillMatchedProjects.length} project${skillMatchedProjects.length > 1 ? 's' : ''} using: ${highlightedSkill}`
+                : `No project tagged "${highlightedSkill}" yet — showing all projects`}
+              <button
+                type="button"
+                className="beta-skill-highlight-clear"
+                onClick={clearHighlightedSkill}
+                aria-label="Clear skill highlight"
+              >
+                ×
+              </button>
+            </span>
+          </div>
+        )}
+
         {/* Vault Grid Layout */}
-        <div className="projects-vault-grid" key={activeFilter}>
-          {filtered.map((project, index) => {
+        <div className="projects-vault-grid" key={`${activeFilter}-${highlightedSkill || 'none'}`}>
+          {displayedProjects.map((project, index) => {
+            const isSkillMatch = isBeta && highlightedSkill && projectMatchesSkill(project, highlightedSkill);
             return (
               <div 
                 key={project.title}
-                className="vault-card specular-card"
+                className={`vault-card specular-card ${isSkillMatch ? 'vault-card--skill-highlighted' : ''}`}
                 style={{ 
                   '--card-accent': project.accent,
                   '--animation-order': index
@@ -288,7 +373,17 @@ const MyWorks = () => {
                     <p className="vault-desc">{project.description}</p>
                     <div className="vault-tags">
                       {project.tags.map((tag) => (
-                        <span key={tag} className="vault-tag" style={{ borderColor: `${project.accent}40`, color: project.accent }}>{tag}</span>
+                        <span
+                          key={tag}
+                          className={`vault-tag ${isBeta ? 'vault-tag--interactive' : ''}`}
+                          style={{ borderColor: `${project.accent}40`, color: project.accent }}
+                          onClick={isBeta ? () => {
+                            window.dispatchEvent(new CustomEvent('beta:skill-highlight', { detail: { skill: tag } }));
+                          } : undefined}
+                          title={isBeta ? `Filter projects by ${tag}` : undefined}
+                        >
+                          {tag}
+                        </span>
                       ))}
                     </div>
                   </div>

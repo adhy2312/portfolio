@@ -327,6 +327,19 @@ const SkillPanel = ({ category, onClose }) => {
   const panelRef = useRef(null);
   const barsRef = useRef([]);
   const percentRefs = useRef([]);
+  const { mode } = useSiteMode();
+  const isBeta = mode === 'beta';
+
+  const handleSkillCrossHighlight = (skillName) => {
+    if (!isBeta) return;
+    window.dispatchEvent(new CustomEvent('beta:skill-highlight', {
+      detail: { skill: skillName },
+    }));
+    const worksEl = document.getElementById('works');
+    if (worksEl) {
+      worksEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
   useEffect(() => {
     if (!panelRef.current) return;
@@ -395,9 +408,25 @@ const SkillPanel = ({ category, onClose }) => {
           const name = typeof skill === 'string' ? skill : skill.name;
           const level = typeof skill === 'object' && skill.level !== undefined ? skill.level : 80;
           return (
-            <div key={i} className="skill-panel-item">
+            <div
+              key={i}
+              className={`skill-panel-item ${isBeta ? 'skill-panel-item--interactive' : ''}`}
+              onClick={isBeta ? () => handleSkillCrossHighlight(name) : undefined}
+              onKeyDown={isBeta ? (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleSkillCrossHighlight(name);
+                }
+              } : undefined}
+              role={isBeta ? 'button' : undefined}
+              tabIndex={isBeta ? 0 : undefined}
+              title={isBeta ? `Highlight projects using ${name}` : undefined}
+            >
               <div className="skill-panel-item-header">
-                <span className="skill-panel-item-name">{name}</span>
+                <span className="skill-panel-item-name">
+                  {name}
+                  {isBeta && <span className="skill-panel-jump" aria-hidden="true">↗</span>}
+                </span>
                 <span
                   className="skill-panel-item-percent"
                   ref={el => percentRefs.current[i] = el}

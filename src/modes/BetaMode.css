@@ -748,4 +748,111 @@ body.mode-beta .ma-starter-btn {
   background: linear-gradient(180deg, #e5c158, transparent);
 }
 
+/* ── Skill-to-Project Cross-Highlighter (Beta) ── */
+body.mode-beta .skill-panel-item--interactive {
+  cursor: pointer;
+  padding: 6px 10px;
+  margin: 0 -10px;
+  border-radius: 10px;
+  transition: background 0.18s ease, transform 0.18s ease;
+}
+
+body.mode-beta .skill-panel-item--interactive:hover,
+body.mode-beta .skill-panel-item--interactive:focus-visible {
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.1);
+  transform: translateX(3px);
+  outline: none;
+}
+
+body.mode-beta .skill-panel-jump {
+  display: inline-block;
+  margin-left: 6px;
+  font-size: 0.72rem;
+  color: var(--beta-accent, #e5c158);
+  opacity: 0;
+  transform: translate(-2px, 2px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+body.mode-beta .skill-panel-item--interactive:hover .skill-panel-jump,
+body.mode-beta .skill-panel-item--interactive:focus-visible .skill-panel-jump {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+body.mode-beta .beta-skill-highlight-bar {
+  display: flex;
+  justify-content: center;
+  margin: 0 auto 24px;
+}
+
+body.mode-beta .beta-skill-highlight-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px 8px 16px;
+  border-radius: 999px;
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.14);
+  border: 1px solid rgba(var(--beta-accent-rgb, 229, 193, 88), 0.42);
+  color: #f4f4f5;
+  font-family: 'Fira Code', monospace;
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+}
+
+body.mode-beta .beta-skill-highlight-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--beta-accent, #e5c158);
+  box-shadow: 0 0 8px var(--beta-accent, #e5c158);
+}
+
+body.mode-beta .beta-skill-highlight-clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #f4f4f5;
+  font-size: 0.9rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+body.mode-beta .beta-skill-highlight-clear:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+body.mode-beta .vault-tag--interactive {
+  cursor: pointer;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+
+body.mode-beta .vault-tag--interactive:hover {
+  transform: translateY(-1px);
+  background: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.14) !important;
+}
+
+@keyframes betaSkillPulse {
+  0%, 100% {
+    border-color: rgba(var(--beta-accent-rgb, 229, 193, 88), 0.45);
+    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(var(--beta-accent-rgb, 229, 193, 88), 0.2);
+  }
+  50% {
+    border-color: var(--beta-accent, #e5c158);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, 0.55), 0 0 24px rgba(var(--beta-accent-rgb, 229, 193, 88), 0.28);
+  }
+}
+
+body.mode-beta .vault-card.vault-card--skill-highlighted {
+  animation: betaSkillPulse 1.6s ease-in-out 3;
+  border-color: var(--beta-accent, #e5c158) !important;
+}
+
+
 
