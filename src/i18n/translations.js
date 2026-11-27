@@ -160,3 +160,4 @@ export function detectBrowserLanguage() {
   const raw = (navigator.language || 'en').toLowerCase().split('-')[0];
   return TRANSLATIONS[raw] ? raw : 'en';
 }
+
