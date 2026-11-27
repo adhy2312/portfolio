@@ -193,19 +193,19 @@ export function SiteModeProvider({ children }) {
   const isSectionVisible = useCallback((sectionName) => {
     if (mode === MODES.RECRUITER) {
       // Streamlined view, hide complex/abstract sections
-      const hiddenInRecruiter = ['NeuralMap', 'StackVisualizer', 'Timeline', 'DigitalScars', 'KineticMarquee', 'ScrollCanvasSequence'];
+      const hiddenInRecruiter = ['NeuralMap', 'StackVisualizer', 'stackVisualizerSection', 'Timeline', 'DigitalScars', 'KineticMarquee', 'ScrollCanvasSequence'];
       return !hiddenInRecruiter.includes(sectionName);
     }
     
     if (mode === MODES.PHOTOGRAPHER) {
-      // Tech-heavy view, hide purely aesthetic sections
-      const hiddenInPhotographer = ['DigitalScars', 'TrustedBy', 'Timeline'];
+      // Tech-heavy view, hide purely aesthetic/infra sections
+      const hiddenInPhotographer = ['DigitalScars', 'TrustedBy', 'Timeline', 'StackVisualizer', 'stackVisualizerSection'];
       return !hiddenInPhotographer.includes(sectionName);
     }
     
     if (mode === MODES.NORMAL) {
-       // Standard view, hide some deep experimental features
-       const hiddenInNormal = ['DigitalScars', 'NeuralMap', 'ScrollCanvasSequence'];
+       // Standard view, hide deep experimental & stack architecture features
+       const hiddenInNormal = ['DigitalScars', 'NeuralMap', 'ScrollCanvasSequence', 'StackVisualizer', 'stackVisualizerSection'];
        return !hiddenInNormal.includes(sectionName);
     }
 

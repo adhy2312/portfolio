@@ -29,6 +29,10 @@ services:
         generateValue: true
       - key: SESSION_SECRET
         generateValue: true
+      - key: APPROVAL_SIGNING_SECRET
+        generateValue: true
+      - key: VISITOR_SESSION_SIGNING_SECRET
+        generateValue: true
       - key: GEMINI_API_KEY
         sync: false
       - key: GROQ_API_KEY
