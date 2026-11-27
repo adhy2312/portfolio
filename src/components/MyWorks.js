@@ -3,6 +3,7 @@ import './MyWorks.css';
 import { FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import DecryptedText from './DecryptedText';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -121,6 +122,7 @@ const MyWorks = () => {
   const filtersRef = useRef(null);
   
   const { getStoryForSection, openStory } = useStory();
+  const { t } = useSiteMode();
   const hasStory = !!getStoryForSection('projects');
 
   useEffect(() => {
@@ -221,10 +223,10 @@ const MyWorks = () => {
     <section className="myworks" id="works" ref={sectionRef} data-xray="[SECTION: PROJECTS]&#10;Data Source: Sanity.io CMS&#10;Cards: 3D Tilt via GSAP&#10;Images: @sanity/image-url (Optimized CDN)&#10;Performance: GSAP ScrollTrigger for entrance">
       <div className="container">
         <div className="works-header" ref={headerRef}>
-          <span className="section-label">{"// what I've built"}</span>
+          <span className="section-label">{t('works.label', "// what I've built")}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="Masterpieces">
-              <span className="section-title-inner"><DecryptedText text="Featured" /> <span><DecryptedText text="Projects" speed={50} /></span></span>
+              <span className="section-title-inner"><DecryptedText text={t('works.title', 'Featured')} /> <span><DecryptedText text={t('works.titleAccent', 'Projects')} speed={50} /></span></span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('projects')} aria-label="Read story behind this section">
@@ -234,7 +236,7 @@ const MyWorks = () => {
           </div>
           <div className="section-divider" />
           <p className="section-desc">
-            A selection of projects spanning web development, hardware prototypes, UI design, and creative photography.
+            {t('works.desc', 'A selection of projects spanning web development, hardware prototypes, UI design, and creative photography.')}
           </p>
         </div>
 

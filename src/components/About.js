@@ -5,6 +5,7 @@ import { FiDownload, FiMapPin } from 'react-icons/fi';
 import { urlFor } from '../sanity';
 import { useSanityQuery } from '../hooks/useSanityQuery';
 import { useStory } from '../contexts/StoryContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import DecryptedText from './DecryptedText';
 import Typography from './motion/Typography';
 import SchrodingersNode from './motion/SchrodingersNode';
@@ -25,6 +26,7 @@ const defaultStats = [
 const About = () => {
   const { data: aboutData } = useSanityQuery('*[_type == "about"][0]');
   const { getStoryForSection, openStory } = useStory();
+  const { t } = useSiteMode();
   const hasStory = !!getStoryForSection('about');
 
   const sectionRef = useRef(null);
@@ -198,10 +200,10 @@ const About = () => {
 
           {/* Text side */}
           <div className="about-text-col" ref={textColRef}>
-            <span className="section-label">{"// who I am"}</span>
+            <span className="section-label">{t('about.label', '// who I am')}</span>
             <div className="section-title-wrapper">
               <Typography as="h2" variant="mask" className="section-title about-title" data-hover="Adhithya Mohan">
-                <span className="section-title-inner"><DecryptedText text="About" speed={15} /> <span><DecryptedText text="Me" speed={15} /></span></span>
+                <span className="section-title-inner"><DecryptedText text={t('about.title', 'About')} speed={15} /> <span><DecryptedText text={t('about.titleAccent', 'Me')} speed={15} /></span></span>
               </Typography>
               {hasStory && (
                 <button className="story-btn" onClick={() => openStory('about')} aria-label="Read story behind this section">
@@ -233,7 +235,7 @@ const About = () => {
 
             <a href="/resume.pdf" download className="btn-primary about-cta">
               <FiDownload />
-              Download Resume
+              {t('about.cta', 'Download Resume')}
             </a>
           </div>
         </div>

@@ -830,3 +830,44 @@ body.dark-mode .nav-chairperson-chip {
   z-index: 0;
   pointer-events: none;
 }
+
+/* ── Global Language Selector in Navbar ── */
+.nav-lang-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(128, 128, 128, 0.25);
+  background: rgba(255, 255, 255, 0.14);
+  color: inherit;
+  margin-left: 6px;
+}
+
+.nav-lang-select {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  outline: none;
+}
+
+.nav-lang-select option {
+  background: #12121a;
+  color: #f4f4f5;
+}
+
+body.mode-beta .nav-lang-wrap {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #f4f4f5;
+}
+
+.nav-lang-wrap--mobile {
+  width: fit-content;
+  margin-left: 0;
+  padding: 6px 12px;
+}

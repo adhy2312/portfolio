@@ -44,26 +44,10 @@ body.mode-beta.dark-mode {
   --shadow-brutal-deep: 0 20px 50px rgba(0, 0, 0, 0.65) !important;
 }
 
-/* Soft ambient studio mesh + subtle 24px dot-grid background */
-body.mode-beta::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background-image: radial-gradient(rgba(9, 9, 11, 0.16) 1px, transparent 1px);
-  background-size: 24px 24px;
-  opacity: 0.35;
-  -webkit-mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
-  mask-image: radial-gradient(ellipse at center, #000 55%, transparent 95%);
-}
-
-body.mode-beta.dark-mode::before {
-  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 1px, transparent 1px);
-}
-
-body.mode-beta .hero-minimal::before {
-  background: radial-gradient(circle at 50% 25%, rgba(99, 102, 241, 0.14), transparent 60%) !important;
+/* Lightweight static dot-grid background (zero fixed mask-image GPU drain) */
+body.mode-beta {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px) !important;
+  background-size: 24px 24px !important;
 }
 
 /* Glassmorphic Floating Docks (SiteModeSwitcher, NowPlaying, Mini-Adhy) */
@@ -74,9 +58,9 @@ body.mode-beta .ma-dock,
 body.mode-beta .ma-window {
   border-radius: 22px !important;
   border: var(--border-brutal) !important;
-  background: var(--bg-card) !important;
-  backdrop-filter: blur(20px) saturate(165%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(165%) !important;
+  background: rgba(14, 14, 20, 0.92) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: var(--shadow-brutal-deep) !important;
 }
 
@@ -98,13 +82,42 @@ body.mode-beta .section-title span {
   font-weight: 600 !important;
 }
 
-/* Frosted Glass Pill Navbar */
-body.mode-beta .navbar,
-body.mode-beta .nav-pill {
-  backdrop-filter: blur(22px) saturate(170%) !important;
-  -webkit-backdrop-filter: blur(22px) saturate(170%) !important;
-  border: var(--border-brutal) !important;
-  box-shadow: var(--shadow-brutal) !important;
+/* Centered Floating Pill Navbar (outer .navbar stays transparent, .navbar-inner is the pill) */
+body.mode-beta .navbar {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  padding: 12px 16px 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+  pointer-events: none !important;
+}
+
+body.mode-beta .navbar-inner {
+  pointer-events: auto !important;
+  width: fit-content !important;
+  max-width: calc(100vw - 24px) !important;
+  margin: 0 auto !important;
+  padding: 0 18px !important;
+  gap: 16px !important;
+  border-radius: 999px !important;
+  background: rgba(14, 14, 22, 0.84) !important;
+  backdrop-filter: blur(12px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(12px) saturate(140%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.48) !important;
+}
+
+body.mode-beta .navbar-inner .logo-text {
+  color: #f4f4f5 !important;
+  background: none !important;
+  -webkit-text-fill-color: #f4f4f5 !important;
+}
+
+body.mode-beta .navbar-inner .hamburger span {
+  background: #f4f4f5 !important;
 }
 
 /* Editorial Typography */
@@ -122,7 +135,7 @@ body.mode-beta .hero-name-giant::after {
   display: none !important;
 }
 
-/* Modern Rounded Cards across the whole page */
+/* Fast GPU-friendly Dark Cards across the whole page (no per-card backdrop-filter) */
 body.mode-beta .bento-card,
 body.mode-beta .bento-cell,
 body.mode-beta .work-card,
@@ -132,22 +145,21 @@ body.mode-beta .achievement-card,
 body.mode-beta .testimonial-card,
 body.mode-beta .experience-card,
 body.mode-beta .marquee-card {
-  border-radius: 22px !important;
+  border-radius: 20px !important;
   border: var(--border-brutal) !important;
-  background: var(--bg-card) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
-  box-shadow: var(--shadow-brutal) !important;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease !important;
+  background: #101018 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35) !important;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease !important;
 }
 
 body.mode-beta .bento-card:hover,
 body.mode-beta .work-card:hover,
 body.mode-beta .skill-card:hover,
 body.mode-beta .achievement-card:hover {
-  transform: translateY(-4px) !important;
+  transform: translateY(-3px) !important;
   border-color: rgba(var(--accent-primary-rgb), 0.4) !important;
-  box-shadow: var(--shadow-brutal-deep) !important;
 }
 
 /* Refined Buttons & Badges */
@@ -398,40 +410,33 @@ body.mode-beta .section-container {
 
 .hero-beta-portrait-aura {
   position: absolute;
-  inset: 4%;
+  inset: 2%;
   border-radius: 50%;
-  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.36) 0%, rgba(229, 193, 88, 0.1) 42%, transparent 72%);
-  filter: blur(28px);
+  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.24) 0%, rgba(229, 193, 88, 0.06) 40%, transparent 68%);
   pointer-events: none;
-  transition: background 0.15s ease;
 }
 
 .hero-beta-portrait-frame {
   position: relative;
   z-index: 2;
-  border-radius: 26px;
-  padding: 12px 12px 0;
-  background: radial-gradient(circle at var(--px) var(--py), rgba(229, 193, 88, 0.14), rgba(16, 16, 24, 0.55) 70%);
-  border: 1px solid rgba(229, 193, 88, 0.22);
-  box-shadow: 0 28px 64px rgba(0, 0, 0, 0.72), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
   transform: rotateX(var(--rx)) rotateY(var(--ry));
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
-  overflow: hidden;
-}
-
-.hero-beta-portrait-stage:hover .hero-beta-portrait-frame {
-  border-color: rgba(229, 193, 88, 0.5);
+  will-change: transform;
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .hero-beta-portrait-img {
   display: block;
-  width: min(390px, 100%);
-  max-height: 500px;
+  width: min(400px, 100%);
+  max-height: 520px;
   object-fit: contain;
   object-position: bottom center;
-  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.85)) contrast(1.03) saturate(1.03);
-  -webkit-mask-image: radial-gradient(ellipse 88% 92% at 50% 48%, #000 68%, transparent 100%);
-  mask-image: radial-gradient(ellipse 88% 92% at 50% 48%, #000 68%, transparent 100%);
+  mix-blend-mode: lighten;
+  -webkit-mask-image: radial-gradient(ellipse 76% 82% at 50% 45%, #000 50%, transparent 94%);
+  mask-image: radial-gradient(ellipse 76% 82% at 50% 45%, #000 50%, transparent 94%);
   user-select: none;
   pointer-events: none;
 }
@@ -441,10 +446,10 @@ body.mode-beta .section-container {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 30%;
+  height: 32%;
   z-index: 3;
   pointer-events: none;
-  background: linear-gradient(to top, #050508 4%, rgba(5, 5, 8, 0.6) 45%, transparent 100%);
+  background: linear-gradient(to top, #050508 6%, rgba(5, 5, 8, 0.65) 48%, transparent 100%);
 }
 
 /* ─── GLOBAL BETA CONTRAST & READABILITY FIXES ─── */

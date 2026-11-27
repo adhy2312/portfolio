@@ -6,6 +6,7 @@ import { FiSend, FiMail, FiMapPin, FiLinkedin, FiCheckCircle, FiXCircle } from '
 import CopyEmail from './CopyEmail';
 import { client } from '../sanity';
 import { useStory } from '../contexts/StoryContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import { hermesAgent } from '../core/agents/specialists/HermesAgent';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -60,6 +61,7 @@ const Contact = () => {
   const keralaTime  = useKeralaTime();
   
   const { getStoryForSection, openStory } = useStory();
+  const { t } = useSiteMode();
   const hasStory = !!getStoryForSection('contact');
   const [contactData, setContactData] = useState(null);
 
@@ -212,15 +214,14 @@ ${message}`;
                 </div>
               )}
 
-              <h3 className="contact-info-title">Get in touch</h3>
+              <h3 className="contact-info-title">{t('contact.getInTouch', 'Get in touch')}</h3>
               <p className="contact-info-text">
-                I'm currently open to full-time roles, freelance projects, and interesting
-                collaborations. Let's build something great together.
+                {t('contact.desc', "I'm currently open to full-time roles, freelance projects, and interesting collaborations. Let's build something great together.")}
               </p>
 
               {/* V200: Response time promise */}
               <div className="contact-response-badge">
-                Usually replies within 24 hours
+                {t('contact.replyBadge', 'Usually replies within 24 hours')}
               </div>
 
               <div className="contact-info-list">
@@ -245,7 +246,7 @@ ${message}`;
 
               <div className="contact-availability">
                 <span className="avail-dot" />
-                <span>Available for opportunities</span>
+                <span>{t('contact.available', 'Available for opportunities')}</span>
               </div>
             </div>
           </div>
@@ -279,7 +280,7 @@ ${message}`;
 
               <div className="form-row">
                 <div className="form-group">
-                  <label className="form-label">Your Name</label>
+                  <label className="form-label">{t('contact.yourName', 'Your Name')}</label>
                   <input
                     type="text"
                     name="from_name"
@@ -289,7 +290,7 @@ ${message}`;
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">Your Email</label>
+                  <label className="form-label">{t('contact.yourEmail', 'Your Email')}</label>
                   <input
                     type="email"
                     name="reply_to"
@@ -301,7 +302,7 @@ ${message}`;
               </div>
 
               <div className="form-group">
-                <label className="form-label">Subject</label>
+                <label className="form-label">{t('contact.subject', 'Subject')}</label>
                 <input
                   type="text"
                   name="subject"
@@ -311,7 +312,7 @@ ${message}`;
               </div>
 
               <div className="form-group">
-                <label className="form-label">Message</label>
+                <label className="form-label">{t('contact.message', 'Message')}</label>
                 <textarea
                   name="message"
                   placeholder="Tell me about your project..."
@@ -338,7 +339,7 @@ ${message}`;
                 ) : (
                   <>
                     <FiSend />
-                    Send Message
+                    {t('contact.send', 'Send Message')}
                   </>
                 )}
               </button>

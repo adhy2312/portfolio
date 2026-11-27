@@ -7,6 +7,7 @@ import {
 } from 'react-icons/fi';
 import { useSanityQuery } from '../hooks/useSanityQuery';
 import { useStory } from '../contexts/StoryContext';
+import { useSiteMode } from '../contexts/SiteModeContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ExpertDoc from './ExpertDoc';
@@ -986,6 +987,7 @@ const Skills = () => {
   const chartAreaRef = useRef(null);
 
   const { getStoryForSection, openStory } = useStory();
+  const { t } = useSiteMode();
   const hasStory = !!getStoryForSection('skills');
 
   // GSAP entrance
@@ -1046,10 +1048,10 @@ const Skills = () => {
 
       <div className="container">
         <div className="skills-header" ref={headerRef}>
-          <span className="section-label">{'// what I know'}</span>
+          <span className="section-label">{t('skills.label', '// what I know')}</span>
           <div className="section-title-wrapper">
             <h2 className="section-title" data-hover="My Arsenal">
-              <span className="section-title-inner">Skills & <span>Expertise</span></span>
+              <span className="section-title-inner">{t('skills.title', 'Skills &')} <span>{t('skills.titleAccent', 'Expertise')}</span></span>
             </h2>
             {hasStory && (
               <button className="story-btn" onClick={() => openStory('skills')} aria-label="Read story behind this section">

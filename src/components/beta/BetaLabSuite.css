@@ -9,8 +9,6 @@
   border: var(--border-brutal, 1px solid rgba(9, 9, 11, 0.1));
   border-radius: 22px;
   padding: 22px 26px;
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
   box-shadow: var(--shadow-brutal, 0 8px 28px rgba(9, 9, 11, 0.06));
 }
 

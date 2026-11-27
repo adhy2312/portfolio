@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow } from 'react-icons/fi';
+import { FiSettings, FiLinkedin, FiInstagram, FiSun, FiMoon, FiCloud, FiCloudRain, FiCloudLightning, FiCloudSnow, FiGlobe } from 'react-icons/fi';
 import gsap from 'gsap';
 import './Navbar.css';
 import MagneticButton from './MagneticButton';
@@ -18,7 +18,7 @@ const Navbar = () => {
   const linksRef = useRef([]);
 
   const { weatherData } = useConsciousness();
-  const { t } = useSiteMode();
+  const { t, lang, setLang, siteLanguages } = useSiteMode();
   
   const getAmbientClass = (data) => {
     if (!data) {
@@ -206,7 +206,7 @@ const Navbar = () => {
                 onClick={(e) => handleNavClick(e, link.target)}
               >
                 <span className="mobile-nav-link-index">0{idx + 1}</span>
-                {link.label}
+                {t(`nav.${link.target}`, link.label)}
               </a>
             </li>
           ))}
@@ -217,11 +217,27 @@ const Navbar = () => {
               className="mobile-nav-resume-btn"
               onClick={playClickSound}
             >
-              Resume ↓
+              {t('nav.resume', 'Resume')} ↓
             </a>
           </li>
 
           <li className="mobile-menu-divider" aria-hidden="true" />
+
+          <li style={{ padding: '8px 0' }}>
+            <div className="nav-lang-wrap nav-lang-wrap--mobile">
+              <FiGlobe size={14} />
+              <select
+                className="nav-lang-select"
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                aria-label="Website language"
+              >
+                {(siteLanguages || []).map((l) => (
+                  <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+              </select>
+            </div>
+          </li>
 
           <li className="mobile-menu-socials">
             <div className="mobile-socials-label">CONNECT</div>
@@ -310,6 +326,21 @@ const Navbar = () => {
               </li>
             ))}
             <li>
+              <div className="nav-lang-wrap" title="Change website language">
+                <FiGlobe size={13} />
+                <select
+                  className="nav-lang-select"
+                  value={lang}
+                  onChange={(e) => setLang(e.target.value)}
+                  aria-label="Website language"
+                >
+                  {(siteLanguages || []).map((l) => (
+                    <option key={l.code} value={l.code}>{l.code.toUpperCase()}</option>
+                  ))}
+                </select>
+              </div>
+            </li>
+            <li>
               <MagneticButton>
                 <a
                   href="/resume.pdf"
@@ -317,7 +348,7 @@ const Navbar = () => {
                   className="nav-resume-btn"
                   onClick={playClickSound}
                 >
-                  Resume ↓
+                  {t('nav.resume', 'Resume')} ↓
                 </a>
               </MagneticButton>
             </li>

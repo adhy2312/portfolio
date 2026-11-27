@@ -19,7 +19,7 @@ gsap.registerPlugin(TextPlugin, ScrollTrigger);
 const Hero = () => {
   const [heroData, setHeroData] = useState(null);
 
-  const { isExperimental, isBeta } = useSiteMode();
+  const { isExperimental, isBeta, t } = useSiteMode();
   const heroRef = useRef(null);
   const contentRef = useRef(null);
   const greetingRef = useRef(null);
@@ -184,14 +184,14 @@ const Hero = () => {
                 className="hero-beta-cta-primary"
                 onClick={() => document.querySelector('#works, .my-works-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Explore Selected Works →
+                {t('hero.exploreWorks', 'Explore Selected Works')} →
               </button>
               <button
                 type="button"
                 className="hero-beta-cta-secondary"
                 onClick={() => document.querySelector('#contact, .contact-section')?.scrollIntoView({ behavior: 'smooth' })}
               >
-                Start a Conversation
+                {t('hero.startConvo', 'Start a Conversation')}
               </button>
               <button
                 type="button"
@@ -200,7 +200,7 @@ const Hero = () => {
                   detail: { prompt: 'Give me a cinematic 3-sentence introduction to Adhithya Mohan and his standout work.' }
                 }))}
               >
-                ✦ Ask Mini-Adhy
+                ✦ {t('hero.askAi', 'Ask Mini-Adhy')}
               </button>
             </div>
 
@@ -214,15 +214,22 @@ const Hero = () => {
           <div
             className="hero-beta-portrait-stage"
             onMouseMove={(e) => {
-              const rect = e.currentTarget.getBoundingClientRect();
-              const x = (e.clientX - rect.left) / rect.width;
-              const y = (e.clientY - rect.top) / rect.height;
-              e.currentTarget.style.setProperty('--rx', `${((0.5 - y) * 10).toFixed(2)}deg`);
-              e.currentTarget.style.setProperty('--ry', `${((x - 0.5) * 12).toFixed(2)}deg`);
-              e.currentTarget.style.setProperty('--px', `${(x * 100).toFixed(1)}%`);
-              e.currentTarget.style.setProperty('--py', `${(y * 100).toFixed(1)}%`);
+              const target = e.currentTarget;
+              const clientX = e.clientX;
+              const clientY = e.clientY;
+              if (target._rafId) cancelAnimationFrame(target._rafId);
+              target._rafId = requestAnimationFrame(() => {
+                const rect = target.getBoundingClientRect();
+                const x = (clientX - rect.left) / rect.width;
+                const y = (clientY - rect.top) / rect.height;
+                target.style.setProperty('--rx', `${((0.5 - y) * 9).toFixed(2)}deg`);
+                target.style.setProperty('--ry', `${((x - 0.5) * 11).toFixed(2)}deg`);
+                target.style.setProperty('--px', `${(x * 100).toFixed(1)}%`);
+                target.style.setProperty('--py', `${(y * 100).toFixed(1)}%`);
+              });
             }}
             onMouseLeave={(e) => {
+              if (e.currentTarget._rafId) cancelAnimationFrame(e.currentTarget._rafId);
               e.currentTarget.style.setProperty('--rx', '0deg');
               e.currentTarget.style.setProperty('--ry', '0deg');
               e.currentTarget.style.setProperty('--px', '50%');
@@ -246,7 +253,7 @@ const Hero = () => {
         </div>
 
         <div className="hero-beta-scroll-cue">
-          <span>SCROLL TO EXPLORE</span>
+          <span>{t('hero.scrollCue', 'SCROLL TO EXPLORE')}</span>
           <div className="hero-beta-scroll-line" />
         </div>
       </section>
