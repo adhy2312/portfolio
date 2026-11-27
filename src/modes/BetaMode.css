@@ -200,10 +200,33 @@ body.mode-beta .achievement-card:hover {
 body.mode-beta .btn-primary,
 body.mode-beta .nav-resume-btn {
   background: var(--accent-primary) !important;
-  color: #ffffff !important;
+  color: #09090b !important;
+  font-weight: 700 !important;
   border: none !important;
   border-radius: 999px !important;
   box-shadow: 0 6px 20px rgba(var(--accent-primary-rgb), 0.32) !important;
+}
+
+body.mode-beta.dark-mode .btn-primary,
+body.mode-beta.dark-mode .nav-resume-btn {
+  color: #ffffff !important;
+}
+
+/* About Stat Boxes — high-contrast dark cards */
+body.mode-beta .about-stat,
+body.mode-beta .about-stat:nth-child(n) {
+  background: #12121c !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.mode-beta .about-stat .stat-value {
+  color: #e5c158 !important;
+}
+
+body.mode-beta .about-stat .stat-label {
+  color: #d4d4d8 !important;
 }
 
 body.mode-beta .tag,
