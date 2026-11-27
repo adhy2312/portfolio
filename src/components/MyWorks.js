@@ -18,8 +18,8 @@ const projects = [
       'A full-featured organizational portal for ISTE MBCET — built with Next.js and Sanity CMS. Features membership management, event listings, internship launchpad, and a premium glassmorphism UI.',
     tags: ['Next.js', 'Sanity CMS', 'Supabase', 'GSAP'],
     category: 'fullstack',
-    liveLink: null,
-    githubLink: null,
+    liveLink: 'https://istembcet-web.vercel.app/',
+    githubLink: 'https://github.com/adhy2312/ISTE-WEBSITE',
     accent: 'var(--accent-primary)',
     icon: <FiGlobe />,
   },
@@ -30,7 +30,7 @@ const projects = [
     tags: ['React', 'Node.js', 'Express', 'Automation'],
     category: 'fullstack',
     liveLink: null,
-    githubLink: null,
+    githubLink: 'https://github.com/adhy2312/certificate-generator-app',
     accent: 'var(--accent-purple, #b19cd9)',
     icon: <FiZap />,
   },
@@ -52,7 +52,7 @@ const projects = [
     tags: ['ESP32', 'Arduino', 'Embedded C', 'IoT'],
     category: 'electronics',
     liveLink: null,
-    githubLink: 'https://github.com/adhy2312/lumina-studio',
+    githubLink: 'https://github.com/adhy2312/Odoo-KiCad-Sync',
     accent: 'var(--accent-green)',
     icon: <FiZap />,
   },
@@ -208,15 +208,27 @@ const MyWorks = () => {
         ? p.githubLink 
         : ((p.github && p.github !== 'null' && p.github !== '#') ? p.github : null);
       const lowerTitle = (p.title || '').toLowerCase();
-      const defaultRepo = lowerTitle.includes('smart lighting')
-        ? 'https://github.com/adhy2312/lumina-studio'
-        : lowerTitle.includes('odoo') && lowerTitle.includes('kicad')
-          ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
+      const defaultRepo = lowerTitle.includes('iste')
+        ? 'https://github.com/adhy2312/ISTE-WEBSITE'
+        : lowerTitle.includes('certificate')
+          ? 'https://github.com/adhy2312/certificate-generator-app'
+          : lowerTitle.includes('odoo') && lowerTitle.includes('kicad')
+            ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
+            : lowerTitle.includes('smart lighting')
+              ? 'https://github.com/adhy2312/Odoo-KiCad-Sync'
+              : lowerTitle.includes('portfolio')
+                ? 'https://github.com/adhy2312/portfolio'
+                : null;
+      const defaultLive = lowerTitle.includes('iste')
+        ? 'https://istembcet-web.vercel.app/'
+        : lowerTitle.includes('portfolio')
+          ? 'https://portfolio-adhym.vercel.app/'
           : null;
       const cleanGithub = rawGithub || defaultRepo;
-      const cleanLive = (p.liveLink && p.liveLink !== 'null' && p.liveLink !== '#') 
+      const rawLive = (p.liveLink && p.liveLink !== 'null' && p.liveLink !== '#') 
         ? p.liveLink 
         : ((p.link && p.link !== 'null' && p.link !== '#') ? p.link : null);
+      const cleanLive = rawLive || defaultLive;
 
       return {
         ...p,
