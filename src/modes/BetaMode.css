@@ -322,6 +322,10 @@ body.mode-beta .ach-emoji {
     grid-template-columns: 1fr;
     gap: 32px;
   }
+  .hero-beta-portrait-stage {
+    order: -1;
+    margin: 0 auto;
+  }
 }
 
 .hero-beta-slate-tag {

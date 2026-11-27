@@ -267,11 +267,6 @@ const Hero = () => {
             </div>
           </div>
         </div>
-
-        <div className="hero-beta-scroll-cue">
-          <span>{t('hero.scrollCue', 'SCROLL TO EXPLORE')}</span>
-          <div className="hero-beta-scroll-line" />
-        </div>
       </section>
     );
   }
