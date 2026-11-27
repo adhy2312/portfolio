@@ -446,6 +446,7 @@ function AppContent() {
         {pageData && pageData.sections && pageData.sections.length > 0 ? (
           pageData.sections.map((section, index) => {
             if (section._type === 'hero') return null;
+            if (mode === 'beta' && section._type === 'footerSection') return null;
             const Component = SANITY_COMPONENT_MAP[section._type];
             if (!Component) return null;
             return (
@@ -476,19 +477,20 @@ function AppContent() {
             <LazySection name="Contact"><Contact /></LazySection>
             <LazySection name="StackVisualizer"><StackVisualizer /></LazySection>
             <LazySection name="KineticMarquee" className="lazy-section-auto"><KineticMarquee /></LazySection>
-            <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>
+            {mode !== 'beta' && <LazySection name="Footer" className="lazy-section-auto"><Footer /></LazySection>}
           </>
         )}
 
-      </div>
+        {mode === 'beta' && (
+          <Suspense fallback={null}>
+            <BetaCareerRail />
+            <BetaInquiryStudio />
+            <BetaFeedbackSection />
+            <Footer />
+          </Suspense>
+        )}
 
-      {mode === 'beta' && (
-        <Suspense fallback={null}>
-          <BetaCareerRail />
-          <BetaInquiryStudio />
-          <BetaFeedbackSection />
-        </Suspense>
-      )}
+      </div>
 
       {mode === 'photographer' && (
         <Suspense fallback={null}>

@@ -239,10 +239,30 @@ body.mode-beta .skill-tag {
   box-shadow: none !important;
 }
 
-/* Spacious section rhythm */
+/* Spacious section rhythm & remove brutalist dashed dividers / ghost numbers */
 body.mode-beta .section-container {
   padding-top: 84px;
   padding-bottom: 84px;
+}
+
+body.mode-beta .section-container + .section-container::before,
+body.mode-beta .section-container::after {
+  display: none !important;
+}
+
+/* Fix invisible icons in What I Bring (Achievements) */
+body.mode-beta .ach-icon-wrap {
+  background: rgba(229, 193, 88, 0.14) !important;
+  border: 1px solid rgba(229, 193, 88, 0.32) !important;
+  border-radius: 14px !important;
+  box-shadow: none !important;
+  color: #e5c158 !important;
+}
+
+body.mode-beta .ach-icon-wrap svg,
+body.mode-beta .ach-emoji {
+  color: #e5c158 !important;
+  stroke: #e5c158 !important;
 }
 
 /* ─── CINEMATIC BETA HERO ─── */
