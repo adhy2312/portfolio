@@ -470,6 +470,42 @@
   transform: rotate(90deg);
 }
 
+@media (max-width: 720px) {
+  .beta-solari-board {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .beta-solari-meta {
+    order: 1;
+  }
+  .beta-solari-cycle {
+    order: 2;
+    margin-left: auto;
+  }
+  .beta-solari-cells {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+    gap: 2px;
+    overflow-x: visible;
+  }
+  .beta-solari-cell {
+    width: 16px;
+    height: 22px;
+    font-size: 0.62rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .beta-solari-cell {
+    width: 14px;
+    height: 20px;
+    font-size: 0.56rem;
+  }
+}
+
 /* ── Formal vs. Unfiltered Flip Toggle ── */
 .beta-rail-controls {
   display: flex;
