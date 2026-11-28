@@ -32,22 +32,6 @@ const iconMap = {
 // Canonical fallback data
 const skillCategories = [
   {
-    title: 'Frontend Development',
-    iconName: 'FiMonitor',
-    color: '#6366f1',
-    order: 1,
-    skills: [
-      { name: 'React.js', level: 90 },
-      { name: 'JavaScript (ES6+)', level: 88 },
-      { name: 'TypeScript', level: 78 },
-      { name: 'HTML5 & CSS3', level: 92 },
-      { name: 'Next.js', level: 82 },
-      { name: 'Tailwind CSS', level: 78 },
-      { name: 'Responsive Web Design', level: 90 },
-      { name: 'Three.js', level: 72 },
-    ],
-  },
-  {
     title: 'Electronics & IoT',
     iconName: 'FiZap',
     color: '#10b981',
@@ -907,7 +891,10 @@ const Skills = () => {
   const { data: fetchedGoals } = useSanityQuery(
     '*[_type == "learningGoal" && !(_id in path("drafts.**"))] | order(order asc) { _id, title, domain, status, tags, order }'
   );
-  const categories = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
+  const categories = React.useMemo(() => {
+    const raw = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
+    return raw.filter((c) => c?.title !== 'Frontend Development');
+  }, [fetchedCategories]);
   const learningGoals = (fetchedGoals && fetchedGoals.length > 0) ? fetchedGoals : DEFAULT_LEARNING_GOALS;
 
   const [activeIndex, setActiveIndex] = useState(null);

@@ -30,23 +30,23 @@ export const VERIFIED_PORTFOLIO_DATA = {
     }
   },
   skills: {
-    frontend: ['React.js', 'JavaScript (ES6+)', 'TypeScript', 'HTML5 & CSS3', 'Next.js', 'Tailwind CSS', 'Responsive Web Design', 'Three.js'],
-    embeddedAndHardware: ['Arduino', 'ESP32', 'Embedded Systems', 'IoT', 'Microcontroller Programming', 'Circuit Design', 'Sensor Interfacing', 'PCB Design', 'Electronics Prototyping', 'KiCad'],
-    erpAndTools: ['Odoo ERP', 'Odoo-KiCad Integration', 'Figma', 'UI/UX Design', 'MATLAB', 'Simulink', 'Simscape', 'GNU Radio', 'Git', 'GitHub', 'VS Code', 'Vercel', 'Wokwi'],
-    learningHorizon: ['Linux (Kernel Architecture & POSIX SysAdmin)', 'Mobile App Dev', 'Cybersecurity']
+    frontend: ['React 19', 'Next.js', 'Vanilla CSS / Glassmorphism', 'GSAP', 'WebGL / Three.js', 'Lenis Scroll'],
+    embeddedAndHardware: ['MATLAB', 'Simulink', 'Simscape', 'GNU Radio (SDR)', 'KiCad PCB Design', 'STM32', 'ESP32', 'Arduino', 'IoT Architectures'],
+    backendAndCloud: ['Node.js', 'Express', 'Sanity CMS', 'Supabase', 'Vercel Serverless', 'Python', 'Odoo ERP'],
+    learningHorizon: ['Advanced Linux Internals', 'Cross-Platform Mobile App Dev', 'Cybersecurity & Offensive Auditing']
   },
   experience: [
     {
       role: 'Media Secretary',
-      organization: 'MBCET Senate',
+      organization: 'MBCET College Senate',
       period: 'Oct 2026 – Present',
-      highlight: 'Directing official campus communications, institutional press coverage, and digital media strategy at the apex student governance level.'
+      highlight: 'Spearheaded college-wide media production, official campus communications, digital visual branding, and broadcast pipelines across campus initiatives.'
     },
     {
       role: 'Co-Founder & Director of External Affairs',
       organization: 'Finance Club MBCET',
       period: 'Oct 2026 – Present',
-      highlight: 'Co-founded the chapter, built industry partnerships for financial literacy workshops, and connected student builders with fintech mentors.'
+      highlight: 'Established financial analytics workshops, industry partnerships, and digital platform infrastructure.'
     },
     {
       role: 'Chairperson',
@@ -59,6 +59,12 @@ export const VERIFIED_PORTFOLIO_DATA = {
       organization: 'FRAMES MBCET',
       period: 'Aug 2026 – Present',
       highlight: 'Leading visual storytelling, event documentation, and Lightroom editorial direction for flagship campus events.'
+    },
+    {
+      role: 'Electronics & Communication Engineering',
+      organization: 'MBCET / KTU',
+      period: '2023 – 2027',
+      highlight: 'Deep modeling of hardware physical systems in Simulink/Simscape and RF signal processing using GNU Radio SDR.'
     }
   ],
   photography: {
@@ -150,20 +156,13 @@ export const AgentTools = {
 
   // 3. Query Verified Technical Skills
   getSkills: (category = 'all') => {
-    const cat = category.toLowerCase();
-    if (liveSkillsCache.length > 0) {
-      const matched = cat === 'all'
-        ? liveSkillsCache
-        : liveSkillsCache.filter(c => c.title?.toLowerCase().includes(cat));
-      const list = matched.length > 0 ? matched : liveSkillsCache;
-      return list.map(c => `• ${c.title}: ${(c.skills || []).map(sk => sk.name).join(', ')}`).join('\n');
-    }
     const s = VERIFIED_PORTFOLIO_DATA.skills;
+    const cat = category.toLowerCase();
     if (cat.includes('front') || cat.includes('web')) return `Frontend: ${s.frontend.join(', ')}`;
     if (cat.includes('embed') || cat.includes('hard') || cat.includes('ece')) return `Hardware & ECE: ${s.embeddedAndHardware.join(', ')}`;
-    if (cat.includes('erp') || cat.includes('tool') || cat.includes('design')) return `ERP, Design & Tools: ${s.erpAndTools.join(', ')}`;
+    if (cat.includes('back') || cat.includes('cloud') || cat.includes('erp')) return `Backend & Cloud: ${s.backendAndCloud.join(', ')}`;
     if (cat.includes('learn') || cat.includes('future')) return `Learning Horizon: ${s.learningHorizon.join(', ')}`;
-    return `• Frontend: ${s.frontend.join(', ')}\n• Hardware & ECE: ${s.embeddedAndHardware.join(', ')}\n• ERP, Design & Tools: ${s.erpAndTools.join(', ')}\n• Active Learning: ${s.learningHorizon.join(', ')}`;
+    return `• Frontend: ${s.frontend.join(', ')}\n• Hardware & ECE: ${s.embeddedAndHardware.join(', ')}\n• Backend & Cloud: ${s.backendAndCloud.join(', ')}\n• Active Learning: ${s.learningHorizon.join(', ')}`;
   },
 
   // 4. Query Experience & Roles
