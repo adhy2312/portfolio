@@ -30,10 +30,10 @@ export const VERIFIED_PORTFOLIO_DATA = {
     }
   },
   skills: {
-    frontend: ['React.js', 'Next.js', 'TypeScript', 'JavaScript (ES6+)', 'Tailwind CSS', 'HTML5 & CSS3', 'Three.js'],
-    embeddedAndHardware: ['ESP32', 'Arduino', 'Embedded Systems', 'IoT', 'KiCad PCB Design', 'Circuit Design', 'Sensor Interfacing'],
-    backendAndCloud: ['Node.js', 'Express.js', 'Python', 'PostgreSQL', 'Firebase', 'Sanity CMS', 'Odoo ERP'],
-    learningHorizon: ['Linux Kernel & POSIX SysAdmin', 'Cross-Platform Mobile App Dev', 'Cybersecurity & AppSec']
+    frontend: ['React.js', 'JavaScript (ES6+)', 'TypeScript', 'HTML5 & CSS3', 'Next.js', 'Tailwind CSS', 'Responsive Web Design', 'Three.js'],
+    embeddedAndHardware: ['Arduino', 'ESP32', 'Embedded Systems', 'IoT', 'Microcontroller Programming', 'Circuit Design', 'Sensor Interfacing', 'PCB Design', 'Electronics Prototyping', 'KiCad'],
+    erpAndTools: ['Odoo ERP', 'Odoo-KiCad Integration', 'Figma', 'UI/UX Design', 'MATLAB', 'Simulink', 'Simscape', 'GNU Radio', 'Git', 'GitHub', 'VS Code', 'Vercel', 'Wokwi'],
+    learningHorizon: ['Linux (Kernel Architecture & POSIX SysAdmin)', 'Mobile App Dev', 'Cybersecurity']
   },
   experience: [
     {
@@ -135,7 +135,7 @@ export const AgentTools = {
   // 2. Query Projects
   getProjects: (category = 'all') => {
     if (!liveProjectsCache.length) {
-      return 'Projects: Autonomous SDR Waterfalls, Neural Portfolio Architecture, Finance Club Analytics Platform, Simscape DC Motor Control Loops.';
+      return 'Projects: ISTE MBCET Portal, Automated Certificate Gen, Odoo - KiCad BOM Sync, Smart Lighting System (IoT), Portfolio Website, Figma Design System, Photo Story Series.';
     }
     const cat = category.toLowerCase();
     const filtered = cat === 'all' 
@@ -151,9 +151,9 @@ export const AgentTools = {
     const cat = category.toLowerCase();
     if (cat.includes('front') || cat.includes('web')) return `Frontend: ${s.frontend.join(', ')}`;
     if (cat.includes('embed') || cat.includes('hard') || cat.includes('ece')) return `Hardware & ECE: ${s.embeddedAndHardware.join(', ')}`;
-    if (cat.includes('back') || cat.includes('cloud')) return `Backend & Cloud: ${s.backendAndCloud.join(', ')}`;
+    if (cat.includes('erp') || cat.includes('tool') || cat.includes('design')) return `ERP, Design & Tools: ${s.erpAndTools.join(', ')}`;
     if (cat.includes('learn') || cat.includes('future')) return `Learning Horizon: ${s.learningHorizon.join(', ')}`;
-    return `• Frontend: ${s.frontend.join(', ')}\n• Hardware & ECE: ${s.embeddedAndHardware.join(', ')}\n• Backend: ${s.backendAndCloud.join(', ')}\n• Active Learning: ${s.learningHorizon.join(', ')}`;
+    return `• Frontend: ${s.frontend.join(', ')}\n• Hardware & ECE: ${s.embeddedAndHardware.join(', ')}\n• ERP, Design & Tools: ${s.erpAndTools.join(', ')}\n• Active Learning: ${s.learningHorizon.join(', ')}`;
   },
 
   // 4. Query Experience & Roles

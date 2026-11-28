@@ -48,39 +48,9 @@ const skillCategories = [
     ],
   },
   {
-    title: 'Backend & Data',
-    iconName: 'FiServer',
-    color: '#06b6d4',
-    order: 2,
-    skills: [
-      { name: 'Node.js', level: 80 },
-      { name: 'Express.js', level: 78 },
-      { name: 'REST APIs', level: 85 },
-      { name: 'Python', level: 88 },
-      { name: 'PostgreSQL', level: 84 },
-      { name: 'Firebase', level: 85 },
-    ],
-  },
-  {
-    title: 'AI & Automation',
-    iconName: 'FiCpu',
-    color: '#a855f7',
-    order: 3,
-    skills: [
-      { name: 'Python Automation', level: 92 },
-      { name: 'AI-Assisted Development', level: 90 },
-      { name: 'AI Agents', level: 82 },
-      { name: 'AI API Integration', level: 85 },
-      { name: 'Workflow Automation', level: 88 },
-      { name: 'Web Scraping', level: 86 },
-      { name: 'YOLOv8', level: 75 },
-      { name: 'Prompt Engineering', level: 82 },
-    ],
-  },
-  {
     title: 'Electronics & IoT',
     iconName: 'FiZap',
-    color: '#34d399',
+    color: '#10b981',
     order: 4,
     skills: [
       { name: 'Arduino', level: 92 },
@@ -127,7 +97,7 @@ const skillCategories = [
   {
     title: 'Photography & Media',
     iconName: 'FiCamera',
-    color: '#ec4899',
+    color: '#f43f5e',
     order: 7,
     skills: [
       { name: 'Photography', level: 96 },
@@ -146,7 +116,7 @@ const skillCategories = [
   {
     title: 'Tools & Workflow',
     iconName: 'FiTerminal',
-    color: '#a855f7',
+    color: '#ec4899',
     order: 8,
     skills: [
       { name: 'Google Antigravity', level: 90 },
@@ -182,7 +152,7 @@ const DEFAULT_LEARNING_GOALS = [
     title: 'Cybersecurity',
     domain: 'Offensive & Defensive Security Systems',
     status: 'planned',
-    tags: ['AppSec', 'Threat Modeling', 'Packet Analysis', 'Cryptographic Primitives']
+    tags: ['AppSec', 'Threat Modeling', 'Network Packet Analysis', 'Cryptographic Primitives']
   }
 ];
 
@@ -930,8 +900,8 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
 
 // ─── Main Skills Component ────────────────────────────────
 const Skills = () => {
-  const { data: fetchedCategories } = useSanityQuery('*[_type == "skillCategory"] | order(order asc)');
-  const { data: fetchedGoals } = useSanityQuery('*[_type == "learningGoal"] | order(order asc)');
+  const { data: fetchedCategories } = useSanityQuery('*[_type == "skillCategory" && !(_id in path("drafts.**"))] | order(order asc)');
+  const { data: fetchedGoals } = useSanityQuery('*[_type == "learningGoal" && !(_id in path("drafts.**"))] | order(order asc)');
   const categories = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
   const learningGoals = (fetchedGoals && fetchedGoals.length > 0) ? fetchedGoals : DEFAULT_LEARNING_GOALS;
 
