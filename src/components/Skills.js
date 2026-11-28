@@ -29,6 +29,15 @@ const iconMap = {
   FiActivity: FiActivity,
 };
 
+const GRAPHIC_DESIGN_SKILLS = [
+  { name: 'Event Poster Designing', level: 80 },
+  { name: 'Color Science', level: 75 },
+  { name: 'Social Media Branding', level: 70 },
+  { name: 'Visual Design', level: 80 },
+  { name: 'Figma', level: 75 },
+  { name: 'Adobe Photoshop', level: 25 },
+];
+
 // Canonical fallback data
 const skillCategories = [
   {
@@ -64,19 +73,11 @@ const skillCategories = [
     ],
   },
   {
-    title: 'UI/UX & Design',
+    title: 'Graphic Designing',
     iconName: 'FiPenTool',
     color: '#f59e0b',
     order: 6,
-    skills: [
-      { name: 'Figma', level: 92 },
-      { name: 'UI/UX Design', level: 88 },
-      { name: 'Prototyping & Wireframing', level: 90 },
-      { name: 'Design Systems', level: 85 },
-      { name: 'Visual Design', level: 88 },
-      { name: 'Interaction Design', level: 82 },
-      { name: 'Adobe Photoshop', level: 80 },
-    ],
+    skills: GRAPHIC_DESIGN_SKILLS,
   },
   {
     title: 'Photography & Media',
@@ -893,7 +894,11 @@ const Skills = () => {
   );
   const categories = React.useMemo(() => {
     const raw = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
-    return raw.filter((c) => c?.title !== 'Frontend Development');
+    return raw
+      .filter((c) => c?.title !== 'Frontend Development')
+      .map((c) => (c?.title?.toLowerCase().includes('ui/ux')
+        ? { ...c, title: 'Graphic Designing', skills: GRAPHIC_DESIGN_SKILLS }
+        : c));
   }, [fetchedCategories]);
   const learningGoals = (fetchedGoals && fetchedGoals.length > 0) ? fetchedGoals : DEFAULT_LEARNING_GOALS;
 
