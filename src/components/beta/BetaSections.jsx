@@ -43,7 +43,7 @@ export function BetaProofBar() {
   const orgs = ['MBCET Senate', 'Finance Club MBCET', 'ISTE SC MBCET', 'FRAMES MBCET'];
   const metrics = [
     { value: '300+', label: t('proof.membersLed', 'Members Led') },
-    { value: '15+', label: t('proof.projectsBuilt', 'Projects Built') },
+    { value: '4+', label: t('proof.projectsBuilt', 'Projects Built') },
     { value: '10+', label: t('proof.techStacks', 'Tech Stacks') },
   ];
 
