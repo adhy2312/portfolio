@@ -19,7 +19,7 @@ gsap.registerPlugin(ScrollTrigger);
 const defaultStats = [
   { value: '300+', label: 'Members Led (ISTE)', iconName: 'FiAward' },
   { value: '4+', label: 'Projects Built', iconName: 'FiAward' },
-  { value: '25+', label: 'Designs Done · More on the way', iconName: 'FiPenTool' },
+  { value: '20+', label: 'Designs Done · More on the way', iconName: 'FiPenTool' },
   { value: '10+', label: 'Tech Stacks', iconName: 'FiAward' },
 ];
 
@@ -236,7 +236,11 @@ const About = () => {
                 <div key={i} className="about-stat">
                   <PoltergeistNode radius={300} strength={0.25} className="stat-poltergeist">
                     <span className="stat-value">
-                      {s.label?.toLowerCase().includes('projects built') ? '4+' : s.value}
+                      {s.label?.toLowerCase().includes('projects built')
+                        ? '4+'
+                        : s.label?.toLowerCase().includes('designs done')
+                          ? '20+'
+                          : s.value}
                     </span>
                     <span className="stat-label">{s.label}</span>
                   </PoltergeistNode>
