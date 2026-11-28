@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './MyWorks.css';
 import { FiGithub, FiArrowRight, FiGlobe, FiZap, FiStar, FiPenTool, FiCamera, FiHome } from 'react-icons/fi';
-import { client } from '../sanity';
+import { useSanityQuery } from '../hooks/useSanityQuery';
 import { useStory } from '../contexts/StoryContext';
 import { useSiteMode } from '../contexts/SiteModeContext';
 import { getBetaUrlParam, updateBetaUrlParam } from '../core/betaAgenticBus';
@@ -128,7 +128,9 @@ const projectMatchesSkill = (project, skillName) => {
 
 const MyWorks = () => {
   const [activeFilter, setActiveFilter] = useState('all');
-  const [fetchedProjects, setFetchedProjects] = useState([]);
+  const { data: fetchedProjects } = useSanityQuery(
+    '*[_type == "project" && !(_id in path("drafts.**"))] | order(_createdAt asc) { _id, title, description, category, tags, githubLink, liveLink, accent, buildTime, soundtrack, emotionalNote }'
+  );
   const [highlightedSkill, setHighlightedSkill] = useState(null);
   const highlightTimerRef = useRef(null);
   const sectionRef = useRef(null);
@@ -138,17 +140,6 @@ const MyWorks = () => {
   const { getStoryForSection, openStory } = useStory();
   const { t, mode } = useSiteMode();
   const hasStory = !!getStoryForSection('projects');
-
-  useEffect(() => {
-    const query = '*[_type == "project" && !(_id in path("drafts.**"))] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink, buildTime, soundtrack, emotionalNote }';
-    client.fetch(query).then((data) => {
-      if (data && data.length > 0) {
-        setFetchedProjects(data);
-      }
-    }).catch((err) => {
-      console.error('Failed to load projects from Sanity:', err);
-    });
-  }, []);
 
   // GSAP header + filters animation
   useEffect(() => {
@@ -186,7 +177,7 @@ const MyWorks = () => {
   }, []);
 
   const currentProjects = React.useMemo(() => {
-    const raw = fetchedProjects.length > 0 ? fetchedProjects : projects;
+    const raw = (fetchedProjects && fetchedProjects.length > 0) ? fetchedProjects : projects;
     return raw.map((p) => {
       let defaultAccent = 'var(--accent-primary)';
       let defaultIcon = <FiGlobe />;

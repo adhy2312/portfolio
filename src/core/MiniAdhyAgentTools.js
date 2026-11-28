@@ -70,15 +70,18 @@ export const VERIFIED_PORTFOLIO_DATA = {
 
 // Dynamic Sanity Cache store updated in background
 let liveProjectsCache = [];
+let liveSkillsCache = [];
 let liveKnowledgeCache = [];
 
 export const syncSanityCache = async () => {
   try {
-    const [projects, knowledge] = await Promise.all([
-      client.fetch(`*[_type == "project"] { title, description, category, tags, demoUrl, githubUrl }`),
+    const [projects, skills, knowledge] = await Promise.all([
+      client.fetch(`*[_type == "project" && !(_id in path("drafts.**"))] | order(_createdAt asc) { title, description, category, tags, githubLink, liveLink }`),
+      client.fetch(`*[_type == "skillCategory" && !(_id in path("drafts.**"))] | order(order asc) { title, "skills": skills[]{ name, level } }`),
       client.fetch(`*[_type == "chatbotKnowledge" && isActive != false] { category, title, content }`)
     ]);
     if (projects?.length) liveProjectsCache = projects;
+    if (skills?.length) liveSkillsCache = skills;
     if (knowledge?.length) liveKnowledgeCache = knowledge;
   } catch (err) {
     // Graceful fallback to verified in-memory ground-truth
@@ -147,8 +150,15 @@ export const AgentTools = {
 
   // 3. Query Verified Technical Skills
   getSkills: (category = 'all') => {
-    const s = VERIFIED_PORTFOLIO_DATA.skills;
     const cat = category.toLowerCase();
+    if (liveSkillsCache.length > 0) {
+      const matched = cat === 'all'
+        ? liveSkillsCache
+        : liveSkillsCache.filter(c => c.title?.toLowerCase().includes(cat));
+      const list = matched.length > 0 ? matched : liveSkillsCache;
+      return list.map(c => `• ${c.title}: ${(c.skills || []).map(sk => sk.name).join(', ')}`).join('\n');
+    }
+    const s = VERIFIED_PORTFOLIO_DATA.skills;
     if (cat.includes('front') || cat.includes('web')) return `Frontend: ${s.frontend.join(', ')}`;
     if (cat.includes('embed') || cat.includes('hard') || cat.includes('ece')) return `Hardware & ECE: ${s.embeddedAndHardware.join(', ')}`;
     if (cat.includes('erp') || cat.includes('tool') || cat.includes('design')) return `ERP, Design & Tools: ${s.erpAndTools.join(', ')}`;

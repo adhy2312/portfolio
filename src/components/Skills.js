@@ -283,6 +283,7 @@ const SkillPanel = ({ category, onClose }) => {
   };
 
   const Icon = iconMap[category.iconName] || FiCpu;
+  const safeSkills = Array.isArray(category.skills) ? category.skills : [];
 
   return (
     <div className="skill-panel" ref={panelRef}>
@@ -292,7 +293,7 @@ const SkillPanel = ({ category, onClose }) => {
         </span>
         <div>
           <h3 className="skill-panel-title">{category.title}</h3>
-          <span className="skill-panel-count">{category.skills.length} capabilities</span>
+          <span className="skill-panel-count">{safeSkills.length} capabilities</span>
         </div>
         <button className="skill-panel-close" onClick={handleClose} aria-label="Close panel">
           <FiX size={18} />
@@ -300,7 +301,7 @@ const SkillPanel = ({ category, onClose }) => {
       </div>
 
       <div className="skill-panel-body">
-        {category.skills.map((skill, i) => {
+        {safeSkills.map((skill, i) => {
           const name = typeof skill === 'string' ? skill : skill.name;
           const level = typeof skill === 'object' && skill.level !== undefined ? skill.level : 80;
           return (
@@ -900,8 +901,12 @@ const SunburstChart = ({ categories, activeIndex, onSegmentClick }) => {
 
 // ─── Main Skills Component ────────────────────────────────
 const Skills = () => {
-  const { data: fetchedCategories } = useSanityQuery('*[_type == "skillCategory" && !(_id in path("drafts.**"))] | order(order asc)');
-  const { data: fetchedGoals } = useSanityQuery('*[_type == "learningGoal" && !(_id in path("drafts.**"))] | order(order asc)');
+  const { data: fetchedCategories } = useSanityQuery(
+    '*[_type == "skillCategory" && !(_id in path("drafts.**"))] | order(order asc) { _id, title, iconName, color, order, "skills": skills[]{ name, level } }'
+  );
+  const { data: fetchedGoals } = useSanityQuery(
+    '*[_type == "learningGoal" && !(_id in path("drafts.**"))] | order(order asc) { _id, title, domain, status, tags, order }'
+  );
   const categories = (fetchedCategories && fetchedCategories.length > 0) ? fetchedCategories : skillCategories;
   const learningGoals = (fetchedGoals && fetchedGoals.length > 0) ? fetchedGoals : DEFAULT_LEARNING_GOALS;
 
