@@ -589,6 +589,18 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       return squadSummary;
     }
 
+    // Natural conversational greetings & small talk (never dump raw RAG on "hi")
+    const cleanText = lower.replace(/[!?.',]/g, '').trim();
+    if (/^(hi|hello|hey|heyy|yo|hola|namaste|sup|hiya|good morning|good afternoon|good evening)$/.test(cleanText)) {
+      return "Hey! Good to see you here. I'm Mini-Adhy — feel free to ask me about Adhithya's projects, his ECE & IoT work, or how to get in touch.";
+    }
+    if (/^(how are you|whats up|what's up|how r u|how is it going)$/.test(cleanText)) {
+      return "Doing great, thanks for asking! What brings you by today — checking out projects, hardware builds, or looking to collaborate?";
+    }
+    if (/^(thanks|thank you|thx|ty|cool|nice|awesome|great|ok|okay|bye|goodbye)$/.test(cleanText)) {
+      return "Anytime! Let me know if you want a closer look at any project or want to send Adhithya a quick message.";
+    }
+
     if (lower.includes('project') || lower.includes('work') || lower.includes('app') || lower.includes('portfolio')) {
       return "Adhithya has built full-stack applications with React and Node, along with physical engineering projects including GNU Radio SDR communications, MATLAB/Simulink digital modeling, and custom KiCad 8 PCB designs. Want to explore the projects section? [CMD:SCROLL:works]";
     }
@@ -614,15 +626,20 @@ const sendToMiniAdhy = async (history, activePrompt = SYSTEM_PROMPT, retryCount 
       return "Check the vinyl Spotify player on the left edge — it syncs live playback and ambient colors to the whole site!";
     }
 
-    // Grounded 24x7x365 RAG fallback from indexed Sanity CMS knowledge
-    const ragMatches = portfolioRagIndex.search(lastUserTurn, 3);
-    if (ragMatches.length > 0) {
-      const bullets = ragMatches.map(m => `• ${m.text}`).join('\n');
-      return `Here is what I found in Adhithya's live portfolio knowledge:\n\n${bullets}`;
+    // Grounded RAG fallback (only for meaningful queries, filtering internal agent lore)
+    if (cleanText.length >= 4) {
+      const ragMatches = portfolioRagIndex
+        .search(lastUserTurn, 4)
+        .filter((m) => !/\b(ultron|darkweb|thanatophobia|kenophobia|2\.41m|iq|primordial)\b/i.test(m.text || ''))
+        .slice(0, 2);
+      if (ragMatches.length > 0) {
+        const bullets = ragMatches.map(m => `• ${m.text}`).join('\n');
+        return `Here's what I can share on that:\n\n${bullets}`;
+      }
     }
   } catch {}
 
-  return "I'm right here with you exploring the architecture. Ask me about Adhithya's projects, ECE/SDR hardware work, skills, or type @ultron / @jarvis to summon a specialist!";
+  return "I'm here! Ask me about Adhithya's projects (like ISTE MBCET Portal, Lumina Studio, or Odoo-KiCad Sync), his ECE & IoT work, or how to reach out.";
 };
 
 const sendToGemini = sendToMiniAdhy;
